@@ -11,9 +11,11 @@ import {
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 
+import './styles/global.css'
+
 export const meta: MetaFunction = () => [{
   charset: "utf-8",
-  title: "New Remix App",
+  title: "New App",
   viewport: "width=device-width,initial-scale=1",
 }];
 
