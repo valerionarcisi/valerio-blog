@@ -1,5 +1,6 @@
 import { globalStyle } from "@vanilla-extract/css";
 
-globalStyle("html, body", {
-    margin: 0,
+globalStyle("body", {
+    margin: 'auto',
+    maxWidth: '120ch'
 });

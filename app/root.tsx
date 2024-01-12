@@ -11,6 +11,8 @@ import {
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 
+import 'normalize.css'
+import 'sakura.css'
 import './styles/global.css'
 
 export const meta: MetaFunction = () => [{
