@@ -8,4 +8,4 @@ const handler = createRequestHandler({
 
 export default handler;
 
-export const config = { path: "/*", preferStatic: true }
+export const config = { path: "/*", preferStatic: true };
