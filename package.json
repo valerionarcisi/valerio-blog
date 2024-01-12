@@ -6,8 +6,12 @@
   "scripts": {
     "build": "remix build",
     "dev": "remix dev --manual",
+    "dev:netlify": "netlify dev",
     "start": "netlify serve",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "prepare": "husky install",
+    "prettier-check": "prettier --parser=typescript \"**/*.{ts,tsx}\" --check",
+    "prettier-write": "prettier --parser=typescript \"**/*.{ts,tsx}\" --write"
   },
   "dependencies": {
     "@dessert-box/react": "^0.7.5",
@@ -23,6 +27,7 @@
     "@vanilla-extract/sprinkles": "^1.6.1",
     "cross-env": "^7.0.3",
     "normalize.css": "^8.0.1",
+    "prettier": "^3.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sakura.css": "^1.5.0"
@@ -34,6 +39,8 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "eslint": "^8.27.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.0",
     "typescript": "^5.2.2"
   },
   "engines": {
