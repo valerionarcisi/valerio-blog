@@ -1,34 +1,14 @@
-import { createTheme } from '@vanilla-extract/css';
 import { defineProperties, createSprinkles } from '@vanilla-extract/sprinkles';
+import {  fontFamilyProps, fontSizeProps, fontWeightProps, spacesProps } from './props.css';
 
-export const [_, vars] = createTheme({
-    color: {
-        blue50: '#eff6ff',
-        blue100: '#dbeafe',
-        blue200: '#bfdbfe',
-        yellow: '#aaff00',
+
+const typographyStyles = defineProperties({
+    properties: {
+        fontFamily: fontFamilyProps,
+        fontSize: fontSizeProps,
+        fontWeight: fontWeightProps,
     },
-    font: {
-        body: 'arial',
-    },
-    fontSize: {
-        small: '12px',
-        medium: '16px',
-        large: '24px',
-        extraLarge: '32px',
-    },
-    fontWeight: {
-        '400': '400',
-        '600': '600',
-    },
-    space: {
-        none: '0',
-        small: '4px',
-        medium: '8px',
-        large: '16px',
-        extraLarge: '32px',
-    },
-});
+})
 
 const layoutStyles = defineProperties({
     conditions: {
@@ -40,14 +20,14 @@ const layoutStyles = defineProperties({
     properties: {
         display: ['none', 'block', 'flex'],
         flexDirection: ['row', 'column'],
-        paddingTop: vars.space,
-        paddingBottom: vars.space,
-        paddingLeft: vars.space,
-        paddingRight: vars.space,
-        margin: vars.space,
+        paddingTop: spacesProps,
+        paddingBottom: spacesProps,
+        paddingLeft: spacesProps,
+        paddingRight: spacesProps,
+        margin: spacesProps,
         width: ['16px', '100%'],
-        fontSize: vars.fontSize,
-        fontWeight: vars.fontWeight,
+        fontSize: fontSizeProps,
+        fontWeight: fontWeightProps,
     },
     shorthands: {
         padding: ['paddingTop', 'paddingBottom', 'paddingLeft', 'paddingRight'],
@@ -56,13 +36,16 @@ const layoutStyles = defineProperties({
     },
 });
 
-const colorStyles = defineProperties({
-    properties: {
-        color: vars.color,
-        background: vars.color,
-    },
-});
+// const colorStyles = defineProperties({
+//     properties: colorsProps,
+//     defaultCondition: 'darkMode',
+//     conditions: {
+//         lightMode: {},
+//         darkMode: { '@media': '(prefers-color-scheme: dark)' }
+//     },
+// });
 
-export const sprinkles = createSprinkles(layoutStyles, colorStyles);
 
-export type Sprinkles = Parameters<typeof sprinkles>[0];
+export const valerioSprinkles = createSprinkles(layoutStyles, typographyStyles);
+
+export type ValerioSprinkles = Parameters<typeof valerioSprinkles>[0];

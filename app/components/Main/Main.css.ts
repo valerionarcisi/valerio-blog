@@ -1,11 +1,10 @@
-import { sprinkles } from "~/styles/sprinkles.css";
+import { valerioSprinkles } from "~/styles/sprinkles.css";
 
-export const container = sprinkles({
+export const container = valerioSprinkles({
     display: 'flex',
     paddingX: 'small',
     flexDirection: {
         mobile: 'column',
         desktop: 'column'
     },
-    background: 'blue100',
 });

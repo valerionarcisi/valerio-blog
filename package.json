@@ -10,11 +10,15 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@dessert-box/react": "^0.7.5",
+    "@fontsource-variable/inter-tight": "^5.0.19",
+    "@fontsource-variable/playfair-display": "^5.0.19",
     "@netlify/functions": "^2.0.0",
     "@netlify/remix-adapter": "^2.0.0",
     "@remix-run/css-bundle": "^2.4.1",
     "@remix-run/node": "^2.4.1",
     "@remix-run/react": "^2.4.1",
+    "@vanilla-extract/recipes": "^0.5.1",
     "@vanilla-extract/sprinkles": "^1.6.1",
     "cross-env": "^7.0.3",
     "normalize.css": "^8.0.1",

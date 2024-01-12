@@ -11,22 +11,28 @@ import {
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 
-import 'normalize.css'
-import 'sakura.css'
-import './styles/global.css'
+// Supports weights 400-900
+import '@fontsource-variable/playfair-display/wght.css';
+// Supports weights 100-900
+import '@fontsource-variable/inter-tight/wght.css';
+
+import 'normalize.css';
+import 'sakura.css';
+import './styles/global.css';
 
 export const meta: MetaFunction = () => [{
   charset: "utf-8",
-  title: "New App",
+  title: "Valerio Narcisi | Frontend Engineer and Director | personal website",
   viewport: "width=device-width,initial-scale=1",
 }];
 
-export const links: LinksFunction = () => [
-  ...(cssBundleHref
-    ? [{ rel: "stylesheet", href: cssBundleHref }]
-    : []),
-];
-
+export const links: LinksFunction = () => {
+  return [
+    ...(cssBundleHref
+      ? [{ rel: "stylesheet", href: cssBundleHref }]
+      : []),
+  ];
+};
 
 export default function App() {
   return (
