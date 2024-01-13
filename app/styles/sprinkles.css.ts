@@ -1,11 +1,18 @@
 import { defineProperties, createSprinkles } from "@vanilla-extract/sprinkles";
-import { fontFamilyProps, fontSizeProps, fontWeightProps, spacesProps } from "./props.css";
+import {
+  fontFamilyProps,
+  fontSizeProps,
+  fontWeightProps,
+  letterSpacingProps,
+  spacesProps,
+} from "./props.css";
 
 const typographyStyles = defineProperties({
   properties: {
     fontFamily: fontFamilyProps,
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
+    letterSpacing: letterSpacingProps,
   },
 });
 

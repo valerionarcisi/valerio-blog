@@ -7,16 +7,18 @@ export const typographyRecipe = recipe({
       heading: valerioSprinkles({
         fontFamily: "heading",
         fontSize: "extraLarge",
-        fontWeight: "600",
+        fontWeight: "800",
       }),
       subheading: valerioSprinkles({
-        fontFamily: "body",
+        fontFamily: "heading",
         fontSize: "large",
-        fontWeight: "400",
+        fontWeight: "600",
+        letterSpacing: "wide",
       }),
       body: valerioSprinkles({
-        fontFamily: "heading",
+        fontFamily: "body",
         fontSize: "medium",
+        letterSpacing: "wide",
       }),
     },
   },

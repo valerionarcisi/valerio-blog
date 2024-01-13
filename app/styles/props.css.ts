@@ -21,6 +21,7 @@ export const fontSizeProps = {
 export const fontWeightProps = {
   "400": vars.fontWeight["400"],
   "600": vars.fontWeight["600"],
+  "800": vars.fontWeight["800"],
 } as const;
 
 export const spacesProps = {
@@ -29,4 +30,11 @@ export const spacesProps = {
   medium: vars.space.medium,
   large: vars.space.large,
   extraLarge: vars.space.extraLarge,
+} as const;
+
+export const letterSpacingProps = {
+  tight: vars.letterSpacing.tight,
+  normal: vars.letterSpacing.normal,
+  wide: vars.letterSpacing.wide,
+  widest: vars.letterSpacing.widest,
 } as const;

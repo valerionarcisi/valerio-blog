@@ -4,10 +4,10 @@ import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@re
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 
-// Supports weights 400-900
-import "@fontsource-variable/playfair-display/wght.css";
 // Supports weights 100-900
 import "@fontsource-variable/inter-tight/wght.css";
+// Supports weights 400-700
+import "@fontsource-variable/lora/wght.css";
 
 import "normalize.css";
 import "sakura.css";

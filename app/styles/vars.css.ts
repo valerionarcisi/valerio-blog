@@ -16,6 +16,7 @@ export const vars = createGlobalThemeContract(
     fontWeight: {
       "400": null,
       "600": null,
+      "800": null,
     },
     color: {
       primary: null,
@@ -28,6 +29,12 @@ export const vars = createGlobalThemeContract(
       medium: null,
       large: null,
       extraLarge: null,
+    },
+    letterSpacing: {
+      tight: null,
+      normal: null,
+      wide: null,
+      widest: null,
     },
   },
   (_value, path) => `valeriotheme-${path.join("-")}`,
