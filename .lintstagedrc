@@ -1,3 +1,7 @@
 {
-  "*.{js,jsx,ts,tsx}": "npm run prettier-ckeck && npm run prettier-write"
+  "*.{js,jsx,ts,tsx}": [
+    "npm run typecheck",
+    "npm run prettier-check",
+    "npm run prettier-write"
+  ]
 }
