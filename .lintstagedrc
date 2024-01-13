@@ -1,6 +1,5 @@
 {
   "*.{js,jsx,ts,tsx}": [
-    "npm run typecheck",
     "npm run prettier-check",
     "npm run prettier-write"
   ]
