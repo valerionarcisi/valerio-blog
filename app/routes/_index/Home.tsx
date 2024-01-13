@@ -6,6 +6,7 @@ const Home: FC = () => {
   return (
     <Layout>
       <Typography variant="heading">Lorem ipsum dolor sit amet</Typography>
+      <Typography variant="heading">Lorem ipsum dolor sit amet</Typography>
       <Typography variant="subheading">Lorem ipsum dolor sit amet,</Typography>
       <Typography variant="body">
         <a href="#">Lorem ipsum dolor sit amet</a>, consectetur adipiscing elit, sed do eiusmod
