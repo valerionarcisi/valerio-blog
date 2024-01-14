@@ -5,6 +5,10 @@ globalStyle("body", {
   maxWidth: "120ch",
 });
 
+globalStyle("html", {
+  fontSize: "16px",
+});
+
 globalStyle("*", {
   MozBoxSizing: "border-box",
   WebkitBoxSizing: "border-box",

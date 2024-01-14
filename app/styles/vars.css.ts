@@ -16,6 +16,7 @@ export const vars = createGlobalThemeContract(
     fontWeight: {
       "400": null,
       "600": null,
+      "700": null,
       "800": null,
     },
     color: {

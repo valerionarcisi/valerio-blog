@@ -30,7 +30,10 @@ const layoutStyles = defineProperties({
     paddingBottom: spacesProps,
     paddingLeft: spacesProps,
     paddingRight: spacesProps,
-    margin: spacesProps,
+    marginTop: spacesProps,
+    marginBottom: spacesProps,
+    marginLeft: spacesProps,
+    marginRight: spacesProps,
     width: ["16px", "100%"],
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
@@ -39,6 +42,9 @@ const layoutStyles = defineProperties({
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
     paddingX: ["paddingLeft", "paddingRight"],
     paddingY: ["paddingTop", "paddingBottom"],
+    margin: ["marginTop", "marginBottom", "marginLeft", "marginRight"],
+    marginX: ["marginLeft", "marginRight"],
+    marginY: ["marginTop", "marginBottom"],
   },
 });
 

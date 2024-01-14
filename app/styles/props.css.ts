@@ -21,6 +21,7 @@ export const fontSizeProps = {
 export const fontWeightProps = {
   "400": vars.fontWeight["400"],
   "600": vars.fontWeight["600"],
+  "700": vars.fontWeight["700"],
   "800": vars.fontWeight["800"],
 } as const;
 
