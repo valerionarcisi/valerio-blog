@@ -21,6 +21,7 @@ export const typographyRecipe = recipe({
       body: valerioSprinkles({
         fontFamily: "body",
         fontSize: "medium",
+        marginBottom: "small",
       }),
     },
   },

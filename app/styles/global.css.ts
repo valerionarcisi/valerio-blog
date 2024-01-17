@@ -9,6 +9,11 @@ globalStyle("html", {
   fontSize: "16px",
 });
 
+globalStyle("img, video, h1, h2, h3, h4, h5, h6", {
+  marginBottom: "1rem",
+  marginTop: "1rem",
+});
+
 globalStyle("*", {
   MozBoxSizing: "border-box",
   WebkitBoxSizing: "border-box",
