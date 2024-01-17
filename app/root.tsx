@@ -1,8 +1,9 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-
+import clsx from "clsx";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
+import { ThemeProvider, useTheme } from "./utils/ThemeProvider";
 
 // Supports weights 100-900
 import "@fontsource-variable/inter-tight/wght.css";
@@ -12,7 +13,6 @@ import "@fontsource-variable/lora/wght.css";
 import "normalize.css";
 import "sakura.css";
 import "./styles/global.css";
-import { defaultTheme } from "./styles/vars.css";
 
 export const meta: MetaFunction = () => [
   {
@@ -26,21 +26,28 @@ export const links: LinksFunction = () => {
   return [...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : [])];
 };
 
-export default function App() {
+function App() {
+  const [theme] = useTheme();
   return (
-    <html lang="en">
+    <html lang="en" className={clsx(theme)}>
       <head>
         <Meta />
         <Links />
       </head>
       <body>
-        <div className={defaultTheme}>
-          <Outlet />
-          <ScrollRestoration />
-          <Scripts />
-          <LiveReload />
-        </div>
+        <Outlet />
+        <ScrollRestoration />
+        <Scripts />
+        <LiveReload />
       </body>
     </html>
+  );
+}
+
+export default function AppWithProviders() {
+  return (
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   );
 }
