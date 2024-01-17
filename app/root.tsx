@@ -12,6 +12,7 @@ import "@fontsource-variable/lora/wght.css";
 import "normalize.css";
 import "sakura.css";
 import "./styles/global.css";
+import { defaultTheme } from "./styles/vars.css";
 
 export const meta: MetaFunction = () => [
   {
@@ -33,10 +34,12 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
+        <div className={defaultTheme}>
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+          <LiveReload />
+        </div>
       </body>
     </html>
   );

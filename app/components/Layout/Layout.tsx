@@ -1,5 +1,6 @@
 import { FC } from "react";
 import Box from "../Box/Box";
+import Typography from "../Typography/Typography";
 type Props = {
   children: React.ReactNode;
 };
@@ -12,7 +13,7 @@ const Layout: FC<Props> = ({ children }) => {
       <Box as="header">i'm header</Box>
       <Box as="main">{children}</Box>
       <Box as="footer">
-        <Box as="p">Copyright {currentYear}, Valerio Narcisi</Box>
+        <Typography variant="body">Copyright {currentYear}, Valerio Narcisi</Typography>
       </Box>
     </>
   );

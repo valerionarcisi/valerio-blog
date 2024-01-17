@@ -1,4 +1,4 @@
-import { createGlobalTheme, createGlobalThemeContract } from "@vanilla-extract/css";
+import { createGlobalThemeContract, createTheme } from "@vanilla-extract/css";
 import { tokens } from "./tokens.css";
 
 export const vars = createGlobalThemeContract(
@@ -38,7 +38,7 @@ export const vars = createGlobalThemeContract(
       widest: null,
     },
   },
-  (_value, path) => `valeriotheme-${path.join("-")}`,
+  (_value, path) => `valerio--theme-${path.join("-")}`,
 );
 
-createGlobalTheme(":root", vars, tokens);
+export const defaultTheme = createTheme(vars, tokens);
