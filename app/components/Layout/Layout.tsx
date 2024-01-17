@@ -1,17 +1,19 @@
 import { FC } from "react";
-import Header from "../Header/Header";
-import Main from "../Main/Main";
-import Footer from "../Footer/Footer";
+import Box from "../Box/Box";
 type Props = {
   children: React.ReactNode;
 };
 
 const Layout: FC<Props> = ({ children }) => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <>
-      <Header />
-      <Main>{children}</Main>
-      <Footer />
+      <Box as="header">i'm header</Box>
+      <Box as="main">{children}</Box>
+      <Box as="footer">
+        <Box as="p">Copyright {currentYear}, Valerio Narcisi</Box>
+      </Box>
     </>
   );
 };
