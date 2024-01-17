@@ -79,18 +79,16 @@ const Home: FC = () => {
           })`}
           </code>
         </Typography>
+        <iframe
+          width="100%"
+          height="500"
+          src="https://www.youtube.com/embed/7TpiIvEq5l8?si=bcs86orkqSdhOdb9"
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        ></iframe>
       </article>
-      <hr />
-
-      <iframe
-        width="100%"
-        height="500"
-        src="https://www.youtube.com/embed/7TpiIvEq5l8?si=bcs86orkqSdhOdb9"
-        title="YouTube video player"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        allowFullScreen
-      ></iframe>
       <button>Click ME</button>
     </Layout>
   );

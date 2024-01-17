@@ -9,8 +9,8 @@ globalStyle("html", {
   fontSize: "16px",
 });
 
-globalStyle("img, video, h1, h2, h3, h4, h5, h6", {
-  marginBottom: "1rem",
+globalStyle("img, video, iframe, h1, h2, h3, h4, h5, h6", {
+  marginBottom: "1.5rem",
   marginTop: "1rem",
 });
 

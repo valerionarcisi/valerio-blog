@@ -1,5 +1,3 @@
-// import { valerioSprinkles } from "~/styles/sprinkles.css";
-
 import { style } from "@vanilla-extract/css";
 
 export const codeClass = style({
