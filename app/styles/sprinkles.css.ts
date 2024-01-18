@@ -3,6 +3,7 @@ import {
   fontFamilyProps,
   fontSizeProps,
   fontWeightProps,
+  layoutSpacingProps,
   letterSpacingProps,
   spacesProps,
 } from "./atoms.css";
@@ -34,9 +35,10 @@ const layoutStyles = defineProperties({
     marginBottom: spacesProps,
     marginLeft: spacesProps,
     marginRight: spacesProps,
-    width: ["16px", "100%"],
+    margin: spacesProps,
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
+    width: layoutSpacingProps,
   },
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],

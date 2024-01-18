@@ -7,7 +7,7 @@ import Box from "~/components/Box/Box";
 const Home: FC = () => {
   return (
     <Layout>
-      <Box as="article">
+      <Box as="article" display="flex" flexDirection="column">
         <Box as="header">
           <img src="/images/example-1.jpg" alt="Example Image" />
           <Typography variant="heading">Lorem ipsum dolor sit amet</Typography>
@@ -17,7 +17,7 @@ const Home: FC = () => {
             <a href="/tags/javascript">javascript</a>
           </Typography>
         </Box>
-        <Box as="div">
+        <Box as="div" width="large" margin="auto">
           <Typography variant="body">
             <hr />
             body start here ...

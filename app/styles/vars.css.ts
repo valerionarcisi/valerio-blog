@@ -1,5 +1,4 @@
-import { createGlobalThemeContract, createTheme } from "@vanilla-extract/css";
-import { tokens } from "./tokens.css";
+import { createGlobalThemeContract } from "@vanilla-extract/css";
 
 export const vars = createGlobalThemeContract(
   {
@@ -30,6 +29,7 @@ export const vars = createGlobalThemeContract(
       medium: null,
       large: null,
       extraLarge: null,
+      auto: null,
     },
     letterSpacing: {
       tight: null,
@@ -37,6 +37,11 @@ export const vars = createGlobalThemeContract(
       wide: null,
       widest: null,
     },
+    layoutSpacing: {
+      small: null,
+      medium: null,
+      large: null,
+    },
   },
-  (_value, path) => `valerio--theme-${path.join("-")}`,
+  (_value, path) => `valerio-theme-${path.join("-")}`,
 );

@@ -16,7 +16,7 @@ import "@fontsource-variable/lora/wght.css";
 export const meta: MetaFunction = () => [
   {
     charset: "utf-8",
-    title: "Valerio Narcisi | Frontend Engineer and Director | personal website",
+    title: "Valerio Narcisi | Frontend Engineer, Director and Screenwriter | personal website",
     viewport: "width=device-width,initial-scale=1",
   },
 ];

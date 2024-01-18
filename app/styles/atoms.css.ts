@@ -31,6 +31,13 @@ export const spacesProps = {
   medium: vars.space.medium,
   large: vars.space.large,
   extraLarge: vars.space.extraLarge,
+  auto: vars.space.auto,
+} as const;
+
+export const layoutSpacingProps = {
+  small: vars.layoutSpacing.small,
+  medium: vars.layoutSpacing.medium,
+  large: vars.layoutSpacing.large,
 } as const;
 
 export const letterSpacingProps = {
