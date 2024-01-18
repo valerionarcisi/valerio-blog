@@ -1,4 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
+import { baseFontSize, pixelToRem } from "./tokens.css";
 
 globalStyle("body", {
   margin: "auto",
@@ -6,12 +7,12 @@ globalStyle("body", {
 });
 
 globalStyle("html", {
-  fontSize: "16px",
+  fontSize: `${baseFontSize}px`,
 });
 
 globalStyle("img, video, iframe, h1, h2, h3, h4, h5, h6", {
-  marginBottom: "1.5rem",
-  marginTop: "1rem",
+  marginBottom: pixelToRem(24),
+  marginTop: pixelToRem(16),
 });
 
 globalStyle("*", {
