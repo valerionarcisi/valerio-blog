@@ -5,14 +5,13 @@ import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import { ThemeProvider, useTheme } from "./utils/ThemeProvider";
 
+import "normalize.css";
+import "sakura.css";
+import "./styles/global.css";
 // Supports weights 100-900
 import "@fontsource-variable/inter-tight/wght.css";
 // Supports weights 400-700
 import "@fontsource-variable/lora/wght.css";
-
-import "normalize.css";
-import "sakura.css";
-import "./styles/global.css";
 
 export const meta: MetaFunction = () => [
   {

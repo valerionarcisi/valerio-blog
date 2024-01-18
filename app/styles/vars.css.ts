@@ -40,5 +40,3 @@ export const vars = createGlobalThemeContract(
   },
   (_value, path) => `valerio--theme-${path.join("-")}`,
 );
-
-export const defaultTheme = createTheme(vars, tokens);

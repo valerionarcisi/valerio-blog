@@ -5,7 +5,7 @@ import {
   fontWeightProps,
   letterSpacingProps,
   spacesProps,
-} from "./props.css";
+} from "./atoms.css";
 
 const typographyStyles = defineProperties({
   properties: {

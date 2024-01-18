@@ -6,7 +6,7 @@ import {
   type SetStateAction,
   useContext,
 } from "react";
-import { defaultTheme } from "~/styles/vars.css";
+import { defaultTheme } from "~/styles/defaultTheme.css";
 
 const themes = {
   DEFAULT: defaultTheme,
