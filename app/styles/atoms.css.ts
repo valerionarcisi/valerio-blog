@@ -1,21 +1,19 @@
 import { vars } from "./vars.css";
 
 export const colorsProps = {
-  neutral: vars.color.neutral,
-  primary: vars.color.primary,
-  secondary: vars.color.secondary,
+  ...vars.color,
+} as const;
+
+export const backgroundColorProps = {
+  ...vars.backgroundColor,
 } as const;
 
 export const fontFamilyProps = {
-  body: vars.fontFamily.body,
-  heading: vars.fontFamily.heading,
+  ...vars.fontFamily,
 } as const;
 
 export const fontSizeProps = {
-  small: vars.fontSize.small,
-  medium: vars.fontSize.medium,
-  large: vars.fontSize.large,
-  extraLarge: vars.fontSize.extraLarge,
+  ...vars.fontSize,
 } as const;
 
 export const fontWeightProps = {
@@ -26,23 +24,41 @@ export const fontWeightProps = {
 } as const;
 
 export const spacesProps = {
-  none: vars.space.none,
-  small: vars.space.small,
-  medium: vars.space.medium,
-  large: vars.space.large,
-  extraLarge: vars.space.extraLarge,
-  auto: vars.space.auto,
+  ...vars.space,
 } as const;
 
 export const layoutSpacingProps = {
-  small: vars.layoutSpacing.small,
-  medium: vars.layoutSpacing.medium,
-  large: vars.layoutSpacing.large,
+  ...vars.layoutSpacing,
 } as const;
 
 export const letterSpacingProps = {
-  tight: vars.letterSpacing.tight,
-  normal: vars.letterSpacing.normal,
-  wide: vars.letterSpacing.wide,
-  widest: vars.letterSpacing.widest,
+  ...vars.letterSpacing,
+} as const;
+
+export const boxShadowProps = {
+  ...vars.boxShadow,
+} as const;
+
+export const borderRadiusProps = {
+  ...vars.borderRadius,
+} as const;
+
+export const positionProps = {
+  ...vars.position,
+} as const;
+
+export const displayProps = {
+  ...vars.display,
+} as const;
+
+export const transformProps = {
+  ...vars.transform,
+} as const;
+
+export const percentualPositionProps = {
+  ...vars.percentualPosition,
+} as const;
+
+export const textAlignProps = {
+  ...vars.textAlign,
 } as const;

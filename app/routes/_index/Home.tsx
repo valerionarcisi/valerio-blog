@@ -3,24 +3,20 @@ import Layout from "~/components/Layout/Layout";
 import Typography from "~/components/Typography/Typography";
 import { codeClass } from "./Home.css";
 import Box from "~/components/Box/Box";
+import Cover from "~/components/Cover/Cover";
 
 const Home: FC = () => {
   return (
     <Layout>
       <Box as="article" display="flex" flexDirection="column">
-        <Box as="header">
-          <img src="/images/example-1.jpg" alt="Example Image" />
-          <Typography variant="heading">Lorem ipsum dolor sit amet</Typography>
-          <Typography variant="body">Author: Valerio</Typography>
-          <Typography variant="body">Posted on: 17 January 2024</Typography>
-          <Typography variant="body">
-            <a href="/tags/javascript">javascript</a>
-          </Typography>
-        </Box>
+        <Cover
+          img={{ src: "/images/example-1.jpg", alt: "Example Image" }}
+          title="Lorem ipsum dolor sit amet"
+          author="Valerio Narcisi"
+          date="17 January 2024"
+        />
         <Box as="div" width="large" margin="auto">
           <Typography variant="body">
-            <hr />
-            body start here ...
             <h2>h2: Lorem ipsum dolor sit amet</h2>
             <h3>h3: Lorem ipsum dolor sit amet</h3>
             <h4>h4: Lorem ipsum dolor sit amet</h4>

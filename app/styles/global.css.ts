@@ -4,6 +4,7 @@ import { baseFontSize, pixelToRem } from "./tokens.css";
 globalStyle("body", {
   margin: "auto",
   maxWidth: "120ch",
+  padding: 0,
 });
 
 globalStyle("html", {

@@ -12,11 +12,12 @@ import "./styles/global.css";
 import "@fontsource-variable/inter-tight/wght.css";
 // Supports weights 400-700
 import "@fontsource-variable/lora/wght.css";
+import Box from "./components/Box/Box";
 
 export const meta: MetaFunction = () => [
   {
     charset: "utf-8",
-    title: "Valerio Narcisi | Frontend Engineer, Director and Screenwriter | personal website",
+    title: "Valerio Narcisi | Frontend Engineer, Director and Screenwriter | Personal website",
     viewport: "width=device-width,initial-scale=1",
   },
 ];
@@ -33,12 +34,12 @@ function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <Box as="body">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
-      </body>
+      </Box>
     </html>
   );
 }

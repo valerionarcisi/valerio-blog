@@ -1,11 +1,20 @@
 import { defineProperties, createSprinkles } from "@vanilla-extract/sprinkles";
 import {
+  backgroundColorProps,
+  borderRadiusProps,
+  boxShadowProps,
+  colorsProps,
+  displayProps,
   fontFamilyProps,
   fontSizeProps,
   fontWeightProps,
   layoutSpacingProps,
   letterSpacingProps,
+  percentualPositionProps,
+  positionProps,
   spacesProps,
+  textAlignProps,
+  transformProps,
 } from "./atoms.css";
 
 const typographyStyles = defineProperties({
@@ -14,6 +23,7 @@ const typographyStyles = defineProperties({
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
     letterSpacing: letterSpacingProps,
+    textAlign: textAlignProps,
   },
 });
 
@@ -25,8 +35,17 @@ const layoutStyles = defineProperties({
   },
   defaultCondition: "mobile",
   properties: {
-    display: ["none", "block", "flex"],
+    display: displayProps,
+    position: positionProps,
+    justifyContent: ["flex-start", "flex-end", "center", "space-between"],
+    alignItems: ["flex-start", "flex-end", "center"],
     flexDirection: ["row", "column"],
+    spaceBetween: spacesProps,
+    top: percentualPositionProps,
+    left: percentualPositionProps,
+    right: percentualPositionProps,
+    bottom: percentualPositionProps,
+    transform: transformProps,
     paddingTop: spacesProps,
     paddingBottom: spacesProps,
     paddingLeft: spacesProps,
@@ -38,7 +57,9 @@ const layoutStyles = defineProperties({
     margin: spacesProps,
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
-    width: layoutSpacingProps,
+    width: { ...percentualPositionProps, ...layoutSpacingProps },
+    boxShadow: boxShadowProps,
+    borderRadius: borderRadiusProps,
   },
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
@@ -50,15 +71,13 @@ const layoutStyles = defineProperties({
   },
 });
 
-// const colorStyles = defineProperties({
-//     properties: colorsProps,
-//     defaultCondition: 'darkMode',
-//     conditions: {
-//         lightMode: {},
-//         darkMode: { '@media': '(prefers-color-scheme: dark)' }
-//     },
-// });
+const colorStyles = defineProperties({
+  properties: {
+    color: colorsProps,
+    backgroundColor: backgroundColorProps,
+  },
+});
 
-export const valerioSprinkles = createSprinkles(layoutStyles, typographyStyles);
+export const valerioSprinkles = createSprinkles(layoutStyles, typographyStyles, colorStyles);
 
 export type ValerioSprinkles = Parameters<typeof valerioSprinkles>[0];

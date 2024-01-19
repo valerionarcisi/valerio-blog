@@ -23,6 +23,11 @@ export const typographyRecipe = recipe({
         fontSize: "medium",
         marginBottom: "small",
       }),
+      small: valerioSprinkles({
+        fontFamily: "body",
+        fontSize: "small",
+        marginBottom: "small",
+      }),
     },
   },
   defaultVariants: {
