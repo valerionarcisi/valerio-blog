@@ -8,7 +8,8 @@ const converContainer = valerioSprinkles({
 const imgStyle = valerioSprinkles({
   display: "block",
   width: "full",
-  borderRadius: "large",
+  borderRadius: "small",
+  boxShadow: "small",
 });
 
 const titleStyle = valerioSprinkles({

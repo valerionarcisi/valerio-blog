@@ -1,6 +1,7 @@
 import { defineProperties, createSprinkles } from "@vanilla-extract/sprinkles";
 import {
   backgroundColorProps,
+  borderFontProps,
   borderRadiusProps,
   boxShadowProps,
   colorsProps,
@@ -40,6 +41,7 @@ const layoutStyles = defineProperties({
     justifyContent: ["flex-start", "flex-end", "center", "space-between"],
     alignItems: ["flex-start", "flex-end", "center"],
     flexDirection: ["row", "column"],
+    "-webkit-text-stroke": borderFontProps,
     spaceBetween: spacesProps,
     top: percentualPositionProps,
     left: percentualPositionProps,

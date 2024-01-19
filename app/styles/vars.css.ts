@@ -6,6 +6,11 @@ export const vars = createGlobalThemeContract(
       body: null,
       heading: null,
     },
+    borderFont: {
+      small: null,
+      medium: null,
+      large: null,
+    },
     fontSize: {
       small: null,
       medium: null,

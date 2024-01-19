@@ -4,24 +4,29 @@ export const pixelToRem = (value: number): string => `${value / baseFontSize}rem
 export const tokens = {
   color: {
     primary: "#fff",
-    secondary: "#000",
+    secondary: "#ff0000",
     neutral: "#000",
   },
+  borderFont: {
+    small: "1px black",
+    medium: "2px black",
+    large: "4px black",
+  },
   backgroundColor: {
-    primary: "#111",
+    primary: "rgb(18,18,18);",
     secondary: "#e4f9ff",
     neutral: "#fff",
-    titleBackground: "rgba(0, 0, 0, 0.7)",
+    titleBackground: "rgba(0, 0, 0, 0.5)",
   },
   fontFamily: {
-    body: `'Lora Variable', sans-serif;`,
-    heading: `'Inter Tight Variable', sans-serif;`,
+    heading: `'Lora Variable', sans-serif;`,
+    body: `'Inter Tight Variable', sans-serif;`,
   },
   fontSize: {
-    small: pixelToRem(12),
-    medium: pixelToRem(19),
-    large: pixelToRem(27),
-    extraLarge: pixelToRem(38),
+    small: pixelToRem(10),
+    medium: pixelToRem(20),
+    large: pixelToRem(32),
+    extraLarge: pixelToRem(48),
   },
   fontWeight: {
     "400": "400",
@@ -69,10 +74,11 @@ export const tokens = {
     extraLarge: pixelToRem(32),
   },
   boxShadow: {
-    small: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
-    medium: "0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23)",
-    large: "0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23)",
-    extraLarge: "0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22)",
+    small:
+      "0px 0px 0 1px #161821,5px 5px 0 #ff0000,5px 5px 0 2px #161821,7px 7px 10px 1px #ff657a;",
+    medium: "10px 5px 5px white;",
+    large: "10px 5px 5px white;",
+    extraLarge: "10px 5px 5px white;",
   },
   transform: {
     translate: "translate(-50%, -50%)",
@@ -81,7 +87,7 @@ export const tokens = {
   },
   percentualPosition: {
     zero: "0",
-    quarter: "28%",
+    quarter: "17%",
     third: "35%",
     half: "50%",
     full: "100%",

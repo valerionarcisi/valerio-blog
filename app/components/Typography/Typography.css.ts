@@ -10,13 +10,15 @@ export const typographyRecipe = recipe({
         fontWeight: "700",
         marginTop: "large",
         marginBottom: "medium",
+        color: "secondary",
+        "-webkit-text-stroke": "medium",
       }),
       subheading: valerioSprinkles({
         fontFamily: "heading",
         fontSize: "large",
         fontWeight: "600",
         marginTop: "large",
-        marginBottom: "medium",
+        marginBottom: "large",
       }),
       body: valerioSprinkles({
         fontFamily: "body",

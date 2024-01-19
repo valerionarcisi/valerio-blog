@@ -4,6 +4,10 @@ export const colorsProps = {
   ...vars.color,
 } as const;
 
+export const borderFontProps = {
+  ...vars.borderFont,
+} as const;
+
 export const backgroundColorProps = {
   ...vars.backgroundColor,
 } as const;
