@@ -5,7 +5,7 @@ export const tokens = {
   color: {
     primary: "#000",
     secondary: "#fff",
-    neutral: "#facc15",
+    neutral: "#fff",
   },
   borderFont: {
     small: "1px black",
@@ -13,7 +13,7 @@ export const tokens = {
     large: "4px black",
   },
   backgroundColor: {
-    primary: "#fe6666bd",
+    primary: "#fe66668c",
     secondary: "#000",
     neutral: "#fff",
     titleBackground: "rgba(0, 0, 0, 0.5)",
