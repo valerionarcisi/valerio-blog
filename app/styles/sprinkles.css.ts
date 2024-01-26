@@ -11,12 +11,29 @@ import {
   fontWeightProps,
   layoutSpacingProps,
   letterSpacingProps,
+  lineHeightProps,
   percentualPositionProps,
   positionProps,
   spacesProps,
   textAlignProps,
   transformProps,
 } from "./atoms.css";
+
+const linkStyles = defineProperties({
+  conditions: {
+    default: {},
+    hover: { selector: "&:hover" },
+    focus: { selector: "&:focus" },
+  },
+  defaultCondition: "default",
+  properties: {
+    fontFamily: fontFamilyProps,
+    fontSize: fontSizeProps,
+    fontWeight: fontWeightProps,
+    letterSpacing: letterSpacingProps,
+    textAlign: textAlignProps,
+  },
+});
 
 const typographyStyles = defineProperties({
   properties: {
@@ -30,11 +47,11 @@ const typographyStyles = defineProperties({
 
 const layoutStyles = defineProperties({
   conditions: {
-    mobile: {},
+    mobile: { "@media": "screen and (max-width: 767px)" },
     tablet: { "@media": "screen and (min-width: 768px)" },
     desktop: { "@media": "screen and (min-width: 1024px)" },
   },
-  defaultCondition: "mobile",
+  defaultCondition: "desktop",
   properties: {
     display: displayProps,
     position: positionProps,
@@ -62,6 +79,7 @@ const layoutStyles = defineProperties({
     width: { ...percentualPositionProps, ...layoutSpacingProps },
     boxShadow: boxShadowProps,
     borderRadius: borderRadiusProps,
+    lineHeight: lineHeightProps,
   },
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
@@ -80,6 +98,11 @@ const colorStyles = defineProperties({
   },
 });
 
-export const valerioSprinkles = createSprinkles(layoutStyles, typographyStyles, colorStyles);
+export const valerioSprinkles = createSprinkles(
+  layoutStyles,
+  typographyStyles,
+  colorStyles,
+  linkStyles,
+);
 
 export type ValerioSprinkles = Parameters<typeof valerioSprinkles>[0];

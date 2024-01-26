@@ -66,3 +66,7 @@ export const percentualPositionProps = {
 export const textAlignProps = {
   ...vars.textAlign,
 } as const;
+
+export const lineHeightProps = {
+  ...vars.lineHeight,
+};

@@ -7,8 +7,8 @@ type TypographyProps = {
 } & TypograsphyVariants;
 
 const variantAs: Record<string, ElementType> = {
-  heading: "h1",
-  subheading: "h2",
+  title: "h1",
+  subtitle: "h2",
   body: "p",
 };
 

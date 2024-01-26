@@ -4,7 +4,8 @@ export const vars = createGlobalThemeContract(
   {
     fontFamily: {
       body: null,
-      heading: null,
+      title: null,
+      subtitle: null,
     },
     borderFont: {
       small: null,
@@ -16,6 +17,7 @@ export const vars = createGlobalThemeContract(
       medium: null,
       large: null,
       extraLarge: null,
+      title: null,
     },
     fontWeight: {
       "400": null,
@@ -95,6 +97,12 @@ export const vars = createGlobalThemeContract(
       left: null,
       center: null,
       right: null,
+    },
+    lineHeight: {
+      none: null,
+      tight: null,
+      normal: null,
+      loose: null,
     },
   },
   (_value, path) => `valerio-theme-${path.join("-")}`,
