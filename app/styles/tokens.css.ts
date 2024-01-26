@@ -25,7 +25,7 @@ export const tokens = {
   },
   fontSize: {
     small: pixelToRem(12),
-    medium: pixelToRem(24),
+    medium: pixelToRem(28),
     large: pixelToRem(48),
     extraLarge: pixelToRem(62),
     title: pixelToRem(122),

@@ -14,8 +14,8 @@ const Home: FC = () => {
           img={{ src: "/images/The-Big-Lebowski-1.jpeg", alt: "Example Image" }}
           title="The Dude: Yeah, well - The Dude abides."
         />
-        <Box as="div" backgroundColor="secondary" padding="large">
-          <Box as="div" width="extraLarge" margin="auto">
+        <Box as="div">
+          <Box as="div" width="large" margin="auto">
             <Box as="div" margin={"auto"} display={"flex"} flexDirection={"column"}>
               <Typography variant="body">Posted on: 2022-01-01</Typography>
             </Box>

@@ -67,7 +67,7 @@ globalStyle(
   a:visited
 `,
   {
-    color: vars.backgroundColor.primary,
+    color: vars.color.neutral,
   },
 );
 
