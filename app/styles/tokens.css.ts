@@ -3,9 +3,9 @@ export const pixelToRem = (value: number): string => `${value / baseFontSize}rem
 
 export const tokens = {
   color: {
-    primary: "#fff",
-    secondary: "#ff0000",
-    neutral: "#000",
+    primary: "#000",
+    secondary: "#fff",
+    neutral: "#fff",
   },
   borderFont: {
     small: "1px black",
@@ -13,20 +13,22 @@ export const tokens = {
     large: "4px black",
   },
   backgroundColor: {
-    primary: "rgb(18,18,18);",
-    secondary: "#e4f9ff",
+    primary: "#fe66668c",
+    secondary: "#000",
     neutral: "#fff",
     titleBackground: "rgba(0, 0, 0, 0.5)",
   },
   fontFamily: {
-    heading: `'Lora Variable', sans-serif;`,
     body: `'Inter Tight Variable', sans-serif;`,
+    title: `'Staatliches', sans-serif`,
+    subtitle: `'Inter Tight Variable', sans-serif;`,
   },
   fontSize: {
-    small: pixelToRem(10),
-    medium: pixelToRem(20),
-    large: pixelToRem(32),
-    extraLarge: pixelToRem(48),
+    small: pixelToRem(12),
+    medium: pixelToRem(28),
+    large: pixelToRem(48),
+    extraLarge: pixelToRem(62),
+    title: pixelToRem(122),
   },
   fontWeight: {
     "400": "400",
@@ -38,9 +40,15 @@ export const tokens = {
     none: pixelToRem(0),
     small: pixelToRem(3),
     medium: pixelToRem(8),
-    large: pixelToRem(16),
-    extraLarge: pixelToRem(32),
+    large: pixelToRem(32),
+    extraLarge: pixelToRem(112),
     auto: "0 auto",
+  },
+  lineHeight: {
+    none: pixelToRem(0),
+    tight: pixelToRem(18),
+    normal: pixelToRem(24),
+    loose: pixelToRem(112),
   },
   position: {
     fixed: "fixed",
@@ -65,7 +73,7 @@ export const tokens = {
     small: pixelToRem(300),
     medium: pixelToRem(500),
     large: pixelToRem(700),
-    extraLarge: pixelToRem(900),
+    extraLarge: pixelToRem(1000),
   },
   borderRadius: {
     small: pixelToRem(4),
@@ -75,8 +83,9 @@ export const tokens = {
   },
   boxShadow: {
     small:
-      "0px 0px 0 1px #161821,5px 5px 0 #ff0000,5px 5px 0 2px #161821,7px 7px 10px 1px #ff657a;",
-    medium: "10px 5px 5px white;",
+      "0px 0px 0 1px #161821,5px 5px 0 #facc15,5px 5px 0 2px #161821,7px 7px 10px 1px #ff657a;",
+    medium:
+      "0px 0px 0 1px #161821,10px 10px 0 #facc15,10px 10px 0 2px #161821,7px 7px 10px 1px #ff657a;",
     large: "10px 5px 5px white;",
     extraLarge: "10px 5px 5px white;",
   },

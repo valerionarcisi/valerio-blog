@@ -2,7 +2,7 @@ import { FC } from "react";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
 import clsx from "clsx";
-import { imgStyle, titleStyle } from "./Cover.css";
+import { coverContainer, imgStyle, titleStyle } from "./Cover.css";
 
 type TCover = {
   title: string;
@@ -10,47 +10,26 @@ type TCover = {
     src: string;
     alt: string;
   };
-  author: string;
-  date: string;
 };
 
-const Cover: FC<TCover> = ({ title, img: { src, alt }, author, date }) => {
+const Cover: FC<TCover> = ({ title, img: { src, alt } }) => {
   return (
-    <Box as="header" position={"relative"}>
+    <Box as="header" className={clsx(coverContainer)}>
       <Box as="div" className={clsx(titleStyle)}>
         <Box
           as={"div"}
-          width={"large"}
+          width={"extraLarge"}
           margin={"auto"}
           display={"flex"}
           flexDirection={"column"}
           textAlign="center"
         >
           <Box as="div" display={"flex"} flexDirection={"column"} textAlign="center">
-            <Typography variant="heading">{title}</Typography>
-            <Typography variant="body">Author: {author}</Typography>
-            <Typography variant="body">Posted on: {date}</Typography>
-            <Box as="div" margin={"auto"} display={"flex"}>
-              <Box as="span" paddingLeft={"small"}>
-                <Typography variant="small">
-                  <a href="/tags/javascript">javascript</a>
-                </Typography>
-              </Box>
-              <Box as="span" paddingLeft={"small"}>
-                <Typography variant="small">
-                  <a href="/tags/javascript">movie</a>
-                </Typography>
-              </Box>
-              <Box as="span" paddingLeft={"small"}>
-                <Typography variant="small">
-                  <a href="/tags/javascript">book</a>
-                </Typography>
-              </Box>
-            </Box>
+            <Typography variant="title">{title}</Typography>
           </Box>
         </Box>
       </Box>
-      <Box as="img" src={src} alt={alt} className={clsx(imgStyle)} />
+      {src && <Box as="img" src={src} alt={alt} className={clsx(imgStyle)} />}
     </Box>
   );
 };

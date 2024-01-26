@@ -17,6 +17,7 @@
     "@dessert-box/react": "^0.7.5",
     "@fontsource-variable/inter-tight": "^5.0.19",
     "@fontsource-variable/lora": "^5.0.9",
+    "@fontsource/staatliches": "^5.0.18",
     "@netlify/functions": "^2.0.0",
     "@netlify/remix-adapter": "^2.0.0",
     "@remix-run/css-bundle": "2.5.1",

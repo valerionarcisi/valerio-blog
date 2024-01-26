@@ -4,17 +4,17 @@ import { valerioSprinkles } from "~/styles/sprinkles.css";
 export const typographyRecipe = recipe({
   variants: {
     variant: {
-      heading: valerioSprinkles({
-        fontFamily: "heading",
-        fontSize: "extraLarge",
-        fontWeight: "700",
-        marginTop: "large",
-        marginBottom: "medium",
-        color: "secondary",
-        "-webkit-text-stroke": "medium",
+      title: valerioSprinkles({
+        fontFamily: "title",
+        fontSize: "title",
+        fontWeight: "800",
+        marginTop: "small",
+        marginBottom: "small",
+        color: "primary",
+        lineHeight: "loose",
       }),
-      subheading: valerioSprinkles({
-        fontFamily: "heading",
+      subtitle: valerioSprinkles({
+        fontFamily: "subtitle",
         fontSize: "large",
         fontWeight: "600",
         marginTop: "large",
@@ -24,6 +24,7 @@ export const typographyRecipe = recipe({
         fontFamily: "body",
         fontSize: "medium",
         marginBottom: "small",
+        color: "secondary",
       }),
       small: valerioSprinkles({
         fontFamily: "body",

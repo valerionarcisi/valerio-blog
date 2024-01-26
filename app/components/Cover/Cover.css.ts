@@ -1,25 +1,20 @@
 import { valerioSprinkles } from "~/styles/sprinkles.css";
 
-const converContainer = valerioSprinkles({
-  position: "relative",
-  width: "full",
+const coverContainer = valerioSprinkles({
+  margin: "auto",
 });
 
 const imgStyle = valerioSprinkles({
-  display: "block",
-  width: "full",
+  width: "extraLarge",
   borderRadius: "small",
-  boxShadow: "small",
+  boxShadow: "medium",
+  marginTop: "large",
+  marginBottom: "extraLarge",
 });
 
 const titleStyle = valerioSprinkles({
-  position: "absolute",
-  top: "quarter",
-  paddingY: "medium",
-  paddingX: "extraLarge",
-  backgroundColor: "titleBackground",
   color: "primary",
   width: "full",
 });
 
-export { converContainer, imgStyle, titleStyle };
+export { coverContainer, imgStyle, titleStyle };

@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import { ThemeProvider, useTheme } from "./utils/ThemeProvider";
+import Box from "./components/Box/Box";
 
 import "normalize.css";
 import "sakura.css";
@@ -12,7 +13,7 @@ import "./styles/global.css";
 import "@fontsource-variable/inter-tight/wght.css";
 // Supports weights 400-700
 import "@fontsource-variable/lora/wght.css";
-import Box from "./components/Box/Box";
+import "@fontsource/staatliches/400.css";
 
 export const meta: MetaFunction = () => [
   {
