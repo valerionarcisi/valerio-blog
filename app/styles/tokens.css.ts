@@ -3,9 +3,9 @@ export const pixelToRem = (value: number): string => `${value / baseFontSize}rem
 
 export const tokens = {
   color: {
-    primary: "#000",
-    secondary: "#fff",
-    neutral: "#ef4444",
+    primary: "#FFF",
+    secondary: "#ef4444",
+    neutral: "#ffc924",
   },
   borderFont: {
     small: "1px black",
@@ -13,7 +13,7 @@ export const tokens = {
     large: "4px black",
   },
   backgroundColor: {
-    primary: "#ffeaa5",
+    primary: "#121111",
     secondary: "#000",
     neutral: "#fff",
     titleBackground: "rgba(0, 0, 0, 0.5)",
@@ -83,9 +83,9 @@ export const tokens = {
   },
   boxShadow: {
     small:
-      "0px 0px 0 1px #161821,5px 5px 0 #ff657a,5px 5px 0 2px #161821,7px 7px 10px 1px #ffeaa5;",
+      "0px 0px 0 1px #161821,5px 5px 0 #ffc924,5px 5px 0 2px #161821,7px 7px 10px 1px #ff657a;",
     medium:
-      "0px 0px 0 1px #161821,10px 10px 0 #ff657a,10px 10px 0 2px #161821,7px 7px 10px 1px #ffeaa5;",
+      "0px 0px 0 1px #161821,10px 10px 0 #ffc924,10px 10px 0 2px #161821,7px 7px 10px 1px #ff657a;",
     large: "10px 5px 5px white;",
     extraLarge: "10px 5px 5px white;",
   },

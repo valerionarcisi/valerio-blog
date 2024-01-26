@@ -44,6 +44,7 @@ globalStyle(
   h5
 `,
   {
+    color: `${vars.color.secondary}`,
     fontFamily: `${vars.fontFamily.title}`,
     letterSpacing: `${vars.letterSpacing.widest}`,
   },
