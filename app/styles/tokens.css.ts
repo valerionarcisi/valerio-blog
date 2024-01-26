@@ -13,7 +13,7 @@ export const tokens = {
     large: "4px black",
   },
   backgroundColor: {
-    primary: "#ef4444",
+    primary: "#fe6666",
     secondary: "#000",
     neutral: "#fff",
     titleBackground: "rgba(0, 0, 0, 0.5)",
