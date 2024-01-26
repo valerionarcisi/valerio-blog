@@ -14,7 +14,7 @@ globalStyle("html", {
 });
 
 globalStyle("h1, h2, h3, h4, h5, h6", {
-  fontWeight: 800,
+  fontWeight: vars.fontWeight["800"],
   marginBottom: pixelToRem(16),
   marginTop: pixelToRem(16),
 });
