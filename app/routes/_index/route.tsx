@@ -1,4 +1,5 @@
-import { MetaFunction } from "@remix-run/node";
+import { LoaderFunction, MetaFunction, json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
 import Home from "~/routes/_index/Home";
 
 export const meta: MetaFunction = () => {
@@ -14,6 +15,13 @@ export const meta: MetaFunction = () => {
     },
   ];
 };
+
+export const loader: LoaderFunction = async () => {
+  const res = await fetch("https://alexmuraro.me/wp-json/wp/v2/posts");
+  return json(await res.json());
+};
+
 export default function Index() {
-  return <Home />;
+  const posts = useLoaderData<typeof loader>();
+  return <Home posts={posts} />;
 }

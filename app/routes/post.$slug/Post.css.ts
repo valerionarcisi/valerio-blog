@@ -11,7 +11,7 @@ export const codeClass = style({
   borderRadius: "1em",
 });
 
-export const postBodyClass = valerioSprinkles({
+export const postBodyStyle = valerioSprinkles({
   fontFamily: "body",
   fontSize: "medium",
   fontWeight: "400",
@@ -20,8 +20,8 @@ export const postBodyClass = valerioSprinkles({
 
 globalStyle(
   `
-  ${postBodyClass} > img,
-  ${postBodyClass} > p > img
+  ${postBodyStyle} > img,
+  ${postBodyStyle} > p > img
 `,
   {
     borderRadius: `${vars.borderRadius.medium}`,
