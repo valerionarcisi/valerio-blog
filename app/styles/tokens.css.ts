@@ -19,7 +19,7 @@ export const tokens = {
     titleBackground: "rgba(0, 0, 0, 0.5)",
   },
   fontFamily: {
-    body: `'Lora Variable', sans-serif;`,
+    body: `'Inter Tight Variable', sans-serif;`,
     title: `'Staatliches', sans-serif`,
     subtitle: `'Inter Tight Variable', sans-serif;`,
   },
