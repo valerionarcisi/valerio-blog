@@ -40,8 +40,8 @@ export const tokens = {
     none: pixelToRem(0),
     small: pixelToRem(3),
     medium: pixelToRem(8),
-    large: pixelToRem(16),
-    extraLarge: pixelToRem(32),
+    large: pixelToRem(32),
+    extraLarge: pixelToRem(112),
     auto: "0 auto",
   },
   lineHeight: {

@@ -8,6 +8,8 @@ const imgStyle = valerioSprinkles({
   width: "extraLarge",
   borderRadius: "small",
   boxShadow: "medium",
+  marginTop: "large",
+  marginBottom: "extraLarge",
 });
 
 const titleStyle = valerioSprinkles({
