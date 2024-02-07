@@ -14,8 +14,7 @@ export const codeClass = style({
 export const postBodyStyle = valerioSprinkles({
   fontFamily: "body",
   fontSize: "medium",
-  fontWeight: "400",
-  marginBottom: "large",
+  marginY: "large",
 });
 
 globalStyle(
@@ -24,7 +23,20 @@ globalStyle(
   ${postBodyStyle} > p > img
 `,
   {
-    borderRadius: `${vars.borderRadius.medium}`,
-    boxShadow: `${vars.boxShadow.small}`,
+    borderRadius: `${vars.borderRadius.large}`,
   },
 );
+
+globalStyle(`  ${postBodyStyle} > p > img.alignleft`, {
+  float: "left",
+  marginRight: vars.space.large,
+  marginTop: vars.space.small,
+  marginBottom: vars.space.large,
+});
+
+globalStyle(`  ${postBodyStyle} > p > img.alignright`, {
+  float: "right",
+  marginLeft: vars.space.large,
+  marginTop: vars.space.large,
+  marginBottom: vars.space.large,
+});

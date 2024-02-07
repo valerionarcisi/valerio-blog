@@ -28,13 +28,14 @@ export const vars = createGlobalThemeContract(
     color: {
       primary: null,
       secondary: null,
+      tertiary: null,
       neutral: null,
     },
     backgroundColor: {
       primary: null,
       secondary: null,
+      tertiary: null,
       neutral: null,
-      titleBackground: null,
     },
     space: {
       none: null,

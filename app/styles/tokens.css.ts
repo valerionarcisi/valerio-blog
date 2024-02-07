@@ -3,8 +3,9 @@ export const pixelToRem = (value: number): string => `${value / baseFontSize}rem
 
 export const tokens = {
   color: {
-    primary: "#000",
-    secondary: "#fff",
+    primary: "#fff",
+    secondary: "#212121",
+    tertiary: "#161821",
     neutral: "#fff",
   },
   borderFont: {
@@ -13,10 +14,10 @@ export const tokens = {
     large: "4px black",
   },
   backgroundColor: {
-    primary: "#fe66668c",
-    secondary: "#000",
+    primary: "#111111",
+    secondary: "#212121",
+    tertiary: "#161821",
     neutral: "#fff",
-    titleBackground: "rgba(0, 0, 0, 0.5)",
   },
   fontFamily: {
     body: `'Inter Tight Variable', sans-serif;`,
@@ -25,7 +26,7 @@ export const tokens = {
   },
   fontSize: {
     small: pixelToRem(12),
-    medium: pixelToRem(28),
+    medium: pixelToRem(22),
     large: pixelToRem(48),
     extraLarge: pixelToRem(62),
     title: pixelToRem(122),
@@ -83,9 +84,9 @@ export const tokens = {
   },
   boxShadow: {
     small:
-      "0px 0px 0 1px #161821,5px 5px 0 #facc15,5px 5px 0 2px #161821,7px 7px 10px 1px #ff657a;",
+      "0px 0px 0 1px #161821,5px 5px 0 #1d7484,5px 5px 0 2px #161821,7px 7px 10px 1px #004b59;",
     medium:
-      "0px 0px 0 1px #161821,10px 10px 0 #facc15,10px 10px 0 2px #161821,7px 7px 10px 1px #ff657a;",
+      "0px 0px 0 1px #161821,10px 10px 0 #1d7484,10px 10px 0 2px #161821,7px 7px 10px 1px #004b59;",
     large: "10px 5px 5px white;",
     extraLarge: "10px 5px 5px white;",
   },

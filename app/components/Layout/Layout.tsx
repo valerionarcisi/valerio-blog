@@ -2,7 +2,7 @@ import { FC } from "react";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
 import clsx from "clsx";
-import { layoutStyles } from "./Layout.css";
+import { headerStyle, layoutStyles } from "./Layout.css";
 type Props = {
   children: React.ReactNode;
 };
@@ -12,10 +12,12 @@ const Layout: FC<Props> = ({ children }) => {
 
   return (
     <Box as="div" className={clsx(layoutStyles)}>
-      <Box as="header">i'm header</Box>
+      <Box as="header">
+        <Box className={clsx(headerStyle)}>HOME BLOG ABOUT</Box>
+      </Box>
       <Box as="main">{children}</Box>
       <Box as="footer">
-        <Typography variant="body">Copyright {currentYear}, Valerio Narcisi</Typography>
+        <Box className={clsx(headerStyle)}>Copyright {currentYear}, Valerio Narcisi</Box>
       </Box>
     </Box>
   );

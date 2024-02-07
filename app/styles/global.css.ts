@@ -1,6 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
 import { baseFontSize, pixelToRem } from "./tokens.css";
-import { layoutStyles } from "~/components/Layout/Layout.css";
 import { vars } from "./vars.css";
 
 globalStyle("body", {
@@ -87,3 +86,7 @@ globalStyle(
     borderBottom: "none",
   },
 );
+
+globalStyle("blockquote", {
+  backgroundColor: vars.color.secondary,
+});
