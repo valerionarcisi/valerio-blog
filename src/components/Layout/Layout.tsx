@@ -14,7 +14,7 @@ const Layout: FC<Props> = ({ children }) => {
       <Box as="header">
         <Box className={clsx(headerStyle)}>HOME BLOG ABOUT</Box>
       </Box>
-      <Box as="main">{children}</Box>
+      <Box as="main" marginY={"extraLarge"}>{children}</Box>
       <Box as="footer">
         <Box className={clsx(footerStyle)}>Copyright {currentYear}, Valerio Narcisi</Box>
       </Box>

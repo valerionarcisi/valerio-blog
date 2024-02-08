@@ -5,7 +5,6 @@ import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 
-
 type Props = {
   posts: TPost[];
 };

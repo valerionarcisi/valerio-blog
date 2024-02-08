@@ -42,7 +42,7 @@ export const tokens = {
     small: pixelToRem(3),
     medium: pixelToRem(8),
     large: pixelToRem(32),
-    extraLarge: pixelToRem(112),
+    extraLarge: pixelToRem(62),
     auto: "0 auto",
   },
   lineHeight: {
