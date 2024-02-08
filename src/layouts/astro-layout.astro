@@ -1,0 +1,22 @@
+---
+import "sakura.css";
+import "normalize.css";
+import "../styles/global.css";
+import "@fontsource-variable/inter-tight/wght.css";
+import "@fontsource-variable/lora/wght.css";
+import "@fontsource/staatliches/400.css";
+import { defaultTheme } from "../styles/defaultTheme.css";
+import clsx from "clsx";
+---
+
+<html lang="en" class={clsx(defaultTheme)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

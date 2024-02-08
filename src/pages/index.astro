@@ -1,0 +1,11 @@
+---
+import AstroLayout from "../layouts/astro-layout.astro";
+import Home from '../components/Home/Home'
+
+const res = await fetch("https://alexmuraro.me/wp-json/wp/v2/posts");
+const posts = await res.json();
+---
+
+<AstroLayout>
+  <Home posts={posts} />
+</AstroLayout>
