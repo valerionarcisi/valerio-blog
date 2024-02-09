@@ -30,7 +30,7 @@ const Layout: FC<Props> = ({ children, pathname }) => {
           {children}
         </Box>
         <Box as="footer">
-          <Box className={clsx(footerStyle)}>Copyright {currentYear}, Valerio Narcisi</Box>
+          <Box className={clsx(footerStyle)}>Written and Directed by Valerio Narcisi. Copyright {currentYear}</Box>
         </Box>
       </Box>
     </Box>
