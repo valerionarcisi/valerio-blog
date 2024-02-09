@@ -100,6 +100,10 @@ export const vars = createGlobalThemeContract(
       center: null,
       right: null,
     },
+    textDecoration: {
+      none: null,
+      underline: null,
+    },
     lineHeight: {
       none: null,
       tight: null,

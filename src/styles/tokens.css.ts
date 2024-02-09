@@ -22,7 +22,7 @@ export const tokens = {
     subtitle: `'Merriweather', sans- serif;`,
   },
   fontSize: {
-    small: pixelToRem(12),
+    small: pixelToRem(16),
     medium: pixelToRem(20),
     large: pixelToRem(48),
     extraLarge: pixelToRem(62),
@@ -39,7 +39,7 @@ export const tokens = {
     small: pixelToRem(3),
     medium: pixelToRem(8),
     large: pixelToRem(32),
-    extraLarge: pixelToRem(62),
+    extraLarge: pixelToRem(52),
     auto: "0 auto",
   },
   lineHeight: {
@@ -105,4 +105,8 @@ export const tokens = {
     center: "center",
     right: "right",
   },
+  textDecoration: {
+    none: "none",
+    underline: "underline",
+  }
 } as const;

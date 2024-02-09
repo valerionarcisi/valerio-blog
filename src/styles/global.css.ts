@@ -47,6 +47,26 @@ globalStyle(
   },
 );
 
+
+globalStyle(
+  `a`,
+  {
+    color: vars.color.tertiary,
+    textDecoration: vars.textDecoration.none,
+    textDecorationColor: vars.color.tertiary,
+  }
+)
+globalStyle(
+  `a,
+   a:visited,
+   p a:visited`,
+  {
+    color: vars.color.tertiary,
+    textDecoration: vars.textDecoration.none,
+    textDecorationColor: vars.color.tertiary,
+  }
+)
+
 globalStyle(
   `
   h1 a,
@@ -55,17 +75,10 @@ globalStyle(
   h4 a,
   h5 a,
   p a,
-  h1 a:visited,
-  h2 a:visited,
-  h3 a:visited,
-  h4 a:visited,
-  h5 a:visited,
-  p a:visited,
-  a, 
-  a:visited
 `,
   {
-    color: vars.color.neutral,
+    color: vars.color.tertiary,
+    textDecoration: vars.textDecoration.none,
   },
 );
 
@@ -81,8 +94,9 @@ globalStyle(
 `,
   {
     color: vars.color.neutral,
-    textDecoration: "underline",
     borderBottom: "none",
+    textDecoration: vars.textDecoration.underline,
+    textDecorationColor: vars.color.tertiary,
   },
 );
 

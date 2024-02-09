@@ -1,7 +1,7 @@
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
 import clsx from "clsx";
-import { coverContainer, imgStyle, titleStyle } from "./Cover.css";
+import { imgStyle, titleStyle } from "./Cover.css";
 import type { FC } from "react";
 
 type TCover = {
@@ -14,12 +14,10 @@ type TCover = {
 
 const Cover: FC<TCover> = ({ title, img: { src, alt } }) => {
   return (
-    <Box as="header" className={clsx(coverContainer)}>
+    <Box as="header">
       <Box as="div" className={clsx(titleStyle)}>
         <Box
           as={"div"}
-          width={"extraLarge"}
-          margin={"auto"}
           display={"flex"}
           flexDirection={"column"}
           textAlign="center"

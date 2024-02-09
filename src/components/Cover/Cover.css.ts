@@ -1,8 +1,6 @@
 import { valerioSprinkles } from "../../styles/sprinkles.css";
 
-const coverContainer = valerioSprinkles({
-  margin: "auto",
-});
+
 
 const imgStyle = valerioSprinkles({
   width: "extraLarge",
@@ -18,4 +16,4 @@ const titleStyle = valerioSprinkles({
   marginBottom: "small",
 });
 
-export { coverContainer, imgStyle, titleStyle };
+export { imgStyle, titleStyle };

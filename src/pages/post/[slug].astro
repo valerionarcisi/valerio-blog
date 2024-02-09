@@ -7,6 +7,8 @@ const res = await fetch(
   `https://alexmuraro.me/wp-json/wp/v2/posts/?slug=${slug}`
 );
 const post = await res.json();
+if (post.length === 0) return Astro.redirect("/404");
+
 ---
 
 <AstroLayout>

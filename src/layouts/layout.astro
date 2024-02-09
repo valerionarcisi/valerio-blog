@@ -1,11 +1,15 @@
 ---
+import clsx from "clsx";
 import "normalize.css";
 import "sakura.css";
-import "../styles/global.css";
 import "@fontsource/staatliches/400.css";
 import "@fontsource/merriweather";
+
 import { defaultTheme } from "../styles/defaultTheme.css";
-import clsx from "clsx";
+import "../styles/global.css";
+import ReactLayout from "../components/Layout/Layout";
+
+const { pathname } = Astro.url;
 ---
 
 <html lang="en" class={clsx(defaultTheme)}>
@@ -16,6 +20,8 @@ import clsx from "clsx";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   </head>
   <body>
-    <slot />
+    <ReactLayout pathname={pathname}>
+      <slot />
+    </ReactLayout>
   </body>
 </html>

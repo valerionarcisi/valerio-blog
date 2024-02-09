@@ -16,6 +16,7 @@ import {
   positionProps,
   spacesProps,
   textAlignProps,
+  textDecorationProps,
   transformProps,
 } from "./atoms.css";
 
@@ -32,6 +33,7 @@ const linkStyles = defineProperties({
     fontWeight: fontWeightProps,
     letterSpacing: letterSpacingProps,
     textAlign: textAlignProps,
+    textDecoration: textDecorationProps,
   },
 });
 

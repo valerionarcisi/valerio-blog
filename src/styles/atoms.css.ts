@@ -67,6 +67,10 @@ export const textAlignProps = {
   ...vars.textAlign,
 } as const;
 
+export const textDecorationProps = {
+  ...vars.textDecoration,
+} as const;
+
 export const lineHeightProps = {
   ...vars.lineHeight,
 };
