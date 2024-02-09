@@ -4,6 +4,7 @@ import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
+import Tag from "../Tag/Tag";
 type Props = {
   post: TPost;
 };
@@ -21,22 +22,10 @@ const Post: FC<Props> = ({ post }) => {
       <Box as="div">
         <Box as="div" width="large" margin="auto">
           <Typography variant="small">Posted on {formattedDate}</Typography>
-          <Box as="div" margin={"auto"} display={"flex"}>
-            <Box as="span" paddingLeft={"small"}>
-              <Typography variant="small">
-                <a href="/tags/javascript">javascript</a>
-              </Typography>
-            </Box>
-            <Box as="span" paddingLeft={"small"}>
-              <Typography variant="small">
-                <a href="/tags/javascript">movie</a>
-              </Typography>
-            </Box>
-            <Box as="span" paddingLeft={"small"}>
-              <Typography variant="small">
-                <a href="/tags/javascript">book</a>
-              </Typography>
-            </Box>
+          <Box as="div"display={"flex"}>
+            <Tag label="javascrip" href="/tags/javascript" />
+            <Tag label="movie" href="/tags/javascript" />
+            <Tag label="book" href="/tags/javascript" />
           </Box>
           <Box
             as="section"
