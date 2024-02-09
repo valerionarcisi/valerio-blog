@@ -7,7 +7,7 @@ const coverContainer = valerioSprinkles({
 const imgStyle = valerioSprinkles({
   width: "extraLarge",
   borderRadius: "small",
-  boxShadow: "small",
+  boxShadow: "medium",
   marginTop: "small",
 });
 

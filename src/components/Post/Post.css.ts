@@ -14,6 +14,7 @@ export const codeClass = style({
 export const postBodyStyle = valerioSprinkles({
   fontFamily: "body",
   fontSize: "medium",
+  lineHeight: "normal",
   marginY: "large",
 });
 

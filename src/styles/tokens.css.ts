@@ -1,32 +1,29 @@
 export const baseFontSize = 16;
 export const pixelToRem = (value: number): string => `${value / baseFontSize}rem`;
 
+const colors = {
+  primary: "#0d0d0d",
+  secondary: "#212121",
+  tertiary: "#ff004ed4",
+  neutral: "#fff",
+}
+
 export const tokens = {
-  color: {
-    primary: "#fff",
-    secondary: "#212121",
-    tertiary: "#161821",
-    neutral: "#fff",
-  },
+  color: { ...colors },
   borderFont: {
     small: "1px black",
     medium: "2px black",
     large: "4px black",
   },
-  backgroundColor: {
-    primary: "#111111",
-    secondary: "#212121",
-    tertiary: "#161821",
-    neutral: "#fff",
-  },
+  backgroundColor: { ...colors },
   fontFamily: {
-    body: `'Inter Tight Variable', sans-serif;`,
+    body: `'Merriweather', sans-serif;`,
     title: `'Staatliches', sans-serif`,
-    subtitle: `'Inter Tight Variable', sans-serif;`,
+    subtitle: `'Merriweather', sans- serif;`,
   },
   fontSize: {
     small: pixelToRem(12),
-    medium: pixelToRem(22),
+    medium: pixelToRem(20),
     large: pixelToRem(48),
     extraLarge: pixelToRem(62),
     title: pixelToRem(122),
@@ -46,10 +43,10 @@ export const tokens = {
     auto: "0 auto",
   },
   lineHeight: {
-    none: pixelToRem(0),
-    tight: pixelToRem(18),
-    normal: pixelToRem(24),
-    loose: pixelToRem(112),
+    none: 0,
+    tight: 1.25,
+    normal: 2.25,
+    loose: 3.5,
   },
   position: {
     fixed: "fixed",
@@ -85,11 +82,11 @@ export const tokens = {
   },
   boxShadow: {
     small:
-      "0px 0px 0 1px #161821,5px 5px 0 #1d7484,5px 5px 0 2px #161821,7px 7px 10px 1px #004b59;",
+      `0px 0px 0 1px ${colors.primary},3px 3px 0 ${colors.tertiary},3px 3px 0 1px ${colors.primary},4px 4px 5px 1px ${colors.secondary};`,
     medium:
-      "0px 0px 0 1px #161821,10px 10px 0 #1d7484,10px 10px 0 2px #161821,7px 7px 10px 1px #004b59;",
-    large: "10px 5px 5px white;",
-    extraLarge: "10px 5px 5px white;",
+      `0px 0px 0 2px ${colors.primary},6px 6px 0 ${colors.tertiary},6px 6px 0 2px ${colors.primary},8px 8px 10px 2px ${colors.secondary};`,
+    large: `0px 0px 0 4px ${colors.primary},12px 12px 0 ${colors.tertiary},12px 12px 0 4px ${colors.primary},16px 16px 20px 4px ${colors.secondary};`,
+    extraLarge: `0px 0px 0 8px ${colors.primary},24px 24px 0 ${colors.tertiary},24px 24px 0 8px ${colors.primary},32px 32px 40px 8px ${colors.secondary};`,
   },
   transform: {
     translate: "translate(-50%, -50%)",

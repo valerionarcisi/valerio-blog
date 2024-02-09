@@ -10,8 +10,7 @@ export const typographyRecipe = recipe({
         fontWeight: "800",
         marginTop: "small",
         marginBottom: "small",
-        color: "primary",
-        lineHeight: "loose",
+        color: "neutral",
       }),
       subtitle: valerioSprinkles({
         fontFamily: "subtitle",
@@ -24,7 +23,7 @@ export const typographyRecipe = recipe({
         fontFamily: "body",
         fontSize: "medium",
         marginBottom: "small",
-        color: "secondary",
+        color: "neutral",
       }),
       small: valerioSprinkles({
         fontFamily: "body",

@@ -11,8 +11,22 @@ const Layout: FC<Props> = ({ children }) => {
 
   return (
     <Box as="div" className={clsx(layoutStyles)}>
-      <Box as="header">
-        <Box className={clsx(headerStyle)}>HOME BLOG ABOUT</Box>
+      <Box as="header" className={clsx(headerStyle)}>
+        <Box as="a" href="/" paddingX={"large"}>
+          <Box as="span">
+            HOME
+          </Box>
+        </Box>
+        <Box as="a" href="/" paddingX={"large"}>
+          <Box as="span">
+            BLOG
+          </Box>
+        </Box>
+        <Box as="a" href="/" paddingX={"large"}>
+          <Box as="span">
+            CONTACT
+          </Box>
+        </Box>
       </Box>
       <Box as="main" marginY={"extraLarge"}>{children}</Box>
       <Box as="footer">

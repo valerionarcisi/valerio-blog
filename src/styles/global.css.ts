@@ -88,4 +88,5 @@ globalStyle(
 
 globalStyle("blockquote", {
   backgroundColor: vars.color.secondary,
+  borderLeft: `5px solid ${vars.color.tertiary}`,
 });

@@ -14,8 +14,7 @@
     "@astrojs/netlify": "^5.1.0",
     "@astrojs/react": "^3.0.10",
     "@dessert-box/react": "^0.7.5",
-    "@fontsource-variable/inter-tight": "^5.0.19",
-    "@fontsource-variable/lora": "^5.0.9",
+    "@fontsource/merriweather": "^5.0.8",
     "@fontsource/staatliches": "^5.0.18",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
@@ -30,6 +29,8 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
+    "@types/react-highlight": "^0.12.8",
+    "@types/react-syntax-highlighter": "^15.5.11",
     "@vanilla-extract/vite-plugin": "^4.0.3"
   }
 }

@@ -1,13 +1,13 @@
 import { valerioSprinkles } from "../../styles/sprinkles.css";
 
 const layoutStyles = valerioSprinkles({
-  color: "primary",
   maxWidth: "fullLayout",
   margin: "auto",
+  color: "neutral",
 });
 
 const headerStyle = valerioSprinkles({
-  position: "absolute",
+  position: "fixed",
   width: "full",
   left: "zero",
   top:  "zero",
@@ -17,12 +17,14 @@ const headerStyle = valerioSprinkles({
   padding: "medium",
   backgroundColor: "secondary",
   fontFamily: "title",
+  boxShadow: "small",
 });
 
 const footerStyle = valerioSprinkles({
-  position: "absolute",
+  position: "fixed",
   width: "full",
   left: "zero",
+  bottom: "zero",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",

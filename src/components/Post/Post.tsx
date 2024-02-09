@@ -1,16 +1,17 @@
-import type { FC } from "react";
+import { type FC } from "react";
 import type { TPost } from "../../models/post.model";
 import Layout from "../Layout/Layout";
 import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
-
 type Props = {
   post: TPost;
 };
 
 const Post: FC<Props> = ({ post }) => {
+
+
   return (
     <Layout>
       <Box as="article" display="flex" flexDirection="column">
