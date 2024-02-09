@@ -7,7 +7,7 @@ export const linkStyles = style([
     valerioSprinkles({
         color: 'neutral',
         textDecoration: 'none',
-        padding: 'small',
+        paddingX: 'large',
     }),
     {
         ':visited': {
