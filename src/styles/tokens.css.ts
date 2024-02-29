@@ -53,6 +53,8 @@ export const tokens = {
     absolute: "absolute",
     relative: "relative",
     sticky: "sticky",
+    // workaround for postion relative of code tag added by external lib
+    static: "static !important",
   },
   display: {
     none: "none",

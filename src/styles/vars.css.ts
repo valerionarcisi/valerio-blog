@@ -50,6 +50,7 @@ export const vars = createGlobalThemeContract(
       absolute: null,
       relative: null,
       sticky: null,
+      static: null,
     },
     display: {
       flex: null,
