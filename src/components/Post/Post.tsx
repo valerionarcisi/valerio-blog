@@ -1,10 +1,18 @@
 import { type FC } from "react";
-import type { TPost } from "../../models/post.model";
+
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { materialDark as codeTheme } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+
+import type { TPost } from "../../models/model";
 import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
 import Tag from "../Tag/Tag";
+
+
 type Props = {
   post: TPost;
 };
@@ -16,22 +24,39 @@ const Post: FC<Props> = ({ post }) => {
   return (
     <Box as="article" display="flex" flexDirection="column">
       <Cover
-        img={{ src: "/images/The-Big-Lebowski-1.jpeg", alt: "Example Image" }}
-        title={post.title.rendered}
+        img={{ src: `${post.coverImage.url}`, alt: `${post.title}` }}
+        title={post.title}
       />
       <Box as="div">
         <Box as="div" width="large" margin="auto">
           <Typography variant="small">Posted on {formattedDate}</Typography>
-          <Box as="div"display={"flex"}>
-            <Tag label="javascrip" href="/tags/javascript" />
-            <Tag label="movie" href="/tags/javascript" />
-            <Tag label="book" href="/tags/javascript" />
+          <Box as="div" display={"flex"}>
+            {post.tags.map((tag) => (
+              <Tag key={tag} label={tag} href={`#`} />
+            ))}
           </Box>
           <Box
             as="section"
             className={postBodyStyle}
-            dangerouslySetInnerHTML={{ __html: post.content.rendered }}
-          />
+          >
+            <Markdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code(props) {
+                  const { children, className, node, ...rest } = props
+                  return (
+                    <SyntaxHighlighter
+                      {...rest}
+                      PreTag="div"
+                      children={String(children).replace(/\n$/, '')}
+                      language={`javascript`}
+                      style={codeTheme}
+                    />
+                  )
+                }
+              }}
+            >{post.content}</Markdown>
+          </Box>
         </Box>
       </Box>
     </Box>

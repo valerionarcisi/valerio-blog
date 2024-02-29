@@ -1,11 +1,11 @@
 import type { FC } from "react";
-import type { TPost } from "../../models/post.model";
 import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
+import type { TPostAbstract } from "../../models/model";
 
 type Props = {
-  posts: TPost[];
+  posts: TPostAbstract[];
 };
 
 const Home: FC<Props> = ({ posts }) => {
@@ -21,7 +21,7 @@ const Home: FC<Props> = ({ posts }) => {
             <Typography variant="body">
               <h3>
                 <a href={`/post/${post.slug}`}>
-                  {post.title.rendered}
+                  {post.title}
                 </a>
               </h3>
             </Typography>

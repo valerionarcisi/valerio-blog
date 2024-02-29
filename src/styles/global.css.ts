@@ -100,6 +100,16 @@ globalStyle(
   },
 );
 
+globalStyle("pre", {
+  padding: 0,
+  backgroundColor: vars.color.primary,
+  borderLeft: `5px solid ${vars.color.tertiary}`
+});
+
+globalStyle("pre > div:first-child", {
+  margin: '0 !important',
+});
+
 globalStyle("blockquote", {
   backgroundColor: vars.color.secondary,
   borderLeft: `5px solid ${vars.color.tertiary}`,

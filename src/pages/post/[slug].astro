@@ -1,16 +1,48 @@
 ---
 import AstroLayout from "../../layouts/layout.astro";
 import Post from "../../components/Post/Post";
+import type { TPost } from "../../models/model";
 
 const { slug } = Astro.params;
-const res = await fetch(
-  `https://alexmuraro.me/wp-json/wp/v2/posts/?slug=${slug}`
-);
-const post = await res.json();
-if (post.length === 0) return Astro.redirect("/404");
+const query = {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    query: `{
+      post(where: {slug: "${slug}"}) {
+        title
+        id
+        slug
+        publishedAt
+        content
+        date
+        tags
+        authors {
+          name
+          picture {
+            url
+            fileName
+          }
+        }
+        coverImage {
+          fileName
+          url
+          height
+          width
+        }
+      }
+    }
+  `,
+  }),
+};
+
+const response = await fetch(import.meta.env.HYGRAPH_ENDPOINT, query);
+const json = await response.json();
+const post: TPost = json.data.post;
+if (!post) return Astro.redirect("/404");
 
 ---
 
 <AstroLayout>
-  <Post post={post[0]} />
+  <Post post={post} />
 </AstroLayout>
