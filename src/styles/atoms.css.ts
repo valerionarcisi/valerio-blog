@@ -71,6 +71,10 @@ export const textDecorationProps = {
   ...vars.textDecoration,
 } as const;
 
+export const transitionProps = {
+  ...vars.transition,
+} as const;
+
 export const lineHeightProps = {
   ...vars.lineHeight,
 };

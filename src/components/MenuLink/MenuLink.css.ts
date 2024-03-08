@@ -8,6 +8,7 @@ export const linkStyles = style([
         color: 'neutral',
         textDecoration: 'none',
         paddingX: 'large',
+        transition: 'fast',
     }),
     {
         ':visited': {
@@ -19,6 +20,7 @@ export const linkStyles = style([
             borderBottom: "none",
             textDecoration: vars.textDecoration.underline,
             textDecorationColor: vars.color.tertiary,
+            transition: 'fast',
         },
     },
 ]);

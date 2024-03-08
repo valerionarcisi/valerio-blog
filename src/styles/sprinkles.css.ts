@@ -17,6 +17,7 @@ import {
   spacesProps,
   textAlignProps,
   textDecorationProps,
+  transitionProps,
   transformProps,
 } from "./atoms.css";
 
@@ -67,6 +68,7 @@ const layoutStyles = defineProperties({
     right: percentualPositionProps,
     bottom: percentualPositionProps,
     transform: transformProps,
+    transition: transitionProps,
     paddingTop: spacesProps,
     paddingBottom: spacesProps,
     paddingLeft: spacesProps,
@@ -84,6 +86,7 @@ const layoutStyles = defineProperties({
     lineHeight: lineHeightProps,
     maxWidth: { ...percentualPositionProps, ...layoutSpacingProps },
   },
+
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
     paddingX: ["paddingLeft", "paddingRight"],

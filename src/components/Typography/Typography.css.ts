@@ -8,8 +8,7 @@ export const typographyRecipe = recipe({
         fontFamily: "title",
         fontSize: "title",
         fontWeight: "800",
-        marginTop: "small",
-        marginBottom: "small",
+        marginTop: "large",
         color: "neutral",
       }),
       subtitle: valerioSprinkles({
@@ -17,7 +16,14 @@ export const typographyRecipe = recipe({
         fontSize: "large",
         fontWeight: "600",
         marginTop: "large",
-        marginBottom: "large",
+        lineHeight: "tight",
+      }),
+      description: valerioSprinkles({
+        fontFamily: "body",
+        fontSize: "medium",
+        fontWeight: "400",
+        marginTop: "large",
+        lineHeight: "normal",
       }),
       body: valerioSprinkles({
         fontFamily: "body",
@@ -30,6 +36,10 @@ export const typographyRecipe = recipe({
         fontSize: "small",
         marginBottom: "small",
       }),
+      boxed: valerioSprinkles({
+        backgroundColor: 'tertiary',
+        color: 'primary',
+      })
     },
   },
   defaultVariants: {

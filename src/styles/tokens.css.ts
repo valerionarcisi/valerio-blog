@@ -1,5 +1,18 @@
 export const baseFontSize = 16;
-export const pixelToRem = (value: number): string => `${value / baseFontSize}rem`;
+const pixelToRem = (value: number): number => value / baseFontSize;
+export const pixelToRemWIthUnit = (value: number): string => `${pixelToRem(value)}rem`;
+
+function clampBuilder(minFontSizeRem: number, maxFontSizeRem: number, minWidthPx = 320, maxWidthPx = 1980): string {
+
+  const minWidth = minWidthPx / baseFontSize;
+  const maxWidth = maxWidthPx / baseFontSize;
+
+  const slope = ((maxFontSizeRem - minFontSizeRem) / (maxWidth - minWidth));
+  const yAxisIntersection = -minWidth * slope + minFontSizeRem
+
+  return `clamp( ${minFontSizeRem}rem, ${yAxisIntersection.toFixed(2)}rem + ${slope * 100}vw, ${maxFontSizeRem}rem )`;
+}
+
 
 const colors = {
   primary: "#0d0d0d",
@@ -22,11 +35,11 @@ export const tokens = {
     subtitle: `'Merriweather', sans- serif;`,
   },
   fontSize: {
-    small: pixelToRem(16),
-    medium: pixelToRem(20),
-    large: pixelToRem(48),
-    extraLarge: pixelToRem(62),
-    title: pixelToRem(122),
+    small: clampBuilder(pixelToRem(8), pixelToRem(16)),
+    medium: clampBuilder(pixelToRem(16), pixelToRem(24)),
+    large: clampBuilder(pixelToRem(24),pixelToRem(32)),
+    extraLarge: clampBuilder(pixelToRem(25),pixelToRem(50)),
+    title: clampBuilder(pixelToRem(60), pixelToRem(110)),
   },
   fontWeight: {
     "400": "400",
@@ -35,11 +48,11 @@ export const tokens = {
     "800": "800",
   },
   space: {
-    none: pixelToRem(0),
-    small: pixelToRem(3),
-    medium: pixelToRem(8),
-    large: pixelToRem(32),
-    extraLarge: pixelToRem(52),
+    none: pixelToRemWIthUnit(0),
+    small: pixelToRemWIthUnit(3),
+    medium: pixelToRemWIthUnit(8),
+    large: pixelToRemWIthUnit(32),
+    extraLarge: pixelToRemWIthUnit(62),
     auto: "0 auto",
   },
   lineHeight: {
@@ -64,23 +77,23 @@ export const tokens = {
     flex: "flex",
   },
   letterSpacing: {
-    tight: pixelToRem(-0.05),
-    normal: pixelToRem(0),
-    wide: pixelToRem(0.05),
-    widest: pixelToRem(0.1),
+    tight: pixelToRemWIthUnit(-0.05),
+    normal: pixelToRemWIthUnit(0),
+    wide: pixelToRemWIthUnit(0.05),
+    widest: pixelToRemWIthUnit(0.1),
   },
   layoutSpacing: {
-    small: pixelToRem(300),
-    medium: pixelToRem(500),
-    large: pixelToRem(700),
-    extraLarge: pixelToRem(1000),
-    fullLayout: '120ch',
+    small: pixelToRemWIthUnit(300),
+    medium: pixelToRemWIthUnit(500),
+    large: pixelToRemWIthUnit(700),
+    extraLarge: pixelToRemWIthUnit(1000),
+    fullLayout: `calc(100vw - ${pixelToRemWIthUnit(150)})`,
   },
   borderRadius: {
-    small: pixelToRem(4),
-    medium: pixelToRem(8),
-    large: pixelToRem(16),
-    extraLarge: pixelToRem(32),
+    small: pixelToRemWIthUnit(4),
+    medium: pixelToRemWIthUnit(8),
+    large: pixelToRemWIthUnit(16),
+    extraLarge: pixelToRemWIthUnit(32),
   },
   boxShadow: {
     small:
@@ -110,5 +123,10 @@ export const tokens = {
   textDecoration: {
     none: "none",
     underline: "underline",
+  },
+  transition: {
+    fast: "0.2s ease-in-out",
+    medium: "0.4s ease-in-out",
+    slow: "0.8s ease-in-out",
   }
 } as const;

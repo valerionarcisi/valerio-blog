@@ -14,24 +14,24 @@ const Layout: FC<Props> = ({ children, pathname }) => {
 
   return (
     <Box as="body">
+      <Box as="header" className={clsx(headerStyle)}>
+        <MenuLink href="/" active={pathname === "/"} >
+          HOME
+        </MenuLink>
+        <MenuLink href="/" active={pathname?.includes("/post")}>
+          BLOG
+        </MenuLink>
+        <MenuLink href="/contact" active={pathname === "/contact"}>
+          CONTACT
+        </MenuLink>
+      </Box>
       <Box as="div" className={clsx(layoutStyles)}>
-        <Box as="header" className={clsx(headerStyle)}>
-          <MenuLink href="/" active={pathname === "/"} >
-            HOME
-          </MenuLink>
-          <MenuLink href="/" active={pathname?.includes("/post")}>
-            BLOG
-          </MenuLink>
-          <MenuLink href="/contact" active={pathname === "/contact"}>
-            CONTACT
-          </MenuLink>
-        </Box>
-        <Box as="main" paddingY={"extraLarge"} width={"extraLarge"} margin={"auto"}>
+        <Box as="main" width={"fullLayout"} paddingY={"extraLarge"} margin="auto">
           {children}
         </Box>
-        <Box as="footer">
-          <Box className={clsx(footerStyle)}>Written and Directed by Valerio Narcisi. Copyright {currentYear}</Box>
-        </Box>
+      </Box>
+      <Box as="footer">
+        <Box className={clsx(footerStyle)}>This website is made from Le Marche, Italy by Valerio Narcisi. Copyright {currentYear}</Box>
       </Box>
     </Box>
   );

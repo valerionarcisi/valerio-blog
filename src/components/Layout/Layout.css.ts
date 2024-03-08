@@ -21,9 +21,9 @@ const headerStyle = valerioSprinkles({
 });
 
 const footerStyle = valerioSprinkles({
-  position: "fixed",
   width: "full",
   left: "zero",
+  color: "neutral",
   bottom: "zero",
   display: "flex",
   justifyContent: "center",

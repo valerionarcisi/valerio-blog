@@ -1,10 +1,11 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { baseFontSize, pixelToRem } from "./tokens.css";
+import { baseFontSize, pixelToRemWIthUnit } from "./tokens.css";
 import { vars } from "./vars.css";
 
 globalStyle("body", {
   padding: 0,
   background: vars.backgroundColor.primary,
+  maxWidth: "100%",
 });
 
 globalStyle("html", {
@@ -13,18 +14,24 @@ globalStyle("html", {
 
 globalStyle("h1, h2, h3, h4, h5, h6", {
   fontWeight: vars.fontWeight["800"],
-  marginBottom: pixelToRem(16),
-  marginTop: pixelToRem(16),
+  marginBottom: pixelToRemWIthUnit(16),
+  marginTop: pixelToRemWIthUnit(16),
 });
 
 globalStyle("img", {
-  marginBottom: pixelToRem(24),
-  marginTop: pixelToRem(16),
+  marginBottom: pixelToRemWIthUnit(24),
+  marginTop: pixelToRemWIthUnit(16),
+});
+
+globalStyle("hr", {
+  borderColor: vars.color.tertiary,
+  marginTop: pixelToRemWIthUnit(64),
+  marginBottom: pixelToRemWIthUnit(64),
 });
 
 globalStyle("video, iframe", {
-  marginBottom: pixelToRem(24),
-  marginTop: pixelToRem(16),
+  marginBottom: pixelToRemWIthUnit(24),
+  marginTop: pixelToRemWIthUnit(16),
 });
 
 globalStyle("*", {
@@ -52,8 +59,9 @@ globalStyle(
   `a`,
   {
     color: vars.color.tertiary,
-    textDecoration: vars.textDecoration.none,
+    textDecoration: vars.textDecoration.underline,
     textDecorationColor: vars.color.tertiary,
+    transition: `color ${vars.transition.fast}`,
   }
 )
 globalStyle(
@@ -62,7 +70,7 @@ globalStyle(
    p a:visited`,
   {
     color: vars.color.tertiary,
-    textDecoration: vars.textDecoration.none,
+    textDecoration: vars.textDecoration.underline,
     textDecorationColor: vars.color.tertiary,
   }
 )
@@ -78,7 +86,7 @@ globalStyle(
 `,
   {
     color: vars.color.tertiary,
-    textDecoration: vars.textDecoration.none,
+    textDecoration: vars.textDecoration.underline,
   },
 );
 
@@ -108,7 +116,7 @@ globalStyle("pre", {
 
 globalStyle("pre > div:first-child", {
   margin: '0 !important',
-  position: 'static !important',
+  position: vars.position.static,
 });
 
 globalStyle("blockquote", {

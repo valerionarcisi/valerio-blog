@@ -111,6 +111,11 @@ export const vars = createGlobalThemeContract(
       normal: null,
       loose: null,
     },
+    transition: {
+      fast: null,
+      medium: null,
+      slow: null,
+    }
   },
   (_value, path) => `valerio-theme-${path.join("-")}`,
 );
