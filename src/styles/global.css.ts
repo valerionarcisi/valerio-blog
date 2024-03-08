@@ -25,8 +25,6 @@ globalStyle("img", {
 
 globalStyle("hr", {
   borderColor: vars.color.tertiary,
-  marginTop: pixelToRemWIthUnit(64),
-  marginBottom: pixelToRemWIthUnit(64),
 });
 
 globalStyle("video, iframe", {

@@ -37,22 +37,22 @@ const Home: FC<Props> = ({ posts }) => {
           <Box as="br" />
         </Typography>
       </Box>
-      <Box as="hr" width="fullLayout" />
+      <Box as="hr" marginY="extraLarge" width="fullLayout" />
       <Box as="div" display={"flex"} flexDirection={"row"}>
         <Box as="div" width="large">
           <BoxedTitle>
-            Last seen, listened to and read...
+            Last seen, listened and read...
           </BoxedTitle>
-          <Cover
+          {/* <Cover
             img={{ src: "/images/The-Big-Lebowski-1.jpeg", alt: "Example Image" }}
             title="The Big Lebowski"
-          />
+          /> */}
         </Box>
         <BoxedTitle>
           I'm currently working on...
         </BoxedTitle>
       </Box>
-      <Box as="hr" width="fullLayout" />
+      <Box as="hr" marginY="extraLarge" width="fullLayout" />
       <Box as="div" width="large" margin="auto">
         <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center">
           <BoxedTitle as="h3">
