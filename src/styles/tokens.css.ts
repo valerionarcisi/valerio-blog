@@ -1,6 +1,6 @@
 export const baseFontSize = 16;
 const pixelToRem = (value: number): number => value / baseFontSize;
-export const pixelToRemWIthUnit = (value: number): string => `${pixelToRem(value)}rem`;
+export const pixelToRemWithUnit = (value: number): string => `${pixelToRem(value)}rem`;
 
 function clampBuilder(minFontSizeRem: number, maxFontSizeRem: number, minWidthPx = 320, maxWidthPx = 1980): string {
 
@@ -48,11 +48,11 @@ export const tokens = {
     "800": "800",
   },
   space: {
-    none: pixelToRemWIthUnit(0),
-    small: pixelToRemWIthUnit(3),
-    medium: pixelToRemWIthUnit(8),
-    large: pixelToRemWIthUnit(32),
-    extraLarge: pixelToRemWIthUnit(62),
+    none: pixelToRemWithUnit(0),
+    small: pixelToRemWithUnit(3),
+    medium: pixelToRemWithUnit(8),
+    large: pixelToRemWithUnit(32),
+    extraLarge: pixelToRemWithUnit(62),
     auto: "0 auto",
   },
   lineHeight: {
@@ -75,25 +75,26 @@ export const tokens = {
     inline: "inline",
     inlineBlock: "inline-block",
     flex: "flex",
+    grid: "grid",
   },
   letterSpacing: {
-    tight: pixelToRemWIthUnit(-0.05),
-    normal: pixelToRemWIthUnit(0),
-    wide: pixelToRemWIthUnit(0.05),
-    widest: pixelToRemWIthUnit(0.1),
+    tight: pixelToRemWithUnit(-0.05),
+    normal: pixelToRemWithUnit(0),
+    wide: pixelToRemWithUnit(0.05),
+    widest: pixelToRemWithUnit(0.1),
   },
   layoutSpacing: {
-    small: pixelToRemWIthUnit(300),
-    medium: pixelToRemWIthUnit(500),
-    large: pixelToRemWIthUnit(700),
-    extraLarge: pixelToRemWIthUnit(1000),
-    fullLayout: `calc(100vw - ${pixelToRemWIthUnit(150)})`,
+    small: pixelToRemWithUnit(300),
+    medium: pixelToRemWithUnit(500),
+    large: pixelToRemWithUnit(700),
+    extraLarge: pixelToRemWithUnit(1000),
+    fullLayout: `calc(100vw - ${pixelToRemWithUnit(150)})`,
   },
   borderRadius: {
-    small: pixelToRemWIthUnit(4),
-    medium: pixelToRemWIthUnit(8),
-    large: pixelToRemWIthUnit(16),
-    extraLarge: pixelToRemWIthUnit(32),
+    small: pixelToRemWithUnit(4),
+    medium: pixelToRemWithUnit(8),
+    large: pixelToRemWithUnit(16),
+    extraLarge: pixelToRemWithUnit(32),
   },
   boxShadow: {
     small:
@@ -128,5 +129,25 @@ export const tokens = {
     fast: "0.2s ease-in-out",
     medium: "0.4s ease-in-out",
     slow: "0.8s ease-in-out",
+  },
+  cardWidth: {
+    320: pixelToRemWithUnit(320),
+    420: pixelToRemWithUnit(420),
+  },
+  cardHeight: {
+    320: pixelToRemWithUnit(320),
+    420: pixelToRemWithUnit(420),
+  },
+  backgroundPosition: {
+    center: "center",
+    top: "top",
+    bottom: "bottom",
+  },
+  backgroundSize: {
+    cover: "cover",
+    contain: "contain",
+  },
+  gridTemplateColumns: {
+    1: "1fr 1fr",
   }
 } as const;

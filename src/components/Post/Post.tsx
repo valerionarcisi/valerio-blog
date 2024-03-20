@@ -19,17 +19,21 @@ type Props = {
 
 const Post: FC<Props> = ({ post }) => {
 
-  const formattedDate = new Date(post.date).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
   return (
     <Box as="article" display="flex" flexDirection="column">
+      <Box as="div" textAlign={"center"}>
+        <Typography variant="title">
+          {post.title}
+        </Typography>
+      </Box>
       <Cover
         img={{ src: `${post.coverImage.url}`, alt: `${post.title}` }}
-        title={post.title}
       />
       <Box as="div">
         <Box as="div" width="large" margin="auto">
-          <Typography variant="small">Posted on {formattedDate}</Typography>
+          {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
           <Box as="div" display={"flex"}>
             {post.tags.map((tag) => (
               <Tag key={tag} label={tag} href={`#`} />

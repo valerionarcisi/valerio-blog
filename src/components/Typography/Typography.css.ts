@@ -39,6 +39,7 @@ export const typographyRecipe = recipe({
       boxed: valerioSprinkles({
         backgroundColor: 'tertiary',
         color: 'primary',
+        paddingX: 'small',
       })
     },
   },

@@ -19,10 +19,9 @@ export type TPost = {
   slug: string;
   date: string;
   publishedAt?: string;
+  extract?: string;
+  createdAt: string;
   tags: TTags;
   coverImage: TImage;
   authors: Array<TAutor>;
 };
-
-
-export type TPostAbstract = Omit<TPost, "content" | "authors" | "publishedAt">

@@ -1,6 +1,6 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
-import Home from "../components/Home/Home";
+import Blog from "../components/Blog/Blog";
 import type { TPost } from "../models/model";
 
 const query = {
@@ -8,13 +8,14 @@ const query = {
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
     query: `{
-      posts(orderBy: publishedAt_DESC, last: 5) {
+      posts(orderBy: publishedAt_DESC) {
         id,
         title,
         slug,
         publishedAt,
         tags,
         extract
+        createdAt
         coverImage {
           id,
           url,
@@ -32,5 +33,5 @@ const posts: TPost[] = json.data.posts;
 ---
 
 <AstroLayout>
-  <Home posts={posts} />
+  <Blog posts={posts} />
 </AstroLayout>

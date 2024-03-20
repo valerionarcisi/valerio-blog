@@ -1,5 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { baseFontSize, pixelToRemWIthUnit } from "./tokens.css";
+import { baseFontSize, pixelToRemWithUnit } from "./tokens.css";
 import { vars } from "./vars.css";
 
 globalStyle("body", {
@@ -14,13 +14,13 @@ globalStyle("html", {
 
 globalStyle("h1, h2, h3, h4, h5, h6", {
   fontWeight: vars.fontWeight["800"],
-  marginBottom: pixelToRemWIthUnit(16),
-  marginTop: pixelToRemWIthUnit(16),
+  marginBottom: pixelToRemWithUnit(16),
+  marginTop: pixelToRemWithUnit(16),
 });
 
 globalStyle("img", {
-  marginBottom: pixelToRemWIthUnit(24),
-  marginTop: pixelToRemWIthUnit(16),
+  marginBottom: pixelToRemWithUnit(24),
+  marginTop: pixelToRemWithUnit(16),
 });
 
 globalStyle("hr", {
@@ -28,8 +28,8 @@ globalStyle("hr", {
 });
 
 globalStyle("video, iframe", {
-  marginBottom: pixelToRemWIthUnit(24),
-  marginTop: pixelToRemWIthUnit(16),
+  marginBottom: pixelToRemWithUnit(24),
+  marginTop: pixelToRemWithUnit(16),
 });
 
 globalStyle("*", {

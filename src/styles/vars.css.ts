@@ -58,6 +58,7 @@ export const vars = createGlobalThemeContract(
       inline: null,
       inlineBlock: null,
       none: null,
+      grid: null,
     },
     letterSpacing: {
       tight: null,
@@ -96,6 +97,14 @@ export const vars = createGlobalThemeContract(
       third: null,
       full: null,
     },
+    cardWidth: {
+      320: null,
+      420: null,
+    },
+    cardHeight: {
+      320: null,
+      420: null,
+    },
     textAlign: {
       left: null,
       center: null,
@@ -115,6 +124,18 @@ export const vars = createGlobalThemeContract(
       fast: null,
       medium: null,
       slow: null,
+    },
+    backgroundPosition: {
+      center: null,
+      top: null,
+      bottom: null,
+    },
+    backgroundSize: {
+      cover: null,
+      contain: null,
+    },
+    gridTemplateColumns: {
+      1: null,
     }
   },
   (_value, path) => `valerio-theme-${path.join("-")}`,

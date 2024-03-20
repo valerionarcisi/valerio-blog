@@ -19,6 +19,11 @@ import {
   textDecorationProps,
   transitionProps,
   transformProps,
+  cardWidthProps,
+  cardHeightProps,
+  backgroundPositionProps,
+  backgroundSizeProps,
+  gridTempalateColumnsProps,
 } from "./atoms.css";
 
 const linkStyles = defineProperties({
@@ -49,12 +54,12 @@ const typographyStyles = defineProperties({
 });
 
 const layoutStyles = defineProperties({
-  conditions: {
-    mobile: { "@media": "screen and (max-width: 767px)" },
-    tablet: { "@media": "screen and (min-width: 768px)" },
-    desktop: { "@media": "screen and (min-width: 1024px)" },
-  },
-  defaultCondition: "desktop",
+  // conditions: {
+  //   mobile: { "@media": "screen and (max-width: 767px)" },
+  //   tablet: { "@media": "screen and (min-width: 768px)" },
+  //   desktop: { "@media": "screen and (min-width: 1024px)" },
+  // },
+  // defaultCondition: "desktop",
   properties: {
     display: displayProps,
     position: positionProps,
@@ -80,11 +85,15 @@ const layoutStyles = defineProperties({
     margin: spacesProps,
     fontSize: fontSizeProps,
     fontWeight: fontWeightProps,
-    width: { ...percentualPositionProps, ...layoutSpacingProps },
+    width: { ...percentualPositionProps, ...layoutSpacingProps, ...cardWidthProps },
+    height: { ...cardHeightProps, },
     boxShadow: boxShadowProps,
     borderRadius: borderRadiusProps,
     lineHeight: lineHeightProps,
     maxWidth: { ...percentualPositionProps, ...layoutSpacingProps },
+    backgroundPosition: backgroundPositionProps,
+    backgroundSize: backgroundSizeProps,
+    gridTemplateColumns: gridTempalateColumnsProps,
   },
 
   shorthands: {

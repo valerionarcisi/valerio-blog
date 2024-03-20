@@ -63,6 +63,14 @@ export const percentualPositionProps = {
   ...vars.percentualPosition,
 } as const;
 
+export const cardWidthProps = {
+  ...vars.cardWidth,
+} as const;
+
+export const cardHeightProps = {
+  ...vars.cardHeight,
+} as const;
+
 export const textAlignProps = {
   ...vars.textAlign,
 } as const;
@@ -77,4 +85,16 @@ export const transitionProps = {
 
 export const lineHeightProps = {
   ...vars.lineHeight,
-};
+} as const;
+
+export const backgroundPositionProps = {
+  ...vars.backgroundPosition,
+} as const;
+
+export const backgroundSizeProps = {
+  ...vars.backgroundSize,
+} as const;
+
+export const gridTempalateColumnsProps = {
+  ...vars.gridTemplateColumns,
+} as const;
