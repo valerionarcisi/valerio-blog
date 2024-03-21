@@ -5,12 +5,9 @@ import Home from "../components/Home/Home";
 import type { TPost } from "../models/model";
 import { fetchMovieById } from "../utils/tmdb";
 import { fetchRecentTracks } from "../utils/audioscrobbler";
+import { fetchHyGraph } from "../utils/hygraph";
 
-const query = {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    query: `{
+const response = await fetchHyGraph<"posts", TPost[]>(`{
       posts(orderBy: publishedAt_DESC, last: 5) {
         id,
         title,
@@ -25,22 +22,15 @@ const query = {
         }
       }
     }
-  `,
-  }),
-};
+  `);
 
-const response = await fetch(import.meta.env.HYGRAPH_ENDPOINT, query);
-const json = await response.json();
-const posts: TPost[] = json.data.posts;
-
-const audioscrobbler = await fetchRecentTracks();
-const music = await audioscrobbler.json();
+const posts: TPost[] = response?.data?.posts || [];
+const music = await fetchRecentTracks();
 
 const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
 const xml = await letterboxdRss.text();
 
 let lastMovieId = "";
-let lastMovieLinkLetterboxd = "";
 parseString(xml, (err: any, result: { rss: { channel: { item: any }[] } }) => {
   if (err) {
     console.error(err);
@@ -48,16 +38,22 @@ parseString(xml, (err: any, result: { rss: { channel: { item: any }[] } }) => {
   }
   const items = result.rss.channel[0].item;
   lastMovieId = items[0]["tmdb:movieId"][0];
-  lastMovieLinkLetterboxd = items[0]?.link[0];
 });
 
 const movie = await fetchMovieById(lastMovieId);
 ---
 
-<AstroLayout>
+<AstroLayout
+  seo={{
+    title: `Home | Valerio Narcisi - Blog`,
+    description: "Valerio Narcisi web developer, director and screenwriter.",
+    name: `Home | Valerio Narcisi - Blog`,
+    type: "website",
+  }}
+>
   <Home
     posts={posts}
     lastTrack={music["recenttracks"]["track"][0]}
-    lastMovie={{ ...movie, link_letterboxd: lastMovieLinkLetterboxd }}
+    lastMovie={movie}
   />
 </AstroLayout>

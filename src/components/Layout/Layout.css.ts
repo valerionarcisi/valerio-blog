@@ -20,17 +20,5 @@ const headerStyle = valerioSprinkles({
   boxShadow: "small",
 });
 
-const footerStyle = valerioSprinkles({
-  width: "full",
-  left: "zero",
-  color: "neutral",
-  bottom: "zero",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "medium",
-  backgroundColor: "secondary",
-  fontFamily: "title",
-});
 
-export { layoutStyles, headerStyle, footerStyle };
+export { layoutStyles, headerStyle };

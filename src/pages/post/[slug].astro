@@ -2,13 +2,10 @@
 import AstroLayout from "../../layouts/layout.astro";
 import Post from "../../components/Post/Post";
 import type { TPost } from "../../models/model";
+import { fetchHyGraph } from "../../utils/hygraph";
 
 const { slug } = Astro.params;
-const query = {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    query: `{
+const response = await fetchHyGraph<"post", TPost>(`{
       post(where: {slug: "${slug}"}) {
         title
         id
@@ -32,17 +29,17 @@ const query = {
         }
       }
     }
-  `,
-  }),
-};
+  `);
 
-const response = await fetch(import.meta.env.HYGRAPH_ENDPOINT, query);
-const json = await response.json();
-const post: TPost = json.data.post;
+const post: TPost | null = response?.data?.post || null;
 if (!post) return Astro.redirect("/404");
-
 ---
 
-<AstroLayout>
+<AstroLayout
+  seo={{
+    title: `${post.title} | Valerio Narcisi Blog`,
+    description: post.extract ? post.extract : "",
+  }}
+>
   <Post post={post} />
 </AstroLayout>

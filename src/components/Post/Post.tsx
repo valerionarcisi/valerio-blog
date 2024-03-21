@@ -36,7 +36,7 @@ const Post: FC<Props> = ({ post }) => {
           {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
           <Box as="div" display={"flex"}>
             {post.tags.map((tag) => (
-              <Tag key={tag} label={tag} href={`#`} />
+              <Tag key={tag} label={tag} href={`/blog/category/${tag}`} />
             ))}
           </Box>
           <Box

@@ -64,3 +64,9 @@ export type TMovie = {
 }
 
 export type TMovieTmdb = Omit<TMovie, 'link_letterboxd'>
+
+
+export type THyGraphResponse<K, T> = {
+  data?: Record<K extends string ? K : never, T>;
+  error?: Error;
+}

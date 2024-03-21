@@ -1,25 +1,13 @@
 ---
-import clsx from "clsx";
-import "normalize.css";
-import "sakura.css";
-import "@fontsource/staatliches/400.css";
-import "@fontsource/merriweather";
-
-import { defaultTheme } from "../styles/defaultTheme.css";
-import "../styles/global.css";
 import ReactLayout from "../components/Layout/Layout";
 
 const { pathname } = Astro.url;
+const { seo } = Astro.props;
 ---
 
-<html lang="en" class={clsx(defaultTheme)}>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta name="generator" content={Astro.generator} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <ReactLayout pathname={pathname}>
-    <slot />
-  </ReactLayout>
-</html>
+<head>
+  <meta name="generator" content={Astro.generator} />
+</head>
+<ReactLayout seo={seo} pathname={pathname}>
+  <slot />
+</ReactLayout>
