@@ -1,14 +1,31 @@
 import { valerioSprinkles } from "../../styles/sprinkles.css";
 
 const cardStyle = valerioSprinkles({
-    borderRadius: "small",
-    boxShadow: "medium",
-    width: 320,
-    height: 420,
+    borderRadius: {
+        mobile: "small", desktop: "small"
+    },
+    boxShadow: {
+        mobile: "thin", desktop: "medium"
+    },
+    width: {
+        mobile: 300,
+        desktop: 320,
+    },
+    height: {
+        mobile: 310,
+        desktop: 420,
+    },
     backgroundPosition: "center",
     backgroundSize: "cover",
     margin: "auto",
-    paddingTop: "large",
+    backgroundRepeat: {
+        mobile: "noRepeat",
+        desktop: "noRepeat",
+    },
+    paddingTop:{
+        mobile: "large",
+        desktop: "large"
+    },
 });
 
 

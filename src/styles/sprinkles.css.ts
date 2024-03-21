@@ -24,6 +24,7 @@ import {
   backgroundPositionProps,
   backgroundSizeProps,
   gridTempalateColumnsProps,
+  backgroundRepeatProps,
 } from "./atoms.css";
 
 const linkStyles = defineProperties({
@@ -54,12 +55,11 @@ const typographyStyles = defineProperties({
 });
 
 const layoutStyles = defineProperties({
-  // conditions: {
-  //   mobile: { "@media": "screen and (max-width: 767px)" },
-  //   tablet: { "@media": "screen and (min-width: 768px)" },
-  //   desktop: { "@media": "screen and (min-width: 1024px)" },
-  // },
-  // defaultCondition: "desktop",
+  conditions: {
+    mobile: { "@media": "screen and (max-width: 767px)" },
+    desktop: { "@media": "screen and (min-width: 768px)" },
+  },
+  defaultCondition: "desktop",
   properties: {
     display: displayProps,
     position: positionProps,
@@ -93,9 +93,9 @@ const layoutStyles = defineProperties({
     maxWidth: { ...percentualPositionProps, ...layoutSpacingProps },
     backgroundPosition: backgroundPositionProps,
     backgroundSize: backgroundSizeProps,
+    backgroundRepeat: backgroundRepeatProps,
     gridTemplateColumns: gridTempalateColumnsProps,
   },
-
   shorthands: {
     padding: ["paddingTop", "paddingBottom", "paddingLeft", "paddingRight"],
     paddingX: ["paddingLeft", "paddingRight"],

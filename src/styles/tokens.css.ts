@@ -37,9 +37,9 @@ export const tokens = {
   fontSize: {
     small: clampBuilder(pixelToRem(8), pixelToRem(16)),
     medium: clampBuilder(pixelToRem(16), pixelToRem(24)),
-    large: clampBuilder(pixelToRem(24),pixelToRem(32)),
-    extraLarge: clampBuilder(pixelToRem(25),pixelToRem(50)),
-    title: clampBuilder(pixelToRem(60), pixelToRem(110)),
+    large: clampBuilder(pixelToRem(20),pixelToRem(32)),
+    extraLarge: clampBuilder(pixelToRem(32),pixelToRem(50)),
+    title: clampBuilder(pixelToRem(40), pixelToRem(110)),
   },
   fontWeight: {
     "400": "400",
@@ -81,7 +81,7 @@ export const tokens = {
     tight: pixelToRemWithUnit(-0.05),
     normal: pixelToRemWithUnit(0),
     wide: pixelToRemWithUnit(0.05),
-    widest: pixelToRemWithUnit(0.1),
+    widest: pixelToRemWithUnit(0.2),
   },
   layoutSpacing: {
     small: pixelToRemWithUnit(300),
@@ -97,6 +97,8 @@ export const tokens = {
     extraLarge: pixelToRemWithUnit(32),
   },
   boxShadow: {
+    thin:
+      `0px 0px 0 1px ${colors.primary},1px 2px 0 ${colors.tertiary},3px 3px 0 0px ${colors.primary},2px 2px 1px 0px ${colors.secondary};`,
     small:
       `0px 0px 0 1px ${colors.primary},3px 3px 0 ${colors.tertiary},3px 3px 0 1px ${colors.primary},4px 4px 5px 1px ${colors.secondary};`,
     medium:
@@ -131,10 +133,12 @@ export const tokens = {
     slow: "0.8s ease-in-out",
   },
   cardWidth: {
+    300: pixelToRemWithUnit(300),
     320: pixelToRemWithUnit(320),
     420: pixelToRemWithUnit(420),
   },
   cardHeight: {
+    310: pixelToRemWithUnit(310),
     320: pixelToRemWithUnit(320),
     420: pixelToRemWithUnit(420),
   },
@@ -146,6 +150,12 @@ export const tokens = {
   backgroundSize: {
     cover: "cover",
     contain: "contain",
+  },
+  backgroundRepeat: {
+    noRepeat: "no-repeat",
+    repeat: "repeat",
+    repeatX: "repeat-x",
+    repeatY: "repeat-y",
   },
   gridTemplateColumns: {
     1: "1fr 1fr",

@@ -74,6 +74,7 @@ export const vars = createGlobalThemeContract(
       fullLayout: null,
     },
     boxShadow: {
+      thin: null,
       small: null,
       medium: null,
       large: null,
@@ -98,10 +99,12 @@ export const vars = createGlobalThemeContract(
       full: null,
     },
     cardWidth: {
+      300: null,
       320: null,
       420: null,
     },
     cardHeight: {
+      310: null,
       320: null,
       420: null,
     },
@@ -133,6 +136,12 @@ export const vars = createGlobalThemeContract(
     backgroundSize: {
       cover: null,
       contain: null,
+    },
+    backgroundRepeat: {
+      noRepeat: null,
+      repeat: null,
+      repeatX: null,
+      repeatY: null,
     },
     gridTemplateColumns: {
       1: null,

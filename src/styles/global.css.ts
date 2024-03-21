@@ -49,6 +49,7 @@ globalStyle(
   {
     fontFamily: `${vars.fontFamily.title}`,
     letterSpacing: `${vars.letterSpacing.widest}`,
+    lineHeight: `${vars.lineHeight.tight}`,
   },
 );
 

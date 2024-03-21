@@ -95,6 +95,10 @@ export const backgroundSizeProps = {
   ...vars.backgroundSize,
 } as const;
 
+export const backgroundRepeatProps = {
+  ...vars.backgroundRepeat,
+} as const;
+
 export const gridTempalateColumnsProps = {
   ...vars.gridTemplateColumns,
 } as const;

@@ -52,7 +52,13 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
           </MenuLink>
         </Box>
         <Box as="div" className={clsx(layoutStyles)}>
-          <Box as="main" width={"fullLayout"} paddingY={"extraLarge"} margin="auto">
+          <Box as="main"
+            width={"fullLayout"}
+            paddingY={{
+              mobile: "extraLarge",
+              desktop: "extraLarge"
+            }}
+            margin="auto">
             {children}
           </Box>
         </Box>

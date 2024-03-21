@@ -41,7 +41,14 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
       </Box>
       <Box as="hr" marginY="extraLarge" width="fullLayout" />
       <Box as="section">
-        <Box as="div" display={"flex"} flexDirection={"row"} justifyContent="center">
+        <Box
+          as="div"
+          display={"flex"}
+          flexDirection={{
+            mobile: "column",
+            desktop: "row"
+          }}
+          justifyContent="center">
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
               img={{ src: `${IMAGES_URL}/${lastMovie.poster_path}`, alt: lastMovie.original_title }}
