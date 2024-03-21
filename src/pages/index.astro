@@ -36,8 +36,8 @@ const posts: TPost[] = json.data.posts;
 const audioscrobbler = await fetchRecentTracks();
 const music = await audioscrobbler.json();
 
-const movieFetched = await fetch("https://letterboxd.com/valenar/rss/");
-const xml = await movieFetched.text();
+const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
+const xml = await letterboxdRss.text();
 
 let lastMovieId = "";
 let lastMovieLinkLetterboxd = "";
