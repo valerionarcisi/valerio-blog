@@ -1,16 +1,23 @@
 import type { FC } from "react";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
-import type { TPost } from "../../models/model";
+import type { TMovie, TPost, TTrack } from "../../models/model";
 import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
+import { IMAGES_URL } from "../../utils/tmdb";
 
 type Props = {
   posts: TPost[];
+  lastTrack: TTrack;
+  lastMovie: TMovie;
 };
 
-const Home: FC<Props> = ({ posts }) => {
+const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
+
+  const foundImage = lastTrack?.image?.find((image) => image.size === "extralarge");
+  const imgSrc = foundImage ? foundImage["#text"] : '';
+
   return (
     <Box as="div" display="flex" flexDirection="column" width="fullLayout">
       <Box as="div" width="extraLarge">
@@ -38,22 +45,22 @@ const Home: FC<Props> = ({ posts }) => {
       </Box>
       <Box as="hr" marginY="extraLarge" width="fullLayout" />
       <Box as="section">
-        <Box as="div" display={"flex"} flexDirection={"row"} alignItems="center">
+        <Box as="div" display={"flex"} flexDirection={"row"} justifyContent="center">
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.justwatch.com%2Fposter%2F306719441%2Fs718%2Ftalk-to-me-2022.%257Bformat%257D&f=1&nofb=1&ipt=105c5ede64cae39768e07a780929982ef8ce6c360c5db259e862428b67e30c8c&ipo=images", alt: "Talk to me Cover" }}
+              img={{ src: `${IMAGES_URL}/${lastMovie.poster_path}`, alt: lastMovie.original_title }}
               title="Last Watched"
-              label="Talk to me"
-              description="Danny Philippou & Michael Philippou (2022)"
-              link="https://letterboxd.com/valenar/films/diary/"
+              label={`${lastMovie.original_title}, ${new Date(lastMovie.release_date).getFullYear()}`}
+              description={lastMovie.overview}
+              link={lastMovie.link_letterboxd}
             />
           </Box>
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: "https://media.pitchfork.com/photos/605637e95b4d06df02b71fde/master/w_1280%2Cc_limit/Cavalcade%252520album%252520cover.jpeg", alt: "Cavalcade" }}
+              img={{ src: imgSrc, alt: `${lastTrack.album["#text"]} Cover` }}
               title="Listening"
-              label="Cavalcade"
-              description="black midi (2022)"
+              label={lastTrack.album["#text"]}
+              description={lastTrack.artist["#text"]}
             />
           </Box>
           <Box as="div" width="medium" paddingX={"large"}>

@@ -1,7 +1,10 @@
 ---
+import { parseString } from "xml2js";
 import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
 import type { TPost } from "../models/model";
+import { fetchMovieById } from "../utils/tmdb";
+import { fetchRecentTracks } from "../utils/audioscrobbler";
 
 const query = {
   method: "POST",
@@ -29,8 +32,32 @@ const query = {
 const response = await fetch(import.meta.env.HYGRAPH_ENDPOINT, query);
 const json = await response.json();
 const posts: TPost[] = json.data.posts;
+
+const audioscrobbler = await fetchRecentTracks();
+const music = await audioscrobbler.json();
+
+const movieFetched = await fetch("https://letterboxd.com/valenar/rss/");
+const xml = await movieFetched.text();
+
+let lastMovieId = "";
+let lastMovieLinkLetterboxd = "";
+parseString(xml, (err: any, result: { rss: { channel: { item: any }[] } }) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  const items = result.rss.channel[0].item;
+  lastMovieId = items[0]["tmdb:movieId"][0];
+  lastMovieLinkLetterboxd = items[0]?.link[0];
+});
+
+const movie = await fetchMovieById(lastMovieId);
 ---
 
 <AstroLayout>
-  <Home posts={posts} />
+  <Home
+    posts={posts}
+    lastTrack={music["recenttracks"]["track"][0]}
+    lastMovie={{ ...movie, link_letterboxd: lastMovieLinkLetterboxd }}
+  />
 </AstroLayout>

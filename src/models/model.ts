@@ -1,3 +1,5 @@
+import { string } from "astro/zod";
+
 export type TTags = Array<string>;
 export type TImage = {
   id: string;
@@ -25,3 +27,40 @@ export type TPost = {
   coverImage: TImage;
   authors: Array<TAutor>;
 };
+
+
+export enum TTrackImagSize {
+  small = 'small',
+  medium = 'medium',
+  large = 'large',
+  extralarge = 'extralarge',
+  mega = 'mega'
+}
+
+export type TTrackImage = {
+  size: TTrackImagSize,
+  '#text': string
+}
+
+export type TTrackInfo = { mbid: string, '#text': string }
+
+export type TTrack = {
+  artist: TTrackInfo,
+  streamable: string,
+  image: Array<TTrackImage>,
+  mbid: string,
+  album: TTrackInfo,
+  name: string,
+  '@attr': { nowplaying: string },
+  url: string
+}
+
+export type TMovie = {
+  original_title: string,
+  overview: string,
+  link_letterboxd: string,
+  poster_path: string,
+  release_date: string
+}
+
+export type TMovieTmdb = Omit<TMovie, 'link_letterboxd'>

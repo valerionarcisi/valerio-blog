@@ -39,7 +39,7 @@ const Layout: FC<Props> = ({ children, pathname }) => {
               <ul>
                 <li><a target="_blank" href="https://github.com/valerionarcisi">Github</a></li>
                 <li><a target="_blank" href="https://www.linkedin.com/in/cv-valerio-narcisi/">LinkedIn</a></li>
-                <li><a target="_blank" href="https://x.com/valerionarcisi">Twitter</a></li>
+                <li><a target="_blank" href="https://x.com/valerionarcisi">X</a></li>
                 <li><a target="_blank" href="https://boxd.it/2mFff">Letterboxd</a></li>
               </ul>
             </Typography>
