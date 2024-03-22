@@ -1,0 +1,14 @@
+{
+	"geolocation": {
+		"data": {
+			"country": {
+				"code": "IT",
+				"name": "Italy"
+			},
+			"timezone": "Europe/Rome",
+			"latitude": 43.1479,
+			"longitude": 12.1097
+		},
+		"timestamp": 1711121349096
+	}
+}
