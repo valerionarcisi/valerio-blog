@@ -6,13 +6,25 @@ import { vars } from "../../styles/vars.css";
 
 export const tagStyles = style([
     valerioSprinkles({
-        borderRadius: 'medium',
+        borderRadius: {
+            mobile: 'small',
+            desktop: 'small',
+            tablet: 'small',
+        },
         fontSize: 'small',
         backgroundColor: 'tertiary',
         color: 'neutral',
         textDecoration: 'none',
-        padding: 'medium',
-        marginX: 'medium',
+        padding: {
+            mobile: 'small',
+            desktop: 'medium',
+            tablet: 'medium',
+        },
+        marginX: {
+            mobile: 'small',
+            desktop: 'medium',
+            tablet: 'medium',
+        },
     }),
     {
         ':visited': {
@@ -20,7 +32,7 @@ export const tagStyles = style([
         },
         ':hover': {
             backgroundColor: `${vars.color.neutral}`,
-        color: `${vars.color.tertiary}`,
+            color: `${vars.color.tertiary}`,
             borderBottom: "none",
             textDecoration: vars.textDecoration.underline,
             textDecorationColor: vars.color.tertiary,

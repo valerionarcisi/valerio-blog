@@ -138,7 +138,7 @@ export const tokens = {
     420: pixelToRemWithUnit(420),
   },
   cardHeight: {
-    310: pixelToRemWithUnit(310),
+    300: pixelToRemWithUnit(300),
     320: pixelToRemWithUnit(320),
     420: pixelToRemWithUnit(420),
   },

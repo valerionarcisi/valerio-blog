@@ -46,6 +46,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           display={"flex"}
           flexDirection={{
             mobile: "column",
+            tablet: "column",
             desktop: "row"
           }}
           justifyContent="center">
@@ -68,7 +69,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </Box>
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.kobo.com%2Fbook-images%2F3fb0f98a-caee-4f36-ac94-2f858214b684%2F1200%2F1200%2FFalse%2Fstella-maris-36.jpg&f=1&nofb=1&ipt=aba325685c233e51620de1d6053226c12d8839d1f6fb00815c6c786cb6fa2d6c&ipo=images", alt: "Stella Maris Cover" }}
+              img={{ src: "https://www.einaudi.it/content/uploads/2023/09/978880625958HIG.JPG", alt: "Stella Maris Cover" }}
               title="Currently reading"
               label="Stella Maris"
               description="Cormarc McCharty (2022)"
@@ -78,7 +79,31 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
       </Box>
       <Box as="hr" marginY="extraLarge" width="fullLayout" />
       {posts.length > 0 && <Box as="section" width="extraLarge" margin="auto">
-        <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center" marginBottom="extraLarge">
+        <Box
+          as="div"
+          display={{
+            mobile: "flex",
+            desktop: "flex",
+            tablet: "flex"
+          }}
+          flexDirection={{
+            mobile: "column",
+            desktop: "column",
+            tablet: "column"
+          }}
+          alignItems={{
+            mobile: "center",
+            desktop: "center",
+            tablet: "center"
+          }}
+          marginBottom={
+            {
+              mobile: "large",
+              desktop: "extraLarge",
+              tablet: "large"
+            }
+          }
+        >
           <BoxedTitle as="h3">
             Recent Posts
           </BoxedTitle>

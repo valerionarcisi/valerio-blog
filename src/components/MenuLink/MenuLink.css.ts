@@ -9,6 +9,7 @@ export const linkStyles = style([
         textDecoration: 'none',
         paddingX: {
             mobile: 'medium',
+            tablet: 'medium',
             desktop: 'large',
         },
         transition: 'fast',

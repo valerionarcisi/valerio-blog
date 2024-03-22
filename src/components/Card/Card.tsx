@@ -20,9 +20,25 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
     return (
         <Box
             as={"div"}
-            display={"flex"}
-            flexDirection={"column"}
-            textAlign="center"
+            display={{
+                mobile: "flex",
+                tablet: "flex",
+                desktop: "flex"
+            }}
+            flexDirection={{
+                mobile: "column",
+                tablet: "column",
+                desktop: "column"
+            }}
+            alignItems={{
+                mobile: "center",
+                tablet: "center",
+                desktop: "center"
+            }}
+            marginTop={{
+                mobile: "large",
+                tablet: "extraLarge",
+            }}
         >
             <Box as="h4" color="neutral" backgroundColor="primary" margin="auto">{title}</Box>
             <Box as="div" marginBottom="large" />
@@ -50,7 +66,38 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
             }
             <Box as="div" marginBottom="large" />
             <Box margin="auto">
-                <Box as="div" marginTop="medium">
+                <Box
+                    as="div"
+                    width={{
+                        mobile: "small",
+                        tablet: "small",
+                    }}
+                    marginTop={{
+                        mobile: "medium",
+                        tablet: "large",
+                    }}
+                    display={{
+                        mobile: "flex",
+                        tablet: "flex",
+                        desktop: "flex"
+                    }}
+                    flexDirection={{
+                        mobile: "column",
+                        tablet: "column",
+                        desktop: "column"
+                    }}
+                    alignItems={{
+                        mobile: "center",
+                        tablet: "center",
+                        desktop: "center"
+                    }}
+                    justifyContent={{
+                        mobile: "center",
+                        tablet: "center",
+                        desktop: "center"
+                    }}
+                    textAlign="center"
+                >
                     <Typography variant="body">
                         {link && <Box as="a" target="_blank" href={link}>{label}</Box>}
                         {!link && label}

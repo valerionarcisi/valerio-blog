@@ -1,6 +1,5 @@
 import type { FC } from "react"
 import clsx from "clsx"
-import Typography from "../Typography/Typography"
 import Box from "../Box/Box"
 import { tagStyles } from "./Tag.css"
 

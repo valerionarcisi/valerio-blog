@@ -16,14 +16,42 @@ const Article: FC<Props> = ({ post }) => {
     const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
     return (
-        <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row" marginBottom="extraLarge">
+        <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row" 
+        marginBottom={{
+            mobile: "extraLarge",
+            tablet: "extraLarge",
+            desktop: "extraLarge"
+        }}>
             <Box as="div">
                 <a href={`/post/${post.slug}`}>
-                    <Box as="img" className={clsx(transitionImg)} borderRadius="small" boxShadow="medium" src={`${post.coverImage.url}`} alt={post.title} width="large" />
+                    <Box as="img"
+                        className={clsx(transitionImg)}
+                        borderRadius={{
+                            mobile: "small",
+                            tablet: "medium",
+                            desktop: "medium"
+                        }}
+                        boxShadow={{
+                            mobile: "small",
+                            tablet: "medium",
+                            desktop: "medium"
+                        }}
+                        src={`${post.coverImage.url}`}
+                        alt={post.title}
+                        width="large"
+                        marginY={{
+                            mobile: "small",
+                            tablet: "medium",
+                        }}
+                    />
                 </a>
             </Box>
             <Box as="div" paddingX="large">
-                <Box as="h3">
+                <Box as="h3" marginY={{
+                    mobile: "small",
+                    tablet: "medium",
+                    desktop: "medium"
+                }}>
                     <a href={`/post/${post.slug}`}>{post.title}</a>
                 </Box>
                 {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}

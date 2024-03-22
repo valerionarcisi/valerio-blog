@@ -54,16 +54,44 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
         <Box as="div" className={clsx(layoutStyles)}>
           <Box as="main"
             width={"fullLayout"}
-            paddingY={{
-              mobile: "extraLarge",
-              desktop: "extraLarge"
-            }}
             margin="auto">
-            {children}
+            <Box
+              as="div"
+              paddingY={{
+                mobile: "large",
+                tablet: "extraLarge",
+                desktop: "extraLarge"
+              }}
+            >
+              {children}
+            </Box>
           </Box>
         </Box>
-        <Box as="footer" backgroundColor="secondary" paddingY="large">
-          <Box width="extraLarge" margin="auto" display="grid" gridTemplateColumns={1} color="neutral">
+        <Box as="footer"
+          backgroundColor="secondary"
+          paddingX={{
+            tablet: "extraLarge",
+            mobile: "large",
+          }}
+          paddingY={{
+            mobile: "medium",
+            tablet: "large",
+            desktop: "large"
+          }}
+        >
+          <Box width="extraLarge"
+            margin="auto"
+            display={{
+              mobile: "flex",
+              tablet: "flex",
+              desktop: "grid"
+            }}
+            flexDirection={{
+              mobile: "column",
+              tablet: "column",
+            }}
+            gridTemplateColumns={1}
+            color="neutral">
             <Box as={"div"}>
               <Typography variant="description">
                 <h3>Get in touch</h3>

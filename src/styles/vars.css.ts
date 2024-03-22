@@ -104,7 +104,7 @@ export const vars = createGlobalThemeContract(
       420: null,
     },
     cardHeight: {
-      310: null,
+      300: null,
       320: null,
       420: null,
     },

@@ -9,7 +9,8 @@ export const typographyRecipe = recipe({
         fontSize: "title",
         fontWeight: "800",
         marginTop: {
-          mobile:"large",
+          mobile: "large",
+          tablet: "large",
           desktop: "large",
         },
         color: "neutral",
@@ -19,7 +20,8 @@ export const typographyRecipe = recipe({
         fontSize: "large",
         fontWeight: "600",
         marginTop: {
-          mobile:"large",
+          mobile: "large",
+          tablet: "large",
           desktop: "large",
         },
         lineHeight: "tight",
@@ -29,7 +31,8 @@ export const typographyRecipe = recipe({
         fontSize: "medium",
         fontWeight: "400",
         marginTop: {
-          mobile:"large",
+          mobile: "large",
+          tablet: "large",
           desktop: "large",
         },
         lineHeight: "normal",
@@ -38,7 +41,9 @@ export const typographyRecipe = recipe({
         fontFamily: "body",
         fontSize: "medium",
         marginBottom: {
-          mobile: "small", desktop: "small"
+          mobile: "small",
+          desktop: "small",
+          tablet: "small"
         },
         color: "neutral",
       }),
@@ -50,7 +55,11 @@ export const typographyRecipe = recipe({
       boxed: valerioSprinkles({
         backgroundColor: 'tertiary',
         color: 'primary',
-        paddingX: 'small',
+        paddingX: {
+          mobile: 'small',
+          desktop: 'medium',
+          tablet: 'medium',
+        },
       })
     },
   },
