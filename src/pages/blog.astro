@@ -1,0 +1,38 @@
+---
+import AstroLayout from "../layouts/layout.astro";
+import type { TPost } from "../models/model";
+import BlogComponent from "../components/Blog/Blog";
+import { fetchHyGraph } from "../utils/hygraph";
+
+const response = await fetchHyGraph<"posts", TPost[]>(`{
+      posts(orderBy: publishedAt_DESC) {
+        id,
+        title,
+        slug,
+        publishedAt,
+        tags,
+        extract
+        createdAt
+        coverImage {
+          id,
+          url,
+          fileName,
+        }
+      }
+    }
+  `);
+
+const posts: TPost[] = response?.data?.posts || [];
+---
+
+<AstroLayout
+  seo={{
+    title: `Blog | Valerio Narcisi - Blog`,
+    description:
+      "Blog page of Valerio Narcisi web developer, director and screenwriter.",
+    name: `Blog | Valerio Narcisi - Blog`,
+    type: "website",
+  }}
+>
+  <BlogComponent posts={posts} title="Blog" />
+</AstroLayout>

@@ -1,0 +1,38 @@
+---
+import AstroLayout from "../../../layouts/layout.astro";
+import type { TPost } from "../../../models/model";
+import Blog from "../../../components/Blog/Blog";
+import { fetchHyGraph } from "../../../utils/hygraph";
+
+const { category } = Astro.params;
+
+const response = await fetchHyGraph<"posts", TPost[]>(`{
+  posts(orderBy: publishedAt_DESC, where: {tags_contains_some: "${category}"}) {
+    id
+    title
+    slug
+    publishedAt
+    tags
+    extract
+    createdAt
+    coverImage {
+      id
+      url
+      fileName
+    }
+  }
+}
+`);
+
+const posts: TPost[] = response?.data?.posts || [];
+if (posts.length === 0) return Astro.redirect("/404");
+---
+
+<AstroLayout
+  seo={{
+    title: `Category ${category} | Valerio Narcisi | Blog`,
+    description: `Category: ${category} of the Valerio Narcisi blog`,
+  }}
+>
+  <Blog posts={posts} title=`Category: ${category}` />
+</AstroLayout>

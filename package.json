@@ -1,35 +1,41 @@
 {
   "name": "valerio-blog",
-  "private": true,
-  "sideEffects": false,
   "type": "module",
+  "version": "0.0.1",
   "scripts": {
-    "build": "remix build",
-    "dev": "remix dev --manual",
-    "start": "netlify serve",
-    "typecheck": "tsc -b"
+    "dev": "astro dev --open",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "@netlify/functions": "^2.0.0",
-    "@netlify/remix-adapter": "^2.0.0",
-    "@remix-run/css-bundle": "^2.4.1",
-    "@remix-run/node": "^2.4.1",
-    "@remix-run/react": "^2.4.1",
-    "cross-env": "^7.0.3",
+    "@astrojs/check": "^0.5.0",
+    "@astrojs/netlify": "^5.1.0",
+    "@astrojs/react": "^3.0.10",
+    "@dessert-box/react": "^0.7.5",
+    "@fontsource/merriweather": "^5.0.8",
+    "@fontsource/staatliches": "^5.0.18",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vanilla-extract/recipes": "^0.5.1",
+    "@vanilla-extract/sprinkles": "^1.6.1",
+    "astro": "^4.3.5",
+    "clsx": "^2.1.0",
+    "normalize.css": "^8.0.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "remark-gfm": "^4.0.0",
+    "sakura.css": "^1.5.0",
+    "typescript": "^5.3.3",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
-    "@remix-run/dev": "^2.4.1",
-    "@remix-run/eslint-config": "^2.4.1",
-    "@remix-run/serve": "^2.4.1",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "@vanilla-extract/css": "^1.14.0",
-    "eslint": "^8.27.0",
-    "typescript": "^5.2.2"
-  },
-  "engines": {
-    "node": ">=18"
+    "@types/react-highlight": "^0.12.8",
+    "@types/react-syntax-highlighter": "^15.5.11",
+    "@types/xml2js": "^0.4.14",
+    "@vanilla-extract/vite-plugin": "^4.0.3"
   }
 }

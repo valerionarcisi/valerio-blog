@@ -1,0 +1,13 @@
+---
+import ReactLayout from "../components/Layout/Layout";
+
+const { pathname } = Astro.url;
+const { seo } = Astro.props;
+---
+
+<head>
+  <meta name="generator" content={Astro.generator} />
+</head>
+<ReactLayout seo={seo} pathname={pathname}>
+  <slot />
+</ReactLayout>
