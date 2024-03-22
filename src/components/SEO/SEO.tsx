@@ -14,7 +14,7 @@ const SEO: FC<Props> = ({ title, description, name, type }) => {
             { /* Standard metadata tags */}
             <meta charSet="utf-8" />
             <meta name="viewport" content="width=device-width" />
-            <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+            <link rel="icon" type="image/ico" href="./favicon.ico" />
             
             <title>{title}</title>
             <meta name='description' content={description} />
