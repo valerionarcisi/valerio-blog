@@ -115,7 +115,8 @@ globalStyle("pre", {
 
 globalStyle("pre > div:first-child", {
   margin: '0 !important',
-  position: vars.position.static,
+  // without !important it will not work, code goes under menu
+  position: 'static !important',
 });
 
 globalStyle("blockquote", {
