@@ -55,7 +55,7 @@ const About: FC = () => {
                         />
                         <h2>Web Development Expertise:</h2>
                         <p>In my current role as a Frontend Developer at <a href="https://www.cleafy.com/">Cleafy</a>, I focus on refactoring large PHP apps into modern Javascript. Prior to this, I held a Senior Frontend Developer position at <a href="https://www.teamsystem.com/">Teamsystem</a> where i utilized technologies such as Angular, Typescript and Ngrx.</p>
-                        <p>During this experience, I had the opportunity to serve as an internal speaker at a conference focused on Flux Architecture, employing React Toolkit and Ngrx.</p>
+                        <p>During this experience, I had the opportunity to serve as an internal speaker at a conference focused on Flux Architecture, employing Redux Toolkit and Ngrx.</p>
                         <p>I worked as a Senior Software Engineer at <a href="http://fieldtronics.it/">Fieldtronics Srl</a>. Here, I utilized technologies such as Node.js, React, Docker, and Serverless to drive innovation in agricultural solutions.</p>
                         <p>My journey in web development began at <a href="https://www.new-system.it/">New System Srl</a>, where I cultivated my skills as a PHP and WordPress developer.</p>
 
@@ -199,8 +199,10 @@ const About: FC = () => {
                             <li>Redux</li>
                             <li>Cypress</li>
                             <li>Angular</li>
+                            <li>Rxjs</li>
                             <li>Ngrx</li>
                             <li>Node.js</li>
+                            <li>Serverless</li>
                             <li>Docker</li>
                         </ul>
 
