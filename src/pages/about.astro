@@ -1,22 +1,7 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
 import Page from "../components/Page/Page";
-import type { TPage } from "../models/model";
-import { fetchHyGraph } from "../utils/hygraph";
 
-const response = await fetchHyGraph<"page", TPage>(`{
-  page(where: {id: "clu2lq5ub6k4j07lgb6tas6rz"}) {
-    title
-    content
-  }
-}
-  `);
-
-  
-const page: TPage = response?.data?.page || {
-  title: "",
-  content: "",
-};
 ---
 
 <AstroLayout
@@ -28,5 +13,5 @@ const page: TPage = response?.data?.page || {
     type: "website",
   }}
 >
-  <Page title={page.title || ""} content={page.content || ""} />
+  <Page />
 </AstroLayout>

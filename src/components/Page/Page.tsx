@@ -1,19 +1,11 @@
 import { type FC } from "react";
 
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { materialDark as codeTheme } from 'react-syntax-highlighter/dist/cjs/styles/prism'
-
 import Box from "../Box/Box";
 import { postBodyStyle } from "./../Post/Post.css";
-import type { TPage } from "../../models/model";
 import BoxedTitle from "../Typography/BoxedTitle";
 
 
-type Props = TPage;
-
-const Page: FC<Props> = ({ title, content }) => {
+const Page: FC = () => {
 
     return (
         <Box as="article" display="flex" flexDirection="column" marginTop={{
@@ -23,7 +15,7 @@ const Page: FC<Props> = ({ title, content }) => {
         }}>
             <Box as="div" textAlign={"center"}>
                 <BoxedTitle>
-                    {title}
+                    Who I am
                 </BoxedTitle>
             </Box>
             <Box as="div">
@@ -99,7 +91,7 @@ const Page: FC<Props> = ({ title, content }) => {
                         <h2>Filmmaking Journey:</h2>
                         <p>Alongside my passion for web development, I have a deep-rooted interest in storytelling through film. With a degree from <a href="https://www.officinemattoli.it/">Officine Mattoli</a>, I have written "Arturo," which garnered recognition at the Roccafluvione Film Festival.</p>
                         <p>Currently, I am engaged in the creation of my latest endeavor, "Caramella," a short film poised to captivate audiences with its narrative depth.</p>
-                        <iframe width="100%" height="315" src="https://www.youtube.com/embed/7TpiIvEq5l8?si=95DZqUv7cTlM8qNW" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+                        <iframe width="100%" height="315" src="https://www.youtube.com/embed/7TpiIvEq5l8?si=95DZqUv7cTlM8qNW" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
                         <Box
                             as="hr"
                             marginY={{

@@ -2,7 +2,6 @@ import type { FC } from "react";
 import Box from "../Box/Box";
 import type { TPost } from "../../models/model";
 import Article from "../Article/Article";
-import Typography from "../Typography/Typography";
 import BoxedTitle from "../Typography/BoxedTitle";
 
 type Props = {

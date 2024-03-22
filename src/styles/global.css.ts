@@ -116,6 +116,7 @@ globalStyle("pre", {
 globalStyle("pre > div:first-child", {
   margin: '0 !important',
   // without !important it will not work, code goes under menu
+  // @ts-ignore
   position: 'static !important',
 });
 

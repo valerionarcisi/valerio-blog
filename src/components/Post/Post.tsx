@@ -55,6 +55,14 @@ const Post: FC<Props> = ({ post }) => {
                       children={String(children).replace(/\n$/, '')}
                       language={`javascript`}
                       style={codeTheme}
+                      ref={(ref) => {
+                        if (ref) {
+                          if (ref instanceof HTMLElement) {
+                            const htmlElementRef = ref as HTMLElement;
+                            (ref as any).ref = htmlElementRef;
+                          }
+                        }
+                      }}
                     />
                   )
                 }

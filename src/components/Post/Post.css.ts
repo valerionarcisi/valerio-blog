@@ -1,4 +1,4 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle } from "@vanilla-extract/css";
 import { valerioSprinkles } from "../../styles/sprinkles.css";
 import { vars } from "../../styles/vars.css";
 

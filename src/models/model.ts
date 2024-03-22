@@ -1,4 +1,3 @@
-import { string } from "astro/zod";
 
 export type TTags = Array<string>;
 export type TImage = {
