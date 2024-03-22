@@ -44,11 +44,11 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
           <MenuLink href="/" active={pathname === "/"} >
             HOME
           </MenuLink>
-          <MenuLink href="/blog" active={pathname?.includes("/post") || pathname?.includes("/blog")}>
+          {/* <MenuLink href="/blog" active={pathname?.includes("/post") || pathname?.includes("/blog")}>
             BLOG
-          </MenuLink>
-          <MenuLink href="/contact" active={pathname === "/contact"}>
-            CONTACT
+          </MenuLink> */}
+          <MenuLink href="/about" active={pathname === "/about"}>
+            About me
           </MenuLink>
         </Box>
         <Box as="div" className={clsx(layoutStyles)}>
@@ -107,7 +107,7 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
               <Typography variant="description">
                 <h3>This website is made from <a target="_blank" href="https://maps.app.goo.gl/U4QDSCMwis5KvoaY8">"Le Marche Zozze"</a> by me.<br /> Copyright {currentYear}</h3>
                 <Typography variant="small">
-                  This site uses no tracking or cookies, other than privacy-respecting, GDPR-compliant analytics via <a target="_blank" href="https://plausible.io">Plausible</a>.
+                  This site uses no tracking or cookies, other than privacy-respecting, GDPR-compliant analytics via Netflify Analytics.
                 </Typography>
               </Typography>
               <Box marginTop="large" />

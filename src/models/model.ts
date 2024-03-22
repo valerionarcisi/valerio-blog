@@ -70,3 +70,8 @@ export type THyGraphResponse<K, T> = {
   data?: Record<K extends string ? K : never, T>;
   error?: Error;
 }
+
+export type TPage = {
+  title: string;
+  content: string;
+}

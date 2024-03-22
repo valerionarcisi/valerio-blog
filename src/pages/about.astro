@@ -1,0 +1,32 @@
+---
+import AstroLayout from "../layouts/layout.astro";
+import Page from "../components/Page/Page";
+import type { TPage } from "../models/model";
+import { fetchHyGraph } from "../utils/hygraph";
+
+const response = await fetchHyGraph<"page", TPage>(`{
+  page(where: {id: "clu2lq5ub6k4j07lgb6tas6rz"}) {
+    title
+    content
+  }
+}
+  `);
+
+  
+const page: TPage = response?.data?.page || {
+  title: "",
+  content: "",
+};
+---
+
+<AstroLayout
+  seo={{
+    title: `Who i am | Valerio Narcisi`,
+    description:
+      "Valerio Narcisi web developer, director and screenwriter. This page about me, my blog and some of my projects.",
+    name: `Blog | Valerio Narcisi - Blog`,
+    type: "website",
+  }}
+>
+  <Page title={page.title || ""} content={page.content || ""} />
+</AstroLayout>
