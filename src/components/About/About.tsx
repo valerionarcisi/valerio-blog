@@ -114,7 +114,7 @@ const About: FC = () => {
                         <h2>Filmmaking Journey:</h2>
                         <p>Alongside my passion for web development, I have a deep-rooted interest in storytelling through film. With a degree from <a href="https://www.officinemattoli.it/">Officine Mattoli</a>, I have written <i>Arturo</i> which garnered recognition at the Roccafluvione Film Festival.</p>
                         <iframe width="100%" height="315" src="https://www.youtube.com/embed/7TpiIvEq5l8?si=95DZqUv7cTlM8qNW" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" frameBorder={0} allowFullScreen></iframe>
-                        <p>Currently, I am engaged in the creation of my latest endeavor, "Caramella," my first short film.</p>
+                        <p>Currently, I am engaged in the creation of my latest endeavor, <i>Caramella</i> my first short film.</p>
                         <Box as="div" textAlign={"center"}>
                             <Box
                                 as="img"
