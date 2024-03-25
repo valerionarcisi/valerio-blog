@@ -85,7 +85,7 @@ const About: FC = () => {
                             }}
                         />
                         <h2>Personal Insight:</h2>
-                        <p>Outside of my professional pursuits, I find fulfillment in the company of my family. Married to Adriana, I am a proud father to two wonderful daughters, Bianca and Lea, who bring joy and balance to my life.</p>
+                        <p>Outside of my professional pursuits, I find fulfillment in the company of my family. Married to Adriana, I am a proud father to two wonderful daughters: Bianca and Lea, who bring joy and balance to my life.</p>
                         <Box as="div" textAlign={"center"}>
                             <Box
                                 as="img"
