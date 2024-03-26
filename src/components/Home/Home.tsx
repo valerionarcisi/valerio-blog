@@ -16,7 +16,7 @@ type Props = {
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
 
   const foundImage = lastTrack?.image?.find((image) => image.size === "extralarge");
-  const imgSrc = foundImage ? foundImage["#text"] : '';
+  const imgSrc = foundImage ? foundImage["#text"] : 'https://iili.io/HlHpqJ4.md.jpg';
 
   return (
     <Box as="div" display="flex" flexDirection="column" width="fullLayout">
@@ -63,8 +63,8 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
             <Card
               img={{ src: imgSrc, alt: `${lastTrack.album["#text"]} Cover` }}
               title="Last played"
-              label={lastTrack.album["#text"]}
-              description={lastTrack.artist["#text"]}
+              label={lastTrack.name}
+              description={`${lastTrack.artist["#text"]} - ${lastTrack.album["#text"]}` }
             />
           </Box>
           <Box as="div" width="medium" paddingX={"large"}>

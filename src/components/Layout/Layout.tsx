@@ -112,7 +112,7 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
               </Typography>
               <Box marginTop="large" />
               <Typography variant="small">
-                Made with <a target="_blank" href="https://astro.build">Astro</a>, <a target="_blank" href="https://reactjs.org">React</a>, <a target="_blank" href="https://vanilla-extract.style">Vanilla Extract</a> and hosted on <a target="_blank" href="https://www.netlify.com">Netlify</a>.
+                Made with <a target="_blank" href="https://astro.build">Astro</a>, <a target="_blank" href="https://reactjs.org">React</a> and hosted on <a target="_blank" href="https://www.netlify.com">Netlify</a>.
               </Typography>
             </Box>
           </Box>
