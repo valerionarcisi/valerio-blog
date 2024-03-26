@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.5.0",
     "@astrojs/netlify": "^5.2.0",
     "@astrojs/react": "^3.0.10",
+    "@astrojs/sitemap": "^3.1.1",
     "@dessert-box/react": "^0.7.5",
     "@fontsource/merriweather": "^5.0.8",
     "@fontsource/staatliches": "^5.0.18",
