@@ -77,6 +77,11 @@ export const tokens = {
     flex: "flex",
     grid: "grid",
   },
+  float: {
+    left: "left",
+    right: "right",
+    none: "none",
+  },
   letterSpacing: {
     tight: pixelToRemWithUnit(-0.05),
     normal: pixelToRemWithUnit(0),
@@ -95,6 +100,7 @@ export const tokens = {
     medium: pixelToRemWithUnit(8),
     large: pixelToRemWithUnit(16),
     extraLarge: pixelToRemWithUnit(32),
+    circle: pixelToRemWithUnit(9999),
   },
   boxShadow: {
     thin:

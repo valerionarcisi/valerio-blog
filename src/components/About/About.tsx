@@ -42,8 +42,9 @@ const About: FC = () => {
                                     tablet: "large",
                                     desktop: "large",
                                 }}
-                                src="https://media.graphassets.com/11v3vMf8QMziD5ZAv6zY"
-                                alt="valerio-thumb.JPG" />
+                                src="https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"
+                                alt="valerio-thumb.JPG" 
+                                />
                         </Box>
                         <Box
                             as="hr"

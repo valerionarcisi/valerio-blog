@@ -25,6 +25,7 @@ import {
   backgroundSizeProps,
   gridTempalateColumnsProps,
   backgroundRepeatProps,
+  floatProps,
 } from "./atoms.css";
 
 const linkStyles = defineProperties({
@@ -69,6 +70,7 @@ const layoutStyles = defineProperties({
     flexDirection: ["row", "column"],
     "-webkit-text-stroke": borderFontProps,
     spaceBetween: spacesProps,
+    float: floatProps,
     top: percentualPositionProps,
     left: percentualPositionProps,
     right: percentualPositionProps,

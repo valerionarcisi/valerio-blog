@@ -52,6 +52,11 @@ export const vars = createGlobalThemeContract(
       sticky: null,
       static: null,
     },
+    float: {
+      left: null,
+      right: null,
+      none: null,
+    },
     display: {
       flex: null,
       block: null,
@@ -85,6 +90,7 @@ export const vars = createGlobalThemeContract(
       medium: null,
       large: null,
       extraLarge: null,
+      circle: null,
     },
     transform: {
       translate: null,

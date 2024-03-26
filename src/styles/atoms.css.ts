@@ -102,3 +102,7 @@ export const backgroundRepeatProps = {
 export const gridTempalateColumnsProps = {
   ...vars.gridTemplateColumns,
 } as const;
+
+export const floatProps = {
+  ...vars.float,
+} as const;
