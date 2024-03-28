@@ -9,8 +9,8 @@ import { IMAGES_URL } from "../../utils/tmdb";
 
 type Props = {
   posts: TPost[];
-  lastTrack: TTrack;
-  lastMovie: TMovieTmdb;
+  lastTrack?: TTrack;
+  lastMovie?: TMovieTmdb;
 };
 
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
@@ -50,7 +50,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
             desktop: "row"
           }}
           justifyContent="center">
-          <Box as="div" width="medium" paddingX={"large"}>
+          {lastMovie && <Box as="div" width="medium" paddingX={"large"}>
             <Card
               img={{ src: `${IMAGES_URL}/${lastMovie.poster_path}`, alt: lastMovie.original_title }}
               title="Last Watched"
@@ -58,15 +58,15 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
               description={lastMovie.overview}
               link={`https://letterboxd.com/valenar/films/diary/ `}
             />
-          </Box>
-          <Box as="div" width="medium" paddingX={"large"}>
+          </Box>}
+          {lastTrack && <Box as="div" width="medium" paddingX={"large"}>
             <Card
               img={{ src: imgSrc, alt: `${lastTrack.album["#text"]} Cover` }}
               title="Last played"
               label={lastTrack.name}
-              description={`${lastTrack.artist["#text"]} - ${lastTrack.album["#text"]}` }
+              description={`${lastTrack.artist["#text"]} - ${lastTrack.album["#text"]}`}
             />
-          </Box>
+          </Box>}
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
               img={{ src: "https://www.einaudi.it/content/uploads/2023/09/978880625958HIG.JPG", alt: "Stella Maris Cover" }}

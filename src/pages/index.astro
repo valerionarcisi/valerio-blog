@@ -7,7 +7,12 @@ import { fetchMovieById } from "../utils/tmdb";
 import { fetchRecentTracks } from "../utils/audioscrobbler";
 import { fetchHyGraph } from "../utils/hygraph";
 
-const response = await fetchHyGraph<"posts", TPost[]>(`{
+let posts: TPost[] = [];
+let music;
+let movie;
+
+try {
+  const response = await fetchHyGraph<"posts", TPost[]>(`{
       posts(orderBy: publishedAt_DESC, last: 5) {
         id,
         title,
@@ -24,29 +29,36 @@ const response = await fetchHyGraph<"posts", TPost[]>(`{
     }
   `);
 
-const posts: TPost[] = response?.data?.posts || [];
-const music = await fetchRecentTracks();
+  posts = response?.data?.posts || [];
+  music = await fetchRecentTracks();
+  // const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
+  // const xml = await letterboxdRss.text();
 
-const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
-const xml = await letterboxdRss.text();
+  // let lastMovieId = "";
+  // parseString(
+  //   xml,
+  //   (err: any, result: { rss: { channel: { item: any }[] } }) => {
+  //     if (err) {
+  //       console.error(err);
+  //       return;
+  //     }
+  //     const items = result.rss.channel[0].item;
+  //     lastMovieId = items[0]["tmdb:movieId"][0];
+  //   }
+  // );
 
-let lastMovieId = "";
-parseString(xml, (err: any, result: { rss: { channel: { item: any }[] } }) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  const items = result.rss.channel[0].item;
-  lastMovieId = items[0]["tmdb:movieId"][0];
-});
+  // movie = await fetchMovieById("lastMovieId");
 
-const movie = await fetchMovieById(lastMovieId);
+} catch (error) {
+  console.error(error);
+}
 ---
 
 <AstroLayout
   seo={{
     title: `Home | Valerio Narcisi - web developer, director and screenwriter`,
-    description: "Valerio Narcisi web developer, director and screenwriter. This is my personal blog where I post my thoughts on technology, movies books and other things.",
+    description:
+      "Valerio Narcisi web developer, director and screenwriter. This is my personal blog where I post my thoughts on technology, movies books and other things.",
     name: `Home | Valerio Narcisi - web developer, director and screenwriter`,
     type: "website",
   }}
