@@ -31,24 +31,23 @@ try {
 
   posts = response?.data?.posts || [];
   music = await fetchRecentTracks();
-  // const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
-  // const xml = await letterboxdRss.text();
+  const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
+  const xml = await letterboxdRss.text();
 
-  // let lastMovieId = "";
-  // parseString(
-  //   xml,
-  //   (err: any, result: { rss: { channel: { item: any }[] } }) => {
-  //     if (err) {
-  //       console.error(err);
-  //       return;
-  //     }
-  //     const items = result.rss.channel[0].item;
-  //     lastMovieId = items[0]["tmdb:movieId"][0];
-  //   }
-  // );
+  let lastMovieId = "";
+  parseString(
+    xml,
+    (err: any, result: { rss: { channel: { item: any }[] } }) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      const items = result.rss.channel[0].item;
+      lastMovieId = items[0]["tmdb:movieId"][0];
+    }
+  );
 
-  // movie = await fetchMovieById("lastMovieId");
-
+  movie = await fetchMovieById(lastMovieId);
 } catch (error) {
   console.error(error);
 }
