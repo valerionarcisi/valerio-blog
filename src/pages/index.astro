@@ -28,8 +28,9 @@ try {
       }
     }
   `);
-
+  
   posts = response?.data?.posts || [];
+
   music = await fetchRecentTracks();
   const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
   const xml = await letterboxdRss.text();

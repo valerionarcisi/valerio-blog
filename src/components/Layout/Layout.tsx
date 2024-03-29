@@ -44,9 +44,9 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
           <MenuLink href="/" active={pathname === "/"} >
             HOME
           </MenuLink>
-          {/* <MenuLink href="/blog" active={pathname?.includes("/post") || pathname?.includes("/blog")}>
+          <MenuLink href="/blog" active={pathname?.includes("/post") || pathname?.includes("/blog")}>
             BLOG
-          </MenuLink> */}
+          </MenuLink>
           <MenuLink href="/about" active={pathname === "/about"}>
             About me
           </MenuLink>
