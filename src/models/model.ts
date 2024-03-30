@@ -64,17 +64,23 @@ const TrackInfoSchema = S.struct({
 })
 export type TTrackInfo = S.Schema.Type<typeof TrackInfoSchema>;
 
-const Track = S.struct({
+export const TrackSchema = S.struct({
   artist: TrackInfoSchema,
   streamable: S.string,
   image: S.array(TrackImageSchema),
   mbid: S.string,
   album: TrackInfoSchema,
   name: S.string,
-  '@attr': S.struct({ nowplaying: S.string }),
   url: S.string
 })
-export type TTrack = S.Schema.Type<typeof Track>;
+export type TTrack = S.Schema.Type<typeof TrackSchema>;
+
+export const RecentTrackSchema = S.struct({
+  recenttracks: S.struct({
+    track: S.array(TrackSchema)
+  })
+})
+
 
 const MovieSchema = S.struct({
   original_title: S.string,

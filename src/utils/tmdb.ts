@@ -18,7 +18,7 @@ export const fetchMovieById = async (id: string): Promise<TMovieTmdb> => {
 
 export const getMovieById = (id: string) => Effect.tryPromise({
     try: () => fetch(`${BASE_URL}${VERSION}/movie/${id}?api_key=${API_KEY}`),
-    catch: () => "fetch" as const,
+    catch: () => "get-movie-by-id" as const,
 })
 
 

@@ -4,12 +4,17 @@ import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
 import type { TPost } from "../models/model";
 import { getAndParseMovieById } from "../utils/tmdb";
-import { fetchRecentTracks } from "../utils/audioscrobbler";
 import { fetchHyGraph } from "../utils/hygraph";
 import { Effect } from "effect";
+import { getAndParseRecentTraks } from "../utils/audioscrobbler";
 
 let posts: TPost[] = [];
-let music;
+
+const music = await Effect.runPromise(getAndParseRecentTraks())
+  .then((data) => data)
+  .then((data) => data.recenttracks.track[0])
+  .catch((error) => error);
+
 let movie;
 
 try {
@@ -32,7 +37,6 @@ try {
 
   posts = response?.data?.posts || [];
 
-  music = await fetchRecentTracks();
   const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
   const xml = await letterboxdRss.text();
 
@@ -51,7 +55,7 @@ try {
 
   movie = await Effect.runPromise(getAndParseMovieById(lastMovieId))
     .then((data) => data)
-    .catch((err) => console.error(err));
+    .catch((err) => err);
 } catch (error) {
   // console.error(error);
 }
@@ -68,7 +72,7 @@ try {
 >
   <Home
     posts={posts}
-    lastTrack={music["recenttracks"]["track"][0]}
+    lastTrack={music}
     lastMovie={movie}
   />
 </AstroLayout>
