@@ -3,9 +3,10 @@ import { parseString } from "xml2js";
 import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
 import type { TPost } from "../models/model";
-import { fetchMovieById } from "../utils/tmdb";
+import { getAndParseMovieById } from "../utils/tmdb";
 import { fetchRecentTracks } from "../utils/audioscrobbler";
 import { fetchHyGraph } from "../utils/hygraph";
+import { Effect } from "effect";
 
 let posts: TPost[] = [];
 let music;
@@ -28,7 +29,7 @@ try {
       }
     }
   `);
-  
+
   posts = response?.data?.posts || [];
 
   music = await fetchRecentTracks();
@@ -48,9 +49,11 @@ try {
     }
   );
 
-  movie = await fetchMovieById(lastMovieId);
+  movie = await Effect.runPromise(getAndParseMovieById(lastMovieId))
+    .then((data) => data)
+    .catch((err) => console.error(err));
 } catch (error) {
-  console.error(error);
+  // console.error(error);
 }
 ---
 

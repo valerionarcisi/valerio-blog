@@ -1,25 +1,25 @@
 import * as S from "@effect/schema/Schema";
 
-const Tags = S.array(S.string);
-export type TTags = S.Schema.Type<typeof Tags>;
+const TagsSchema = S.array(S.string);
+export type TTags = S.Schema.Type<typeof TagsSchema>;
 
-const Image = S.struct({
+const ImageSchema = S.struct({
   id: S.string,
   url: S.string,
   width: S.optional(S.number),
   height: S.optional(S.number),
   filename: S.string
 })
-export type TImage = S.Schema.Type<typeof Image>;
+export type TImage = S.Schema.Type<typeof ImageSchema>;
 
-const Author  = S.struct({
+const AuthorSchema = S.struct({
   name: S.string,
-  picture: Image
+  picture: ImageSchema
 })
-export type TAuthor = S.Schema.Type<typeof Author>;
+export type TAuthor = S.Schema.Type<typeof AuthorSchema>;
 
 
-const Post = S.struct({
+const PostSchema = S.struct({
   id: S.string,
   title: S.string,
   content: S.string,
@@ -29,13 +29,20 @@ const Post = S.struct({
   extract: S.optional(S.string),
   createdAt: S.string,
   tags: S.array(S.string),
-  coverImage: Image,
-  authors: S.array(Author)
+  coverImage: ImageSchema,
+  authors: S.array(AuthorSchema)
 });
-export type TPost = S.Schema.Type<typeof Post>;
+export type TPost = S.Schema.Type<typeof PostSchema>;
 
-const TTrackImageSize = S.union(S.literal('small'), S.literal('medium'), S.literal('large'), S.literal('extralarge'), S.literal('mega'));
-export type TTrackImageSize = S.Schema.Type<typeof TTrackImageSize>;
+const TTrackImageSizeSchema = S.enums({
+  small: 'small',
+  medium: 'medium',
+  large: 'large',
+  extralarge: 'extralarge',
+  mega: 'mega'
+} as const);
+
+export type TTrackImageSize = S.Schema.Type<typeof TTrackImageSizeSchema>;
 
 // export enum TTrackImagSize {
 //   small = 'small',
@@ -45,49 +52,49 @@ export type TTrackImageSize = S.Schema.Type<typeof TTrackImageSize>;
 //   mega = 'mega'
 // }
 
-const TrackImage = S.struct({
-  size: TTrackImageSize,
+const TrackImageSchema = S.struct({
+  size: TTrackImageSizeSchema,
   '#text': S.string
 })
-export type TTrackImage = S.Schema.Type<typeof TrackImage>;
+export type TTrackImage = S.Schema.Type<typeof TrackImageSchema>;
 
-const TrackInfo = S.struct({
+const TrackInfoSchema = S.struct({
   mbid: S.string,
   '#text': S.string
 })
-export type TTrackInfo = S.Schema.Type<typeof TrackInfo>;
+export type TTrackInfo = S.Schema.Type<typeof TrackInfoSchema>;
 
 const Track = S.struct({
-  artist: TrackInfo,
+  artist: TrackInfoSchema,
   streamable: S.string,
-  image: S.array(TrackImage),
+  image: S.array(TrackImageSchema),
   mbid: S.string,
-  album: TrackInfo,
+  album: TrackInfoSchema,
   name: S.string,
   '@attr': S.struct({ nowplaying: S.string }),
   url: S.string
 })
 export type TTrack = S.Schema.Type<typeof Track>;
 
-const Movie = S.struct({
+const MovieSchema = S.struct({
   original_title: S.string,
   overview: S.string,
   link_letterboxd: S.string,
   poster_path: S.string,
   release_date: S.string
 })
-export type TMovie = S.Schema.Type<typeof Movie>;
+export type TMovie = S.Schema.Type<typeof MovieSchema>;
 
-const MovieTmdb =  Movie.pipe(S.omit('link_letterboxd'))
-export type TMovieTmdb = S.Schema.Type<typeof MovieTmdb>
+export const MovieTmdbSchema = MovieSchema.pipe(S.omit('link_letterboxd'))
+export type TMovieTmdb = S.Schema.Type<typeof MovieTmdbSchema>
 
 export type THyGraphResponse<K, T> = {
   data?: Record<K extends string ? K : never, T>;
   error?: Error;
 }
 
-const Page = S.struct({
+const PageSchema = S.struct({
   title: S.string,
   content: S.string
 })
-export type TPage = S.Schema.Type<typeof Page>
+export type TPage = S.Schema.Type<typeof PageSchema>
