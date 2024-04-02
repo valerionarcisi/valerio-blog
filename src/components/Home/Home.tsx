@@ -10,7 +10,7 @@ import { IMAGES_URL } from "../../utils/tmdb";
 type Props = {
   posts: TPost[];
   lastTrack?: TTrack;
-  lastMovie?: TMovieTmdb;
+  lastMovie: TMovieTmdb;
 };
 
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
@@ -52,9 +52,9 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           justifyContent="center">
           {lastMovie && <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: `${IMAGES_URL}/${lastMovie.poster_path}`, alt: lastMovie.original_title }}
+              img={{ src: `${!lastMovie.poster_path ? 'https://iili.io/HlHpqJ4.md.jpg' : `${IMAGES_URL}${lastMovie.poster_path}`}`, alt: lastMovie.original_title }}
               title="Last Watched"
-              label={`${lastMovie.original_title}, ${new Date(lastMovie.release_date).getFullYear()}`}
+              label={`${lastMovie.original_title}, ${lastMovie.release_date && new Date(lastMovie.release_date).getFullYear()}`}
               description={lastMovie.overview}
               link={`https://letterboxd.com/valenar/films/diary/ `}
             />

@@ -5,4 +5,7 @@ export const getJson = (res: Response) => Effect.tryPromise({
     catch: () => "json" as const,
 });
 
-export const getData = (data: Record<string, unknown>) => Effect.sync(() => data.data)
+export const getText = (res: Response) => Effect.tryPromise({
+    try: () => res.text() as Promise<string>,
+    catch: () => "text" as const,
+})

@@ -104,3 +104,22 @@ const PageSchema = S.struct({
   content: S.string
 })
 export type TPage = S.Schema.Type<typeof PageSchema>
+
+
+export const RssSchema = S.struct({
+  rss: S.struct({
+    channel: S.array(
+      S.struct({
+        item: S.array(
+          S.struct({
+            title: S.array(S.string),
+            link: S.array(S.string),
+            description: S.array(S.string),
+            "tmdb:movieId": S.optional(S.array(S.string)),
+          })
+        )
+      }))
+  })
+})
+
+export type TRss = S.Schema.Type<typeof RssSchema>

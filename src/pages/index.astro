@@ -3,10 +3,10 @@ import { parseString } from "xml2js";
 import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
 import type { TPost } from "../models/model";
-import { getAndParseMovieById } from "../utils/tmdb";
 import { fetchHyGraph } from "../utils/hygraph";
 import { Effect } from "effect";
 import { getAndParseRecentTraks } from "../utils/audioscrobbler";
+import { program } from "../utils/letterboxd";
 
 let posts: TPost[] = [];
 
@@ -15,7 +15,9 @@ const music = await Effect.runPromise(getAndParseRecentTraks())
   .then((data) => data.recenttracks.track[0])
   .catch((error) => error);
 
-let movie;
+const movie = await Effect.runPromise(program)
+  .then((data) => data)
+  .catch((error) => error);
 
 try {
   const response = await fetchHyGraph<"posts", TPost[]>(`{
@@ -36,26 +38,6 @@ try {
   `);
 
   posts = response?.data?.posts || [];
-
-  const letterboxdRss = await fetch("https://letterboxd.com/valenar/rss/");
-  const xml = await letterboxdRss.text();
-
-  let lastMovieId = "";
-  parseString(
-    xml,
-    (err: any, result: { rss: { channel: { item: any }[] } }) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      const items = result.rss.channel[0].item;
-      lastMovieId = items[0]["tmdb:movieId"][0];
-    }
-  );
-
-  movie = await Effect.runPromise(getAndParseMovieById(lastMovieId))
-    .then((data) => data)
-    .catch((err) => err);
 } catch (error) {
   // console.error(error);
 }
@@ -70,9 +52,5 @@ try {
     type: "website",
   }}
 >
-  <Home
-    posts={posts}
-    lastTrack={music}
-    lastMovie={movie}
-  />
+  <Home posts={posts} lastTrack={music} lastMovie={movie} />
 </AstroLayout>
