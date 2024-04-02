@@ -1,10 +1,11 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
-import type { TPost } from "../models/model";
 import BlogComponent from "../components/Blog/Blog";
-import { fetchHyGraph } from "../utils/hygraph";
+import { getAndParseHyAllPosts } from "../utils/hygraph";
+import { Effect } from "effect";
 
-const response = await fetchHyGraph<"posts", TPost[]>(`{
+const posts = await Effect.runPromise(
+  getAndParseHyAllPosts(`{
       posts(orderBy: publishedAt_DESC) {
         id,
         title,
@@ -20,9 +21,11 @@ const response = await fetchHyGraph<"posts", TPost[]>(`{
         }
       }
     }
-  `);
+  `)
+)
+  .then((data) => data.data?.posts || [])
+  .catch((error) => error);
 
-const posts: TPost[] = response?.data?.posts || [];
 ---
 
 <AstroLayout

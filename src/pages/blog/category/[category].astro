@@ -2,11 +2,13 @@
 import AstroLayout from "../../../layouts/layout.astro";
 import type { TPost } from "../../../models/model";
 import Blog from "../../../components/Blog/Blog";
-import { fetchHyGraph } from "../../../utils/hygraph";
+import { getAndParseHyAllPosts } from "../../../utils/hygraph";
+import { Effect } from "effect";
 
 const { category } = Astro.params;
 
-const response = await fetchHyGraph<"posts", TPost[]>(`{
+const posts = await Effect.runPromise(
+  getAndParseHyAllPosts(`{
   posts(orderBy: publishedAt_DESC, where: {tags_contains_some: "${category}"}) {
     id
     title
@@ -21,10 +23,11 @@ const response = await fetchHyGraph<"posts", TPost[]>(`{
       fileName
     }
   }
-}
-`);
+}`)
+)
+  .then((data) => data.data?.posts || [])
+  .catch((error) => error);
 
-const posts: TPost[] = response?.data?.posts || [];
 if (posts.length === 0) return Astro.redirect("/404");
 ---
 

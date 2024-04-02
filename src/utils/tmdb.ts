@@ -8,13 +8,6 @@ export const IMAGES_URL = 'https://image.tmdb.org/t/p/w500';
 export const BASE_URL = 'https://api.themoviedb.org/';
 export const VERSION = '3';
 
-export const fetchMovieById = async (id: string): Promise<TMovieTmdb> => {
-    const url = `${BASE_URL}${VERSION}/movie/${id}?api_key=${API_KEY}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    return data
-};
-
 
 export const getMovieById = (id: string) => Effect.tryPromise({
     try: () => fetch(`${BASE_URL}${VERSION}/movie/${id}?api_key=${API_KEY}`),

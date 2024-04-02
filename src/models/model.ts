@@ -4,11 +4,11 @@ const TagsSchema = S.array(S.string);
 export type TTags = S.Schema.Type<typeof TagsSchema>;
 
 const ImageSchema = S.struct({
-  id: S.string,
+  id: S.optional(S.string),
   url: S.string,
   width: S.optional(S.number),
   height: S.optional(S.number),
-  filename: S.string
+  filename: S.optional(S.string)
 })
 export type TImage = S.Schema.Type<typeof ImageSchema>;
 
@@ -32,6 +32,7 @@ const PostSchema = S.struct({
   coverImage: ImageSchema,
   authors: S.array(AuthorSchema)
 });
+
 export type TPost = S.Schema.Type<typeof PostSchema>;
 
 const TTrackImageSizeSchema = S.enums({
@@ -43,14 +44,6 @@ const TTrackImageSizeSchema = S.enums({
 } as const);
 
 export type TTrackImageSize = S.Schema.Type<typeof TTrackImageSizeSchema>;
-
-// export enum TTrackImagSize {
-//   small = 'small',
-//   medium = 'medium',
-//   large = 'large',
-//   extralarge = 'extralarge',
-//   mega = 'mega'
-// }
 
 const TrackImageSchema = S.struct({
   size: TTrackImageSizeSchema,
@@ -93,6 +86,42 @@ export type TMovie = S.Schema.Type<typeof MovieSchema>;
 
 export const MovieTmdbSchema = MovieSchema.pipe(S.omit('link_letterboxd'))
 export type TMovieTmdb = S.Schema.Type<typeof MovieTmdbSchema>
+
+export const HyGraphResponseSchema = S.struct({
+  data: S.record(S.string, S.unknown),
+  error: S.optional(S.string)
+})
+
+export const AbstractPostSchema = S.struct({
+  id: S.string,
+  title: S.string,
+  slug: S.string,
+  publishedAt: S.optional(S.string),
+  extract: S.nullable(S.string),
+  tags: S.optional(S.array(S.string)),
+  coverImage: S.struct({
+    id: S.string,
+    url: S.string,
+    fileName: S.string,
+  }),
+})
+
+
+export const HyGraphPostsSchema = S.struct({
+  ...HyGraphResponseSchema.fields,
+  data: S.optional(
+    S.struct({
+      posts: S.array(AbstractPostSchema),
+    })),
+})
+
+export const HyGraphPostDetailSchema = S.struct({
+  ...HyGraphResponseSchema.fields,
+  data: S.optional(
+    S.struct({
+      post: PostSchema,
+    })),
+})
 
 export type THyGraphResponse<K, T> = {
   data?: Record<K extends string ? K : never, T>;
