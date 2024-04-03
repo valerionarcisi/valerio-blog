@@ -1,10 +1,10 @@
 import type { FC } from "react"
-import type { TPost } from "../../models/model"
 import clsx from "clsx"
 import Box from "../Box/Box"
 import Typography from "../Typography/Typography"
 import Tag from "../Tag/Tag"
 import { transitionImg } from "./Article.css"
+import type { TPost } from "../../services/hygraph"
 
 type Props = {
     post: TPost

@@ -14,7 +14,7 @@ const variantAs: Record<string, ElementType> = {
 
 const Typography: FC<TypographyProps> = ({ variant, children }) => {
   return (
-    <Box as={variantAs[variant || "span"]} className={typographyRecipe({ variant })}>
+    <Box as={variantAs[variant || "span"]} className={typographyRecipe({ variant: variant || "body" })}>
       {children}
     </Box>
   );

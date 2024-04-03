@@ -5,12 +5,12 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { materialDark as codeTheme } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 
-import type { TPost } from "../../models/model";
 import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
 import Tag from "../Tag/Tag";
+import type { TPost } from "../../services/hygraph";
 
 
 type Props = {
