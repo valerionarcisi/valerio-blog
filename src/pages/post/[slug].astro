@@ -1,11 +1,13 @@
 ---
 import AstroLayout from "../../layouts/layout.astro";
 import Post from "../../components/Post/Post";
-import type { TPost } from "../../models/model";
-import { fetchHyGraph } from "../../utils/hygraph";
+import { getAndParsePostDetail } from "../../services/hygraph";
+import { Effect } from "effect";
 
 const { slug } = Astro.params;
-const response = await fetchHyGraph<"post", TPost>(`{
+
+const post = await Effect.runPromise(
+  getAndParsePostDetail(`{
       post(where: {slug: "${slug}"}) {
         title
         id
@@ -29,9 +31,10 @@ const response = await fetchHyGraph<"post", TPost>(`{
         }
       }
     }
-  `);
-
-const post: TPost | null = response?.data?.post || null;
+  `)
+)
+  .then((data) => data.data?.post)
+  .catch((error) => error);
 if (!post) return Astro.redirect("/404");
 ---
 

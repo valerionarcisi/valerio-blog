@@ -1,11 +1,12 @@
+import { Match, ReadonlyArray } from 'effect';
 import type { FC } from "react";
 import Box from "../Box/Box";
-import type { TPost } from "../../models/model";
 import Article from "../Article/Article";
 import BoxedTitle from "../Typography/BoxedTitle";
+import type { TPost } from "../../services/hygraph";
 
 type Props = {
-    posts: TPost[];
+    posts: ReadonlyArray<TPost>;
     title?: string;
 };
 
@@ -50,9 +51,15 @@ const Blog: FC<Props> = ({ posts, title }) => {
                     mobile: "center",
                     desktop: "center"
                 }}>
-                {posts.map((post) => (
-                    <Article key={post.id} post={post} />
-                ))}
+                {
+                    Match.value(posts).pipe(
+                        Match.when(
+                            ReadonlyArray.isNonEmptyReadonlyArray,
+                            (posts) => posts.map((post) => <Article post={post} />),
+                        ),
+                        Match.orElse(() => <Box as="div" width="fullLayout" margin="large" >No posts available</Box>),
+                    )
+                }
             </Box>
         </Box>
     );

@@ -1,16 +1,18 @@
 import type { FC } from "react";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
-import type { TMovieTmdb, TPost, TTrack } from "../../models/model";
 import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
-import { IMAGES_URL } from "../../utils/tmdb";
+import { IMAGES_URL, type TMovieTmdb } from "../../services/tmdb";
+import { Match, ReadonlyArray } from "effect";
+import type { TPost } from "../../services/hygraph";
+import type { TTrack } from "../../services/audioscrobbler";
 
 type Props = {
   posts: TPost[];
   lastTrack?: TTrack;
-  lastMovie?: TMovieTmdb;
+  lastMovie: TMovieTmdb;
 };
 
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
@@ -52,9 +54,9 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           justifyContent="center">
           {lastMovie && <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: `${IMAGES_URL}/${lastMovie.poster_path}`, alt: lastMovie.original_title }}
+              img={{ src: `${!lastMovie.poster_path ? 'https://iili.io/HlHpqJ4.md.jpg' : `${IMAGES_URL}${lastMovie.poster_path}`}`, alt: lastMovie.original_title }}
               title="Last Watched"
-              label={`${lastMovie.original_title}, ${new Date(lastMovie.release_date).getFullYear()}`}
+              label={`${lastMovie.original_title}, ${lastMovie.release_date && new Date(lastMovie.release_date).getFullYear()}`}
               description={lastMovie.overview}
               link={`https://letterboxd.com/valenar/films/diary/ `}
             />
@@ -109,9 +111,15 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </BoxedTitle>
         </Box>
         <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center">
-          {posts.map((post) => (
-            <Article key={post.id} post={post} />
-          ))}
+          {
+            Match.value(posts).pipe(
+              Match.when(
+                ReadonlyArray.isNonEmptyReadonlyArray,
+                (posts) => posts.map((post) => <Article post={post} />),
+              ),
+              Match.orElse(() => <Box as="div" width="fullLayout" margin="large" >Error: Something went wrong</Box>),
+            )
+          }
         </Box>
       </Box>}
     </Box >
