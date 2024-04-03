@@ -33,7 +33,7 @@ const posts = await Effect.runPromise(
     }
   `)
 )
-  .then((data) => data.data?.posts || [])
+  .then((data) => data.data?.posts)
   .catch((error) => error);
 
 ---

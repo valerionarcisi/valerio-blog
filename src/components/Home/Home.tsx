@@ -6,6 +6,7 @@ import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
 import { IMAGES_URL } from "../../services/tmdb";
+import { Match, ReadonlyArray } from "effect";
 
 type Props = {
   posts: TPost[];
@@ -109,9 +110,15 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </BoxedTitle>
         </Box>
         <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center">
-          {posts.map((post) => (
-            <Article key={post.id} post={post} />
-          ))}
+          {
+            Match.value(posts).pipe(
+              Match.when(
+                ReadonlyArray.isNonEmptyReadonlyArray,
+                (posts) => posts.map((post) => <Article post={post} />),
+              ),
+              Match.orElse(() => <Box as="div" width="fullLayout" margin="large" >Error: Something went wrong</Box>),
+            )
+          }
         </Box>
       </Box>}
     </Box >
