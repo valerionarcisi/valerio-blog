@@ -5,7 +5,7 @@ import type { TMovieTmdb, TPost, TTrack } from "../../models/model";
 import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
-import { IMAGES_URL } from "../../utils/tmdb";
+import { IMAGES_URL } from "../../services/tmdb";
 
 type Props = {
   posts: TPost[];

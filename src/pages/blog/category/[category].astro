@@ -1,8 +1,7 @@
 ---
 import AstroLayout from "../../../layouts/layout.astro";
-import type { TPost } from "../../../models/model";
 import Blog from "../../../components/Blog/Blog";
-import { getAndParseHyAllPosts } from "../../../utils/hygraph";
+import { getAndParseHyAllPosts } from "../../../services/hygraph";
 import { Effect } from "effect";
 
 const { category } = Astro.params;

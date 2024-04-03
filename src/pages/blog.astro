@@ -1,7 +1,7 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
 import BlogComponent from "../components/Blog/Blog";
-import { getAndParseHyAllPosts } from "../utils/hygraph";
+import { getAndParseHyAllPosts } from "../services/hygraph";
 import { Effect } from "effect";
 
 const posts = await Effect.runPromise(
