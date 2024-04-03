@@ -1,12 +1,13 @@
 import type { FC } from "react";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
-import type { TMovieTmdb, TPost, TTrack } from "../../models/model";
 import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
-import { IMAGES_URL } from "../../services/tmdb";
+import { IMAGES_URL, type TMovieTmdb } from "../../services/tmdb";
 import { Match, ReadonlyArray } from "effect";
+import type { TPost } from "../../services/hygraph";
+import type { TTrack } from "../../services/audioscrobbler";
 
 type Props = {
   posts: TPost[];
