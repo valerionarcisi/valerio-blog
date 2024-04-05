@@ -2,14 +2,21 @@ import type { FC } from "react";
 import Box from "../Box/Box";
 import Article from "../Article/Article";
 import BoxedTitle from "../Typography/BoxedTitle";
-import type { TPost } from "../../services/hygraph";
+import type { ExitTAbstractPost } from "../../services/hygraph";
+import { Match } from "effect";
 
 type Props = {
-    posts: ReadonlyArray<TPost>;
+    posts: ExitTAbstractPost;
     title?: string;
 };
 
 const Blog: FC<Props> = ({ posts, title }) => {
+
+    const postsMatch = Match.typeTags<ExitTAbstractPost>()({
+        Success: ({ value }) => (value.map((post) => (<Article key={post.id} post={post} />))),
+        Failure: () => (<>Something went wrong</>),
+    })
+
     return (
         <Box as="section" width="extraLarge" margin="auto">
             {title && <Box
@@ -50,9 +57,7 @@ const Blog: FC<Props> = ({ posts, title }) => {
                     mobile: "center",
                     desktop: "center"
                 }}>
-                {posts && posts?.map((post) => (
-                    <Article key={post.id} post={post} />
-                ))}
+                {postsMatch(posts)}
             </Box>
         </Box>
     );

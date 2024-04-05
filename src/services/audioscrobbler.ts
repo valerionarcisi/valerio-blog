@@ -69,3 +69,9 @@ export const getAndParseRecentTraks = (method = "user.getrecenttracks", format =
     Effect.flatMap(getJson),
     Effect.flatMap(decodeUnknownEither(RecentTrackSchema)),
 )
+
+export const getAndParseRecentTrack = () => pipe(
+   getAndParseRecentTraks(),
+   Effect.map(data => data.recenttracks.track[0]),
+   Effect.flatMap(decodeUnknownEither(TrackSchema)), 
+)

@@ -4,10 +4,10 @@ import Box from "../Box/Box"
 import Typography from "../Typography/Typography"
 import Tag from "../Tag/Tag"
 import { transitionImg } from "./Article.css"
-import type { TPost } from "../../services/hygraph"
+import type { TAbstractPost } from "../../services/hygraph"
 
 type Props = {
-    post: TPost
+    post: TAbstractPost
 }
 
 
@@ -16,12 +16,12 @@ const Article: FC<Props> = ({ post }) => {
     const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
     return (
-        <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row" 
-        marginBottom={{
-            mobile: "extraLarge",
-            tablet: "extraLarge",
-            desktop: "extraLarge"
-        }}>
+        <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row"
+            marginBottom={{
+                mobile: "extraLarge",
+                tablet: "extraLarge",
+                desktop: "extraLarge"
+            }}>
             <Box as="div">
                 <a href={`/post/${post.slug}`}>
                     <Box as="img"
@@ -60,7 +60,7 @@ const Article: FC<Props> = ({ post }) => {
                 </Typography>
 
                 <Box as="div" display={"flex"}>
-                    {post.tags.map((tag) => (
+                    {post.tags && post.tags.map((tag) => (
                         <Tag key={tag} label={tag} href={`/blog/category/${tag}`} />
                     ))}
                 </Box>

@@ -1,7 +1,8 @@
 import { Effect, pipe } from "effect";
+import type { Exit } from "effect/Exit";
 import * as S from "@effect/schema/Schema";
 import { getJson } from "../utils/utils";
-import { decodeUnknownEither } from "../utils/decode";
+import { DecodeError, decodeUnknownEither } from "../utils/decode";
 
 const TagsSchema = S.array(S.string);
 export type TTags = S.Schema.Type<typeof TagsSchema>;
@@ -56,21 +57,20 @@ export const AbstractPostSchema = S.struct({
         fileName: S.string,
     }),
 })
+export type TAbstractPost = S.Schema.Type<typeof AbstractPostSchema>
 
 export const HyGraphPostsSchema = S.struct({
     ...HyGraphResponseSchema.fields,
-    data: S.optional(
-        S.struct({
-            posts: S.array(AbstractPostSchema),
-        })),
+    data: S.struct({
+        posts: S.array(AbstractPostSchema),
+    }),
 })
 
 export const HyGraphPostDetailSchema = S.struct({
     ...HyGraphResponseSchema.fields,
-    data: S.optional(
-        S.struct({
-            post: PostSchema,
-        })),
+    data: S.struct({
+        post: PostSchema,
+    }),
 })
 
 export type THyGraphResponse<K, T> = {
@@ -103,16 +103,25 @@ const getHyGraph = (query: string) => Effect.tryPromise({
 })
 
 
-export const getAndParseHyAllPosts = (query: string) => pipe(
+export const getAndParseHyGraph = (query: string) => pipe(
     getHyGraph(query),
     Effect.flatMap(getJson),
     Effect.flatMap(decodeUnknownEither(HyGraphPostsSchema)),
 );
+
+export const getAndParseHyGraphAbstractPost = (query: string) => pipe(
+    getHyGraph(query),
+    Effect.flatMap(getJson),
+    Effect.flatMap(decodeUnknownEither(HyGraphPostsSchema)),
+    Effect.map(data => data.data.posts),
+)
 
 export const getAndParsePostDetail = (query: string) => pipe(
     getHyGraph(query),
     Effect.flatMap(getJson),
     Effect.flatMap(decodeUnknownEither(HyGraphPostDetailSchema)),
 );
+
+export type ExitTAbstractPost = Exit<TAbstractPost[], "json" | DecodeError | "get-hygraph">
 
 export { fetchHyGraph }

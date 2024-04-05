@@ -1,41 +1,33 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
-// import { getAndParseHyAllPosts } from "../services/hygraph";
+import { getAndParseHyGraphAbstractPost } from "../services/hygraph";
+import type { ExitTAbstractPost } from "../services/hygraph";
 import { Effect } from "effect";
-import { getAndParseRecentTraks } from "../services/audioscrobbler";
+import { getAndParseRecentTrack } from "../services/audioscrobbler";
 import { program } from "../services/letterboxd";
 
-const music = await Effect.runPromise(getAndParseRecentTraks())
-  .then((data) => data)
-  .then((data) => data.recenttracks.track[0])
-  .catch((error) => error);
+const music = await Effect.runPromiseExit(getAndParseRecentTrack());
+const movie = await Effect.runPromiseExit(program);
 
-const movie = await Effect.runPromise(program)
-  .then((data) => data)
-  .catch((error) => error);
-
-// const posts = await Effect.runPromise(
-//   getAndParseHyAllPosts(`{
-//       posts(orderBy: publishedAt_DESC, last: 5) {
-//         id,
-//         title,
-//         slug,
-//         publishedAt,
-//         tags,
-//         extract
-//         coverImage {
-//           id,
-//           url,
-//           fileName,
-//         }
-//       }
-//     }
-//   `)
-// )
-//   .then((data) => data.data?.posts)
-//   .catch((error) => error);
-
+const posts = (await Effect.runPromiseExit(
+  getAndParseHyGraphAbstractPost(`{
+      posts(orderBy: publishedAt_DESC, last: 5) {
+        id,
+        title,
+        slug,
+        publishedAt,
+        tags,
+        extract
+        coverImage {
+          id,
+          url,
+          fileName,
+        }
+      }
+    }
+  `)
+)) as ExitTAbstractPost;
 ---
 
 <AstroLayout
@@ -47,5 +39,5 @@ const movie = await Effect.runPromise(program)
     type: "website",
   }}
 >
-  <Home posts={[]} lastTrack={music} lastMovie={movie} />
+  <Home posts={posts} lastTrack={music} lastMovie={movie} />
 </AstroLayout>
