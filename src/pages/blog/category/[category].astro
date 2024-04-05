@@ -1,33 +1,34 @@
 ---
 import AstroLayout from "../../../layouts/layout.astro";
 import Blog from "../../../components/Blog/Blog";
-import { getAndParseHyAllPosts } from "../../../services/hygraph";
-import { Effect } from "effect";
+import {
+  getAndParseHyGraphAbstractPost,
+  type ExitTAbstractPost,
+} from "../../../services/hygraph";
+import { Effect, Exit } from "effect";
 
 const { category } = Astro.params;
-
-const posts = await Effect.runPromise(
-  getAndParseHyAllPosts(`{
+const posts = (await Effect.runPromiseExit(
+  getAndParseHyGraphAbstractPost(`{
   posts(orderBy: publishedAt_DESC, where: {tags_contains_some: "${category}"}) {
-    id
-    title
-    slug
-    publishedAt
-    tags
-    extract
-    createdAt
-    coverImage {
-      id
-      url
-      fileName
+        id,
+        title,
+        slug,
+        publishedAt,
+        tags,
+        extract
+        coverImage {
+          id,
+          url,
+          fileName,
+        }
+      }
     }
-  }
-}`)
-)
-  .then((data) => data.data?.posts || [])
-  .catch((error) => error);
+  `)
+)) as ExitTAbstractPost;
 
-if (posts.length === 0) return Astro.redirect("/404");
+
+if (Exit.isFailure(posts)) return Astro.redirect("/404");
 ---
 
 <AstroLayout

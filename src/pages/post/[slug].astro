@@ -33,8 +33,9 @@ const post = await Effect.runPromise(
     }
   `)
 )
-  .then((data) => data.data?.post)
+  .then((data) => data.data.post)
   .catch((error) => error);
+
 if (!post) return Astro.redirect("/404");
 ---
 

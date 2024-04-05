@@ -1,23 +1,69 @@
 import type { FC } from "react";
+import { Match } from "effect";
+import type { Exit } from "effect/Exit";
 import Box from "../Box/Box";
 import Typography from "../Typography/Typography";
 import BoxedTitle from "../Typography/BoxedTitle";
 import Card from "../Card/Card";
 import Article from "../Article/Article";
 import { IMAGES_URL, type TMovieTmdb } from "../../services/tmdb";
-import type { TPost } from "../../services/hygraph";
 import type { TTrack } from "../../services/audioscrobbler";
+import type { DecodeError } from "../../utils/decode";
+import type { ExitTAbstractPost } from "../../services/hygraph";
+
+type ExitTMovie = Exit<TMovieTmdb, DecodeError | 'json' | "get-letterboxd-rss" | "text" | "parse-xml" | "get-movie-by-id">
+type ExitTTrack = Exit<TTrack, DecodeError | 'json' | 'get-recent-tracks'>
 
 type Props = {
-  posts: TPost[];
-  lastTrack?: TTrack;
-  lastMovie: TMovieTmdb;
+  posts: ExitTAbstractPost;
+  lastTrack: ExitTTrack;
+  lastMovie: ExitTMovie;
 };
 
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
 
-  const foundImage = lastTrack?.image?.find((image) => image.size === "extralarge");
-  const imgSrc = foundImage ? foundImage["#text"] : 'https://iili.io/HlHpqJ4.md.jpg';
+  const musicMatch = Match.typeTags<ExitTTrack>()({
+    Success: ({ value }) => (<Card
+      img={
+        {
+          src: value.image?.find((image) => image.size === "extralarge")?.["#text"] ?? 'https://iili.io/HlHpqJ4.md.jpg',
+          alt: `${value.album["#text"]} Cover`
+        }
+      }
+      title="Last played"
+      label={value.name}
+      description={`${value.artist["#text"]} - ${value.album["#text"]}`}
+    />),
+    Failure: () => (<Card
+      img={{ src: 'https://iili.io/HlHpqJ4.md.jpg', alt: `Not Found Cover` }}
+      title="Last played"
+      label="Missing track"
+      description="No track played yet"
+    />)
+  });
+
+
+  const movieMatch = Match.typeTags<ExitTMovie>()({
+    Success: ({ value }) => (<Card
+      img={{ src: `${!value.poster_path ? 'https://iili.io/HlHpqJ4.md.jpg' : `${IMAGES_URL}${value.poster_path}`}`, alt: value.original_title }}
+      title="Last Watched"
+      label={`${value.original_title}, ${value.release_date && new Date(value.release_date).getFullYear()}`}
+      description={value.overview}
+      link={`https://letterboxd.com/valenar/films/diary/ `}
+    />),
+    Failure: () => (<Card
+      img={{ src: 'https://iili.io/HlHpqJ4.md.jpg', alt: `Not Found Cover` }}
+      title="Last played"
+      label="Missing track"
+      description="No track played yet"
+    />)
+  });
+
+  const postsMatch = Match.typeTags<ExitTAbstractPost>()({
+    Success: ({ value }) => (value.map((post) => (<Article key={post.id} post={post} />))),
+    Failure: () => (<>Something went wrong</>),
+  })
+
 
   return (
     <Box as="div" display="flex" flexDirection="column" width="fullLayout">
@@ -51,27 +97,16 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
             desktop: "row"
           }}
           justifyContent="center">
-          {lastMovie && <Box as="div" width="medium" paddingX={"large"}>
-            <Card
-              img={{ src: `${!lastMovie.poster_path ? 'https://iili.io/HlHpqJ4.md.jpg' : `${IMAGES_URL}${lastMovie.poster_path}`}`, alt: lastMovie.original_title }}
-              title="Last Watched"
-              label={`${lastMovie.original_title}, ${lastMovie.release_date && new Date(lastMovie.release_date).getFullYear()}`}
-              description={lastMovie.overview}
-              link={`https://letterboxd.com/valenar/films/diary/ `}
-            />
-          </Box>}
-          {lastTrack && <Box as="div" width="medium" paddingX={"large"}>
-            <Card
-              img={{ src: imgSrc, alt: `${lastTrack.album["#text"]} Cover` }}
-              title="Last played"
-              label={lastTrack.name}
-              description={`${lastTrack.artist["#text"]} - ${lastTrack.album["#text"]}`}
-            />
-          </Box>}
+          <Box as="div" width="medium" paddingX={"large"}>
+            {movieMatch(lastMovie)}
+          </Box>
+          <Box as="div" width="medium" paddingX={"large"}>
+            {musicMatch(lastTrack)}
+          </Box>
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
               img={{ src: "https://www.einaudi.it/content/uploads/2023/09/978880625958HIG.JPG", alt: "Stella Maris Cover" }}
-              title="Currently reading"
+              title="on reading"
               label="Stella Maris"
               description="Cormarc McCharty (2022)"
             />
@@ -79,7 +114,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
         </Box>
       </Box>
       <Box as="hr" marginY="extraLarge" width="fullLayout" />
-      {posts.length > 0 && <Box as="section" width="extraLarge" margin="auto">
+      <Box as="section" width="extraLarge" margin="auto">
         <Box
           as="div"
           display={{
@@ -110,11 +145,9 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </BoxedTitle>
         </Box>
         <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center">
-          {posts && posts?.map((post) => (
-            <Article key={post.id} post={post} />
-          ))}
+          {postsMatch(posts)}
         </Box>
-      </Box>}
+      </Box>
     </Box >
   );
 };

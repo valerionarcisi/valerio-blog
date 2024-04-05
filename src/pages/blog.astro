@@ -1,11 +1,11 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
 import BlogComponent from "../components/Blog/Blog";
-import { getAndParseHyAllPosts } from "../services/hygraph";
+import { getAndParseHyGraphAbstractPost, type ExitTAbstractPost } from "../services/hygraph";
 import { Effect } from "effect";
 
-const posts = await Effect.runPromise(
-  getAndParseHyAllPosts(`{
+const posts = (await Effect.runPromiseExit(
+  getAndParseHyGraphAbstractPost(`{
       posts(orderBy: publishedAt_DESC) {
         id,
         title,
@@ -22,9 +22,7 @@ const posts = await Effect.runPromise(
       }
     }
   `)
-)
-  .then((data) => data.data?.posts || [])
-  .catch((error) => error);
+)) as ExitTAbstractPost;
 ---
 
 <AstroLayout
