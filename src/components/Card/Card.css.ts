@@ -25,9 +25,6 @@ const cardStyle = valerioSprinkles({
         tablet: "noRepeat",
         desktop: "noRepeat",
     },
-    paddingTop:{
-        desktop: "large"
-    },
 });
 
 
