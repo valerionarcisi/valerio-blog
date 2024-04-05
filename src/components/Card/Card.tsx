@@ -44,24 +44,26 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
             <Box as="div" marginBottom="large" />
             {link &&
                 <Box as="a" target="_blank" href={link} >
-                    <Box as="div" className={
+                    <Box as="img" className={
                         clsx({
                             [cardStyle]: true,
                             [transitionImg]: !!link
                         })
                     }
-                        style={{ backgroundImage: `url(${src})` }}
+                        src={src}
+                        alt="{alt}"
                     />
                 </Box>
             }
             {!link &&
-                <Box as="div" className={
+                <Box as="img" className={
                     clsx({
                         [cardStyle]: true,
                         [transitionImg]: !!link
                     })
                 }
-                    style={{ backgroundImage: `url(${src})` }}
+                    src={src}
+                    alt="{alt}"
                 />
             }
             <Box as="div" marginBottom="large" />

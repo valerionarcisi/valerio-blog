@@ -13,8 +13,8 @@ const cardStyle = valerioSprinkles({
         desktop: 320,
     },
     height: {
-        mobile: 300,
-        tablet: 300,
+        mobile: 420,
+        tablet: 420,
         desktop: 420,
     },
     backgroundPosition: "center",
@@ -26,8 +26,6 @@ const cardStyle = valerioSprinkles({
         desktop: "noRepeat",
     },
     paddingTop:{
-        mobile: "large",
-        tablet: "large",
         desktop: "large"
     },
 });
