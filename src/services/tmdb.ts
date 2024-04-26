@@ -8,12 +8,12 @@ export const IMAGES_URL = 'https://image.tmdb.org/t/p/w500';
 export const BASE_URL = 'https://api.themoviedb.org/';
 export const VERSION = '3';
 
-const MovieSchema = S.struct({
-    original_title: S.string,
-    overview: S.string,
-    link_letterboxd: S.string,
-    poster_path: S.string,
-    release_date: S.string
+const MovieSchema = S.Struct({
+    original_title: S.String,
+    overview: S.String,
+    link_letterboxd: S.String,
+    poster_path: S.String,
+    release_date: S.String
 })
 export type TMovie = S.Schema.Type<typeof MovieSchema>;
 

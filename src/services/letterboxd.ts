@@ -6,16 +6,16 @@ import { decodeUnknownEither } from "../utils/decode";
 import { getAndParseMovieById } from "./tmdb";
 
 
-export const RssSchema = S.struct({
-    rss: S.struct({
-        channel: S.array(
-            S.struct({
-                item: S.array(
-                    S.struct({
-                        title: S.array(S.string),
-                        link: S.array(S.string),
-                        description: S.array(S.string),
-                        "tmdb:movieId": S.optional(S.array(S.string)),
+export const RssSchema = S.Struct({
+    rss: S.Struct({
+        channel: S.Array(
+            S.Struct({
+                item: S.Array(
+                    S.Struct({
+                        title: S.Array(S.String),
+                        link: S.Array(S.String),
+                        description: S.Array(S.String),
+                        "tmdb:movieId": S.optional(S.Array(S.String)),
                     })
                 )
             }))
@@ -53,7 +53,7 @@ export const getLetterboxdRss = () => Effect.tryPromise({
 export const getAndParseLetterboxdRss = () => pipe(
     getLetterboxdRss(),
     Effect.flatMap(getText),
-    Effect.flatMap(decodeUnknownEither(S.string)),
+    Effect.flatMap(decodeUnknownEither(S.String)),
 )
 
 export const program = Effect.gen(function* (_) {

@@ -7,7 +7,7 @@ export const AUDIO_SCROBBLER_API_KEY = "35dcb09bbc9c0e8bee54210bace4ba66";
 export const AUDIO_SCROBBLER_USER = "valerionar";
 export const AUDIO_SCROBBLER_VERSION = '2.0';
 
-const TTrackImageSizeSchema = S.enums({
+const TTrackImageSizeSchema = S.Enums({
     small: 'small',
     medium: 'medium',
     large: 'large',
@@ -17,32 +17,32 @@ const TTrackImageSizeSchema = S.enums({
 
 export type TTrackImageSize = S.Schema.Type<typeof TTrackImageSizeSchema>;
 
-const TrackImageSchema = S.struct({
+const TrackImageSchema = S.Struct({
     size: TTrackImageSizeSchema,
-    '#text': S.string
+    '#text': S.String
 })
 export type TTrackImage = S.Schema.Type<typeof TrackImageSchema>;
 
-const TrackInfoSchema = S.struct({
-    mbid: S.string,
-    '#text': S.string
+const TrackInfoSchema = S.Struct({
+    mbid: S.String,
+    '#text': S.String
 })
 export type TTrackInfo = S.Schema.Type<typeof TrackInfoSchema>;
 
-export const TrackSchema = S.struct({
+export const TrackSchema = S.Struct({
     artist: TrackInfoSchema,
-    streamable: S.string,
-    image: S.array(TrackImageSchema),
-    mbid: S.string,
+    streamable: S.String,
+    image: S.Array(TrackImageSchema),
+    mbid: S.String,
     album: TrackInfoSchema,
-    name: S.string,
-    url: S.string
+    name: S.String,
+    url: S.Number
 })
 export type TTrack = S.Schema.Type<typeof TrackSchema>;
 
-export const RecentTrackSchema = S.struct({
-    recenttracks: S.struct({
-        track: S.array(TrackSchema)
+export const RecentTrackSchema = S.Struct({
+    recenttracks: S.Struct({
+        track: S.Array(TrackSchema)
     })
 })
 
