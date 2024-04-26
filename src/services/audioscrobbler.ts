@@ -36,7 +36,7 @@ export const TrackSchema = S.Struct({
     mbid: S.String,
     album: TrackInfoSchema,
     name: S.String,
-    url: S.Number
+    url: S.String
 })
 export type TTrack = S.Schema.Type<typeof TrackSchema>;
 
