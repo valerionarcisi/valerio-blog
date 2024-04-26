@@ -105,10 +105,10 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </Box>
           <Box as="div" width="medium" paddingX={"large"}>
             <Card
-              img={{ src: "https://www.einaudi.it/content/uploads/2023/09/978880625958HIG.JPG", alt: "Stella Maris Cover" }}
+              img={{ src: "https://www.ibs.it/images/9788806235017_0_536_0_75.jpg", alt: "4 3 2 1 Cover" }}
               title="on reading"
-              label="Stella Maris"
-              description="Cormarc McCharty (2022)"
+              label="4 3 2 1"
+              description="Paul Auster (2017)"
             />
           </Box>
         </Box>
