@@ -56,7 +56,6 @@ const Article: FC<Props> = ({ post }) => {
                 </Box>
                 {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
                 <Typography variant="small"><Box as="i"> {post.extract} </Box>
-                    <Box as="a" href={`/post/${post.slug}`}>Read more</Box>
                 </Typography>
 
                 <Box as="div" display={"flex"}>
