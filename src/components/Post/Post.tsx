@@ -20,7 +20,6 @@ type Props = {
 const Post: FC<Props> = ({ post }) => {
 
   const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
-
   return (
     <Box as="article" display="flex" flexDirection="column">
       <Box as="div" textAlign={"center"}>
@@ -29,13 +28,13 @@ const Post: FC<Props> = ({ post }) => {
         </Typography>
       </Box>
       <Cover
-        img={{ src: `${post.coverImage.url}`, alt: `${post.title}` }}
+        img={{ src: `${post.coverImage?.url}`, alt: `${post.title}` }}
       />
       <Box as="div">
         <Box as="div" width="large" margin="auto">
           {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
           <Box as="div" display={"flex"}>
-            {post.tags.map((tag) => (
+            {post?.tags?.map((tag) => (
               <Tag key={tag} label={tag} href={`/blog/category/${tag}`} />
             ))}
           </Box>
