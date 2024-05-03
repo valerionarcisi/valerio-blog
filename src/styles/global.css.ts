@@ -61,6 +61,7 @@ globalStyle(
     textDecoration: vars.textDecoration.underline,
     textDecorationColor: vars.color.tertiary,
     transition: `color ${vars.transition.fast}`,
+    wordWrap: 'break-word',
   }
 )
 globalStyle(
