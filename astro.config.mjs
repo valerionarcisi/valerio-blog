@@ -12,6 +12,21 @@ export default defineConfig({
   prefetch: true,
   output: "server",
   adapter: netlify(),
+  image: {
+    remotePatterns: [{
+      protocol: 'https',
+      hostname: 'media.graphassets.com',
+    },
+    {
+      protocol: 'https',
+      hostname: 'image.tmdb.org',
+    },
+    {
+      protocol: 'https',
+      hostname: 'lastfm.freetls.fastly.net',
+    }
+    ]
+  },
   vite: {
     plugins: [vanillaExtractPlugin()]
   }
