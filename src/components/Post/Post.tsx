@@ -27,9 +27,11 @@ const Post: FC<Props> = ({ post }) => {
           {post.title}
         </Typography>
       </Box>
-      <Cover
-        img={{ src: `${post.coverImage?.url}`, alt: `${post.title}` }}
-      />
+      <Box as="div" margin="auto">
+        <Cover
+          img={{ src: `${post.coverImage?.url}`, alt: `${post.title}` }}
+        />
+      </Box>
       <Box as="div">
         <Box as="div" width="large" margin="auto">
           {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}

@@ -38,6 +38,7 @@ const post = await Effect.runPromise(
   .catch((error) => error);
 
 if (!post) return Astro.redirect("/404");
+
 ---
 
 <AstroLayout

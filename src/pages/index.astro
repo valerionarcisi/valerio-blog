@@ -4,7 +4,7 @@ import AstroLayout from "../layouts/layout.astro";
 import Home from "../components/Home/Home";
 import { getAndParseHyGraphAbstractPost } from "../services/hygraph";
 import type { ExitTAbstractPost } from "../services/hygraph";
-import { Effect } from "effect";
+import { Effect, Match } from "effect";
 import { getAndParseRecentTrack } from "../services/audioscrobbler";
 import { program } from "../services/letterboxd";
 
@@ -30,6 +30,18 @@ const posts = (await Effect.runPromiseExit(
   `)
 )) as ExitTAbstractPost;
 
+const postMatch = Match.typeTags<ExitTAbstractPost>()({
+  Success: ({ value }) => (value.map((post) => ({
+    params: { slug: post.slug },
+  }))),
+  Failure: () => ({
+    params: { slug: "404" },
+  }),
+});
+
+export const getStaticPaths = () => {
+  return postMatch(posts);
+}
 ---
 
 <AstroLayout
