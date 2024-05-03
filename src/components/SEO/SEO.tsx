@@ -1,13 +1,14 @@
 import type { FC } from 'react';
 
-type Props = {
+export type SeoProps = {
     title: string;
     description: string;
     name: string;
     type: string;
+    image?: string;
 }
 
-const SEO: FC<Props> = ({ title, description, name, type }) => {
+const SEO: FC<SeoProps> = ({ title, description, name, image, type }) => {
     
     return (
         <>
@@ -21,14 +22,16 @@ const SEO: FC<Props> = ({ title, description, name, type }) => {
             { /* End standard metadata tags */}
             { /* Facebook tags */}
             <meta property="og:type" content={type} />
-            <meta property="og:title" content={title} />
+            <meta property="og:title" content={title.length > 60 ? `${title.substring(0, 60)}...` : title} />
             <meta property="og:description" content={description} />
+            <meta property="og:image" content={image ?? ""} />
             { /* End Facebook tags */}
             { /* Twitter tags */}
             <meta name="twitter:creator" content={name} />
             <meta name="twitter:card" content={type} />
-            <meta name="twitter:title" content={title} />
-            <meta name="twitter:description" content={description} />
+            <meta name="twitter:title" content={title.length > 70 ? `${title.substring(0, 70)}...` : title} />
+            <meta name="twitter:description" content={description.length > 200 ? `${description.substring(0, 200)}...` : description} />
+            <meta name="twitter:image" content={image ?? ""} />
             { /* End Twitter tags */}
         </>
     )

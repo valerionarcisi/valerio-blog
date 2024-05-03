@@ -13,22 +13,16 @@ import { defaultTheme } from "../../styles/defaultTheme.css";
 import Box from "../Box/Box";
 import MenuLink from "../MenuLink/MenuLink";
 import Typography from "../Typography/Typography";
-import { SEO } from "../SEO/SEO";
+import { SEO, type SeoProps } from "../SEO/SEO";
 import type React from "react";
 
 type Props = {
   children: React.ReactNode;
-  seo?: {
-    title?: string;
-    description?: string;
-    name?: string;
-    type?: string;
-  };
+  seo?: SeoProps;
   pathname?: string;
 };
 
 const Layout: FC<Props> = ({ children, pathname, seo }) => {
-
   const currentYear = new Date().getFullYear();
 
   return (
@@ -38,6 +32,7 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
         description={seo?.description || "Valerio Narcisi - Web Developer, Director and Screenwriter"}
         name={seo?.name || "Valerio Narcisi"}
         type={seo?.type || "website"}
+        image={seo?.image || "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
       />
       <Box as="body">
         <Box as="header" className={clsx(headerStyle)}>

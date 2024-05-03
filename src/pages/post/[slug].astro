@@ -38,13 +38,14 @@ const post = await Effect.runPromise(
   .catch((error) => error);
 
 if (!post) return Astro.redirect("/404");
-console.log(post);
 ---
 
 <AstroLayout
   seo={{
     title: `${post.title} | Valerio Narcisi Blog`,
     description: post.extract ? post.extract : "",
+    image: post.coverImage?.url,
+    type: "article",
   }}
 >
   <Post post={post} />
