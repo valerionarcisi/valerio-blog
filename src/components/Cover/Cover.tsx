@@ -10,10 +10,16 @@ type TCover = {
   };
 };
 
-const Cover: FC<TCover> = ({img: { src, alt } }) => {
+const Cover: FC<TCover> = ({ img: { src, alt } }) => {
   return (
     <Box as="div">
-      {src && <Box as="img" src={src} alt={alt} className={clsx(imgStyle)} />}
+      {src && <Box 
+      as="img" 
+      width="extraLarge"
+      src={src} 
+      alt={alt} 
+      className={clsx(imgStyle)} 
+      />}
     </Box>
   );
 };

@@ -44,7 +44,8 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
             <Box as="div" marginBottom="large" />
             {link &&
                 <Box as="a" target="_blank" href={link} >
-                    <Box as="img" className={
+                    <Box as="img"
+                    className={
                         clsx({
                             [cardStyle]: true,
                             [transitionImg]: !!link

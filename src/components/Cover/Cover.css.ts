@@ -3,11 +3,6 @@ import { valerioSprinkles } from "../../styles/sprinkles.css";
 
 
 const imgStyle = valerioSprinkles({
-  width: {
-    mobile: "extraLarge",
-    desktop: "extraLarge",
-    tablet: "extraLarge",
-  },
   borderRadius: {
     mobile: "large",
     desktop: "large",
