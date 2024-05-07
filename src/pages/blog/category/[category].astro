@@ -2,33 +2,20 @@
 import AstroLayout from "../../../layouts/layout.astro";
 import Blog from "../../../components/Blog/Blog";
 import {
-  getAndParseHyGraphAbstractPost,
+  getAndParseHyGraphAbstractPostByCategory,
   type ExitTAbstractPost,
 } from "../../../services/hygraph";
 import { Effect, Exit } from "effect";
 
 const { category } = Astro.params;
+if (!category) return Astro.redirect("/404");
+
 const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPost(`{
-  posts(orderBy: publishedAt_DESC, where: {tags_contains_some: "${category}"}) {
-        id,
-        title,
-        slug,
-        publishedAt,
-        tags,
-        extract
-        coverImage {
-          id,
-          url,
-          fileName,
-        }
-      }
-    }
-  `)
+  getAndParseHyGraphAbstractPostByCategory(category)
 )) as ExitTAbstractPost;
 
-
 if (Exit.isFailure(posts)) return Astro.redirect("/404");
+
 ---
 
 <AstroLayout

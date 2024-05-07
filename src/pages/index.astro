@@ -11,22 +11,7 @@ const music = await Effect.runPromiseExit(getAndParseRecentTrack());
 const movie = await Effect.runPromiseExit(program);
 
 const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPost(`{
-      posts(orderBy: publishedAt_DESC, last: 5) {
-        id,
-        title,
-        slug,
-        publishedAt,
-        tags,
-        extract
-        coverImage {
-          id,
-          url,
-          fileName,
-        }
-      }
-    }
-  `)
+  getAndParseHyGraphAbstractPost(5)
 )) as ExitTAbstractPost;
 
 ---

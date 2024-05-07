@@ -12,66 +12,29 @@ import { Effect, Match } from "effect";
 export const prerender = true; // This line tells Astro to prerender the page
 export const getStaticPaths = async () => {
   const posts = (await Effect.runPromiseExit(
-    getAndParseHyGraphAbstractPost(`{
-      posts(orderBy: publishedAt_DESC) {
-        id,
-        title,
-        slug,
-        publishedAt,
-        tags,
-        extract
-        createdAt
-        coverImage {
-          id,
-          url,
-          fileName,
-        }
-      }
-    }
-  `)
+    getAndParseHyGraphAbstractPost()
   )) as ExitTAbstractPost;
 
   const postMatch = Match.typeTags<ExitTAbstractPost>()({
-    Success: ({ value }) =>
-      value.map((post) => ({
+    Success: ({ value }) => [
+      ...value.map((post) => ({
         params: { slug: post.slug },
       })),
+      { params: { slug: "404" } },
+    ],
     Failure: () => ({
       params: { slug: "404" },
     }),
   });
+
+
   return postMatch(posts);
 };
 
 const { slug } = Astro.params;
 
 const post = (await Effect.runPromiseExit(
-  getAndParsePostDetail(`{
-      post(where: {slug: "${slug}"}) {
-        title
-        id
-        slug
-        publishedAt
-        content
-        date
-        tags
-        extract
-        authors {
-          name
-          picture {
-            url
-            fileName
-          }
-        }
-        coverImage {
-          fileName
-          url
-          height
-          width
-        }
-      }
-    }
-  `)
+  getAndParsePostDetail(slug)
 )) as ExitTPost;
 
 const postMatch = Match.typeTags<ExitTPost>()({
@@ -81,7 +44,6 @@ const postMatch = Match.typeTags<ExitTPost>()({
 
 const postDetail = postMatch(post);
 if (!postDetail) return Astro.redirect("/404");
-
 ---
 
 <AstroLayout

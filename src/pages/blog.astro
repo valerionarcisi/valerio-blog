@@ -8,23 +8,7 @@ import {
 import { Effect } from "effect";
 
 const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPost(`{
-      posts(orderBy: publishedAt_DESC) {
-        id,
-        title,
-        slug,
-        publishedAt,
-        tags,
-        extract
-        createdAt
-        coverImage {
-          id,
-          url,
-          fileName,
-        }
-      }
-    }
-  `)
+  getAndParseHyGraphAbstractPost()
 )) as ExitTAbstractPost;
 
 ---
