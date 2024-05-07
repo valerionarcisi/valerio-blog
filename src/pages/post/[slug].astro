@@ -1,12 +1,51 @@
 ---
 import AstroLayout from "../../layouts/layout.astro";
 import Post from "../../components/Post/Post";
-import { getAndParsePostDetail } from "../../services/hygraph";
-import { Effect } from "effect";
+import {
+  getAndParseHyGraphAbstractPost,
+  getAndParsePostDetail,
+  type ExitTAbstractPost,
+  type ExitTPost,
+} from "../../services/hygraph";
+import { Effect, Match } from "effect";
+
+export const prerender = true; // This line tells Astro to prerender the page
+export const getStaticPaths = async () => {
+  const posts = (await Effect.runPromiseExit(
+    getAndParseHyGraphAbstractPost(`{
+      posts(orderBy: publishedAt_DESC) {
+        id,
+        title,
+        slug,
+        publishedAt,
+        tags,
+        extract
+        createdAt
+        coverImage {
+          id,
+          url,
+          fileName,
+        }
+      }
+    }
+  `)
+  )) as ExitTAbstractPost;
+
+  const postMatch = Match.typeTags<ExitTAbstractPost>()({
+    Success: ({ value }) =>
+      value.map((post) => ({
+        params: { slug: post.slug },
+      })),
+    Failure: () => ({
+      params: { slug: "404" },
+    }),
+  });
+  return postMatch(posts);
+};
 
 const { slug } = Astro.params;
 
-const post = await Effect.runPromise(
+const post = (await Effect.runPromiseExit(
   getAndParsePostDetail(`{
       post(where: {slug: "${slug}"}) {
         title
@@ -33,21 +72,25 @@ const post = await Effect.runPromise(
       }
     }
   `)
-)
-  .then((data) => data.data.post)
-  .catch((error) => error);
+)) as ExitTPost;
 
-if (!post) return Astro.redirect("/404");
+const postMatch = Match.typeTags<ExitTPost>()({
+  Success: ({ value }) => value,
+  Failure: () => undefined,
+});
+
+const postDetail = postMatch(post);
+if (!postDetail) return Astro.redirect("/404");
 
 ---
 
 <AstroLayout
   seo={{
-    title: `${post.title} | Valerio Narcisi Blog`,
-    description: post.extract ? post.extract : "",
-    image: post.coverImage?.url,
+    title: `${postDetail.title} | Valerio Narcisi Blog`,
+    description: postDetail.extract ? postDetail.extract : "",
+    image: postDetail.coverImage?.url,
     type: "article",
   }}
 >
-  <Post post={post} />
+  <Post post={postDetail} />
 </AstroLayout>

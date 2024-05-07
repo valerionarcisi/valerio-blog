@@ -120,8 +120,10 @@ export const getAndParsePostDetail = (query: string) => pipe(
     getHyGraph(query),
     Effect.flatMap(getJson),
     Effect.flatMap(decodeUnknownEither(HyGraphPostDetailSchema)),
+    Effect.map(data => data.data.post),
 );
 
 export type ExitTAbstractPost = Exit<TAbstractPost[], "json" | "get-hygraph">
+export type ExitTPost = Exit<TPost, "json" | "get-hygraph">
 
 export { fetchHyGraph }

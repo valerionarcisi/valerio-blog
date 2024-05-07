@@ -5,7 +5,7 @@ import {
   getAndParseHyGraphAbstractPost,
   type ExitTAbstractPost,
 } from "../services/hygraph";
-import { Effect, Match } from "effect";
+import { Effect } from "effect";
 
 const posts = (await Effect.runPromiseExit(
   getAndParseHyGraphAbstractPost(`{
@@ -27,19 +27,6 @@ const posts = (await Effect.runPromiseExit(
   `)
 )) as ExitTAbstractPost;
 
-const postMatch = Match.typeTags<ExitTAbstractPost>()({
-  Success: ({ value }) =>
-    value.map((post) => ({
-      params: { slug: post.slug },
-    })),
-  Failure: () => ({
-    params: { slug: "404" },
-  }),
-});
-
-export const getStaticPaths = () => {
-  return postMatch(posts);
-};
 ---
 
 <AstroLayout
