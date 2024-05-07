@@ -102,7 +102,7 @@ const Layout: FC<Props> = ({ children, pathname, seo }) => {
               <Typography variant="description">
                 <h3>This website is made from <a target="_blank" href="https://maps.app.goo.gl/U4QDSCMwis5KvoaY8">"Le Marche Zozze"</a> by me.<br /> Copyright {currentYear}</h3>
                 <Typography variant="small">
-                  This site uses no tracking or cookies, other than privacy-respecting, GDPR-compliant analytics via Netflify Analytics.
+                  This site uses no tracking or cookies, other than privacy-respecting, GDPR-compliant analytics via <a target="_blank" href="https://plausible.io/">Plausible</a>.
                 </Typography>
               </Typography>
               <Box marginTop="large" />
