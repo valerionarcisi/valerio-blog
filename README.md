@@ -1,13 +1,18 @@
-# Astro + React Example
+# Valerio Blog: Astro, React, Vanilla-Extract and Effect-TS
 
-```sh
-npm create astro@latest -- --template framework-react
-```
+This is a website built with the following technologies:
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/framework-react)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/framework-react)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/framework-react/devcontainer.json)
+- [React](https://reactjs.org/): A JavaScript library for building user interfaces.
+- [Astro](https://astro.build/): A static site builder for modern JavaScript frameworks.
+- [Vanilla Extract](https://github.com/vanilla-extract-css/vanilla-extract): A zero-runtime CSS-in-JS solution.
+- [TypeScript](https://www.typescriptlang.org/): A typed superset of JavaScript that compiles to plain JavaScript.
+- [Effect-TS](https://github.com/Effect-TS): A set of libraries to write better TypeScript
 
-This example showcases Astro working with [React](https://react.dev).
+## Getting Started
 
-Write your React components as `.jsx` or `.tsx` files in your project.
+To get started with this project, follow these steps:
+
+1. Clone the repository.
+2. Navigate to the project directory.
+3. Install the dependencies by running `npm install` or `yarn install`.
+4. Start the development server by running `npm run dev` or `yarn dev`.
