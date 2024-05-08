@@ -18,7 +18,7 @@ interface Props {
 }
 
 const { pathname } = Astro.url;
-const { seo: seoData } = Astro.props;
+const { seo } = Astro.props;
 ---
 
 <html lang="en" class={clsx(defaultTheme)}>
@@ -29,12 +29,12 @@ const { seo: seoData } = Astro.props;
       data-domain="valerionarcisi.me"
       src="https://plausible.io/js/script.js"></script>
     <SEO
-      title={seoData?.title || "Valerio Narcisi"}
-      description={seoData?.description ||
+      title={seo?.title || "Valerio Narcisi"}
+      description={seo?.description ||
         "Valerio Narcisi - Web Developer, Director and Screenwriter"}
-      name={seoData?.name || "Valerio Narcisi"}
-      type={seoData?.type || "website"}
-      image={seoData?.image ||
+      name={seo?.name || "Valerio Narcisi"}
+      type={seo?.type || "website"}
+      image={seo?.image ||
         "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
     />
     <ViewTransitions />
