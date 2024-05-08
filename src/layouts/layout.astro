@@ -29,7 +29,6 @@ const currentYear = new Date().getFullYear();
       defer
       data-domain="valerionarcisi.me"
       src="https://plausible.io/js/script.js"></script>
-    <ViewTransitions />
     <SEO
       title={seoData?.title || "Valerio Narcisi"}
       description={seoData?.description ||
@@ -39,6 +38,7 @@ const currentYear = new Date().getFullYear();
       image={seoData?.image ||
         "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
     />
+    <ViewTransitions />
   </head>
   <Box as="body">
     <Box as="header" className={clsx(headerStyle)}>
