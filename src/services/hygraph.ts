@@ -189,16 +189,27 @@ export const getAndParsePostDetail = (slug: string) => pipe(
 export type ExitTAbstractPost = Exit<TAbstractPost[], "json" | "get-hygraph">
 export type ExitTPost = Exit<TPost, "json" | "get-hygraph">
 
-export const getAndParseAllTags = () => pipe(
+
+export const HyGraphTagScema = S.Struct({
+  data: S.Struct({
+    posts: S.Array(
+     S.Struct({
+       tags: S.Array(S.String),
+     }) 
+    ),
+  }),
+})
+export const getAllStaticPathsTags = () => pipe(
   getHyGraph(`{
     posts {
       tags
     }
   }`),
   Effect.flatMap(getJson),
-  Effect.flatMap(decodeUnknownEither(HyGraphPostsSchema)),
+  Effect.flatMap(decodeUnknownEither(HyGraphTagScema)),
   Effect.map(data => [...new Set(data.data.posts.map(post => post.tags?.flatMap(tag => tag)))]),
   Effect.map(data => data.flat().filter(Boolean) as string[]),
+  Effect.map(data => data.map(tag => ({ params: { category: tag } }))),
 )
 
 export type ExitTAllTags = Exit<String[], "json" | "get-hygraph">

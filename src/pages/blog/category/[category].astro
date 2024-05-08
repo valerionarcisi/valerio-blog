@@ -3,6 +3,7 @@ import AstroLayout from "../../../layouts/layout.astro";
 import Blog from "../../../components/Blog/Blog";
 import {
   getAndParseHyGraphAbstractPostByCategory,
+  getAllStaticPathsTags,
   type ExitTAbstractPost,
 } from "../../../services/hygraph";
 import { Effect, Exit } from "effect";
@@ -16,6 +17,12 @@ const posts = (await Effect.runPromiseExit(
 
 if (Exit.isFailure(posts)) return Astro.redirect("/404");
 
+export const prerender = true;
+export const getStaticPaths = async () => {
+  const routes = await Effect.runPromiseExit(getAllStaticPathsTags());
+  if (Exit.isFailure(routes)) return [];
+  return routes.value;
+};
 ---
 
 <AstroLayout
