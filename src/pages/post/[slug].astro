@@ -9,6 +9,9 @@ import {
 } from "../../services/hygraph";
 import { Effect, Match } from "effect";
 
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect("/404");
+
 export const prerender = true; // This line tells Astro to prerender the page
 export const getStaticPaths = async () => {
   const posts = (await Effect.runPromiseExit(
@@ -16,22 +19,19 @@ export const getStaticPaths = async () => {
   )) as ExitTAbstractPost;
 
   const postMatch = Match.typeTags<ExitTAbstractPost>()({
-    Success: ({ value }) => [
-      ...value.map((post) => ({
+    Success: ({ value }) =>
+      value.map((post) => ({
         params: { slug: post.slug },
       })),
-      { params: { slug: "404" } },
+    Failure: () => [
+      {
+        params: { slug: "404" },
+      },
     ],
-    Failure: () => ({
-      params: { slug: "404" },
-    }),
   });
-
 
   return postMatch(posts);
 };
-
-const { slug } = Astro.params;
 
 const post = (await Effect.runPromiseExit(
   getAndParsePostDetail(slug)
