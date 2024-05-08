@@ -1,5 +1,4 @@
 ---
-import { ViewTransitions } from "astro:transitions";
 import ReactLayout from "../components/Layout/Layout";
 
 const { pathname } = Astro.url;
@@ -9,7 +8,6 @@ const { seo } = Astro.props;
 <head>
   <meta name="generator" content={Astro.generator} />
   <script defer data-domain="valerionarcisi.me" src="https://plausible.io/js/script.js"></script>
-  <ViewTransitions />
 </head>
 <ReactLayout seo={seo} pathname={pathname}>
   <slot />
