@@ -15,6 +15,11 @@ const Article: FC<Props> = ({ post }) => {
 
     const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
+    const getExtract = (extract: string | null): string => {
+        if (!extract) return "";
+        return extract.length > 100 ? extract.slice(0, 97) + "..." : extract
+    }
+
     return (
         <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row"
             marginBottom={{
@@ -55,7 +60,8 @@ const Article: FC<Props> = ({ post }) => {
                     <a href={`/post/${post.slug}`}>{post.title}</a>
                 </Box>
                 {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
-                <Typography variant="small"><Box as="i"> {post.extract} </Box>
+                <Typography variant="small"><Box as="i"> {getExtract(post?.extract)}
+                </Box>
                 </Typography>
 
                 <Box as="div" display={"flex"}>
