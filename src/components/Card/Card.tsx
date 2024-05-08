@@ -105,7 +105,9 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
                         {link && <Box as="a" target="_blank" href={link}>{label}</Box>}
                         {!link && label}
                     </Typography>
-                    <Typography variant="small">{description}</Typography>
+                    <Typography variant="small">{
+                        description.length > 100 ? `${description.substring(0, 97)}...` : description
+                    }</Typography>
                 </Box>
             </Box>
         </Box>

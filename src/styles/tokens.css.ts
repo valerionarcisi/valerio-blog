@@ -35,7 +35,7 @@ export const tokens = {
     subtitle: `'Merriweather', sans- serif;`,
   },
   fontSize: {
-    small: clampBuilder(pixelToRem(8), pixelToRem(16)),
+    small: clampBuilder(pixelToRem(12), pixelToRem(20)),
     medium: clampBuilder(pixelToRem(16), pixelToRem(24)),
     large: clampBuilder(pixelToRem(20),pixelToRem(32)),
     extraLarge: clampBuilder(pixelToRem(32),pixelToRem(50)),
