@@ -2,8 +2,8 @@ import type { FC } from "react";
 import Box from "./Box/Box";
 import Article from "./Article/Article";
 import BoxedTitle from "./Typography/BoxedTitle";
-import type { ExitTAbstractPost } from "../services/hygraph";
 import { Match } from "effect";
+import type { ExitTAbstractPost } from "../models";
 
 type Props = {
     posts: ExitTAbstractPost;

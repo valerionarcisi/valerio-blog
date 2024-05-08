@@ -10,7 +10,7 @@ import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
 import Tag from "../Tag/Tag";
-import type { TPost } from "../../services/hygraph";
+import type { TPost } from "../../models";
 
 
 type Props = {

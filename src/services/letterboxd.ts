@@ -4,25 +4,8 @@ import { Effect, pipe } from "effect";
 import { getText } from "../utils/utils";
 import { decodeUnknownEither } from "../utils/decode";
 import { getAndParseMovieById } from "./tmdb";
+import { LetterBoxdRssSchema } from "../models";
 
-
-export const RssSchema = S.Struct({
-    rss: S.Struct({
-        channel: S.Array(
-            S.Struct({
-                item: S.Array(
-                    S.Struct({
-                        title: S.Array(S.String),
-                        link: S.Array(S.String),
-                        description: S.Array(S.String),
-                        "tmdb:movieId": S.optional(S.Array(S.String)),
-                    })
-                )
-            }))
-    })
-})
-
-export type TRss = S.Schema.Type<typeof RssSchema>
 
 const parseXmlContent = (xmlContent: string): Promise<unknown> =>
     new Promise((resolve, reject) => {
@@ -42,7 +25,7 @@ export const runParseXmlContent = (xml: string) => Effect.tryPromise({
 export const runParseAndDecodeXmlContent = (xml: string) => pipe(
     runParseXmlContent(xml),
     Effect.map(data => data),
-    Effect.flatMap(decodeUnknownEither(RssSchema)),
+    Effect.flatMap(decodeUnknownEither(LetterBoxdRssSchema)),
 )
 
 export const getLetterboxdRss = () => Effect.tryPromise({

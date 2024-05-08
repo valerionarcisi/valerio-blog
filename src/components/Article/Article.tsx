@@ -4,7 +4,7 @@ import Box from "../Box/Box"
 import Typography from "../Typography/Typography"
 import Tag from "../Tag/Tag"
 import { transitionImg } from "./Article.css"
-import type { TAbstractPost } from "../../services/hygraph"
+import type { TAbstractPost } from "../../models"
 
 type Props = {
     post: TAbstractPost

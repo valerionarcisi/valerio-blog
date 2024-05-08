@@ -4,10 +4,9 @@ import AstroLayout from "../../layouts/layout.astro";
 import {
   getAndParseHyGraphAbstractPost,
   getAndParsePostDetail,
-  type ExitTAbstractPost,
-  type ExitTPost,
 } from "../../services/hygraph";
 import Post from "../../components/Post/Post";
+import type { ExitTAbstractPost, ExitTPost } from "../../models";
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect("/404");

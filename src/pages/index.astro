@@ -1,11 +1,11 @@
 ---
 import AstroLayout from "../layouts/layout.astro";
 import { getAndParseHyGraphAbstractPost } from "../services/hygraph";
-import type { ExitTAbstractPost } from "../services/hygraph";
 import { Effect } from "effect";
 import { getAndParseRecentTrack } from "../services/audioscrobbler";
 import { program } from "../services/letterboxd";
 import { Home } from "../components";
+import type { ExitTAbstractPost } from "../models";
 
 const music = await Effect.runPromiseExit(getAndParseRecentTrack());
 const movie = await Effect.runPromiseExit(program);

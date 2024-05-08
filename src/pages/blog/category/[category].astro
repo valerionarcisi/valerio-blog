@@ -1,10 +1,10 @@
 ---
 import { Blog } from "../../../components";
 import AstroLayout from "../../../layouts/layout.astro";
+import type { ExitTAbstractPost } from "../../../models";
 import {
   getAndParseHyGraphAbstractPostByCategory,
   getAllStaticPathsTags,
-  type ExitTAbstractPost,
 } from "../../../services/hygraph";
 import { Effect, Exit } from "effect";
 

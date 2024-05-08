@@ -4,8 +4,8 @@ import { Blog as BlogComponent } from "../components";
 import AstroLayout from "../layouts/layout.astro";
 import {
   getAndParseHyGraphAbstractPost,
-  type ExitTAbstractPost,
 } from "../services/hygraph";
+import type { ExitTAbstractPost } from "../models";
 
 const posts = (await Effect.runPromiseExit(
   getAndParseHyGraphAbstractPost()
