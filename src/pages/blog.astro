@@ -1,16 +1,15 @@
 ---
+import { Effect } from "effect";
+import { Blog as BlogComponent } from "../components";
 import AstroLayout from "../layouts/layout.astro";
-import BlogComponent from "../components/Blog/Blog";
 import {
   getAndParseHyGraphAbstractPost,
   type ExitTAbstractPost,
 } from "../services/hygraph";
-import { Effect } from "effect";
 
 const posts = (await Effect.runPromiseExit(
   getAndParseHyGraphAbstractPost()
 )) as ExitTAbstractPost;
-
 ---
 
 <AstroLayout

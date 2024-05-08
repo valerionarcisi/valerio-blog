@@ -1,13 +1,13 @@
 ---
+import { Effect, Match } from "effect";
 import AstroLayout from "../../layouts/layout.astro";
-import Post from "../../components/Post/Post";
 import {
   getAndParseHyGraphAbstractPost,
   getAndParsePostDetail,
   type ExitTAbstractPost,
   type ExitTPost,
 } from "../../services/hygraph";
-import { Effect, Match } from "effect";
+import Post from "../../components/Post/Post";
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect("/404");
@@ -56,6 +56,7 @@ if (!postDetail) return Astro.redirect("/404");
     description: postDetail.extract ? postDetail.extract : "",
     image: postDetail.coverImage?.url,
     type: "article",
+    name: `${postDetail.title} | Valerio Narcisi Blog`,
   }}
 >
   <Post post={postDetail} />

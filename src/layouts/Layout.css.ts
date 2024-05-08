@@ -1,4 +1,4 @@
-import { valerioSprinkles } from "../../styles/sprinkles.css";
+import { valerioSprinkles } from "../styles/sprinkles.css";
 
 const layoutStyles = valerioSprinkles({
   maxWidth: {

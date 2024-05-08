@@ -1,6 +1,6 @@
 ---
+import { Blog } from "../../../components";
 import AstroLayout from "../../../layouts/layout.astro";
-import Blog from "../../../components/Blog/Blog";
 import {
   getAndParseHyGraphAbstractPostByCategory,
   getAllStaticPathsTags,
@@ -29,6 +29,8 @@ export const getStaticPaths = async () => {
   seo={{
     title: `Category ${category} | Valerio Narcisi | Blog`,
     description: `Category: ${category} of the Valerio Narcisi blog`,
+    name: `Blog | Valerio Narcisi - Blog`,
+    type: "website",
   }}
 >
   <Blog posts={posts} title=`Category: ${category}` />

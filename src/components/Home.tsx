@@ -1,15 +1,15 @@
 import type { FC } from "react";
 import { Match } from "effect";
 import type { Exit } from "effect/Exit";
-import Box from "../Box/Box";
-import Typography from "../Typography/Typography";
-import BoxedTitle from "../Typography/BoxedTitle";
-import Card from "../Card/Card";
-import Article from "../Article/Article";
-import { IMAGES_URL, type TMovieTmdb } from "../../services/tmdb";
-import type { TTrack } from "../../services/audioscrobbler";
-import type { DecodeError } from "../../utils/decode";
-import type { ExitTAbstractPost } from "../../services/hygraph";
+import Box from "./Box/Box";
+import Typography from "./Typography/Typography";
+import BoxedTitle from "./Typography/BoxedTitle";
+import Card from "./Card/Card";
+import Article from "./Article/Article";
+import { IMAGES_URL, type TMovieTmdb } from "../services/tmdb";
+import type { TTrack } from "../services/audioscrobbler";
+import type { DecodeError } from "../utils/decode";
+import type { ExitTAbstractPost } from "../services/hygraph";
 
 type ExitTMovie = Exit<TMovieTmdb, DecodeError | 'json' | "get-letterboxd-rss" | "text" | "parse-xml" | "get-movie-by-id">
 type ExitTTrack = Exit<TTrack, DecodeError | 'json' | 'get-recent-tracks'>
