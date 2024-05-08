@@ -19,10 +19,14 @@ export const getStaticPaths = async () => {
   )) as ExitTAbstractPost;
 
   const postMatch = Match.typeTags<ExitTAbstractPost>()({
-    Success: ({ value }) =>
-      value.map((post) => ({
+    Success: ({ value }) => [
+      ...value.map((post) => ({
         params: { slug: post.slug },
       })),
+      {
+        params: { slug: "404" },
+      },
+    ],
     Failure: () => [
       {
         params: { slug: "404" },
