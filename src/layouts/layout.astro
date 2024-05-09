@@ -1,5 +1,4 @@
 ---
-import { ViewTransitions } from "astro:transitions";
 import clsx from "clsx";
 
 import "normalize.css";
@@ -37,7 +36,6 @@ const { seo } = Astro.props;
       image={seo?.image ||
         "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
     />
-    <ViewTransitions />
   </head>
   <Box as="body">
     <Header pathname={pathname} />
