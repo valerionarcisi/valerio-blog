@@ -16,13 +16,14 @@ import { Box, Header, Footer } from "../components";
 interface Props {
   seo: ISeo;
   pathname?: string;
+  language?: string;
 }
 
 const { pathname } = Astro.url;
-const { seo } = Astro.props;
+const { seo, language } = Astro.props;
 ---
 
-<html lang="en" class={clsx(defaultTheme)}>
+<html lang={language || "en"} class={clsx(defaultTheme)}>
   <head>
     <meta name="generator" content={Astro.generator} />
     <script

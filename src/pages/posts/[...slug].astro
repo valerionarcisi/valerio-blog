@@ -27,6 +27,7 @@ const { Content } = await entry.render();
     type: "article",
     name: `${entry.data.title} | Valerio Narcisi Blog`,
   }}
+  language={entry.data.language}
 >
   <Post post={entry.data} >
     <Content />
