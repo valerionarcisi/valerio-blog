@@ -1,4 +1,4 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { PostMDSchema } from "../models";
 
 const postsCollection = defineCollection({
