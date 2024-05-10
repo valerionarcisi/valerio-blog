@@ -1,19 +1,18 @@
+import type { CollectionEntry } from "astro:content"
 import type { FC } from "react"
 import clsx from "clsx"
 import Box from "../Box/Box"
 import Typography from "../Typography/Typography"
 import Tag from "../Tag/Tag"
 import { transitionImg } from "./Article.css"
-import type { TAbstractPost } from "../../models"
 
 type Props = {
-    post: TAbstractPost
+    post: CollectionEntry<"posts">
 }
 
 
 const Article: FC<Props> = ({ post }) => {
-
-    const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+    const formattedDate = post.data.createdAt ? new Date(post.data.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
 
     const getExtract = (extract: string | null): string => {
         if (!extract) return "";
@@ -21,14 +20,14 @@ const Article: FC<Props> = ({ post }) => {
     }
 
     return (
-        <Box as="article" key={post.id} display="grid" gridTemplateColumns={1} flexDirection="row"
+        <Box as="article" key={post.data.title} display="grid" gridTemplateColumns={1} flexDirection="row"
             marginBottom={{
                 mobile: "extraLarge",
                 tablet: "extraLarge",
                 desktop: "extraLarge"
             }}>
             <Box as="div">
-                <a href={`/post/${post.slug}`}>
+                <a href={`/posts/${post.slug}`}>
                     <Box as="img"
                         className={clsx(transitionImg)}
                         borderRadius={{
@@ -41,8 +40,8 @@ const Article: FC<Props> = ({ post }) => {
                             tablet: "medium",
                             desktop: "medium"
                         }}
-                        src={`${post.coverImage.url}`}
-                        alt={post.title}
+                        src={`${post.data.cover}`}
+                        alt={post.data.title}
                         width="large"
                         marginY={{
                             mobile: "small",
@@ -57,15 +56,15 @@ const Article: FC<Props> = ({ post }) => {
                     tablet: "medium",
                     desktop: "medium"
                 }}>
-                    <a href={`/post/${post.slug}`}>{post.title}</a>
+                    <a href={`/posts/${post.slug}`}>{post.data.title}</a>
                 </Box>
                 {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
-                <Typography variant="small"><Box as="i"> {getExtract(post?.extract)}
+                <Typography variant="small"><Box as="i"> {getExtract(post?.data.extract)}
                 </Box>
                 </Typography>
 
                 <Box as="div" display={"flex"}>
-                    {post.tags && post.tags.map((tag) => (
+                    {post.data.tags && post.data.tags.map((tag) => (
                         <Tag key={tag} label={tag} href={`/blog/category/${tag}`} />
                     ))}
                 </Box>

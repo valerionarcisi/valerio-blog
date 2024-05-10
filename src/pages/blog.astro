@@ -1,15 +1,14 @@
 ---
-import { Effect } from "effect";
+import { getCollection } from "astro:content";
 import { Blog as BlogComponent } from "../components";
 import AstroLayout from "../layouts/layout.astro";
-import {
-  getAndParseHyGraphAbstractPost,
-} from "../services/hygraph";
-import type { ExitTAbstractPost } from "../models";
 
-const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPost()
-)) as ExitTAbstractPost;
+const posts = await getCollection("posts");
+const sortedPosts = posts.sort((a, b) => {
+  return (
+    new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime()
+  );
+});
 ---
 
 <AstroLayout
@@ -21,5 +20,5 @@ const posts = (await Effect.runPromiseExit(
     type: "website",
   }}
 >
-  <BlogComponent posts={posts} title="Blog" />
+  <BlogComponent posts={sortedPosts} title="Blog" />
 </AstroLayout>

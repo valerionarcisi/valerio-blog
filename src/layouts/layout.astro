@@ -1,4 +1,5 @@
 ---
+import { ViewTransitions } from "astro:transitions";
 import clsx from "clsx";
 
 import "normalize.css";
@@ -7,6 +8,7 @@ import "@fontsource/staatliches/400.css";
 import "@fontsource/merriweather";
 import "../styles/global.css";
 import { defaultTheme } from "../styles/defaultTheme.css";
+
 import SEO, { type Props as ISeo } from "../components/SEO/SEO.astro";
 import { layoutStyles } from "./Layout.css";
 import { Box, Header, Footer } from "../components";
@@ -27,6 +29,7 @@ const { seo } = Astro.props;
       defer
       data-domain="valerionarcisi.me"
       src="https://plausible.io/js/script.js"></script>
+      <ViewTransitions />
     <SEO
       title={seo?.title || "Valerio Narcisi"}
       description={seo?.description ||
@@ -36,6 +39,7 @@ const { seo } = Astro.props;
       image={seo?.image ||
         "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
     />
+        <ViewTransitions />
   </head>
   <Box as="body">
     <Header pathname={pathname} />

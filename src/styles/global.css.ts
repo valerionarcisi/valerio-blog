@@ -111,7 +111,8 @@ globalStyle(
 globalStyle("pre", {
   padding: 0,
   backgroundColor: vars.color.primary,
-  borderLeft: `5px solid ${vars.color.tertiary}`
+  borderLeft: `5px solid ${vars.color.tertiary}`,
+  paddingLeft: pixelToRemWithUnit(16),
 });
 
 globalStyle("pre > div:first-child", {
@@ -125,3 +126,9 @@ globalStyle("blockquote", {
   backgroundColor: vars.color.secondary,
   borderLeft: `5px solid ${vars.color.tertiary}`,
 });
+
+globalStyle("code", {
+  backgroundColor: vars.color.tertiary,
+  borderRadius: vars.borderRadius.small,
+  padding: pixelToRemWithUnit(2),
+})

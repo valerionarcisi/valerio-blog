@@ -6,17 +6,17 @@ import BoxedTitle from "./Typography/BoxedTitle";
 import Card from "./Card/Card";
 import Article from "./Article/Article";
 import { IMAGES_URL } from "../services/tmdb";
-import type { ExitTAbstractPost, ExitTMovie, ExitTTrack } from "../models";
+import type { ExitTMovie, ExitTTrack } from "../models";
+import type { CollectionEntry } from "astro:content";
 
 
 type Props = {
-  posts: ExitTAbstractPost;
+  posts: CollectionEntry<"posts">[];
   lastTrack: ExitTTrack;
   lastMovie: ExitTMovie;
 };
 
 const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
-
   const musicMatch = Match.typeTags<ExitTTrack>()({
     Success: ({ value }) => (<Card
       img={
@@ -53,11 +53,6 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
       description="No track played yet"
     />)
   });
-
-  const postsMatch = Match.typeTags<ExitTAbstractPost>()({
-    Success: ({ value }) => (value.map((post) => (<Article key={post.id} post={post} />))),
-    Failure: () => (<>Something went wrong</>),
-  })
 
 
   return (
@@ -140,7 +135,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
           </BoxedTitle>
         </Box>
         <Box as="div" display={"flex"} flexDirection={"column"} alignItems="center">
-          {postsMatch(posts)}
+          {posts.map((post) => (<Article key={post.id} post={post} />))}
         </Box>
       </Box>
     </Box >

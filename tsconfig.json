@@ -4,6 +4,8 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "strict": true,
-    "exactOptionalPropertyTypes": true
+    "exactOptionalPropertyTypes": true,
+    "strictNullChecks": true,
+    "allowJs": true,
   }
 }

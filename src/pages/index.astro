@@ -1,19 +1,23 @@
 ---
+import { getCollection } from "astro:content";
 import AstroLayout from "../layouts/layout.astro";
-import { getAndParseHyGraphAbstractPost } from "../services/hygraph";
 import { Effect } from "effect";
 import { getAndParseRecentTrack } from "../services/audioscrobbler";
 import { program } from "../services/letterboxd";
 import { Home } from "../components";
-import type { ExitTAbstractPost } from "../models";
 
 const music = await Effect.runPromiseExit(getAndParseRecentTrack());
 const movie = await Effect.runPromiseExit(program);
 
-const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPost(5)
-)) as ExitTAbstractPost;
+const posts = await getCollection("posts");
+const sortedPosts = posts.sort((a, b) => {
+  return (
+    new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime()
+  );
+});
 
+// Get the last 5 posts
+const lastFivePosts = sortedPosts.slice(0, 5);
 ---
 
 <AstroLayout
@@ -25,5 +29,5 @@ const posts = (await Effect.runPromiseExit(
     type: "website",
   }}
 >
-  <Home posts={posts} lastTrack={music} lastMovie={movie} />
+  <Home posts={lastFivePosts} lastTrack={music} lastMovie={movie} />
 </AstroLayout>

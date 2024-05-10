@@ -1,28 +1,38 @@
 ---
+import { getCollection } from "astro:content";
 import { Blog } from "../../../components";
 import AstroLayout from "../../../layouts/layout.astro";
-import type { ExitTAbstractPost } from "../../../models";
-import {
-  getAndParseHyGraphAbstractPostByCategory,
-  getAllStaticPathsTags,
-} from "../../../services/hygraph";
-import { Effect, Exit } from "effect";
+
+export const prerender = true;
+export async function getStaticPaths() {
+  const allPosts = await getCollection("posts");
+  const uniqueTags = [
+    ...new Set(allPosts.map((post) => post.data.tags).flat()),
+  ];
+
+  return uniqueTags.map((tag) => {
+    const filteredPosts = allPosts.filter((post) =>
+      post.data.tags.includes(tag)
+    );
+    return {
+      params: { category: tag },
+      props: { posts: filteredPosts },
+    };
+  });
+}
 
 const { category } = Astro.params;
 if (!category) return Astro.redirect("/404");
 
-const posts = (await Effect.runPromiseExit(
-  getAndParseHyGraphAbstractPostByCategory(category)
-)) as ExitTAbstractPost;
+const { posts } = Astro.props;
+if (!posts) return Astro.redirect("/404");
 
-if (Exit.isFailure(posts)) return Astro.redirect("/404");
+const sortedPosts = posts.sort((a, b) => {
+  return (
+    new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime()
+  );
+});
 
-export const prerender = true;
-export const getStaticPaths = async () => {
-  const routes = await Effect.runPromiseExit(getAllStaticPathsTags());
-  if (Exit.isFailure(routes)) return [];
-  return routes.value;
-};
 ---
 
 <AstroLayout
@@ -33,5 +43,5 @@ export const getStaticPaths = async () => {
     type: "website",
   }}
 >
-  <Blog posts={posts} title=`Category: ${category}` />
+  <Blog posts={sortedPosts} title=`Category: ${category}` />
 </AstroLayout>

@@ -1,25 +1,20 @@
 import { type FC } from "react";
-
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { materialDark as codeTheme } from 'react-syntax-highlighter/dist/cjs/styles/prism'
-
 import Box from "../Box/Box";
 import Cover from "../Cover/Cover";
 import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
 import Tag from "../Tag/Tag";
-import type { TPost } from "../../models";
+import type { TPostMD } from "../../models";
 
 
 type Props = {
-  post: TPost;
+  post: TPostMD;
+  children: React.ReactNode
 };
 
-const Post: FC<Props> = ({ post }) => {
+const Post: FC<Props> = ({ post, children }) => {
 
-  const formattedDate = post?.publishedAt ? new Date(post?.publishedAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+  const formattedDate = post?.createdAt ? new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
   return (
     <Box as="article" display="flex" flexDirection="column">
       <Box as="div" textAlign={"center"}>
@@ -29,11 +24,13 @@ const Post: FC<Props> = ({ post }) => {
       </Box>
       <Box as="div" margin="auto">
         <Cover
-          img={{ src: `${post.coverImage?.url}`, alt: `${post.title}` }}
+          img={{ src: `${post.cover}`, alt: `${post.title}` }}
         />
       </Box>
       <Box as="div">
         <Box as="div" width="large" margin="auto">
+          <Box as="hr" />
+
           {formattedDate && <Typography variant="small">Posted on {formattedDate}</Typography>}
           <Box as="div" display={"flex"}>
             {post?.tags?.map((tag) => (
@@ -44,31 +41,14 @@ const Post: FC<Props> = ({ post }) => {
             as="section"
             className={postBodyStyle}
           >
-            <Markdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                code(props) {
-                  const { children, className, node, ...rest } = props
-                  return (
-                    <SyntaxHighlighter
-                      {...rest}
-                      PreTag="div"
-                      children={String(children).replace(/\n$/, '')}
-                      language={`javascript`}
-                      style={codeTheme}
-                      ref={(ref) => {
-                        if (ref) {
-                          if (ref instanceof HTMLElement) {
-                            const htmlElementRef = ref as HTMLElement;
-                            (ref as any).ref = htmlElementRef;
-                          }
-                        }
-                      }}
-                    />
-                  )
-                }
-              }}
-            >{post.content}</Markdown>
+            {post.cover && post.coverAuthor && post.coverLinkSource && <Box
+              as="div"
+            >
+              Cover by <Box as="a" href={post.coverLinkSource} target="_blank">{post.coverAuthor}</Box>
+            </Box>
+            }
+            <Box as="hr" />
+            {children}
           </Box>
         </Box>
       </Box>

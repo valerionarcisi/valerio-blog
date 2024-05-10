@@ -1,21 +1,15 @@
 import type { FC } from "react";
 import Box from "./Box/Box";
-import Article from "./Article/Article";
 import BoxedTitle from "./Typography/BoxedTitle";
-import { Match } from "effect";
-import type { ExitTAbstractPost } from "../models";
+import Article from "./Article/Article";
+import type { CollectionEntry } from "astro:content";
 
 type Props = {
-    posts: ExitTAbstractPost;
+    posts: CollectionEntry<"posts">[];
     title?: string;
 };
 
 const Blog: FC<Props> = ({ posts, title }) => {
-
-    const postsMatch = Match.typeTags<ExitTAbstractPost>()({
-        Success: ({ value }) => (value.map((post) => (<Article key={post.id} post={post} />))),
-        Failure: () => (<>Something went wrong</>),
-    })
 
     return (
         <Box as="section" width="extraLarge" margin="auto">
@@ -57,7 +51,7 @@ const Blog: FC<Props> = ({ posts, title }) => {
                     mobile: "center",
                     desktop: "center"
                 }}>
-                {postsMatch(posts)}
+                {posts.map((post) => (<Article key={post.id} post={post} />))}
             </Box>
         </Box>
     );
