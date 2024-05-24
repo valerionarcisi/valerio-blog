@@ -57,7 +57,11 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
 
   return (
     <Box as="div" display="flex" flexDirection="column" width="fullLayout">
-      <Box as="div" width="extraLarge">
+      <Box as="div" width="extraLarge" paddingTop={{
+        mobile: "medium",
+        tablet: "medium",
+        desktop: "medium"
+      }}>
         <Typography variant="title">
           <BoxedTitle as="span">
             Hi I'm Valerio
