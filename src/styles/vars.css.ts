@@ -43,6 +43,7 @@ export const vars = createGlobalThemeContract(
       medium: null,
       large: null,
       extraLarge: null,
+      full: null,
       auto: null,
     },
     position: {
@@ -79,6 +80,7 @@ export const vars = createGlobalThemeContract(
       fullLayout: null,
     },
     boxShadow: {
+      inverted: null,
       thin: null,
       small: null,
       medium: null,

@@ -53,6 +53,7 @@ export const tokens = {
     medium: pixelToRemWithUnit(8),
     large: pixelToRemWithUnit(32),
     extraLarge: pixelToRemWithUnit(62),
+    full: pixelToRemWithUnit(100),
     auto: "0 auto",
   },
   lineHeight: {
@@ -104,13 +105,14 @@ export const tokens = {
   },
   boxShadow: {
     thin:
-      `0px 0px 0 1px ${colors.primary},1px 2px 0 ${colors.tertiary},3px 3px 0 0px ${colors.primary},2px 2px 1px 0px ${colors.secondary};`,
+    `0px 0px 0 1px ${colors.primary},1px 2px 0 ${colors.tertiary},3px 3px 0 0px ${colors.primary},2px 2px 1px 0px ${colors.secondary};`,
     small:
-      `0px 0px 0 1px ${colors.primary},3px 3px 0 ${colors.tertiary},3px 3px 0 1px ${colors.primary},4px 4px 5px 1px ${colors.secondary};`,
+    `0px 0px 0 1px ${colors.primary},3px 3px 0 ${colors.tertiary},3px 3px 0 1px ${colors.primary},4px 4px 5px 1px ${colors.secondary};`,
     medium:
-      `0px 0px 0 2px ${colors.primary},6px 6px 0 ${colors.tertiary},6px 6px 0 2px ${colors.primary},8px 8px 10px 2px ${colors.secondary};`,
+    `0px 0px 0 2px ${colors.primary},6px 6px 0 ${colors.tertiary},6px 6px 0 2px ${colors.primary},8px 8px 10px 2px ${colors.secondary};`,
     large: `0px 0px 0 4px ${colors.primary},12px 12px 0 ${colors.tertiary},12px 12px 0 4px ${colors.primary},16px 16px 20px 4px ${colors.secondary};`,
     extraLarge: `0px 0px 0 8px ${colors.primary},24px 24px 0 ${colors.tertiary},24px 24px 0 8px ${colors.primary},32px 32px 40px 8px ${colors.secondary};`,
+    inverted: `0px 0px 0 1px ${colors.tertiary},3px 3px 0 ${colors.primary},3px 3px 0 1px ${colors.tertiary},4px 4px 5px 1px ${colors.secondary};`,
   },
   transform: {
     translate: "translate(-50%, -50%)",

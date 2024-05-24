@@ -6,15 +6,14 @@ const Footer = () => {
     return (
         <Box
             as="footer"
-            backgroundColor="secondary"
             paddingX={{
                 tablet: "extraLarge",
                 mobile: "large",
             }}
-            paddingY={{
-                mobile: "medium",
-                tablet: "large",
-                desktop: "large",
+            marginY={{
+                mobile: "full",
+                tablet: "full",
+                desktop: "full",
             }}
         >
             <Box
@@ -31,7 +30,24 @@ const Footer = () => {
                 }}
                 gridTemplateColumns={1}
                 color="neutral"
+                backgroundColor="secondary"
+                paddingX={{
+                    mobile: "large",
+                    tablet: "large",
+                    desktop: "large",
+                }}
+                paddingBottom={{
+                    mobile: "large",
+                    tablet: "large",
+                    desktop: "large",
+                }}
+                borderRadius={{
+                    mobile: "large",
+                    tablet: "large",
+                    desktop: "large",
+                }}
             >
+
                 <Box as={"div"}>
                     <Typography variant="description">
                         <h3>Get in touch</h3>
@@ -50,6 +66,9 @@ const Footer = () => {
                             </li>
                             <li>
                                 <a target="_blank" href="https://x.com/valerionarcisi">X</a>
+                            </li>
+                            <li>
+                                <a target="_blank" href="https://bsky.app/profile/valnar.bsky.social">BlueSky</a>
                             </li>
                             <li>
                                 <a target="_blank" href="https://boxd.it/2mFff">Letterboxd</a>

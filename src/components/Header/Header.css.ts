@@ -8,7 +8,7 @@ const headerStyle = valerioSprinkles({
     left: {
         mobile: "zero", desktop: "zero", tablet: "zero"
     },
-    top: {
+    bottom: {
         mobile: "zero", desktop: "zero", tablet: "zero"
     },
     display: {
@@ -26,7 +26,7 @@ const headerStyle = valerioSprinkles({
     backgroundColor: "secondary",
     fontFamily: "title",
     boxShadow: {
-        mobile: "thin", desktop: "small", tablet: "small"
+        mobile: "inverted", desktop: "inverted", tablet: "inverted"
     },
 });
 

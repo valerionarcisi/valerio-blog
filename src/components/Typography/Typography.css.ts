@@ -8,11 +8,6 @@ export const typographyRecipe = recipe({
         fontFamily: "title",
         fontSize: "title",
         fontWeight: "800",
-        marginTop: {
-          mobile: "large",
-          tablet: "large",
-          desktop: "large",
-        },
         color: "neutral",
       }),
       subtitle: valerioSprinkles({
