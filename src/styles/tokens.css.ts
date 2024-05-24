@@ -17,7 +17,7 @@ function clampBuilder(minFontSizeRem: number, maxFontSizeRem: number, minWidthPx
 const colors = {
   primary: "#000000",
   secondary: "#1c1c1c",
-  tertiary: "#ff004ed4",
+  tertiary: "#ff004efa",
   neutral: "#fff",
 }
 
