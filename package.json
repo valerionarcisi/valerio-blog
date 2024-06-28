@@ -10,12 +10,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/check": "^0.5.0",
+    "@astrojs/check": "^0.7.0",
     "@astrojs/netlify": "^5.2.0",
     "@astrojs/react": "^3.0.10",
     "@astrojs/sitemap": "^3.1.1",
     "@dessert-box/react": "^0.7.5",
-    "@effect/schema": "^0.66.8",
+    "@effect/schema": "^0.68.12",
     "@fontsource/merriweather": "^5.0.8",
     "@fontsource/staatliches": "^5.0.18",
     "@types/react": "^18.2.37",
