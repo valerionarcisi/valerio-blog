@@ -16,6 +16,23 @@ type TCard = {
     };
 };
 
+const ImageBoxed = ({ src, alt, link }: { src: string, alt: string, link?: string }) => {
+    return (
+        <Box
+            as="img"
+            className={
+                clsx({
+                    [cardStyle]: true,
+                    [transitionImg]: !!link
+                })
+            }
+            src={src}
+            alt={alt}
+        />
+    );
+}
+
+
 const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
     return (
         <Box
@@ -44,16 +61,7 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
             <Box as="div" marginBottom="large" />
             {link &&
                 <Box as="a" target="_blank" href={link} >
-                    <Box as="img"
-                    className={
-                        clsx({
-                            [cardStyle]: true,
-                            [transitionImg]: !!link
-                        })
-                    }
-                        src={src}
-                        alt="{alt}"
-                    />
+                    <ImageBoxed src={src} alt={label} link={link} />
                 </Box>
             }
             {!link &&
@@ -114,4 +122,5 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
     );
 };
 
+export { ImageBoxed }
 export default Card;

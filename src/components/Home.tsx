@@ -1,13 +1,13 @@
 import type { FC } from "react";
 import { Match } from "effect";
 import Box from "./Box/Box";
-import Typography from "./Typography/Typography";
 import BoxedTitle from "./Typography/BoxedTitle";
 import Card from "./Card/Card";
 import Article from "./Article/Article";
 import { IMAGES_URL } from "../services/tmdb";
 import type { ExitTMovie, ExitTTrack } from "../models";
 import type { CollectionEntry } from "astro:content";
+import Hero from "./Hero/Hero";
 
 
 type Props = {
@@ -57,29 +57,7 @@ const Home: FC<Props> = ({ posts, lastTrack, lastMovie }) => {
 
   return (
     <Box as="div" display="flex" flexDirection="column" width="fullLayout">
-      <Box as="div" width="extraLarge" paddingTop={{
-        mobile: "medium",
-        tablet: "medium",
-        desktop: "medium"
-      }}>
-        <Typography variant="title">
-          <BoxedTitle as="span">
-            Hi I'm Valerio
-          </BoxedTitle>
-        </Typography>
-        <Typography variant="title">
-          I'm a web developer, director and screenwriter.
-        </Typography>
-        <Typography variant="subtitle">
-          I currently work at <Box as="a" target="_blank" href="https://cleafy.com">.Cleafy</Box> as a frontend developer. <br />
-        </Typography>
-        <Typography variant="description">
-          Over the past year I've been strengthening my knowledge on refactoring large PHP apps into modern Javascript. I'm working with JS, React, Redux, Angular, Typescript and Node.js.        </Typography>
-        <Typography variant="description">
-          In my free time I work as a director and screenwriter.<Box as="br" />
-          <Box as="i">Caramella</Box> will be my first short film.
-        </Typography>
-      </Box>
+      <Hero />
       <Box as="hr" marginY="extraLarge" width="fullLayout" />
       <Box as="section">
         <Box

@@ -1,5 +1,4 @@
 ---
-import { ViewTransitions } from "astro:transitions";
 import clsx from "clsx";
 
 import "normalize.css";
@@ -30,7 +29,6 @@ const { seo, language } = Astro.props;
       defer
       data-domain="valerionarcisi.me"
       src="https://plausible.io/js/script.js"></script>
-    <ViewTransitions />
     <SEO
       title={seo?.title || "Valerio Narcisi"}
       description={seo?.description ||
@@ -40,13 +38,21 @@ const { seo, language } = Astro.props;
       image={seo?.image ||
         "https://media.graphassets.com/output=format:jpg/resize=width:250/11v3vMf8QMziD5ZAv6zY"}
     />
-    <ViewTransitions />
   </head>
   <Box as="body">
     <Header pathname={pathname} />
     <Box as="div" className={clsx(layoutStyles)}>
       <Box as="main" width={"fullLayout"} margin="auto">
-        <slot />
+        <Box
+          as="div"
+          marginTop={{
+            mobile: "extraLarge",
+            tablet: "extraLarge",
+            desktop: "extraLarge",
+          }}
+        >
+          <slot />
+        </Box>
       </Box>
     </Box>
     <Footer />

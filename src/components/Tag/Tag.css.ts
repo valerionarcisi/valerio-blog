@@ -13,7 +13,7 @@ export const tagStyles = style([
         },
         fontSize: 'small',
         backgroundColor: 'tertiary',
-        color: 'neutral',
+        color: 'primary',
         textDecoration: 'none',
         padding: {
             mobile: 'small',
@@ -28,7 +28,7 @@ export const tagStyles = style([
     }),
     {
         ':visited': {
-            color: `${vars.color.neutral}`,
+            color: `${vars.color.primary}`,
         },
         ':hover': {
             backgroundColor: `${vars.color.neutral}`,

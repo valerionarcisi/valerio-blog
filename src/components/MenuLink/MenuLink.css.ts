@@ -7,6 +7,13 @@ export const linkStyles = style([
     valerioSprinkles({
         color: 'neutral',
         textDecoration: 'none',
+        fontSize: 'medium',
+        lineHeight: 'tight',
+        paddingY: {
+            mobile: 'small',
+            tablet: 'small',
+            desktop: 'none',
+        },
         paddingX: {
             mobile: 'medium',
             tablet: 'medium',

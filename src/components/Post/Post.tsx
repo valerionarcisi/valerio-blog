@@ -5,6 +5,7 @@ import Typography from "../Typography/Typography";
 import { postBodyStyle } from "./Post.css";
 import Tag from "../Tag/Tag";
 import type { TPostMD } from "../../models";
+import BoxedTitle from "../Typography/BoxedTitle";
 
 
 type Props = {
@@ -17,9 +18,15 @@ const Post: FC<Props> = ({ post, children }) => {
   const formattedDate = post?.createdAt ? new Date(post?.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
   return (
     <Box as="article" display="flex" flexDirection="column">
-      <Box as="div" textAlign={"center"}>
+      <Box as="div" textAlign={"center"} marginY={{
+        mobile: "large",
+        tablet: "large",
+        desktop: "large"
+      }}>
         <Typography variant="title">
-          {post.title}
+          <BoxedTitle as="span">
+            {post.title}
+          </BoxedTitle>
         </Typography>
       </Box>
       <Box as="div" margin="auto">

@@ -39,7 +39,8 @@ export const tokens = {
     medium: clampBuilder(pixelToRem(16), pixelToRem(24)),
     large: clampBuilder(pixelToRem(20),pixelToRem(32)),
     extraLarge: clampBuilder(pixelToRem(32),pixelToRem(50)),
-    title: clampBuilder(pixelToRem(40), pixelToRem(110)),
+    title: clampBuilder(pixelToRem(30), pixelToRem(80)),
+  
   },
   fontWeight: {
     "400": "400",
@@ -112,7 +113,7 @@ export const tokens = {
     `0px 0px 0 2px ${colors.primary},6px 6px 0 ${colors.tertiary},6px 6px 0 2px ${colors.primary},8px 8px 10px 2px ${colors.secondary};`,
     large: `0px 0px 0 4px ${colors.primary},12px 12px 0 ${colors.tertiary},12px 12px 0 4px ${colors.primary},16px 16px 20px 4px ${colors.secondary};`,
     extraLarge: `0px 0px 0 8px ${colors.primary},24px 24px 0 ${colors.tertiary},24px 24px 0 8px ${colors.primary},32px 32px 40px 8px ${colors.secondary};`,
-    inverted: `0px 0px 0 1px ${colors.tertiary},3px 3px 0 ${colors.primary},3px 3px 0 1px ${colors.tertiary},4px 4px 5px 1px ${colors.secondary};`,
+    inverted: `0px 0px 0 1px ${colors.tertiary},3px 3px 0 ${colors.primary},3px 3px 0 1px ${colors.primary},4px 4px 5px 1px ${colors.secondary};`,
   },
   transform: {
     translate: "translate(-50%, -50%)",
