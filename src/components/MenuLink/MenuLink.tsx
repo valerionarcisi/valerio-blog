@@ -11,7 +11,6 @@ type Props = {
 }
 
 const MenuLink: FC<Props> = ({ children, href, target = "_self", active = false }) => {
-    console.log(active)
     return (<Box as="a" data-astro-prefetch href={href} target={target} 
         className={
             clsx({
