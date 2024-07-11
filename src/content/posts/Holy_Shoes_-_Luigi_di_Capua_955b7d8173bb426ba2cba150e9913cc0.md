@@ -47,6 +47,6 @@ Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto quest
 > Forse, anzi senza *forse*, questo è un po' il tema di una generazione cresciuta nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
 
 
-La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avvisto.
+La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avviso.
 
 Il film mi è piaciuto e anche se ha i suoi problemi ma non è banale o almeno è il tentivo di esserlo.
