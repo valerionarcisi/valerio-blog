@@ -13,17 +13,17 @@ title: "Holy Shoes - Storie di anime ed oggetti di Luigi Di Capua"
 ---
 Film d’esordio di Luigi di Capua e presentato a Torino Film Festival 2023 (non in conorso)
 
-Il film di Di Capua risulta essere interessante anche con i suoi difetti.
+Il film di Di Capua risulta essere interessante anche se ha i suoi difetti a mio avviso.
 
-Le quattro storie che si avvitano attorno alle Typo 3, una mitologica scarpa dalla dubbia estetica, si uniscono nel finale dando un po’ il senso di quello che abbiamo visto e quello che ci è stato raccontato fino a quel momento.
+Le quattro storie che si avvitano attorno alle Typo 3, una mitologica scarpa dalla dubbia estetica unendosi nel finale dando un po’ il senso di quello che si è visto.
 
 ## Trascendere gli oggetti
 
-La volontà di raccontare il rapporto che c’è tra gli uomioni e le cose, in questo caso una scarpa, e chi scrive vive dove si campa facendole le scarpe (sigh), è molto interessate. C’è chi usa la Typo 3 per raggiungere un obiettivo sentimentale in maniera infantile, chi le usa per la sua scalata e accettazione sociale, chi le usa (non le Typo 3) per scopa’.
+La volontà di raccontare il rapporto che c’è tra gli uomioni e le cose, in questo caso una scarpa, e chi scrive vive in una zona dove si campa facendo le scarpe (sigh), è molto interessate. C’è chi usa la Typo 3 per raggiungere un obiettivo sentimentale in maniera infantile. C'è chi le usa per la sua scalata e accettazione sociale. C'è chi le usa (non le Typo 3) per scopa’.
 
 ![Untitled](Holy_Shoes_-_Luigi_di_Capua_955b7d8173bb426ba2cba150e9913cc0/Untitled1.png)
 
-Trascendere un oggetto in altro è una delle cose più umane che ci siano, basti pensare alle relegioni e alla loro ritualità intorno ad oggetti che trascendono, che cambiano significato. Il film riesce nell’intento di farci vedere questi personaggi sempre patetici con occhio non giudicante, anzi, ha il merito di farceli sentire vicini e mai alieni.
+Trascendere il significato di un oggetto fino a farlo leva per il raggiungimento di qualcosa di più elevato come il riconoscimento personale attraverso lo sguardo altrui è una delle cose più umane che ci siano. Penso anche alle relegioni e alla loro ritualità intorno ad oggetti che trascendono, che cambiano significato. Il film riesce nell’intento di farci vedere questi personaggi sempre patetici con occhio mai giudicante, anzi, ha il merito di farceli sentire vicini e mai alieni.
 
 ![Untitled](Holy_Shoes_-_Luigi_di_Capua_955b7d8173bb426ba2cba150e9913cc0/Untitled2.png)
 
@@ -39,10 +39,12 @@ Non tutte le quattro storie sono riuscitissime. La migliore senza dubbio è quel
 
 Bibbolino con le sue umiliazioni continue, con il suo vestire infantile, con il suo lavoro *che sta ingrandando*, con il suo rapporto subalterno con il padre,  con il tentativo di creare un contatto con il figlio tramite le Typo 3, con i suoi tentativi mai riusciti e sempre *vorrei ma non posso* di svicolarsi dal rapporto con il padre.
 
-Si capisce Di Capua sappia di cosa stia parlando, dell’eredita che schiaccia e soffoca e che pur di prendersele alcune resposabilità si fa di tutto per scappare da un ventre materno caldo-umido di cui tutti a un certo punto vogliamo farne a meno ma che é comunque protettivo e accomodante.
+Di Capua in questa storia fa sentire che sa esattamente cosa stia raccontando. Di quell'eredità che schiaccia e soffoca. Quell'eredità che ci permettere di fare una vita al di sopra delle nostre possibiltà. Che permette l'inseguimento di un sogno ma che al tempo stesso ha un prezzo da pagare, inferiore certamente di chi questa eredità non ce l'ha ma sempre che un effetto collaterale è presente.
+La dedizione di Bibbino per le scarpe finanziata dal padre è il punto e la cosa che a me è piaciuta di più anche se sfiorata di poco. Ovviamente il film avrebbe dovuto parlare di altro ma a colpito molto questo aspetto.
 
-Questa storia, con Bibbolino che si spacca tra lavoro (se c’è un lavoro), la ragazza, la famiglia, il padre generale presente anche se bloccato a casa e questa eredità che è sempre li a ricordarti che non puoi crescere è sicuramente la parte più interessante.
+> Forse, anzi senza *forse*, questo è un po' il tema di una generazione crescita nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
+
 
 La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avvisto.
 
-Il film mi è piaciuto e anche se ha i suoi problemi ma non è banale.
+Il film mi è piaciuto e anche se ha i suoi problemi ma non è banale o almeno è il tentivo di esserlo.
