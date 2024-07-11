@@ -40,7 +40,9 @@ Non tutte le quattro storie sono riuscitissime. La migliore senza dubbio è quel
 Bibbolino con le sue umiliazioni continue, con il suo vestire infantile, con il suo lavoro *che sta ingrandando*, con il suo rapporto subalterno con il padre,  con il tentativo di creare un contatto con il figlio tramite le Typo 3, con i suoi tentativi mai riusciti e sempre *vorrei ma non posso* di svicolarsi dal rapporto con il padre.
 
 Di Capua in questa storia fa sentire che sa esattamente cosa stia raccontando. Di quell'eredità che schiaccia e soffoca. Quell'eredità che ci permettere di fare una vita al di sopra delle nostre possibiltà. Che permette l'inseguimento di un sogno ma che al tempo stesso ha un prezzo da pagare, inferiore certamente di chi questa eredità non ce l'ha ma sempre che un effetto collaterale è presente.
-La dedizione di Bibbino per le scarpe finanziata dal padre è il punto e la cosa che a me è piaciuta di più anche se sfiorata di poco. Ovviamente il film avrebbe dovuto parlare di altro ma a colpito molto questo aspetto.
+La dedizione di Bibbino per le scarpe finanziata dal padre è il punto e la cosa che a me è piaciuta di più anche se sfiorata di poco. 
+
+Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto questa sfaccettatura.
 
 > Forse, anzi senza *forse*, questo è un po' il tema di una generazione crescita nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
 
