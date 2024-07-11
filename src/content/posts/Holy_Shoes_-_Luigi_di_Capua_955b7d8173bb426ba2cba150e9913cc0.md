@@ -11,7 +11,7 @@ slug: "holy-shoes-storie-di-anime-ed-oggetti-2023-luigi-di-capua"
 title: "Holy Shoes - Storie di anime ed oggetti di Luigi Di Capua"
 
 ---
-Film d’esordio di Luigi di Capua e presentato a Torino Film Festival 2023 (non in conorso)
+Film d’esordio di Luigi di Capua e presentato a Torino Film Festival 2023 (non in concorso)
 
 Il film di Di Capua risulta essere interessante anche se ha i suoi difetti a mio avviso.
 
