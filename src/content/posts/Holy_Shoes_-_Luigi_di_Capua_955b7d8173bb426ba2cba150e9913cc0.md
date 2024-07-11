@@ -49,7 +49,7 @@ Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto quest
 
 La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avviso.
 
-Holy Shoes è una favola nera scritta su quattro protagonisti che non cambiano mai durante la storia. I loro difetti, subito presentati e mai sanati, faranno si che la posta in gioco diventi sempre più alta fino alla distruzione e tutto questo con ai piedi le Typo 3.
+Holy Shoes è una favola nera scritta su quattro protagonisti che non cambiano mai durante la storia. I loro difetti, subito presentati e mai sanati, fanno si che la posta in gioco diventi sempre più alta fino alla distruzione e tutto questo con ai piedi le Typo 3.
 
 
 
