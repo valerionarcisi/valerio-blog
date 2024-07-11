@@ -44,7 +44,7 @@ La dedizione di Bibbino per le scarpe finanziata dal padre è il punto e la cosa
 
 Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto questa sfaccettatura.
 
-> Forse, anzi senza *forse*, questo è un po' il tema di una generazione crescita nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
+> Forse, anzi senza *forse*, questo è un po' il tema di una generazione cresciuta nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
 
 
 La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avvisto.
