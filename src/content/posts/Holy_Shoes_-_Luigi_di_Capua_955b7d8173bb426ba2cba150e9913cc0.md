@@ -15,7 +15,7 @@ Film d’esordio di Luigi di Capua e presentato a Torino Film Festival 2023 (non
 
 Il film di Di Capua risulta essere interessante anche se ha i suoi difetti a mio avviso.
 
-Le quattro storie che si avvitano attorno alle Typo 3, una mitologica scarpa dalla dubbia estetica unendosi nel finale dando un po’ il senso di quello che si è visto.
+Le quattro storie che si avvitano attorno alle Typo 3, una mitologica scarpa dalla dubbia estetica, si uniscono nel finale dando un po' il senso a quello che abbiamo visto.
 
 ## Trascendere gli oggetti
 
