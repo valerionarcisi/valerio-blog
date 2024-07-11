@@ -23,11 +23,11 @@ La volontà di raccontare il rapporto che c’è tra gli uomioni e le cose, in q
 
 ![Untitled](Holy_Shoes_-_Luigi_di_Capua_955b7d8173bb426ba2cba150e9913cc0/Untitled1.png)
 
-Trascendere il significato di un oggetto fino a farlo leva per il raggiungimento di qualcosa di più elevato come il riconoscimento personale attraverso lo sguardo altrui è una delle cose più umane che ci siano. Penso anche alle relegioni e alla loro ritualità intorno ad oggetti che trascendono, che cambiano significato. Il film riesce nell’intento di farci vedere questi personaggi sempre patetici con occhio mai giudicante, anzi, ha il merito di farceli sentire vicini e mai alieni.
+Trascendere il significato di un oggetto fino a farlo diventare la leva per il raggiungimento di qualcosa di più elevato come il riconoscimento personale (e quindi essere riconosciuti dagli altri) è una delle cose più umane che ci siano. Penso anche alle relegioni e alla loro ritualità intorno ad oggetti che trascendono, che cambiano significato. Il film riesce nell’intento di farci vedere questi personaggi sempre patetici con occhio mai giudicante, anzi, ha il merito di farceli sentire vicini e mai alieni.
 
 ![Untitled](Holy_Shoes_-_Luigi_di_Capua_955b7d8173bb426ba2cba150e9913cc0/Untitled2.png)
 
-L’unico problema del film avviso, che a me è mediamente piaciuto, sono le ridodanze. 
+L’unico problema del film a mio avviso, che a me è mediamente piaciuto, sono le ridodanze. 
 
 La volontà di Di Capua di voler raccontare tutto, ogni sfaccettatura, ogni micro increspatura che c’è nel rapporto uomo-scarpa-altro fa diventare il racconto poco fluido.
 
@@ -37,16 +37,19 @@ Non tutte le quattro storie sono riuscitissime. La migliore senza dubbio è quel
 
 ![Untitled](Holy_Shoes_-_Luigi_di_Capua_955b7d8173bb426ba2cba150e9913cc0/Untitled3.png)
 
-Bibbolino con le sue umiliazioni continue, con il suo vestire infantile, con il suo lavoro *che sta ingrandando*, con il suo rapporto subalterno con il padre,  con il tentativo di creare un contatto con il figlio tramite le Typo 3, con i suoi tentativi mai riusciti e sempre *vorrei ma non posso* di svicolarsi dal rapporto con il padre.
+Bibbolino con le sue umiliazioni continue, con il suo vestire infantile, con il suo lavoro *che sta ingrandando*, con il suo rapporto subalterno con il padre, con il suo tentativo di creare un contatto con il figlio tramite le Typo 3, con i suoi tentativi mai riusciti e sempre *vorrei ma non posso* di svicolarsi dal rapporto con il padre, lo rende sicuramente il personaggio più umano e quindi complesso.
 
-Di Capua in questa storia fa sentire che sa esattamente cosa stia raccontando. Di quell'eredità che schiaccia e soffoca. Quell'eredità che ci permettere di fare una vita al di sopra delle nostre possibiltà. Che permette l'inseguimento di un sogno ma che al tempo stesso ha un prezzo da pagare, inferiore certamente di chi questa eredità non ce l'ha ma sempre che un effetto collaterale è presente.
-La dedizione di Bibbino per le scarpe finanziata dal padre è il punto e la cosa che a me è piaciuta di più anche se sfiorata di poco. 
+Di Capua in questa storia fa sentire che sa esattamente di cosa stia raccontando. Di quell'eredità che schiaccia e soffoca. Quell'eredità che ti permettere di fare una vita al di sopra delle tue possibiltà. Che permette l'inseguimento di un sogno ma che al tempo stesso ha un prezzo da pagare, inferiore certamente di chi questa eredità non ce l'ha, ma porta comunque con sé un effetto collatarale.
+La dedizione di Bibbino per le scarpe, finanziata dal padre, è il punto e la cosa che a me è piaciuta di più, anche se solo sfiorata. 
 
-Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto questa sfaccettatura.
+Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto questo aspetto.
 
 > Forse, anzi senza *forse*, questo è un po' il tema di una generazione cresciuta nell'abbondanza e nella possibiltà di non lavorare fino ai trentacinque anni.
 
 
 La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avviso.
 
-Il film mi è piaciuto e anche se ha i suoi problemi ma non è banale o almeno è il tentivo di esserlo.
+Holy Shoes è una favola nera scritta su quattro protagonisti che non cambiano mai durante la storia. I loro difetti, subito presentati e mai sanati, faranno si che la posta in gioco diventi sempre più alta fino alla distruzione e tutto questo con ai piedi le Typo 3.
+
+
+
