@@ -69,9 +69,10 @@ E qui succede quello che doveva succedere. Avvine la trasformazione e grazie all
 
 Qui mi ricollego alla parola scritta e parlata per chiudere.
 
-> La parola scritta dell’assassino è bella, conturbante, profonda dove ci specchiamo e non vogliamo che si esaurisca mai. Quella detta, pronunciata, da tutti i personaggi è brutta, è buona per un libro ma non per un film. Ed è meglio, forse, rimanere in silenzio.
+> La parola scritta dell’assassino è bella, conturbante, profonda dove ci specchiamo e non vogliamo che si esaurisca mai. Quella detta, pronunciata, da tutti i personaggi in Dostoevskij è grottesca al limite del brutto, è buona per un libro ma non per un film.
 >
-I personaggi parlano male, fa starno, ma nella seconda parte del film questa stranezza si fa meno sentire per l'incedere che ha la storia. Non è un erroe, la cosa è voluta perché la parola detta è brutta, quella scitta è bella, è salvifica, ha senso.
+I personaggi parlano male, fa strano, ma nella seconda parte del film questa stranezza si fa meno sentire per l'incedere che ha la storia. Non è un erroe, la cosa è voluta perché la parola detta è brutta, quella scitta è bella, è salvifica, ha senso.
 
-I Fratelli D'Inncenzo sono riusciti nel portare il thriller alla [Memories of Murder](https://letterboxd.com/film/memories-of-murder/), alla True Detective, in Italia, con una scommessa fatta tra loro e Sky. 
-Sicuramente è una delle cose più interessanti uscite fino a questo momento, non solo in Italia, 2024.
+I Fratelli D'Inncenzo sono riusciti nel portare il thriller alla [Memories of Murder](https://letterboxd.com/film/memories-of-murder/), alla True Detective, in Italia, con una scommessa fatta tra loro e Sky. Come fa Enzo con l'indagine, allin senza pensarci troppo.
+ 
+Sicuramente Dostoevskij è una delle cose più interessanti uscite fino a questo momento, non solo in Italia, nel 2024.
