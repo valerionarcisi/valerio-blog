@@ -56,6 +56,14 @@ const Post: FC<Props> = ({ post, children }) => {
             }
             <Box as="hr" />
             {children}
+            <Box as="hr" />
+            <Box as="div" marginY={{
+              mobile: "large",
+              tablet: "large",
+              desktop: "large"
+            }}>
+              Contact me: <a href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com </a>
+            </Box>
           </Box>
         </Box>
       </Box>

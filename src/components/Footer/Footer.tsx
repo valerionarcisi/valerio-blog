@@ -53,6 +53,11 @@ const Footer = () => {
                         <h3>Get in touch</h3>
                         <ul>
                             <li>
+                                <a href="mailto:valerio.narcisi@gmail.com"
+                                >valerio.narcisi@gmail.com</a
+                                >
+                            </li>
+                            <li>
                                 <a target="_blank" href="https://github.com/valerionarcisi"
                                 >Github</a
                                 >
