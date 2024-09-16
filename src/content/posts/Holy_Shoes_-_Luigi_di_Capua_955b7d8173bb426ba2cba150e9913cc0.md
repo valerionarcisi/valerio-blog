@@ -2,7 +2,7 @@
 tags: 
     - "MOVIE"
 author: "Valerio Narcisi"
-cover: https://i0.wp.com/www.badtaste.it/cinema/wp-content/uploads/sites/1/2024/07/holy-shoes-cover.jpg?fit=1280%2C720&quality=85&strip=all&ssl=1
+cover: https://www.hollywoodreporter.it/wp-content/uploads/2023/11/Isabella-Briganti_-Luigi-Di-capua.jpg
 createdAt: "July 10, 2024"
 extract: "Opera prima di Luigi Di Capua presentata al Torino Film Festival 2023 investiga l’umana attitutinde di transcendere gli oggetti e di quattro tentativi di usare le scarpe per raggiungere un riconoscimento a questo mondo."
 isDraft: "No"
@@ -50,6 +50,3 @@ Ovviamente il film avrebbe dovuto parlare d'altro ma a me ha colpito molto quest
 La regia indugia sempre molto sui volti, è sempre molto in prossimità. Le musiche belle ma un po’ troppo invasive a mio avviso.
 
 Holy Shoes è una favola nera scritta su quattro protagonisti che non cambiano mai durante la storia. I loro difetti, subito presentati e mai sanati, fanno si che la posta in gioco diventi sempre più alta fino alla distruzione e tutto questo con ai piedi le Typo 3.
-
-
-
