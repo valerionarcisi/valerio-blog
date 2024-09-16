@@ -48,6 +48,7 @@ const Hero = () => {
             }}>
             <Box
                 as="img"
+                display={{ mobile: "none" }}
                 src={valerioImage.src}
                 alt="Valerio Narcisi"
                 className={cardStyle}

@@ -58,6 +58,12 @@ const Footer = () => {
                                 >
                             </li>
                             <li>
+                                <a
+                                    target="_blank"
+                                    href="https://www.instagram.com/narcisi.valerio/"
+                                >IG</a>
+                            </li>
+                            <li>
                                 <a target="_blank" href="https://github.com/valerionarcisi"
                                 >Github</a
                                 >

@@ -59,23 +59,25 @@ const Card: FC<TCard> = ({ title, label, description, img: { src }, link }) => {
         >
             <Box as="h4" color="neutral" backgroundColor="primary" margin="auto">{title}</Box>
             <Box as="div" marginBottom="large" />
-            {link &&
-                <Box as="a" target="_blank" href={link} >
-                    <ImageBoxed src={src} alt={label} link={link} />
-                </Box>
-            }
-            {!link &&
-                <Box as="img" className={
-                    clsx({
-                        [cardStyle]: true,
-                        [transitionImg]: !!link
-                    })
+            <Box as="div" display={{ mobile: "none" }}>
+                {link &&
+                    <Box as="a" target="_blank" href={link} >
+                        <ImageBoxed src={src} alt={label} link={link} />
+                    </Box>
                 }
-                    src={src}
-                    alt="{alt}"
-                />
-            }
-            <Box as="div" marginBottom="large" />
+                {!link &&
+                    <Box as="img" className={
+                        clsx({
+                            [cardStyle]: true,
+                            [transitionImg]: !!link
+                        })
+                    }
+                        src={src}
+                        alt="{alt}"
+                    />
+                }
+                <Box as="div" marginBottom="large" />
+            </Box>
             <Box margin="auto">
                 <Box
                     as="div"
