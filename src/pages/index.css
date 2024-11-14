@@ -8,8 +8,11 @@ section {
   gap: 1.75rem;
   margin: var(--space-medium) auto;
   padding-left: var(--space-large);
-  overflow: auto;
+  overflow-x: scroll;
+  scrollbar-color: var(--backgroundColor-tertiary) var(--backgroundColor-primary);
+  scrollbar-width: thin;
 }
+
 
 @media screen and (max-width: 768px) {
   .ReelContainer {
