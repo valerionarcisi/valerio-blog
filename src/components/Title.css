@@ -1,0 +1,26 @@
+.Title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 50%;
+  margin: 0 auto;
+  h1 {
+    text-align: center;
+    background-color: var(--backgroundColor-tertiary);
+    color: var(--color-primary);
+    border-radius: var(--borderRadius-small);
+    font-size: var(--fontSize-extraLarge);
+    font-weight: var(--fontWeight-800);
+    display: block;
+    margin: var(--space-medium) auto;
+    padding: 0 var(--space-medium);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .Title {
+    text-align: center;
+    max-width: 80%;
+    margin: 0 auto;
+  }
+}

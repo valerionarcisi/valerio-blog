@@ -1,0 +1,52 @@
+---
+import '~/components/Hero.css'
+import Button from '~/components/Button.astro'
+import Title from './Title.astro';
+
+interface CallToAction {
+    label: string;
+    href: string;
+}
+
+interface Props {
+    title: string;
+    subtitle: string;
+    callToActions: CallToAction[];
+}
+
+const { title, subtitle, callToActions } = Astro.props;
+
+---
+
+
+<section class="Hero">
+  <div class="container">
+    <video class="video" autoplay muted loop>
+      <source src="/videos/Arturo.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div class="overlay">
+    <div class="content">
+      <Title title={title} />
+      <p>{subtitle}</p>
+      <div class="call-to-actions">
+          {callToActions.map((callToAction) => <Button label={callToAction.label} href={callToAction.href} />)}
+      </div>
+    </div>
+    <button class="floating-btn">
+      <span class="arrow">&#8595;</span> <!-- Down arrow symbol -->
+    </button>
+  </div>
+</section>
+
+<script>
+  const buttons = document.querySelector('button.floating-btn');
+  buttons?.addEventListener('click', () => {
+    const targetSection = document.getElementById('last-watched');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+</script>

@@ -1,33 +1,98 @@
 ---
-import { getCollection } from "astro:content";
-import AstroLayout from "../layouts/layout.astro";
-import { Effect } from "effect";
-import { getAndParseRecentTrack } from "../services/audioscrobbler";
-import { program } from "../services/letterboxd";
-import { Home } from "../components";
+import BaseHead from '~/components/BaseHead.astro';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import { SITE_TITLE, SITE_DESCRIPTION } from '~/consts';
+import Hero from '~/components/Hero.astro';
+import Title from '~/components/Title.astro';
+import { getCollection } from 'astro:content';
+import Card from '~/components/Card.astro';
+import { getLetterboxdRss, parseXmlContent  } from '~/services/letterboxd';
+import { getMovieById  } from '~/services/tmdb';
+import Reel from '~/components/Reel.astro';
+import './index.css';
+import { fetchRecentTracks } from '~/services/audioscrobbler';
 
-const music = await Effect.runPromiseExit(getAndParseRecentTrack());
-const movie = await Effect.runPromiseExit(program);
+const posts = (await getCollection('blog')).sort(
+	(a: any, b:any) => b.data.createdAt.valueOf() - a.data.createdAt.valueOf(),
+).slice(0, 5);
 
-const posts = await getCollection("posts");
-const sortedPosts = posts.sort((a, b) => {
-  return (
-    new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime()
-  );
-});
 
-// Get the last 5 posts
-const lastFivePosts = sortedPosts.slice(0, 5);
+const lastWatchedMovies = async () => {
+	const xml = await getLetterboxdRss()
+	const parsedXml = await parseXmlContent(await xml.text()) as any
+
+	const watchedMovies = []
+	for (const item of parsedXml.rss.channel[0].item) {
+    if (!item?.['tmdb:movieId']?.[0]) continue;
+    try {
+      const movie = await getMovieById(item['tmdb:movieId'][0]);
+      watchedMovies.push({...movie, ...item});
+    } catch (error) {
+      console.error(`Failed to fetch movie with ID ${item['tmdb:movieId'][0]}`, error);
+      continue;
+    }
+	}
+
+	return watchedMovies
+}
+
+const lastWatched = await lastWatchedMovies()
+
+const lastSongs = await fetchRecentTracks()
 ---
 
-<AstroLayout
-  seo={{
-    title: `Home | Valerio Narcisi - web developer, director and screenwriter`,
-    description:
-      "Valerio Narcisi web developer, director and screenwriter. This is my personal blog where I post my thoughts on technology, movies books and other things.",
-    name: `Home | Valerio Narcisi - web developer, director and screenwriter`,
-    type: "website",
-  }}
->
-  <Home posts={lastFivePosts} lastTrack={music} lastMovie={movie} />
-</AstroLayout>
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+	</head>
+	<body data-theme="dark">
+		<Header />
+		<Hero
+		title="Hi I'm Valerio"
+		subtitle="I'm a web developer, director and screenwriter. I currently work at Cleafy as fullstack developer. "
+		callToActions={[
+			{
+				label: 'Connect with me',
+				href: 'http://linkedin.com/in/cv-valerio-narcisi',
+			},
+			{
+				label: 'Watch Arturo my first shortfilm',
+				href: 'https://vimeo.com/931983314',
+			},
+		]}
+		/>
+		<main>
+			<section id="last-watched">
+			<Title title="Last watched movies" />
+				<div class="ReelContainer">
+				{
+					lastWatched.map((movie: any) => (
+						<Reel type="movie" vote_average={movie.vote_average} vote_count={movie.vote_count} url={`https://image.tmdb.org/t/p/w185/${movie.poster_path}`} href={movie.link[0]} title={movie['letterboxd:filmTitle'][0]} watchedDate={movie['letterboxd:watchedDate'][0]}  />
+					))
+				}
+				</div>
+			</section>
+			<section>
+				<Title title="Last Listened songs" />
+				<div class="ReelContainer">
+				{
+					lastSongs.recenttracks.track.map((song) => (
+						<Reel type="song" artist={song.artist['#text']} album={song.album['#text']} url={song.image[3]['#text']} href={song.url} title={song.name} watchedDate={song?.date ? song.date['#text'] : new Date().toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: 'numeric' })}  />
+					))
+				}
+				</div>
+			</section>
+			<section>
+				<Title title="Latest posts" />
+				{
+					posts.map((post:any) => ( 
+							<Card {...post.data } slug={post.slug} />
+					))
+				}	
+			</section>	
+			</main>
+		<Footer />
+	</body>
+</html>

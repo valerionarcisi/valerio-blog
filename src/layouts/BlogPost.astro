@@ -1,0 +1,49 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '~/components/BaseHead.astro';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import FormattedDate from '~/components/FormattedDate.astro';
+import Tag from '~/components/Tag.astro'
+
+type Props = CollectionEntry<'blog'>['data'];
+
+const { title, description, createdAt, cover, language, tags, coverAuthor, coverLinkSource } = Astro.props;
+import './BlogPast.css'
+import Title from '~/components/Title.astro';
+import { SITE_TITLE } from '~/consts';
+
+---
+
+<html lang={language}>
+	<head>
+		<BaseHead title={`${title} | ${SITE_TITLE}`} description={description} />
+	</head>
+
+	<body data-theme="dark">
+		<Header />
+		<main>
+			<article class="BlogPost">
+				<Title title={title} />
+				{cover && <img src={cover} alt={title} />}
+				<div class="prose">
+						<hr />
+						<div class="info">
+							<div class="date">
+								Posted on <FormattedDate date={createdAt} />
+							</div>
+							<div class="tags">
+								{tags.map((tag: string) => <Tag tag={tag} />)}
+							</div>
+						</div>
+						{coverAuthor && <div class="cover">
+							Cover by <a target="_blank" href={coverLinkSource}>{coverAuthor}</a>
+						</div>}
+						<hr />
+					<slot />
+				</div>
+			</article>
+		</main>
+		<Footer />
+	</body>
+</html>

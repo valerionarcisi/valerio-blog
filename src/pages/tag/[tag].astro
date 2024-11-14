@@ -1,0 +1,29 @@
+---
+import { getCollection } from 'astro:content';
+import Blog from '~/layouts/Blog.astro';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection("blog");
+  const uniqueTags = [
+    ...new Set(allPosts.map((post) => post.data.tags).flat()),
+  ].map((tag) => tag.toLowerCase());
+
+  return uniqueTags.map((tag) => ({
+    params: { tag: tag.toLocaleLowerCase() },
+    props: { posts: allPosts.filter((post) => post.data.tags.map((t) => t.toLowerCase()).includes(tag)) 
+    },
+  }));
+}
+
+const { tag } = Astro.params
+const { posts } = Astro.props;
+
+
+const sortedPosts = posts.sort((a, b) => {
+  return (
+    new Date(b.data.createdAt).getTime() - new Date(a.data.createdAt).getTime()
+  );
+});
+
+---
+<Blog category={tag} posts={sortedPosts}  />

@@ -1,0 +1,29 @@
+.Button,
+.Button:visited {
+  color: var(--color-primary);
+  background-color: var(--backgroundColor-tertiary);
+  padding: var(--space-xlarge);
+  text-transform: uppercase;
+  font-size: var(--fontSize-small);
+  border-radius: var(--borderRadius-2xlarge);
+  text-decoration: none;
+  margin: 0 var(--space-medium);
+  font-family: var(--fontFamily-title);
+  color: var(--color-primary);
+  transition: box-shadow var(--transition-fast);
+  border: none;
+}
+
+.Button:hover {
+  box-shadow: var(--boxShadow-inverted-hover);
+  color: var(--color-neutral);
+  background-color: var(--color-tertiary);
+  text-decoration: underline;
+}
+
+@media screen and (max-width: 768px) {
+  .Button {
+    font-size: var(--fontSize-medium);
+    padding: var(--space-medium);
+  }
+}

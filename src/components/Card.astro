@@ -1,0 +1,27 @@
+---
+import FormattedDate from '~/components/FormattedDate.astro';
+import '~/components/Card.css'
+import Tag from '~/components/Tag.astro';
+const { title, description, createdAt, cover, tags, slug } = Astro.props;
+---
+
+
+<section class="Card">
+    <div>
+        <a href={`/blog/${slug}/`}>
+            <img src={cover} alt={title} />
+        </a>
+    </div>
+    <div class="info">
+        <a href={`/blog/${slug}/`}>
+            <h3 class="title">{title}</h3>
+        </a>
+        <div class="description">{description.substring(0, 100)}...</div>
+        <div class="date">
+            Created At: <FormattedDate date={createdAt} />
+        </div>
+        <div class="tags">
+            {tags.map((tag: unknown) => <Tag tag={tag} />)}
+        </div>
+    </div>
+</section>

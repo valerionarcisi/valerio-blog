@@ -1,0 +1,5 @@
+---
+const { tag } = Astro.props;
+import '~/components/Tag.css'
+---
+<a class="Tags" href={`/tag/${tag.toLowerCase()}`}>{tag}</a>

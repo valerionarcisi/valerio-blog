@@ -1,0 +1,14 @@
+.Header {
+  width: 100vw;
+  background-color: var(--backgroundColor-secondary);
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--boxShadow-inverted);
+  nav {
+    display: flex;
+    gap: 1rem;
+  }
+}

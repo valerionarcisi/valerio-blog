@@ -1,0 +1,18 @@
+section {
+  margin: var(--space-large) 0;
+}
+
+.ReelContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 1.75rem;
+  margin: var(--space-medium) auto;
+  padding-left: var(--space-large);
+  overflow: auto;
+}
+
+@media screen and (max-width: 768px) {
+  .ReelContainer {
+    padding-left: var(--space-medium);
+  }
+}

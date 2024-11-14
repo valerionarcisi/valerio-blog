@@ -1,0 +1,184 @@
+/* Common Variables */
+:root {
+  --fontFamily-body: 'Merriweather', sans-serif;
+  --fontFamily-title: 'Staatliches', sans-serif;
+  --fontSize-very-micro: clamp(0.25rem, 0.25rem + 0.38vw, 0.5rem);
+  --fontSize-very-small: clamp(0.55rem, 0.55rem + 0.38vw, 1.05rem);
+  --fontSize-small: clamp(0.75rem, 0.65rem + 0.48vw, 1.25rem);
+  --fontSize-medium: clamp(1.15rem, 0.9rem + 0.48vw, 1.5rem);
+  --fontSize-large: clamp(1.5rem, 1.11rem + 0.82vw, 2.5rem);
+  --fontSize-extraLarge: clamp(2rem, 1.78rem + 1.08vw, 3.125rem);
+  --fontWeight-400: 400;
+  --fontWeight-600: 600;
+  --fontWeight-700: 700;
+  --fontWeight-800: 800;
+  --space-small: 0.1875rem;
+  --space-medium: 0.5rem;
+  --space-xlarge: 0.75rem;
+  --space-large: 2rem;
+  --lineHeight-tight: 1.25;
+  --lineHeight-medium: 1.5;
+  --lineHeight-loose: 1.75;
+  --lineHeight-looser: 2;
+  --lineHeight-normal: 2.25;
+  --borderRadius-small: 0.25rem;
+  --borderRadius-medium: 0.5rem;
+  --borderRadius-large: 1rem;
+  --borderRadius-2xlarge: 1.25rem;
+  --transition-fast: 0.2s ease-in-out;
+  --transition-medium: 0.4s ease-in-out;
+  --transition-slow: 0.8s ease-in-out;
+  --text-decoration-none: none;
+  --textDecoration-underline: underline;
+}
+
+/* Dark Mode Variables */
+body[data-theme='dark'] {
+  --color-primary: #000000;
+  --color-secondary: #aaa;
+  --color-tertiary: #ff004efa;
+  --color-neutral: #fff;
+  --backgroundColor-primary: #000000;
+  --backgroundColor-secondary: #1c1c1c;
+  --backgroundColor-tertiary: #ff004efa;
+  --backgroundColor-neutral: #fff;
+  --boxShadow-thin: 0px 0px 0 1px var(--backgroundColor-primary),
+    1px 2px 0 var(--backgroundColor-tertiary),
+    3px 3px 0 0px var(--backgroundColor-primary),
+    2px 2px 1px 0px var(--backgroundColor-secondary);
+  --boxShadow-small: 0px 0px 0 1px var(--backgroundColor-primary),
+    3px 3px 0 var(--backgroundColor-tertiary),
+    3px 3px 0 1px var(--backgroundColor-primary),
+    4px 4px 5px 1px var(--backgroundColor-secondary);
+  --boxShadow-medium: 0px 0px 0 2px var(--backgroundColor-primary),
+    6px 6px 0 var(--backgroundColor-tertiary),
+    6px 6px 0 2px var(--backgroundColor-primary),
+    8px 8px 10px 2px var(--backgroundColor-secondary);
+  --boxShadow-large: 0px 0px 0 4px var(--backgroundColor-primary),
+    12px 12px 0 var(--backgroundColor-tertiary),
+    12px 12px 0 4px var(--backgroundColor-primary),
+    16px 16px 20px 4px var(--backgroundColor-secondary);
+  --boxShadow-extraLarge: 0px 0px 0 8px var(--backgroundColor-primary),
+    24px 24px 0 var(--backgroundColor-tertiary),
+    24px 24px 0 8px var(--backgroundColor-primary),
+    32px 32px 40px 8px var(--backgroundColor-secondary);
+  --boxShadow-inverted: 0px 0px 0 1px var(--backgroundColor-tertiary),
+    3px 3px 0 var(--backgroundColor-primary),
+    3px 3px 0 1px var(--backgroundColor-primary),
+    4px 4px 5px 1px var(--backgroundColor-secondary);
+  --boxShadow-inverted-hover: 0 0 0 1px var(--color-primary),
+    3px 3px 0 var(--color-neutral), 3px 3px 0 1px var(--color-primary),
+    4px 4px 5px 1px var(--color-tertiary);
+}
+
+/* Global Styles */
+body {
+  background: var(--backgroundColor-primary);
+  max-width: 100%;
+  padding: 0;
+}
+
+html {
+  font-size: var(--fontSize-medium);
+  font-family: var(--fontFamily-body);
+}
+body,
+html {
+  overflow-x: hidden;
+}
+
+img,
+video,
+iframe {
+  margin-top: var(--space-medium);
+  margin-bottom: var(--space-large);
+  border-radius: var(--borderRadius-medium);
+}
+
+hr {
+  border-color: var(--color-tertiary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: var(--fontFamily-title);
+  letter-spacing: var(--letterSpacing-widest);
+  line-height: var(--lineHeight-tight);
+  margin-top: 0;
+}
+
+a,
+a:visited,
+a:hover,
+p a:visited {
+  color: var(--color-tertiary);
+  text-decoration: var(--textDecoration-underline);
+  text-decoration-color: var(--color-tertiary);
+  transition: color var(--transition-fast);
+  word-wrap: break-word;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+p a {
+  color: var(--color-tertiary);
+  text-decoration: var(--textDecoration-underline);
+}
+
+a:hover,
+h1 a:hover,
+h2 a:hover,
+h3 a:hover,
+h4 a:hover,
+h5 a:hover,
+p a:hover {
+  color: var(--color-neutral);
+  border-bottom: none;
+}
+
+pre {
+  padding: 0;
+  background-color: var(--color-primary);
+  border-left: 5px solid var(--color-tertiary);
+  padding-left: var(--space-medium);
+}
+
+blockquote {
+  background-color: var(--backgroundColor-secondary);
+  border-left: 5px solid var(--color-tertiary);
+}
+
+code {
+  background-color: var(--color-tertiary);
+  border-radius: var(--borderRadius-small);
+  padding: var(--space-small);
+}
+
+main {
+  margin: 0 auto;
+  font-size: var(--fontSize-medium);
+  color: var(--color-neutral);
+}
+
+
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

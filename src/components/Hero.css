@@ -1,0 +1,118 @@
+.Hero {
+  position: relative;
+  width: 100vw;
+  height: 85vh;
+  overflow: hidden;
+  margin-bottom: var(--space-medium);
+  margin-top: 0;
+  .container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1; /* Make sure the video is in the background */
+  }
+
+  .floating-btn {
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--backgroundColor-tertiary);
+    color: var(--color-primary);
+    font-family: var(--fontFamily-title);
+    border-radius: var(--borderRadius-2xlarge);
+    height: 50px;
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: box-shadow var(--transition-fast);
+    animation: floatUpDown 2s ease-in-out infinite; 
+    .arrow {
+      font-size: var(--fontSize-small);
+    }
+  }
+
+  .floating-btn:hover {
+    box-shadow: var(--boxShadow-inverted-hover);
+    color: var(--color-neutral);
+  }
+
+  .video {
+    margin-top: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1; /* Make sure the video is in the background */
+  }
+
+  .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.55);
+    border-radius: var(--borderRadius-medium);
+    color: var(--color-neutral);
+    text-align: center;
+    max-width: 49%;
+    padding-bottom: calc(var(--space-medium) + 0.5rem);
+  }
+
+  @media screen and (max-width: 768px) {
+    .content {
+      padding: var(--space-medium);
+      max-width: 80%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: var(--space-medium);
+    }
+    .call-to-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-medium);
+      align-items: center;
+    }
+  }
+
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+}
+
+.button {
+  background-color: #ff5733;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 1.2rem;
+}
+
+.button:hover {
+  background-color: #e04e2f;
+}

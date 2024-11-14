@@ -1,0 +1,11 @@
+---
+interface Props {
+    label: string;
+    href?: string;
+}
+
+const { label, href } = Astro.props;
+import '~/components/Button.css'
+---
+
+{href ? <a class="Button" href={href} target="_blank" rel="noopener noreferrer">{label}</a> : null}

@@ -1,0 +1,17 @@
+.header-link {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--color-neutral);
+  font-size: var(--fontSize-small);
+  text-transform: uppercase;
+  font-family: var(--fontFamily-title);
+}
+
+.header-link:visited {
+  color: aliceblue;
+}
+
+.header-link.active {
+  color: var(--color-tertiary);
+  text-decoration: var(--textDecoration-underline);
+}

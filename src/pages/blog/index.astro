@@ -1,0 +1,11 @@
+---
+import { getCollection } from 'astro:content';
+import Blog from '~/layouts/Blog.astro';
+
+const posts = (await getCollection('blog')).sort(
+	(a: any, b:any) => b.data.createdAt.valueOf() - a.data.createdAt.valueOf(),
+);
+
+---
+
+<Blog category="Blog" posts={posts}  />
