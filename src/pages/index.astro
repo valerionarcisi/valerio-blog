@@ -78,7 +78,7 @@ const lastSongs = await fetchRecentTracks()
 				<Title title="Last Listened songs" />
 				<div class="ReelContainer">
 				{
-					lastSongs.recenttracks.track.map((song) => (
+					lastSongs.map((song) => (
 						<Reel type="song" artist={song.artist['#text']} album={song.album['#text']} url={song.image[3]['#text']} href={song.url} title={song.name} watchedDate={song?.date ? song.date['#text'] : new Date().toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: 'numeric' })}  />
 					))
 				}
