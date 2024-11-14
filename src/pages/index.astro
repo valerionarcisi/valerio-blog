@@ -7,39 +7,15 @@ import Hero from '~/components/Hero.astro';
 import Title from '~/components/Title.astro';
 import { getCollection } from 'astro:content';
 import Card from '~/components/Card.astro';
-import { getLetterboxdRss, parseXmlContent  } from '~/services/letterboxd';
-import { getMovieById  } from '~/services/tmdb';
-import Reel from '~/components/Reel.astro';
 import './index.css';
-import { fetchRecentTracks } from '~/services/audioscrobbler';
+import FetchSongs from '~/components/FetchSongs';
+import FetchMovies from '~/components/FetchMovies';
 
 const posts = (await getCollection('blog')).sort(
 	(a: any, b:any) => b.data.createdAt.valueOf() - a.data.createdAt.valueOf(),
 ).slice(0, 5);
 
 
-const lastWatchedMovies = async () => {
-	const xml = await getLetterboxdRss()
-	const parsedXml = await parseXmlContent(await xml.text()) as any
-
-	const watchedMovies = []
-	for (const item of parsedXml.rss.channel[0].item) {
-    if (!item?.['tmdb:movieId']?.[0]) continue;
-    try {
-      const movie = await getMovieById(item['tmdb:movieId'][0]);
-      watchedMovies.push({...movie, ...item});
-    } catch (error) {
-      console.error(`Failed to fetch movie with ID ${item['tmdb:movieId'][0]}`, error);
-      continue;
-    }
-	}
-
-	return watchedMovies
-}
-
-const lastWatched = await lastWatchedMovies()
-
-const lastSongs = await fetchRecentTracks()
 ---
 
 <!doctype html>
@@ -65,23 +41,15 @@ const lastSongs = await fetchRecentTracks()
 		/>
 		<main>
 			<section id="last-watched">
-			<Title title="Last watched movies" />
+				<Title title="Last watched movies" />
 				<div class="ReelContainer">
-				{
-					lastWatched.map((movie: any) => (
-						<Reel type="movie" vote_average={movie.vote_average} vote_count={movie.vote_count} url={`https://image.tmdb.org/t/p/w185/${movie.poster_path}`} href={movie.link[0]} title={movie['letterboxd:filmTitle'][0]} watchedDate={movie['letterboxd:watchedDate'][0]}  />
-					))
-				}
+				<FetchMovies client:load />
 				</div>
 			</section>
 			<section>
 				<Title title="Last Listened songs" />
 				<div class="ReelContainer">
-				{
-					lastSongs.recenttracks.track.map((song) => (
-						<Reel type="song" artist={song.artist['#text']} album={song.album['#text']} url={song.image[3]['#text']} href={song.url} title={song.name} watchedDate={song?.date ? song.date['#text'] : new Date().toLocaleDateString('en-us', { year: 'numeric', month: 'short', day: 'numeric' })}  />
-					))
-				}
+				<FetchSongs client:load />
 				</div>
 			</section>
 			<section>
