@@ -24,6 +24,7 @@
     "astro": "^4.16.10",
     "normalize.css": "^8.0.1",
     "sakura.css": "^1.5.0",
+    "sharp": "^0.33.5",
     "typescript": "^5.6.3",
     "xml2js": "^0.6.2"
   },
