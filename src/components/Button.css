@@ -24,6 +24,6 @@
 @media screen and (max-width: 768px) {
   .Button {
     font-size: var(--fontSize-medium);
-    padding: var(--space-medium);
+    padding: var(--space-small);
   }
 }
