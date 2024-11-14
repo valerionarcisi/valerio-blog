@@ -1,5 +1,6 @@
 [build.environment]
   NPM_FLAGS = "--version"
+  NETLIFY_USE_PNPM = "true"
 [build]
-  command = "npx pnpm i --store=node_modules/.pnpm-store && npm run build"
+  command = "pnpm build"
   publish = "dist"
