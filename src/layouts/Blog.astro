@@ -23,7 +23,7 @@ const { category, posts } = Astro.props;
 				<Title title={`Category: ${category}` || 'Blog'} />
 					{
 						posts.map((post:any) => ( 
-								<Card {...post.data } slug={post.slug} />
+								<Card {...post } slug={post.slug} />
 						))
 						
 					}

@@ -1,0 +1,18 @@
+.container {
+  max-width: 800px;
+  margin-top: var(--space-large);
+
+  .avatar {
+    margin: var(--space-medium) auto;
+    max-width: 100%;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    float: left;
+    box-shadow: var(--boxShadow-small);
+    margin-right: var(--space-xlarge);
+  }
+  section {
+    height: 50vh;
+  }
+}

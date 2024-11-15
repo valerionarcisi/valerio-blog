@@ -2,23 +2,27 @@
 import FormattedDate from '~/components/FormattedDate.astro';
 import '~/components/Card.css'
 import Tag from '~/components/Tag.astro';
-const { title, description, createdAt, cover, tags, slug } = Astro.props;
+import {type TAbstractPost} from '~/services/post';
+
+type Props = TAbstractPost
+
+const { title, extract, date, coverImage, tags, slug } = Astro.props;
 ---
 
 
 <section class="Card">
     <div>
         <a href={`/blog/${slug}/`}>
-            <img src={cover} alt={title} />
+            <img src={coverImage.url} alt={title} />
         </a>
     </div>
     <div class="info">
         <a href={`/blog/${slug}/`}>
             <h3 class="title">{title}</h3>
         </a>
-        <div class="description">{description.substring(0, 100)}...</div>
+        <div class="description">{extract.substring(0, 100)}...</div>
         <div class="date">
-            Created At: <FormattedDate date={createdAt} />
+            Created At: <FormattedDate date={new Date(date)}} />
         </div>
         <div class="tags">
             {tags.map((tag: unknown) => <Tag tag={tag} />)}

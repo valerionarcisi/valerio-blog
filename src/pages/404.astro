@@ -1,0 +1,30 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
+import Title from "~/components/Title.astro";
+import "./404.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={`404 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+  </head>
+  <body data-theme="dark">
+    <Header />
+    <main class="container">
+      <Title title="404: Page not found 😢" />
+      <section>
+        <p>
+          <img class="avatar" src="/img/avatar.png" alt="Valerio" />
+          <h2>
+            Home is always... <a href="/">Home</a>!
+          </h2>
+        </p>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

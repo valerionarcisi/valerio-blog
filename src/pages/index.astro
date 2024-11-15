@@ -5,18 +5,15 @@ import Footer from '~/components/Footer.astro';
 import { SITE_TITLE, SITE_DESCRIPTION } from '~/consts';
 import Hero from '~/components/Hero.astro';
 import Title from '~/components/Title.astro';
-import { getCollection } from 'astro:content';
 import Card from '~/components/Card.astro';
 import { getLetterboxdRss, parseXmlContent  } from '~/services/letterboxd';
 import { getMovieById  } from '~/services/tmdb';
 import Reel from '~/components/Reel.astro';
 import './index.css';
 import { fetchRecentTracks } from '~/services/audioscrobbler';
+import fetchHyPosts from '~/services/post';
 
-const posts = (await getCollection('blog')).sort(
-	(a: any, b:any) => b.data.createdAt.valueOf() - a.data.createdAt.valueOf(),
-).slice(0, 5);
-
+const posts = await fetchHyPosts()
 
 const lastWatchedMovies = async () => {
 	const xml = await getLetterboxdRss()
@@ -87,8 +84,8 @@ const lastSongs = await fetchRecentTracks()
 			<section>
 				<Title title="Latest posts" />
 				{
-					posts.map((post:any) => ( 
-							<Card {...post.data } slug={post.slug} />
+					posts?.map((post) => ( 
+							<Card date={post.date} title={post.title} extract={post.extract} slug={post.slug} createdAt={post.createdAt} coverImage={post.coverImage} tags={post.tags} />
 					))
 				}	
 			</section>	

@@ -1,20 +1,31 @@
 ---
-import { type CollectionEntry, getCollection } from 'astro:content';
+import { marked } from "marked";
 import BlogPost from '~/layouts/BlogPost.astro';
+import fetchHyPosts, { type TPost } from '~/services/post';
 
 export async function getStaticPaths() {
-	const posts = await getCollection('blog');
-	return posts.map((post: CollectionEntry<'blog'>) => ({
-		params: { slug: post.slug },
-		props: post,
-	}));
+	const posts = await fetchHyPosts(100);
+	const paths = posts?.map(post => ({
+    params: {
+      slug: post.slug,
+    },
+    props: {
+		post,
+    },
+  }))
+  return paths
 }
-type Props = CollectionEntry<'blog'>;
 
-const post = Astro.props;
-const { Content } = await post.render();
+const post = Astro.props.post as TPost
+const htmlContent = marked(post.content);
 ---
 
-<BlogPost {...post.data}>
-	<Content />
+<script>
+  import 'highlight.js/styles/github-dark.css';
+  import hljs from 'highlight.js';
+  hljs.initHighlightingOnLoad();
+</script>
+
+<BlogPost slug={post.slug} createdAt={post.createdAt} title={post.title} extract={post.extract} date={post.date} coverImage={post.coverImage} lang={post.lang} tags={post.tags}>
+  <div  set:html={htmlContent} />
 </BlogPost>

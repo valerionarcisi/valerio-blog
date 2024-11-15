@@ -22,6 +22,8 @@
     "@fontsource/merriweather": "^5.1.0",
     "@fontsource/staatliches": "^5.1.0",
     "astro": "^4.16.10",
+    "highlight.js": "^11.10.0",
+    "marked": "^15.0.0",
     "normalize.css": "^8.0.1",
     "sakura.css": "^1.5.0",
     "sharp": "^0.33.5",

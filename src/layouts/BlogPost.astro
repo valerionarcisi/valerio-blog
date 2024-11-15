@@ -1,23 +1,23 @@
 ---
-import type { CollectionEntry } from 'astro:content';
 import BaseHead from '~/components/BaseHead.astro';
 import Header from '~/components/Header.astro';
 import Footer from '~/components/Footer.astro';
 import FormattedDate from '~/components/FormattedDate.astro';
 import Tag from '~/components/Tag.astro'
-
-type Props = CollectionEntry<'blog'>['data'];
-
-const { title, description, createdAt, cover, language, tags, coverAuthor, coverLinkSource } = Astro.props;
-import './BlogPast.css'
 import Title from '~/components/Title.astro';
+import type { TPost } from '~/services/post';
 import { SITE_TITLE } from '~/consts';
+import './BlogPost.css'
+
+type Props = Omit<TPost, 'content'>;
+
+const { title, extract, date, coverImage, lang, tags, coverAuthorName, coverAuthorLink } = Astro.props;
 
 ---
 
-<html lang={language}>
+<html lang={lang}>
 	<head>
-		<BaseHead title={`${title} | ${SITE_TITLE}`} description={description} cover={cover}/>
+		<BaseHead title={`${title} | ${SITE_TITLE}`} description={extract} cover={coverImage.url}/>
 	</head>
 
 	<body data-theme="dark">
@@ -25,22 +25,22 @@ import { SITE_TITLE } from '~/consts';
 		<main>
 			<article class="BlogPost">
 				<Title title={title} />
-				{cover && <img src={cover} alt={title} />}
+				{coverImage.url && <img src={coverImage.url} alt={title} />}
 				<div class="prose">
 						<hr />
 						<div class="info">
 							<div class="date">
-								Posted on <FormattedDate date={createdAt} />
+								Posted on <FormattedDate date={new Date(date)} />
 							</div>
 							<div class="tags">
 								{tags.map((tag: string) => <Tag tag={tag} />)}
 							</div>
 						</div>
-						{coverAuthor && <div class="cover">
-							Cover by <a target="_blank" href={coverLinkSource}>{coverAuthor}</a>
+						{coverAuthorName && <div class="cover">
+							Cover by <a target="_blank" href={coverAuthorLink || '#'}>{coverAuthorName}</a>
 						</div>}
 						<hr />
-					<slot />
+						<slot />
 				</div>
 			</article>
 		</main>

@@ -148,7 +148,7 @@ p a:hover {
 
 pre {
   padding: 0;
-  background-color: var(--color-primary);
+  background-color: var(--backgroundColor-secondary);
   border-left: 5px solid var(--color-tertiary);
   padding-left: var(--space-medium);
 }
