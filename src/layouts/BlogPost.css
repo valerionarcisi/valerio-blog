@@ -11,6 +11,12 @@
     box-shadow: var(--boxShadow-medium);
   }
 
+  @media screen and (max-width: 768px) {
+    img {
+      max-width: 85%;
+    }
+  }
+
   .info {
     font-size: var(--fontSize-very-small);
     color: var(--color-neutral);
