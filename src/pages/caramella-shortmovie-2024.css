@@ -1,0 +1,13 @@
+.title {
+  text-align: center;
+  h2 {
+    font-style: italic;
+  }
+}
+
+.container {
+  margin-top: var(--space-large);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-large);
+}
