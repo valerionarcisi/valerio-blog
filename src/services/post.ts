@@ -11,10 +11,11 @@ const PostScheme = zod.object({
   lang: zod.string(),
   tags: zod.array(zod.string()),
   coverImage: zod.object({
-    url: zod.string()
+    url: zod.string(),
   }),
-  coverAuthorName: zod.string().optional(),
-  coverAuthorLink: zod.string().optional()
+  coverAuthorName: zod.string().nullable().optional(),
+  coverAuthorLink: zod.string().nullable().optional(),
+  coverDescription: zod.string().nullable().optional(),
 });
 
 const AbstractPostScheme = PostScheme.omit({ content: true, lang: true });
@@ -37,12 +38,15 @@ const fetchHyPosts = async (limit = 5) => {
       tags,
       lang,
       content,
+      coverAuthorName,
+      coverAuthorLink,
+      coverDescription,
       coverImage {
     	  id,
         url,
-    	}
-    }
-  }
+    	},
+      }
+      }
 `;
 
   try {

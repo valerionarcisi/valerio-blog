@@ -33,8 +33,11 @@ const htmlContent = marked(post.content);
   extract={post.extract}
   date={post.date}
   coverImage={post.coverImage}
+  coverAuthorLink={post.coverAuthorLink}
+  coverAuthorName={post.coverAuthorName}
   lang={post.lang}
   tags={post.tags}
+  coverDescription={post.coverDescription}
 >
   <div set:html={htmlContent} />
 </BlogPost>

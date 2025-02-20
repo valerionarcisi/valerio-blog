@@ -6,17 +6,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-large);
-  .date {
-    text-transform: uppercase;
+
+  @media screen and (min-width: 769px) and (max-width: 1024px) {
+    max-width: 90%;
   }
 
-  .title,
-  .date,
-  .tags {
+  .title {
     margin-bottom: var(--space-medium);
-  }
-  .info {
-    padding: var(--space-medium) 0;
   }
 
   h3 {
@@ -33,33 +29,83 @@
   img:hover {
     box-shadow: var(--boxShadow-inverted-hover);
   }
-  .date {
-    font-size: var(--fontSize-very-small);
-    color: var(--color-neutral);
-  }
   .description {
     font-size: var(--fontSize-very-small);
     color: var(--color-neutral);
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    position: relative;
+
+    .cover-image {
+      width: 100%;
+
+      img {
+        width: 100%;
+        display: block;
+        box-shadow: var(--boxShadow-medium);
+        border-radius: var(--borderRadius-small);
+      }
+    }
+
+    .metadata {
+      position: absolute;
+      bottom: var(--space-large);
+      left: var(--space-small);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: calc(100% - var(--space-small) * 2);
+
+      .tags {
+        font-size: var(--fontSize-very-small);
+        color: var(--color-neutral);
+        padding: var(--space-small);
+        border-radius: var(--borderRadius-small);
+      }
+      .date {
+        font-size: var(--fontSize-very-small);
+        color: var(--color-neutral);
+        background-color: rgba(0, 0, 0, 0.7);
+        padding: var(--space-small);
+        border-radius: var(--borderRadius-small);
+      }
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .content {
+      margin-top: var(--space-medium);
+      text-align: center;
+    }
+    .info {
+      img {
+        margin-bottom: var(--space-small);
+      }
+      .metadata {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        bottom: var(--space-small);
+        .tags {
+          font-size: var(--fontSize-very-micro);
+        }
+        .date {
+          font-size: var(--fontSize-very-micro);
+        }
+      }
+    }
   }
 
   @media screen and (max-width: 768px) {
     max-width: 90%;
     grid-template-columns: 1fr;
     gap: var(--space-small);
-    img {
-      margin: var(--space-small) auto;
-    }
     h3 {
       font-size: var(--fontSize-extraLarge);
-    }
-    .info {
-      padding: var(--space-small) 0;
-      text-align: center;
-    }
-    .title,
-    .date,
-    .tags {
-      margin-bottom: var(--space-small);
     }
     .description {
       display: none;

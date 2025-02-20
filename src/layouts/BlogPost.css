@@ -3,7 +3,14 @@
   flex-direction: column;
   gap: 0.2rem;
   margin-top: var(--space-medium);
-
+  .author {
+    text-align: center;
+    font-size: var(--fontSize-very-small);
+    .description {
+      margin-top: 2px;
+      font-size: var(--fontSize-very-micro);
+    }
+  }
   .title {
     display: flex;
     flex-direction: column;
@@ -37,12 +44,13 @@
         display: block;
         box-shadow: var(--boxShadow-medium);
         border-radius: var(--borderRadius-small);
+        margin-bottom: var(--space-medium);
       }
     }
 
     .metadata {
       position: absolute;
-      bottom: var(--space-large);
+      bottom: var(--space-medium);
       left: var(--space-small);
       display: flex;
       justify-content: space-between;
@@ -133,10 +141,6 @@
         margin-bottom: var(--space-medium);
       }
     }
-  }
-
-  .cover {
-    font-size: var(--fontSize-very-small);
   }
 
   @media (max-width: 768px) {

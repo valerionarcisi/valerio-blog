@@ -20,6 +20,7 @@ const {
   tags,
   coverAuthorName,
   coverAuthorLink,
+  coverDescription,
 } = Astro.props;
 ---
 
@@ -50,17 +51,20 @@ const {
             </div>
           </div>
         </div>
+        {
+          coverAuthorName && (
+            <div class="author">
+              Cover by
+              <a target="_blank" href={coverAuthorLink || "#"}>
+                {coverAuthorName}
+              </a>
+              {coverDescription && (
+                <div class="description">{coverDescription}</div>
+              )}
+            </div>
+          )
+        }
         <div class="prose">
-          {
-            coverAuthorName && (
-              <div class="cover">
-                Cover by{" "}
-                <a target="_blank" href={coverAuthorLink || "#"}>
-                  {coverAuthorName}
-                </a>
-              </div>
-            )
-          }
           <slot />
         </div>
       </article>

@@ -25,4 +25,7 @@ footer {
     grid-template-columns: 1fr;
     gap: var(--space-medium);
   }
+  @media screen and (min-width: 769px) and (max-width: 1024px) {
+    max-width: 90%;
+  }
 }
