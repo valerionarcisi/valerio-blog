@@ -3,10 +3,10 @@
   background-color: var(--backgroundColor-tertiary);
   padding: var(--space-small);
   text-transform: uppercase;
-  font-size: var(--fontSize-small);
+  font-size: var(--fontSize-very-small);
   border-radius: var(--borderRadius-small);
   text-decoration: none;
-  margin: 0 var(--space-medium);
+  margin: 0 var(--space-small);
   font-family: var(--fontFamily-title);
   color: var(--color-primary);
   transition: box-shadow var(--transition-fast);
