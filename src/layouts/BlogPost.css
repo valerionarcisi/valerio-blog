@@ -74,7 +74,6 @@
       img {
         margin-bottom: var(--space-large);
       }
-    
     }
     .pic-caption {
       display: flex;
@@ -93,8 +92,6 @@
         margin-bottom: var(--space-medium);
       }
     }
-  }
-
   }
   @media (max-width: 768px) {
     .prose {

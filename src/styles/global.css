@@ -177,6 +177,10 @@ p a:hover {
   border-bottom: none;
 }
 
+ul {
+  font-size: var(--fontSize-small);
+}
+
 pre {
   padding: 0;
   background-color: var(--backgroundColor-secondary);
