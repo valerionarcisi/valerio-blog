@@ -12,7 +12,9 @@ const { title, extract, date, coverImage, tags, slug } = Astro.props;
 <div class="Card">
   <div class="info">
     <div class="cover-image">
-      {coverImage.url && <img src={coverImage.url} alt={title} />}
+      <a href={`/blog/${slug}/`}>
+        {coverImage.url && <img src={coverImage.url} alt={title} />}
+      </a>
     </div>
     <div class="metadata">
       <div class="tags">
