@@ -22,5 +22,9 @@
     text-align: center;
     max-width: 80%;
     margin: 0 auto;
+    h1 {
+      font-size: var(--fontSize-large);
+      padding: 0 var(--space-medium);
+    }
   }
 }

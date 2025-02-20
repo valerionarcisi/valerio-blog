@@ -1,31 +1,30 @@
 ---
-import FormattedDate from '~/components/FormattedDate.astro';
-import '~/components/Card.css'
-import Tag from '~/components/Tag.astro';
-import {type TAbstractPost} from '~/services/post';
+import FormattedDate from "~/components/FormattedDate.astro";
+import "~/components/Card.css";
+import Tag from "~/components/Tag.astro";
+import { type TAbstractPost } from "~/services/post";
 
-type Props = TAbstractPost
+type Props = TAbstractPost;
 
 const { title, extract, date, coverImage, tags, slug } = Astro.props;
 ---
 
-
-<section class="Card">
-    <div>
-        <a href={`/blog/${slug}/`}>
-            <img src={coverImage.url} alt={title} />
-        </a>
+<div class="Card">
+  <div>
+    <a href={`/blog/${slug}/`}>
+      <img src={coverImage.url} alt={title} />
+    </a>
+  </div>
+  <div class="info">
+    <a href={`/blog/${slug}/`}>
+      <h3 class="title">{title}</h3>
+    </a>
+    <div class="description">{extract.substring(0, 100)}...</div>
+    <div class="date">
+      <FormattedDate date={new Date(date)} } />
     </div>
-    <div class="info">
-        <a href={`/blog/${slug}/`}>
-            <h3 class="title">{title}</h3>
-        </a>
-        <div class="description">{extract.substring(0, 100)}...</div>
-        <div class="date">
-            Created At: <FormattedDate date={new Date(date)}} />
-        </div>
-        <div class="tags">
-            {tags.map((tag: unknown) => <Tag tag={tag} />)}
-        </div>
+    <div class="tags">
+      {tags.map((tag: unknown) => <Tag tag={tag} />)}
     </div>
-</section>
+  </div>
+</div>

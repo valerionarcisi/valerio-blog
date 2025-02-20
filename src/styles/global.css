@@ -1,11 +1,12 @@
 /* Common Variables */
 :root {
-  --fontFamily-body: 'Merriweather', sans-serif;
-  --fontFamily-title: 'Staatliches', sans-serif;
+  --fontFamily-body: "Merriweather", sans-serif;
+  --fontFamily-title: "Staatliches", sans-serif;
   --fontSize-very-micro: clamp(0.25rem, 0.25rem + 0.38vw, 0.5rem);
   --fontSize-very-small: clamp(0.55rem, 0.55rem + 0.38vw, 1.05rem);
-  --fontSize-small: clamp(0.75rem, 0.65rem + 0.48vw, 1.25rem);
-  --fontSize-medium: clamp(1.15rem, 0.9rem + 0.48vw, 1.5rem);
+  --fontSize-small: clamp(0.75rem, 0.65rem + 0.48vw, 1.2rem);
+  --fontSize-base: clamp(1rem, 1rem + 0.38vw, 1.5rem);
+  --fontSize-medium: clamp(1.15rem, 0.9rem + 0.48vw, 1.3rem);
   --fontSize-large: clamp(1.5rem, 1.11rem + 0.82vw, 2.5rem);
   --fontSize-extraLarge: clamp(2rem, 1.78rem + 1.08vw, 3.125rem);
   --fontWeight-400: 400;
@@ -33,7 +34,7 @@
 }
 
 /* Dark Mode Variables */
-body[data-theme='dark'] {
+body[data-theme="dark"] {
   --color-primary: #000000;
   --color-secondary: #aaa;
   --color-tertiary: #ff004efa;
@@ -42,33 +43,39 @@ body[data-theme='dark'] {
   --backgroundColor-secondary: #1c1c1c;
   --backgroundColor-tertiary: #ff004efa;
   --backgroundColor-neutral: #fff;
-  --boxShadow-thin: 0px 0px 0 1px var(--backgroundColor-primary),
+  --boxShadow-thin:
+    0px 0px 0 1px var(--backgroundColor-primary),
     1px 2px 0 var(--backgroundColor-tertiary),
     3px 3px 0 0px var(--backgroundColor-primary),
     2px 2px 1px 0px var(--backgroundColor-secondary);
-  --boxShadow-small: 0px 0px 0 1px var(--backgroundColor-primary),
+  --boxShadow-small:
+    0px 0px 0 1px var(--backgroundColor-primary),
     3px 3px 0 var(--backgroundColor-tertiary),
     3px 3px 0 1px var(--backgroundColor-primary),
     4px 4px 5px 1px var(--backgroundColor-secondary);
-  --boxShadow-medium: 0px 0px 0 2px var(--backgroundColor-primary),
+  --boxShadow-medium:
+    0px 0px 0 2px var(--backgroundColor-primary),
     6px 6px 0 var(--backgroundColor-tertiary),
     6px 6px 0 2px var(--backgroundColor-primary),
     8px 8px 10px 2px var(--backgroundColor-secondary);
-  --boxShadow-large: 0px 0px 0 4px var(--backgroundColor-primary),
+  --boxShadow-large:
+    0px 0px 0 4px var(--backgroundColor-primary),
     12px 12px 0 var(--backgroundColor-tertiary),
     12px 12px 0 4px var(--backgroundColor-primary),
     16px 16px 20px 4px var(--backgroundColor-secondary);
-  --boxShadow-extraLarge: 0px 0px 0 8px var(--backgroundColor-primary),
+  --boxShadow-extraLarge:
+    0px 0px 0 8px var(--backgroundColor-primary),
     24px 24px 0 var(--backgroundColor-tertiary),
     24px 24px 0 8px var(--backgroundColor-primary),
     32px 32px 40px 8px var(--backgroundColor-secondary);
-  --boxShadow-inverted: 0px 0px 0 1px var(--backgroundColor-tertiary),
+  --boxShadow-inverted:
+    0px 0px 0 1px var(--backgroundColor-tertiary),
     3px 3px 0 var(--backgroundColor-primary),
     3px 3px 0 1px var(--backgroundColor-primary),
     4px 4px 5px 1px var(--backgroundColor-secondary);
-  --boxShadow-inverted-hover: 0 0 0 1px var(--color-primary),
-    3px 3px 0 var(--color-neutral), 3px 3px 0 1px var(--color-primary),
-    4px 4px 5px 1px var(--color-tertiary);
+  --boxShadow-inverted-hover:
+    0 0 0 1px var(--color-primary), 3px 3px 0 var(--color-neutral),
+    3px 3px 0 1px var(--color-primary), 4px 4px 5px 1px var(--color-tertiary);
 }
 
 /* Global Styles */
@@ -97,6 +104,7 @@ iframe {
 
 hr {
   border-color: var(--color-tertiary);
+  margin: var(--space-large) 0;
 }
 
 * {
@@ -112,6 +120,29 @@ h5 {
   letter-spacing: var(--letterSpacing-widest);
   line-height: var(--lineHeight-tight);
   margin-top: 0;
+}
+
+h2 {
+  font-size: var(--fontSize-large);
+}
+
+h3 {
+  font-size: var(--fontSize-medium);
+}
+
+h4 {
+  font-size: var(--fontSize-base);
+}
+
+h5 {
+  font-size: var(--fontSize-base);
+}
+
+p {
+  font-size: var(--fontSize-small);
+  margin-top: var(--space-small);
+  margin-bottom: var(--space-small);
+  word-wrap: break-word;
 }
 
 a,
@@ -152,6 +183,9 @@ pre {
   border-left: 5px solid var(--color-tertiary);
   padding-left: var(--space-medium);
 }
+pre > code {
+  font-size: var(--fontSize-very-small);
+}
 
 blockquote {
   background-color: var(--backgroundColor-secondary);
@@ -169,7 +203,6 @@ main {
   font-size: var(--fontSize-medium);
   color: var(--color-neutral);
 }
-
 
 @keyframes floatUpDown {
   0% {

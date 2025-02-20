@@ -1,14 +1,33 @@
 ---
-import HeaderLink from '~/components/HeaderLink.astro';
-import '~/components/Header.css'
+import HeaderLink from "~/components/HeaderLink.astro";
+import "~/components/Header.css";
 ---
 
 <header class="Header">
-	<div>
-		<nav>
-				<HeaderLink href="/">Home</HeaderLink>
-				<HeaderLink href="/blog">Blog</HeaderLink>
-				<HeaderLink href="/who-i-am">Who I Am</HeaderLink>
-				<HeaderLink href="/filmmaker-journey">Filmmaker Journey</HeaderLink>
-	</div>
+  <div>
+    <HeaderLink href="/" class="logo">
+      <img src="/public/img/me.jpg" alt="Logo Valerio Narcisi" />
+      <div>Valerio Narcisi</div>
+    </HeaderLink>
+  </div>
+  <div class="menu-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <nav>
+    <HeaderLink href="/blog">Blog</HeaderLink>
+    <HeaderLink href="/who-i-am">Who I Am</HeaderLink>
+    <HeaderLink href="/filmmaker-journey">Filmmaker Journey</HeaderLink>
+  </nav>
 </header>
+
+<script>
+  const menuToggle = document.querySelector(".menu-toggle");
+  const nav = document.querySelector("nav");
+
+  menuToggle?.addEventListener("click", () => {
+    menuToggle.classList.toggle("active");
+    nav?.classList.toggle("active");
+  });
+</script>

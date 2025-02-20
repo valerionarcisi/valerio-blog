@@ -8,18 +8,21 @@ footer {
   border-radius: var(--borderRadius-medium);
   background-color: var(--backgroundColor-secondary);
   color: var(--color-neutral);
-  font-size: var(--fontSize-medium);
+  font-size: var(--fontSize-small);
   font-family: var(--fontFamily-title);
-  @media screen and (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: var(--space-medium);
-  }
+  box-shadow: var(--boxShadow-medium);
   h3 {
-    font-size: var(--fontSize-large);
+    font-size: var(--fontSize-medium);
   }
   ul {
     list-style: none;
     padding: 0;
     margin: 0;
+  }
+
+  @media screen and (max-width: 768px) {
+    max-width: 90%;
+    grid-template-columns: 1fr;
+    gap: var(--space-medium);
   }
 }

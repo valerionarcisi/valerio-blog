@@ -6,30 +6,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-large);
-
-  @media screen and (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: var(--space-small);
-    img {
-      margin: var(--space-small) auto;
-    }
-    h3 {
-      font-size: var(--fontSize-extraLarge);
-    }
-    .info {
-      padding: var(--space-small) 0;
-      text-align: center;
-    }
-    .title,
-    .description,
-    .date,
-    .tags {
-      margin-bottom: var(--space-small);
-    }
+  .date {
+    text-transform: uppercase;
   }
 
   .title,
-  .description,
   .date,
   .tags {
     margin-bottom: var(--space-medium);
@@ -59,5 +40,29 @@
   .description {
     font-size: var(--fontSize-very-small);
     color: var(--color-neutral);
+  }
+
+  @media screen and (max-width: 768px) {
+    max-width: 90%;
+    grid-template-columns: 1fr;
+    gap: var(--space-small);
+    img {
+      margin: var(--space-small) auto;
+    }
+    h3 {
+      font-size: var(--fontSize-extraLarge);
+    }
+    .info {
+      padding: var(--space-small) 0;
+      text-align: center;
+    }
+    .title,
+    .date,
+    .tags {
+      margin-bottom: var(--space-small);
+    }
+    .description {
+      display: none;
+    }
   }
 }

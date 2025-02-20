@@ -48,16 +48,53 @@
 
   .prose {
     margin: var(--space-medium) auto;
-    max-width: 45%;
+    max-width: 55%;
     color: var(--color-neutral);
     font-size: var(--fontSize-small);
     font-weight: var(--fontWeight-400);
     line-height: var(--lineHeight-normal);
     img {
-      margin: var(--space-small) auto;
+      margin: var(--space-small);
       max-width: 100%;
       box-shadow: var(--boxShadow-thin);
     }
+
+    .avatar {
+      margin: var(--space-medium) auto;
+      max-width: 100%;
+      border-radius: 50%;
+      width: 100px;
+      height: 100px;
+      float: left;
+      box-shadow: var(--boxShadow-small);
+      margin-right: var(--space-xlarge);
+    }
+    .img-container {
+      text-align: center;
+      img {
+        margin-bottom: var(--space-large);
+      }
+    
+    }
+    .pic-caption {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      img {
+        margin-bottom: var(--space-small);
+      }
+      .caption {
+        text-align: center;
+        text-transform: uppercase;
+        color: var(--color-secondary);
+        font-size: var(--fontSize-very-small);
+        margin-top: var(--space-small);
+        margin-bottom: var(--space-medium);
+      }
+    }
+  }
+
   }
   @media (max-width: 768px) {
     .prose {
