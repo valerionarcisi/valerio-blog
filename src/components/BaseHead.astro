@@ -61,6 +61,19 @@ const { title, description, image = "/img/avatar.png", cover } = Astro.props;
   defer
   data-domain="valerionarcisi.me"
   src="https://plausible.io/js/script.js"></script>
+  <script type="text/javascript">
+    (
+      function() {
+        var sbSiteSecret = '04e78d4b-5e6e-41c0-91e3-9d7e16e4a874';
+        window.sitebehaviourTrackingSecret = sbSiteSecret;
+        var scriptElement = document.createElement('script');
+        scriptElement.async = true;
+        scriptElement.id = 'site-behaviour-script-v2';
+        scriptElement.src = 'https://sitebehaviour-cdn.fra1.cdn.digitaloceanspaces.com/index.min.js?sitebehaviour-secret=' + sbSiteSecret;
+        document.head.appendChild(scriptElement); 
+      }
+    )()
+</script>
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
