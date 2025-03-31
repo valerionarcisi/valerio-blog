@@ -40,4 +40,7 @@ const htmlContent = marked(post.content);
   coverDescription={post.coverDescription}
 >
   <div set:html={htmlContent} />
+  <script async src="https://talk.hyvor.com/embed/embed.js" type="module"
+  ></script>
+  <hyvor-talk-comments website-id="12917" page-id=""></hyvor-talk-comments>
 </BlogPost>
