@@ -18,13 +18,16 @@ const { title, subtitle, callToActions } = Astro.props;
 
 ---
 
-
 <section class="Hero">
   <div class="container">
-    <video class="video" autoplay muted loop>
-      <source src="/videos/Arturo.mp4" type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
+    <iframe
+      id="youtubeVideo"
+      width="100%"
+      src="https://www.youtube.com/embed/UnQ8NSXYXao?autoplay=1&mute=1"
+      frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
   </div>
 
   <div class="overlay">
@@ -42,11 +45,24 @@ const { title, subtitle, callToActions } = Astro.props;
 </section>
 
 <script>
-  const buttons = document.querySelector('button.floating-btn');
-  buttons?.addEventListener('click', () => {
+  const button = document.querySelector('button.floating-btn');
+  button?.addEventListener('click', () => {
     const targetSection = document.getElementById('last-watched');
     if (targetSection) {
       targetSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Set iframe height to viewport height
+  const iframe = document.getElementById('youtubeVideo');
+  if (iframe) {
+    iframe.style.height = `${window.innerHeight}px`;
+  }
+
+  // Optionally, update height on window resize
+  window.addEventListener('resize', () => {
+    if (iframe) {
+      iframe.style.height = `${window.innerHeight}px`;
     }
   });
 </script>
