@@ -36,12 +36,19 @@ const today = new Date();
   </div>
   <div>
     <div>
-      <h3>
+      <h2>Stay up to date</h2>
+      <p>Subscribe to receive notifications about my latest posts and updates. Unsubscribe at any time.</p>
+      <script
+        async
+        src="https://talk.hyvor.com/embed/newsletter.js"
+        type="module"></script>
+      <hyvor-talk-newsletter website-id="12917" style="margin-top: 20px;"></hyvor-talk-newsletter>
+      <p style="margin-top: 20px;">
         This website is made from <a
           target="_blank"
           href="https://maps.app.goo.gl/U4QDSCMwis5KvoaY8">"Le Marche Zozze"</a
         > by me.<br /> Copyright {today.getFullYear()}
-      </h3>
+      </p>
     </div>
   </div>
 </footer>
