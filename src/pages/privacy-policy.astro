@@ -1,0 +1,62 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
+import Title from "~/components/Title.astro";
+import "~/layouts/BlogPost.css";
+const today = new Date();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Privacy Policy  | ${SITE_TITLE}`}
+      description={SITE_DESCRIPTION}
+    />
+  </head>
+  <body data-theme="dark">
+    <Header />
+    <main class="BlogPost">
+      <Title title="Privacy Policy" />
+      <section class="prose">
+        <h2>Last updated: {today.getFullYear()}</h2>
+
+        <p>
+          At valerionarcisi.me, we prioritize user privacy. We do not use
+          tracking tools, analytics, or advertisements.
+        </p>
+
+        <hr />
+        <h2>1. Data We Collect,<br /></h2>
+        <p>
+          We collect only the necessary data to provide our services:
+          Newsletter: If you subscribe, we collect your email address to send
+          updates. You can unsubscribe anytime. Comments: We use Hyvor Talk, a
+          privacy-first commenting system that does not track users or sell data
+          to third parties. Learn more here: <a
+            target="_blank"
+            href="https://talk.hyvor.com/docs#privacy-focused"
+            >Hyvor Talk Docs
+          </a>
+        </p>
+      <hr />
+
+      <h2>2. Your Rights You have the right</h2>
+      <p>
+        to: ✅ Request the deletion of your email from our newsletter. ✅ Delete
+        your comments directly on Hyvor Talk.
+      </p>
+      <hr />
+
+      <h2>
+        3. Contact For any privacy-related inquiries, contact us at: <a
+          href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com</a
+        >
+      </h2>
+    </main>
+
+    <Footer />
+  </body>
+</html>

@@ -5,6 +5,7 @@ import Footer from "~/components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
 import Title from "~/components/Title.astro";
 import "~/layouts/BlogPost.css";
+import Button from "~/components/Button.astro";
 ---
 
 <!doctype html>
@@ -138,15 +139,16 @@ import "~/layouts/BlogPost.css";
           encounters.
         </p>
         <p>Arturo also won a prize at the Roccafluvione Film Festival.</p>
-        <iframe
-          width="100%"
-          height="315"
-          src="https://www.youtube.com/embed/7TpiIvEq5l8?si=95DZqUv7cTlM8qNW"
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          referrerpolicy="strict-origin-when-cross-origin"
-          frameborder={0}
-          allowfullscreen></iframe>
+        <video class="video" autoplay muted loop>
+          <source src="/videos/Arturo.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div style="text-align: center;">
+          <Button
+            label="Watch Arturo on Youtube"
+            href="https://youtu.be/7TpiIvEq5l8"
+          />
+        </div>
       </section>
     </main>
 
