@@ -2,3 +2,6 @@
 interface ImportMetaEnv {
   readonly HYGRAPH_ENDPOINT: string;
 }
+interface Window {
+  plausible: any;
+}
