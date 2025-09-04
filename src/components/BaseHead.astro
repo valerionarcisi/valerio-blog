@@ -57,18 +57,9 @@ const { title, description, image = "/img/avatar.png", cover } = Astro.props;
 />
 <meta name="theme-color" content="#ffffff" />
 <meta name="generator" content={Astro.generator} />
-<script
-  defer
-  data-domain="valerionarcisi.me"
-  src="https://plausible.io/js/script.file-downloads.hash.outbound-links.pageview-props.revenue.tagged-events.js"
-></script>
-<script>
-  window.plausible =
-    window.plausible ||
-    function () {
-      (window.plausible.q = window.plausible.q || []).push(arguments);
-    };
-</script>
+<!-- 100% privacy-first analytics -->
+<script is:inline async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
