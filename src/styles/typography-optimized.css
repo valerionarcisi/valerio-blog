@@ -1,0 +1,83 @@
+/* Typography and Spacing Optimizations */
+
+/* Improved paragraph spacing */
+p + p {
+  margin-top: var(--space-large);
+}
+
+/* Better heading spacing */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: var(--space-large);
+  margin-bottom: var(--space-medium);
+}
+
+/* First heading after content should have less top margin */
+.prose > h1:first-child,
+.prose > h2:first-child,
+.prose > h3:first-child {
+  margin-top: 0;
+}
+
+/* List improvements */
+ul, ol {
+  margin-top: var(--space-small);
+  margin-bottom: var(--space-medium);
+  padding-left: 1.2rem;
+}
+
+li {
+  margin-bottom: var(--space-small);
+}
+
+li:last-child {
+  margin-bottom: 0;
+}
+
+/* Better blockquote spacing */
+blockquote {
+  margin: var(--space-large) 0;
+  padding: var(--space-medium);
+}
+
+/* Code block improvements */
+pre {
+  margin: var(--space-large) 0;
+  padding: var(--space-medium);
+}
+
+/* Image spacing in content */
+.prose img {
+  margin: var(--space-large) auto;
+  display: block;
+}
+
+/* Table spacing if any */
+table {
+  margin: var(--space-medium) 0;
+  border-spacing: 0;
+}
+
+td, th {
+  padding: var(--space-small) var(--space-medium);
+}
+
+/* Remove excessive spacing from elements */
+* + br {
+  display: none;
+}
+
+/* Improve text flow */
+.prose {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+}
+
+@media (max-width: 768px) {
+  .prose {
+    text-align: left;
+    text-justify: none;
+  }
+}

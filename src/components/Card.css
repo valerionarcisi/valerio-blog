@@ -1,11 +1,11 @@
 .Card {
   max-width: 70%;
-  margin: var(--space-medium) auto;
-  margin-bottom: var(--space-large);
+  margin: var(--space-small) auto;
+  margin-bottom: var(--space-medium);
   padding: var(--space-medium);
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-large);
+  gap: var(--space-medium);
 
   @media screen and (min-width: 769px) and (max-width: 1024px) {
     max-width: 90%;
@@ -103,7 +103,7 @@
   @media screen and (max-width: 768px) {
     max-width: 90%;
     grid-template-columns: 1fr;
-    gap: var(--space-small);
+    gap: var(--space-medium);
     h3 {
       font-size: var(--fontSize-extraLarge);
     }

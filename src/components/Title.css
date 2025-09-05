@@ -12,7 +12,7 @@
     font-size: var(--fontSize-extraLarge);
     font-weight: var(--fontWeight-800);
     display: block;
-    margin: var(--space-medium) auto;
+    margin: var(--space-small) auto;
     padding: 0 var(--space-medium);
   }
 }

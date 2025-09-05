@@ -1,7 +1,7 @@
 .BlogPost {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.1rem;
   margin-top: var(--space-medium);
   .author {
     text-align: center;
@@ -101,11 +101,11 @@
     color: var(--color-neutral);
     font-size: var(--fontSize-small);
     font-weight: var(--fontWeight-400);
-    line-height: var(--lineHeight-normal);
-    white-space: pre-wrap; 
+    line-height: var(--lineHeight-loose);
+    white-space: normal; 
   
     img {
-      margin: var(--space-small);
+      margin: var(--space-small) 0;
       max-width: 100%;
       box-shadow: var(--boxShadow-thin);
     }
@@ -163,8 +163,8 @@
       max-width: 85%;
       font-size: var(--fontSize-medium);
       font-weight: var(--fontWeight-400);
-      line-height: var(--lineHeight-normal);
-      white-space: pre-wrap; 
+      line-height: var(--lineHeight-loose);
+      white-space: normal; 
     }
   }
 }
