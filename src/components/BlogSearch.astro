@@ -110,12 +110,7 @@
         this.resultsList.innerHTML = results.map(post => `
           <div class="search-result-item">
             <a href="/blog/${post.slug}/" class="result-link">
-              <h4 class="result-title">${this.highlightText(post.title, query)}</h4>
-              <p class="result-extract">${this.highlightText(this.truncate(post.extract, 120), query)}</p>
-              <div class="result-meta">
-                <span class="result-date">${new Date(post.date).toLocaleDateString()}</span>
-                <span class="result-tags">${post.tags.slice(0, 3).join(', ')}</span>
-              </div>
+              <h4 class="result-title">${this.highlightText(post.title, query)}</h4>\
             </a>
           </div>
         `).join('');
@@ -239,6 +234,7 @@
   .results-list {
     max-height: 300px;
     overflow-y: auto;
+    padding: var(--space-medium);
   }
 
   .search-result-item {
@@ -268,19 +264,7 @@
     color: var(--color-neutral);
   }
 
-  .result-extract {
-    margin: 0 0 var(--space-small) 0;
-    font-size: var(--fontSize-very-small);
-    color: var(--color-secondary);
-    line-height: var(--lineHeight-medium);
-  }
 
-  .result-meta {
-    display: flex;
-    gap: var(--space-medium);
-    font-size: var(--fontSize-very-micro);
-    color: var(--color-secondary);
-  }
 
   .no-results {
     padding: var(--space-large);
