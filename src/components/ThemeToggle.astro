@@ -30,19 +30,21 @@
     });
   }
   
-  function updateToggleAppearance(theme) {
+  function updateToggleAppearance(theme: string) {
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;
     
-    const sunIcon = toggle.querySelector('.sun-icon');
-    const moonIcon = toggle.querySelector('.moon-icon');
+    const sunIcon = toggle.querySelector('.sun-icon') as HTMLElement;
+    const moonIcon = toggle.querySelector('.moon-icon') as HTMLElement;
     
-    if (theme === 'dark') {
-      sunIcon.style.opacity = '1';
-      moonIcon.style.opacity = '0';
-    } else {
-      sunIcon.style.opacity = '0';
-      moonIcon.style.opacity = '1';
+    if (sunIcon && moonIcon) {
+      if (theme === 'dark') {
+        sunIcon.style.opacity = '1';
+        moonIcon.style.opacity = '0';
+      } else {
+        sunIcon.style.opacity = '0';
+        moonIcon.style.opacity = '1';
+      }
     }
   }
   
