@@ -97,7 +97,8 @@
     font-size: var(--fontSize-small);
     font-weight: var(--fontWeight-400);
     line-height: var(--lineHeight-normal);
-
+    white-space: pre-wrap; 
+  
     img {
       margin: var(--space-small);
       max-width: 100%;
@@ -158,6 +159,7 @@
       font-size: var(--fontSize-medium);
       font-weight: var(--fontWeight-400);
       line-height: var(--lineHeight-normal);
+      white-space: pre-wrap; 
     }
   }
 }
