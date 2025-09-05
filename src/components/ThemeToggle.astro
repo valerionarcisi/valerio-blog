@@ -1,0 +1,96 @@
+---
+// Theme Toggle Component
+---
+
+<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+  <span class="sun-icon">☀️</span>
+  <span class="moon-icon">🌙</span>
+</button>
+
+<script>
+  function initTheme() {
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    
+    // Get saved theme or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    body.setAttribute('data-theme', savedTheme);
+    
+    // Update toggle appearance
+    updateToggleAppearance(savedTheme);
+    
+    // Add click event listener
+    themeToggle?.addEventListener('click', () => {
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      
+      body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateToggleAppearance(newTheme);
+    });
+  }
+  
+  function updateToggleAppearance(theme) {
+    const toggle = document.getElementById('theme-toggle');
+    if (!toggle) return;
+    
+    const sunIcon = toggle.querySelector('.sun-icon');
+    const moonIcon = toggle.querySelector('.moon-icon');
+    
+    if (theme === 'dark') {
+      sunIcon.style.opacity = '1';
+      moonIcon.style.opacity = '0';
+    } else {
+      sunIcon.style.opacity = '0';
+      moonIcon.style.opacity = '1';
+    }
+  }
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', initTheme);
+  
+  // Re-initialize on view transitions (Astro)
+  document.addEventListener('astro:page-load', initTheme);
+</script>
+
+<style>
+  .theme-toggle {
+    position: relative;
+    background: transparent;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    overflow: hidden;    border: none;
+
+  }
+  
+  body[data-theme="light"] .theme-toggle {
+    border: none;
+    background: var(--backgroundColor-secondary);
+  }
+  
+  .theme-toggle:hover {
+    background: var(--backgroundColor-tertiary);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+  }
+
+  .sun-icon,
+  .moon-icon {
+    position: absolute;
+    font-size: 1.2rem;
+    transition: opacity var(--transition-fast);
+  }
+  
+  .sun-icon {
+    opacity: 1;
+  }
+  
+  .moon-icon {
+    opacity: 0;
+  }
+</style>

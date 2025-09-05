@@ -1,0 +1,63 @@
+---
+import fetchHyPosts, { type TAbstractPost } from "~/services/post";
+import Title from "~/components/Title.astro";
+import Card from "~/components/Card.astro";
+
+interface Props {
+  currentSlug: string;
+  currentTags: string[];
+  maxPosts?: number;
+}
+
+const { currentSlug, currentTags, maxPosts = 3 } = Astro.props;
+
+// Function to calculate tag similarity score
+function calculateSimilarity(postTags: string[], currentTags: string[]): number {
+  const commonTags = postTags.filter(tag => currentTags.includes(tag));
+  return commonTags.length;
+}
+
+// Get all posts and filter related ones
+const allPosts = await fetchHyPosts();
+const relatedPosts = allPosts
+  ?.filter(post => post.slug !== currentSlug) // Exclude current post
+  .map(post => ({
+    ...post,
+    similarity: calculateSimilarity(post.tags || [], currentTags)
+  }))
+  .filter(post => post.similarity > 0) // Only posts with at least 1 common tag
+  .sort((a, b) => {
+    // Sort by similarity first, then by date (newest first)
+    if (b.similarity !== a.similarity) {
+      return b.similarity - a.similarity;
+    }
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  })
+  .slice(0, maxPosts) || [];
+---
+
+{relatedPosts.length > 0 && (
+  <section class="related-posts">
+    <Title title="Related Posts" />
+    <div class="related-posts-grid">
+      {relatedPosts.map((post) => (
+        <Card {...post} slug={post.slug} />
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .related-posts {
+    padding: var(--space-large) 0;
+    border-top: 2px solid var(--color-tertiary);
+  }
+
+  .related-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--space-large);
+    margin-top: var(--space-large);
+  }
+
+</style>

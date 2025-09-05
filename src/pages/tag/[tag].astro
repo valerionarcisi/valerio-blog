@@ -8,8 +8,12 @@ export async function getStaticPaths() {
   const uniqueTags = [...new Set(posts?.map((post) => post.tags).flat())];
 
   return uniqueTags.map((tag) => ({
-    params: { tag: tag.toLocaleLowerCase() },
-    props: { posts: posts?.filter((post) => post.tags.includes(tag)) },
+    params: { tag: tag.toLowerCase() },
+    props: { 
+      posts: posts?.filter((post) => 
+        post.tags.some(postTag => postTag.toLowerCase() === tag.toLowerCase())
+      ) 
+    },
   }));
 }
 

@@ -70,6 +70,11 @@
         padding: var(--space-small);
         border-radius: var(--borderRadius-small);
       }
+      
+      /* Light theme version */
+      body[data-theme="light"] & .date {
+        background-color: rgba(255, 255, 255, 0.9);
+      }
     }
   }
 

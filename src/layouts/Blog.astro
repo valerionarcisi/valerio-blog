@@ -4,6 +4,7 @@ import Card from "~/components/Card.astro";
 import Footer from "~/components/Footer.astro";
 import Header from "~/components/Header.astro";
 import Title from "~/components/Title.astro";
+import BlogSearch from "~/components/BlogSearch.astro";
 import '~/layouts/Blog.css'
 import { SITE_DESCRIPTION, SITE_TITLE } from "~/consts";
 
@@ -16,11 +17,12 @@ const { category, posts } = Astro.props;
 	<head>
 		<BaseHead title={`Category: ${category || 'Blog'} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
-	<body data-theme="dark">
+	<body>
 	<Header />
 		<main>
 			<section class="Blog">
 				<Title title={`Category: ${category}` || 'Blog'} />
+				<BlogSearch />
 					{
 						posts.map((post:any) => ( 
 								<Card {...post } slug={post.slug} />

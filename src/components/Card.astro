@@ -1,4 +1,5 @@
 ---
+import { Image } from "astro:assets";
 import FormattedDate from "~/components/FormattedDate.astro";
 import "~/components/Card.css";
 import Tag from "~/components/Tag.astro";
@@ -7,13 +8,18 @@ import { type TAbstractPost } from "~/services/post";
 type Props = TAbstractPost;
 
 const { title, extract, date, coverImage, tags, slug } = Astro.props;
+
+// Optimize description for better SEO (150-160 chars)
+const optimizedExtract = extract.length > 150 
+  ? extract.substring(0, 147) + "..." 
+  : extract;
 ---
 
 <div class="Card">
   <div class="info">
     <div class="cover-image">
       <a href={`/blog/${slug}/`}>
-        {coverImage.url && <img src={coverImage.url} alt={title} />}
+        {coverImage.url && <Image src={coverImage.url} alt={title} width={400} height={250} loading="lazy" />}
       </a>
     </div>
     <div class="metadata">
@@ -29,6 +35,6 @@ const { title, extract, date, coverImage, tags, slug } = Astro.props;
     <a href={`/blog/${slug}/`}>
       <h3 class="title">{title}</h3>
     </a>
-    <div class="description">{extract.substring(0, 250)}...</div>
+    <div class="description">{optimizedExtract}</div>
   </div>
 </div>

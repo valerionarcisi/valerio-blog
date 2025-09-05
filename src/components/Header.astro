@@ -1,19 +1,24 @@
 ---
+import { Image } from "astro:assets";
 import HeaderLink from "~/components/HeaderLink.astro";
+import ThemeToggle from "~/components/ThemeToggle.astro";
 import "~/components/Header.css";
 ---
 
 <header class="Header">
   <div class="logo-container">
     <HeaderLink href="/" class="logo">
-      <img src="/img/me.jpg" alt="Logo Valerio Narcisi" />
+      <Image src="/img/me.jpg" alt="Logo Valerio Narcisi" width={32} height={32} loading="eager" />
       <div>Valerio Narcisi</div>
     </HeaderLink>
   </div>
-  <div class="menu-toggle">
-    <span></span>
-    <span></span>
-    <span></span>
+  <div class="header-controls">
+    <ThemeToggle />
+    <div class="menu-toggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
   </div>
   <nav>
     <HeaderLink href="/">Home</HeaderLink>

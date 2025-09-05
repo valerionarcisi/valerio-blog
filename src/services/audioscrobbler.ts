@@ -1,6 +1,6 @@
 import { z as zod } from 'astro:content';
 
-export const AUDIO_SCROBBLER_API_KEY = '35dcb09bbc9c0e8bee54210bace4ba66';
+export const AUDIO_SCROBBLER_API_KEY = import.meta.env.LASTFM_API_KEY;
 export const AUDIO_SCROBBLER_USER = 'valerionar';
 export const AUDIO_SCROBBLER_VERSION = '2.0';
 
@@ -52,7 +52,7 @@ export const fetchRecentTracks = async (
 
   try {
     const response = await fetch(
-      `http://ws.audioscrobbler.com/2.0/?${params.toString()}`
+      `https://ws.audioscrobbler.com/2.0/?${params.toString()}`
     );
 
     // Check if the response is successful

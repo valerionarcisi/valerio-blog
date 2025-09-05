@@ -1,0 +1,56 @@
+---
+interface Props {
+  content: string;
+  wordsPerMinute?: number;
+}
+
+const { content, wordsPerMinute = 200 } = Astro.props;
+
+function calculateReadingTime(text: string, wpm: number): number {
+  // Remove HTML tags and normalize whitespace
+  const cleanText = text.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+  
+  // Count words (split by whitespace and filter out empty strings)
+  const wordCount = cleanText.split(' ').filter(word => word.length > 0).length;
+  
+  // Calculate reading time in minutes, minimum 1 minute
+  const readingTime = Math.max(1, Math.ceil(wordCount / wpm));
+  
+  return readingTime;
+}
+
+const readingTime = calculateReadingTime(content, wordsPerMinute);
+const readingTimeText = readingTime === 1 ? '1 min read' : `${readingTime} min read`;
+---
+
+<span class="reading-time" title={`Estimated reading time: ${readingTimeText}`}>
+  <span class="reading-time-icon">📖</span>
+  <span class="reading-time-text">{readingTimeText}</span>
+</span>
+
+<style>
+  .reading-time {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-small);
+    font-size: var(--fontSize-very-small);
+    color: var(--color-neutral);
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: var(--space-small);
+    border-radius: var(--borderRadius-small);
+  }
+
+  .reading-time-icon {
+    font-size: var(--fontSize-very-small);
+    opacity: 0.8;
+  }
+
+  .reading-time-text {
+    font-weight: var(--fontWeight-400);
+  }
+
+  /* Light theme adjustments */
+  body[data-theme="light"] .reading-time {
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+</style>

@@ -33,6 +33,51 @@
   --textDecoration-underline: underline;
 }
 
+/* Light Mode Variables */
+body[data-theme="light"] {
+  --color-primary: #ffffff;
+  --color-secondary: #666;
+  --color-tertiary: #ff004efa;
+  --color-neutral: #000;
+  --backgroundColor-primary: #ffffff;
+  --backgroundColor-secondary: #e1e1e1;
+  --backgroundColor-tertiary: #ff004efa;
+  --backgroundColor-neutral: #000;
+  --boxShadow-thin:
+    0px 0px 0 1px var(--backgroundColor-neutral),
+    1px 2px 0 var(--backgroundColor-tertiary),
+    3px 3px 0 0px var(--backgroundColor-neutral),
+    2px 2px 1px 0px rgba(0, 0, 0, 0.1);
+  --boxShadow-small:
+    0px 0px 0 1px var(--backgroundColor-neutral),
+    3px 3px 0 var(--backgroundColor-tertiary),
+    3px 3px 0 1px var(--backgroundColor-neutral),
+    4px 4px 5px 1px rgba(0, 0, 0, 0.1);
+  --boxShadow-medium:
+    0px 0px 0 2px var(--backgroundColor-neutral),
+    6px 6px 0 var(--backgroundColor-tertiary),
+    6px 6px 0 2px var(--backgroundColor-neutral),
+    8px 8px 10px 2px rgba(0, 0, 0, 0.1);
+  --boxShadow-large:
+    0px 0px 0 4px var(--backgroundColor-neutral),
+    12px 12px 0 var(--backgroundColor-tertiary),
+    12px 12px 0 4px var(--backgroundColor-neutral),
+    16px 16px 20px 4px rgba(0, 0, 0, 0.1);
+  --boxShadow-extraLarge:
+    0px 0px 0 8px var(--backgroundColor-neutral),
+    24px 24px 0 var(--backgroundColor-tertiary),
+    24px 24px 0 8px var(--backgroundColor-neutral),
+    32px 32px 40px 8px rgba(0, 0, 0, 0.1);
+  --boxShadow-inverted:
+    0px 0px 0 1px var(--backgroundColor-tertiary),
+    3px 3px 0 var(--backgroundColor-neutral),
+    3px 3px 0 1px var(--backgroundColor-neutral),
+    4px 4px 5px 1px rgba(0, 0, 0, 0.1);
+  --boxShadow-inverted-hover:
+    0 0 0 1px var(--color-neutral), 3px 3px 0 var(--color-primary),
+    3px 3px 0 1px var(--color-neutral), 4px 4px 5px 1px var(--color-tertiary);
+}
+
 /* Dark Mode Variables */
 body[data-theme="dark"] {
   --color-primary: #000000;

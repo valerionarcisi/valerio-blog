@@ -1,0 +1,308 @@
+---
+// Blog Search Component
+---
+
+<div class="search-container">
+  <div class="search-input-wrapper">
+    <input 
+      type="text" 
+      id="blog-search" 
+      placeholder="Search posts..." 
+      aria-label="Search blog posts"
+      class="search-input"
+    />
+    <span class="search-icon">🔍</span>
+  </div>
+  <div id="search-results" class="search-results" style="display: none;">
+    <div class="results-header">
+      <span id="results-count">0 results found</span>
+      <button id="clear-search" class="clear-button">✕</button>
+    </div>
+    <div id="results-list" class="results-list"></div>
+  </div>
+</div>
+
+<script>
+  interface Post {
+    title: string;
+    slug: string;
+    extract: string;
+    date: string;
+    tags: string[];
+  }
+
+  class BlogSearch {
+    private posts: Post[] = [];
+    private searchInput: HTMLInputElement | null = null;
+    private searchResults: HTMLElement | null = null;
+    private resultsList: HTMLElement | null = null;
+    private resultsCount: HTMLElement | null = null;
+    private clearButton: HTMLElement | null = null;
+
+    constructor() {
+      this.init();
+    }
+
+    async init() {
+      this.searchInput = document.getElementById('blog-search') as HTMLInputElement;
+      this.searchResults = document.getElementById('search-results');
+      this.resultsList = document.getElementById('results-list');
+      this.resultsCount = document.getElementById('results-count');
+      this.clearButton = document.getElementById('clear-search');
+
+      await this.loadPosts();
+      this.bindEvents();
+    }
+
+    async loadPosts() {
+      try {
+        // Fetch posts from your API or generate static search index
+        const response = await fetch('/api/search.json');
+        this.posts = await response.json();
+      } catch (error) {
+        console.error('Failed to load posts for search:', error);
+        this.posts = [];
+      }
+    }
+
+    bindEvents() {
+      if (!this.searchInput || !this.clearButton) return;
+
+      this.searchInput.addEventListener('input', (e) => {
+        const query = (e.target as HTMLInputElement).value.trim();
+        if (query.length >= 2) {
+          this.performSearch(query);
+        } else {
+          this.hideResults();
+        }
+      });
+
+      this.clearButton.addEventListener('click', () => {
+        this.clearSearch();
+      });
+
+      // Close search on escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.hideResults();
+        }
+      });
+    }
+
+    performSearch(query: string) {
+      const results = this.posts.filter(post => 
+        post.title.toLowerCase().includes(query.toLowerCase()) ||
+        post.extract.toLowerCase().includes(query.toLowerCase()) ||
+        post.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
+      );
+
+      this.displayResults(results, query);
+    }
+
+    displayResults(results: Post[], query: string) {
+      if (!this.searchResults || !this.resultsList || !this.resultsCount) return;
+
+      this.resultsCount.textContent = `${results.length} result${results.length !== 1 ? 's' : ''} found`;
+      
+      if (results.length === 0) {
+        this.resultsList.innerHTML = '<div class="no-results">No posts found matching your search.</div>';
+      } else {
+        this.resultsList.innerHTML = results.map(post => `
+          <div class="search-result-item">
+            <a href="/blog/${post.slug}/" class="result-link">
+              <h4 class="result-title">${this.highlightText(post.title, query)}</h4>
+              <p class="result-extract">${this.highlightText(this.truncate(post.extract, 120), query)}</p>
+              <div class="result-meta">
+                <span class="result-date">${new Date(post.date).toLocaleDateString()}</span>
+                <span class="result-tags">${post.tags.slice(0, 3).join(', ')}</span>
+              </div>
+            </a>
+          </div>
+        `).join('');
+      }
+
+      this.showResults();
+    }
+
+    highlightText(text: string, query: string): string {
+      const regex = new RegExp(`(${query})`, 'gi');
+      return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    truncate(text: string, length: number): string {
+      return text.length > length ? text.substring(0, length) + '...' : text;
+    }
+
+    showResults() {
+      if (this.searchResults) {
+        this.searchResults.style.display = 'block';
+      }
+    }
+
+    hideResults() {
+      if (this.searchResults) {
+        this.searchResults.style.display = 'none';
+      }
+    }
+
+    clearSearch() {
+      if (this.searchInput) {
+        this.searchInput.value = '';
+      }
+      this.hideResults();
+    }
+  }
+
+  // Initialize search when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    new BlogSearch();
+  });
+</script>
+
+<style>
+  .search-container {
+    position: relative;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--space-medium) var(--space-large) var(--space-medium) 3rem;
+    font-size: var(--fontSize-small);
+    border: 2px solid var(--color-tertiary);
+    border-radius: var(--borderRadius-medium);
+    background: var(--backgroundColor-primary);
+    color: var(--color-neutral);
+    transition: all var(--transition-fast);
+  }
+
+  .search-input:focus {
+    outline: none;
+    box-shadow: var(--boxShadow-small);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: var(--space-medium);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-secondary);
+    font-size: var(--fontSize-small);
+  }
+
+  .search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--backgroundColor-secondary);
+    border: 2px solid var(--color-tertiary);
+    border-radius: var(--borderRadius-medium);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: var(--space-small);
+    box-shadow: var(--boxShadow-medium);
+  }
+
+  .results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-medium);
+    border-bottom: 1px solid var(--color-secondary);
+    font-size: var(--fontSize-very-small);
+    color: var(--color-secondary);
+  }
+
+  .clear-button {
+    background: none;
+    border: none;
+    color: var(--color-secondary);
+    cursor: pointer;
+    font-size: var(--fontSize-small);
+    padding: var(--space-small);
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+  }
+
+  .clear-button:hover {
+    background: var(--backgroundColor-tertiary);
+    color: var(--color-primary);
+  }
+
+  .results-list {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .search-result-item {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .search-result-item:last-child {
+    border-bottom: none;
+  }
+
+  .result-link {
+    display: block;
+    padding: var(--space-medium);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color var(--transition-fast);
+  }
+
+  .result-link:hover {
+    background: var(--backgroundColor-tertiary);
+  }
+
+  .result-title {
+    margin: 0 0 var(--space-small) 0;
+    font-size: var(--fontSize-small);
+    font-weight: var(--fontWeight-600);
+    color: var(--color-neutral);
+  }
+
+  .result-extract {
+    margin: 0 0 var(--space-small) 0;
+    font-size: var(--fontSize-very-small);
+    color: var(--color-secondary);
+    line-height: var(--lineHeight-medium);
+  }
+
+  .result-meta {
+    display: flex;
+    gap: var(--space-medium);
+    font-size: var(--fontSize-very-micro);
+    color: var(--color-secondary);
+  }
+
+  .no-results {
+    padding: var(--space-large);
+    text-align: center;
+    color: var(--color-secondary);
+    font-style: italic;
+  }
+
+  mark {
+    background: var(--backgroundColor-tertiary);
+    color: var(--color-primary);
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .search-container {
+      max-width: 100%;
+    }
+    
+    .search-results {
+      max-height: 300px;
+    }
+  }
+</style>

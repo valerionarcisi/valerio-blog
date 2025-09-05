@@ -2,6 +2,7 @@
 import BaseHead from "~/components/BaseHead.astro";
 import Header from "~/components/Header.astro";
 import Footer from "~/components/Footer.astro";
+import StructuredData from "~/components/StructuredData.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
 import Hero from "~/components/Hero.astro";
 import Title from "~/components/Title.astro";
@@ -13,41 +14,50 @@ import "./index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
 import fetchHyPosts from "~/services/post";
 
-const posts = await fetchHyPosts();
-
 const lastWatchedMovies = async () => {
   const xml = await getLetterboxdRss();
   const parsedXml = (await parseXmlContent(await xml.text())) as any;
 
-  const watchedMovies = [];
-  for (const item of parsedXml.rss.channel[0].item) {
-    if (!item?.["tmdb:movieId"]?.[0]) continue;
-    try {
-      const movie = await getMovieById(item["tmdb:movieId"][0]);
-      watchedMovies.push({ ...movie, ...item });
-    } catch (error) {
-      console.error(
-        `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
-        error
-      );
-      continue;
-    }
-  }
+  const moviePromises = parsedXml.rss.channel[0].item
+    .filter((item: any) => item?.["tmdb:movieId"]?.[0])
+    .map(async (item: any) => {
+      try {
+        const movie = await getMovieById(item["tmdb:movieId"][0]);
+        return { ...movie, ...item };
+      } catch (error) {
+        console.error(
+          `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
+          error
+        );
+        return null;
+      }
+    });
 
-  return watchedMovies;
+  const watchedMovies = await Promise.all(moviePromises);
+  return watchedMovies.filter(Boolean);
 };
 
-const lastWatched = await lastWatchedMovies();
-
-const lastSongs = await fetchRecentTracks();
+// Parallelize all data fetching
+const [posts, lastWatched, lastSongs] = await Promise.all([
+  fetchHyPosts(),
+  lastWatchedMovies(),
+  fetchRecentTracks(),
+]);
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <StructuredData 
+      type="website"
+      title={SITE_TITLE}
+      description={SITE_DESCRIPTION}
+      url={Astro.url.href}
+      image="/img/avatar.png"
+    />
   </head>
-  <body data-theme="dark">
+  <body>
     <Header />
     <Hero
       title="Hi I'm Valerio"

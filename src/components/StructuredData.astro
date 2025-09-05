@@ -1,0 +1,78 @@
+---
+interface Props {
+  type: 'website' | 'article' | 'person';
+  title: string;
+  description: string;
+  url: string;
+  image?: string;
+  author?: string;
+  datePublished?: string;
+  dateModified?: string;
+  tags?: string[];
+}
+
+const { 
+  type, 
+  title, 
+  description, 
+  url, 
+  image, 
+  author = "Valerio Narcisi", 
+  datePublished, 
+  dateModified,
+  tags = []
+} = Astro.props;
+
+const baseStructuredData = {
+  "@context": "https://schema.org",
+  "@type": type === 'website' ? 'WebSite' : type === 'article' ? 'BlogPosting' : 'Person',
+  "name": title,
+  "headline": title,
+  "description": description,
+  "url": url,
+  "image": image,
+};
+
+const websiteData = {
+  ...baseStructuredData,
+  "author": {
+    "@type": "Person",
+    "name": "Valerio Narcisi",
+    "url": "https://valerionarcisi.me/who-i-am",
+    "jobTitle": "Web Developer & Filmmaker",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "Cleafy"
+    }
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Valerio Narcisi"
+  }
+};
+
+const articleData = {
+  ...baseStructuredData,
+  "author": {
+    "@type": "Person",
+    "name": author,
+    "url": "https://valerionarcisi.me/who-i-am"
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Valerio Narcisi",
+    "url": "https://valerionarcisi.me"
+  },
+  "datePublished": datePublished,
+  "dateModified": dateModified || datePublished,
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": url
+  },
+  "keywords": tags.join(", ")
+};
+
+const structuredData = type === 'website' ? websiteData : type === 'article' ? articleData : baseStructuredData;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
