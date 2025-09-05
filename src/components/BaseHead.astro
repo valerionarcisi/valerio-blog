@@ -30,44 +30,42 @@ const fullImageUrl = new URL(socialImage, Astro.url);
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 
-<!-- Preload critical fonts -->
-<link rel="preload" href="/fonts/staatliches-v18-latin-400.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/merriweather-v30-latin-400.woff2" as="font" type="font/woff2" crossorigin />
+<!-- Fonts are loaded via @fontsource packages -->
 <link
   rel="apple-touch-icon"
   sizes="180x180"
-  href="favicon_io/apple-touch-icon.png"
+  href="/favicon_io/apple-touch-icon.png"
 />
 <link
   rel="icon"
   type="image/png"
   sizes="32x32"
-  href="favicon_io/favicon-32x32.png"
+  href="/favicon_io/favicon-32x32.png"
 />
 <link
   rel="icon"
   type="image/png"
   sizes="16x16"
-  href="favicon_io/favicon-16x16.png"
+  href="/favicon_io/favicon-16x16.png"
 />
-<link rel="manifest" href="favicon_io/site.webmanifest" />
+<link rel="manifest" href="/favicon_io/site.webmanifest" />
 <link rel="icon" href="/favicon.ico" sizes="any" />
 <link
   rel="icon"
-  href="favicon_io/favicon.ico"
+  href="/favicon_io/favicon.ico"
   sizes="any"
 /><!-- /favicon.ico -->
 <link
   rel="icon"
   type="image/png"
   sizes="192x192"
-  href="favicon_io/android-chrome-192x192.png"
+  href="/favicon_io/android-chrome-192x192.png"
 />
 <link
   rel="icon"
   type="image/png"
   sizes="512x512"
-  href="favicon_io/android-chrome-512x512.png"
+  href="/favicon_io/android-chrome-512x512.png"
 />
 <meta name="theme-color" content="#ffffff" />
 <meta name="generator" content={Astro.generator} />

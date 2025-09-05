@@ -9,7 +9,7 @@ interface Props {
   maxPosts?: number;
 }
 
-const { currentSlug, currentTags, maxPosts = 3 } = Astro.props;
+const { currentSlug, currentTags, maxPosts = 6 } = Astro.props;
 
 // Function to calculate tag similarity score
 function calculateSimilarity(postTags: string[], currentTags: string[]): number {
@@ -17,8 +17,7 @@ function calculateSimilarity(postTags: string[], currentTags: string[]): number 
   return commonTags.length;
 }
 
-// Get all posts and filter related ones
-const allPosts = await fetchHyPosts();
+const allPosts = await fetchHyPosts(100);
 const relatedPosts = allPosts
   ?.filter(post => post.slug !== currentSlug) // Exclude current post
   .map(post => ({
