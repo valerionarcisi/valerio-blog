@@ -48,15 +48,53 @@ const relatedPosts = allPosts
 
 <style>
   .related-posts {
+    max-width: 85%;
+    margin: 0 auto;
     padding: var(--space-large) 0;
     border-top: 2px solid var(--color-tertiary);
   }
 
   .related-posts-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--space-large);
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-medium);
     margin-top: var(--space-large);
+  }
+
+  /* Override Card styles for related posts grid */
+  .related-posts-grid :global(.Card) {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    grid-template-columns: 1fr;
+    gap: var(--space-small);
+  }
+
+  .related-posts-grid :global(.Card .content) {
+    padding: 0 6rem;
+  }
+
+  .related-posts-grid :global(.Card h3) {
+    font-size: var(--fontSize-medium);
+    margin-bottom: var(--space-small);
+  }
+
+  .related-posts-grid :global(.Card .description) {
+    font-size: var(--fontSize-very-small);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  @media screen and (max-width: 768px) {
+    .related-posts {
+      max-width: 85%;
+    }
+
+    .related-posts-grid {
+      grid-template-columns: 1fr;
+    }
   }
 
 </style>

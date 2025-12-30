@@ -102,10 +102,10 @@
     font-size: var(--fontSize-small);
     font-weight: var(--fontWeight-400);
     line-height: var(--lineHeight-loose);
-    white-space: normal; 
-  
+    white-space: normal;
+
     img {
-      margin: var(--space-small) 0;
+      margin: var(--space-large) 0;
       max-width: 100%;
       box-shadow: var(--boxShadow-thin);
     }

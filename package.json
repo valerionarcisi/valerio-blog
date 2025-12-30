@@ -15,13 +15,13 @@
     "optimize:images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/netlify": "^6.5.9",
-    "@astrojs/rss": "^4.0.12",
-    "@astrojs/sitemap": "^3.5.1",
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/netlify": "^6.6.3",
+    "@astrojs/rss": "^4.0.14",
+    "@astrojs/sitemap": "^3.6.0",
     "@fontsource/merriweather": "^5.1.1",
     "@fontsource/staatliches": "^5.1.1",
-    "astro": "^5.13.5",
+    "astro": "^5.16.6",
     "highlight.js": "^11.11.1",
     "marked": "^15.0.7",
     "normalize.css": "^8.0.1",
