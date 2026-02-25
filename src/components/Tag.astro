@@ -1,5 +1,11 @@
 ---
-const { tag } = Astro.props;
+const { tag, lang = "it", asSpan = false } = Astro.props;
 import '~/components/Tag.css'
+
+const tagPrefix = lang === "it" ? "/tag" : "/en/tag";
 ---
-<a class="Tags" href={`/tag/${tag.toLowerCase()}`}>{tag}</a>
+{asSpan ? (
+  <span class="Tags">{tag}</span>
+) : (
+  <a class="Tags" href={`${tagPrefix}/${tag.toLowerCase()}`}>{tag}</a>
+)}

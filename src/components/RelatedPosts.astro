@@ -1,46 +1,49 @@
 ---
-import fetchHyPosts from "~/services/post";
+import { getCollection } from "astro:content";
 import Title from "~/components/Title.astro";
 import Card from "~/components/Card.astro";
+import { getSlugFromId, getLangFromId, useTranslations } from "~/i18n/utils";
+import type { Lang } from "~/i18n/ui";
 
 interface Props {
   currentSlug: string;
   currentTags: string[];
   maxPosts?: number;
+  lang?: string;
 }
 
-const { currentSlug, currentTags, maxPosts = 6 } = Astro.props;
+const { currentSlug, currentTags, maxPosts = 6, lang = "it" } = Astro.props;
+const t = useTranslations(lang as Lang);
 
-// Function to calculate tag similarity score
 function calculateSimilarity(postTags: string[], currentTags: string[]): number {
   const commonTags = postTags.filter(tag => currentTags.includes(tag));
   return commonTags.length;
 }
 
-const allPosts = await fetchHyPosts(100);
+const allPosts = await getCollection("blog");
 const relatedPosts = allPosts
-  ?.filter(post => post.slug !== currentSlug) // Exclude current post
+  .filter(post => getLangFromId(post.id) === lang)
+  .filter(post => getSlugFromId(post.id) !== currentSlug)
   .map(post => ({
-    ...post,
-    similarity: calculateSimilarity(post.tags || [], currentTags)
+    ...post.data,
+    slug: getSlugFromId(post.id),
+    coverImage: post.data.coverImage,
+    similarity: calculateSimilarity(post.data.tags || [], currentTags),
   }))
-  .filter(post => post.similarity > 0) // Only posts with at least 1 common tag
+  .filter(post => post.similarity > 0)
   .sort((a, b) => {
-    // Sort by similarity first, then by date (newest first)
-    if (b.similarity !== a.similarity) {
-      return b.similarity - a.similarity;
-    }
+    if (b.similarity !== a.similarity) return b.similarity - a.similarity;
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   })
-  .slice(0, maxPosts) || [];
+  .slice(0, maxPosts);
 ---
 
 {relatedPosts.length > 0 && (
   <section class="related-posts">
-    <Title title="Related Posts" />
+    <Title title={t("blog.relatedPosts")} />
     <div class="related-posts-grid">
       {relatedPosts.map((post) => (
-        <Card {...post} slug={post.slug} />
+        <Card {...post} slug={post.slug} lang={lang} />
       ))}
     </div>
   </section>
@@ -61,7 +64,6 @@ const relatedPosts = allPosts
     margin-top: var(--space-large);
   }
 
-  /* Override Card styles for related posts grid */
   .related-posts-grid :global(.Card) {
     max-width: 100%;
     margin: 0;
@@ -96,5 +98,4 @@ const relatedPosts = allPosts
       grid-template-columns: 1fr;
     }
   }
-
 </style>

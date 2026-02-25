@@ -1,6 +1,5 @@
 ---
 import "normalize.css";
-import "sakura.css";
 import "~/styles/fonts.css";
 import "~/styles/global.css";
 import "~/styles/typography-optimized.css";
@@ -62,17 +61,13 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   sizes="512x512"
   href="/favicon_io/android-chrome-512x512.png"
 />
-<meta name="theme-color" content="#ffffff" />
+<meta name="theme-color" content="#0a0a0c" />
 <meta name="generator" content={Astro.generator} />
-<!-- Theme initialization - must run before body renders -->
+<!-- Dark theme only - apply immediately -->
 <script is:inline>
-  // Apply theme immediately to prevent flash
   (function() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.style.visibility = 'hidden';
     document.addEventListener('DOMContentLoaded', function() {
-      document.body.setAttribute('data-theme', savedTheme);
-      document.documentElement.style.visibility = 'visible';
+      document.body.setAttribute('data-theme', 'dark');
     });
   })();
 </script>

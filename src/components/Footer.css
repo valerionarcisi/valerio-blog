@@ -1,31 +1,71 @@
+/* ============================================
+   Footer — Gradient border top, monospace links
+   Mobile first
+   ============================================ */
 footer {
   display: grid;
-  grid-template-columns: 0.75fr 1.25fr;
-  gap: var(--space-large);
+  grid-template-columns: 1fr;
+  gap: var(--space-medium);
   margin: var(--space-large) auto;
-  max-width: 70%;
+  max-width: 95%;
   padding: var(--space-large);
   border-radius: var(--borderRadius-medium);
   background-color: var(--backgroundColor-secondary);
   color: var(--color-neutral);
   font-size: var(--fontSize-small);
-  font-family: var(--fontFamily-title);
-  box-shadow: var(--boxShadow-medium);
-  h3 {
-    font-size: var(--fontSize-medium);
-  }
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+  border-top: 1px solid transparent;
+  border-image: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan)) 1;
+}
 
-  @media screen and (max-width: 768px) {
-    max-width: 90%;
-    grid-template-columns: 1fr;
-    gap: var(--space-medium);
+footer h3 {
+  font-family: var(--fontFamily-title);
+  font-size: var(--fontSize-medium);
+  color: var(--color-tertiary);
+}
+
+footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+footer li {
+  margin-bottom: var(--space-small);
+}
+
+footer a {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  color: var(--color-neutral);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+footer a:hover {
+  color: var(--color-accent-cyan);
+}
+
+footer .tagline {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  color: var(--color-secondary);
+  font-style: italic;
+  margin-top: var(--space-medium);
+}
+
+/* ============================================
+   Tablet+
+   ============================================ */
+@media (min-width: 769px) {
+  footer {
+    grid-template-columns: 0.75fr 1.25fr;
+    gap: var(--space-large);
+    max-width: 80%;
   }
-  @media screen and (min-width: 769px) and (max-width: 1024px) {
-    max-width: 90%;
+}
+
+@media (min-width: 1024px) {
+  footer {
+    max-width: 70%;
   }
 }

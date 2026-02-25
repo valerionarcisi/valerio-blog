@@ -8,3 +8,23 @@
   for = "/*"
   [headers.values]
     Access-Control-Allow-Origin = "*"
+
+[[redirects]]
+  from = "/caramella-shortmovie"
+  to = "/films/caramella/"
+  status = 301
+
+[[redirects]]
+  from = "/caramella-shortmovie/"
+  to = "/films/caramella/"
+  status = 301
+
+[[redirects]]
+  from = "/filmmaker-journey"
+  to = "/films/"
+  status = 301
+
+[[redirects]]
+  from = "/filmmaker-journey/"
+  to = "/films/"
+  status = 301

@@ -1,8 +1,16 @@
 ---
 import Blog from '~/layouts/Blog.astro';
-import fetchHyPosts from '~/services/post';
+import { getCollection } from 'astro:content';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
 
-const posts = await fetchHyPosts(100);
+const allEntries = await getCollection('blog');
+const posts = allEntries
+  .filter(e => getLangFromId(e.id) === 'it')
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .map(e => ({
+    ...e.data,
+    slug: getSlugFromId(e.id),
+  }));
 ---
 
-<Blog category="Blog" posts={posts}  />
+<Blog category="Blog" posts={posts} lang="it" />

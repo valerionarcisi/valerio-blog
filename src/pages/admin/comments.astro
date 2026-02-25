@@ -1,0 +1,134 @@
+---
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token");
+const isAuthorized = token === import.meta.env.COMMENTS_ADMIN_TOKEN;
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Comments Admin</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; }
+      h1 { color: #c9a84c; margin-bottom: 1rem; }
+      .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; }
+      .tabs button { padding: 0.5rem 1rem; background: #141416; border: 1px solid #333; color: #e8e6e1; cursor: pointer; border-radius: 4px; font-size: 0.9rem; }
+      .tabs button.active { border-color: #c9a84c; color: #c9a84c; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #222; font-size: 0.85rem; }
+      th { color: #8a8a8e; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+      .page-id { font-family: monospace; color: #4ecdc4; font-size: 0.8rem; }
+      .text-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .email { color: #8a8a8e; font-size: 0.8rem; }
+      .actions { display: flex; gap: 0.5rem; }
+      .btn { padding: 0.3rem 0.8rem; border: 1px solid; border-radius: 4px; cursor: pointer; font-size: 0.8rem; background: transparent; }
+      .btn-approve { color: #4ecdc4; border-color: #4ecdc4; }
+      .btn-approve:hover { background: rgba(78, 205, 196, 0.15); }
+      .btn-delete { color: #e74c3c; border-color: #e74c3c; }
+      .btn-delete:hover { background: rgba(231, 76, 60, 0.15); }
+      .empty { color: #8a8a8e; font-style: italic; padding: 2rem 0; }
+      .count { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Comments Admin</h1>
+    <div class="tabs">
+      <button class="active" data-status="pending">Pending</button>
+      <button data-status="approved">Approved</button>
+    </div>
+    <p class="count"></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Page</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Comment</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="comments-body"></tbody>
+    </table>
+    <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
+
+    <script is:inline define:vars={{ token }}>
+      var currentStatus = "pending";
+
+      function loadComments(status) {
+        currentStatus = status;
+        document.querySelectorAll(".tabs button").forEach(function (btn) {
+          btn.classList.toggle("active", btn.dataset.status === status);
+        });
+
+        fetch("/api/admin/comments?status=" + status, {
+          headers: { Authorization: "Bearer " + token },
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (comments) {
+            var tbody = document.getElementById("comments-body");
+            var emptyMsg = document.getElementById("empty-msg");
+            document.querySelector(".count").textContent = comments.length + " comment(s)";
+
+            if (!comments.length) {
+              tbody.innerHTML = "";
+              emptyMsg.style.display = "block";
+              return;
+            }
+            emptyMsg.style.display = "none";
+            tbody.innerHTML = comments.map(function (c) {
+              var d = new Date(c.created_at).toLocaleDateString("en-US");
+              var actions = status === "pending"
+                ? '<button class="btn btn-approve" onclick="doAction(' + c.id + ',\'approve\')">Approve</button>'
+                : "";
+              actions += '<button class="btn btn-delete" onclick="doAction(' + c.id + ',\'delete\')">Delete</button>';
+              return '<tr>' +
+                '<td class="page-id">' + escapeHtml(c.page_id) + '</td>' +
+                '<td>' + escapeHtml(c.name) + '</td>' +
+                '<td class="email">' + escapeHtml(c.email) + '</td>' +
+                '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
+                '<td>' + d + '</td>' +
+                '<td class="actions">' + actions + '</td>' +
+                '</tr>';
+            }).join("");
+          });
+      }
+
+      window.doAction = function (id, action) {
+        fetch("/api/admin/comments", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({ id: id, action: action }),
+        }).then(function () {
+          loadComments(currentStatus);
+        });
+      };
+
+      function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+      }
+
+      document.querySelectorAll(".tabs button").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          loadComments(btn.dataset.status);
+        });
+      });
+
+      loadComments("pending");
+    </script>
+  </body>
+</html>

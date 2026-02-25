@@ -1,0 +1,31 @@
+---
+import Blog from '~/layouts/Blog.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
+
+export async function getStaticPaths() {
+  const allEntries = await getCollection('blog');
+  const enPosts = allEntries
+    .filter(e => getLangFromId(e.id) === 'en')
+    .map(e => ({
+      ...e.data,
+      slug: getSlugFromId(e.id),
+    }));
+
+  const uniqueTags = [...new Set(enPosts.map((post) => post.tags).flat())];
+
+  return uniqueTags.map((tag) => ({
+    params: { tag: tag.toLowerCase() },
+    props: {
+      posts: enPosts.filter((post) =>
+        post.tags.some(postTag => postTag.toLowerCase() === tag.toLowerCase())
+      ),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<Blog category={tag} posts={posts} lang="en" />

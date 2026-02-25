@@ -1,46 +1,36 @@
 ---
-import { marked } from "marked";
-import BlogPost from "~/layouts/BlogPost.astro";
-import fetchHyPosts, { type TPost } from "~/services/post";
+import { getCollection, render } from 'astro:content';
+import BlogPost from '~/layouts/BlogPost.astro';
+import Comments from '~/components/Comments.astro';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
 
 export async function getStaticPaths() {
-  const posts = await fetchHyPosts(100);
-  const paths = posts?.map((post) => ({
-    params: {
-      slug: post.slug,
-    },
-    props: {
-      post,
-    },
-  }));
-  return paths;
+  const allEntries = await getCollection('blog');
+  return allEntries
+    .filter(e => getLangFromId(e.id) === 'it')
+    .map(entry => ({
+      params: { slug: getSlugFromId(entry.id) },
+      props: { entry },
+    }));
 }
 
-const post = Astro.props.post as TPost;
-const htmlContent = marked(post.content);
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const slug = getSlugFromId(entry.id);
 ---
 
-<script>
-  import "highlight.js/styles/github-dark.css";
-  import hljs from "highlight.js";
-  hljs.highlightAll();
-</script>
-
 <BlogPost
-  slug={post.slug}
-  createdAt={post.createdAt}
-  title={post.title}
-  extract={post.extract}
-  date={post.date}
-  coverImage={post.coverImage}
-  coverAuthorLink={post.coverAuthorLink}
-  coverAuthorName={post.coverAuthorName}
-  lang={post.lang}
-  tags={post.tags}
-  coverDescription={post.coverDescription}
+  slug={slug}
+  title={entry.data.title}
+  extract={entry.data.extract}
+  date={entry.data.date}
+  coverImage={entry.data.coverImage}
+  coverAuthorLink={entry.data.coverAuthorLink}
+  coverAuthorName={entry.data.coverAuthorName}
+  lang="it"
+  tags={entry.data.tags}
+  coverDescription={entry.data.coverDescription}
 >
-  <div set:html={htmlContent} />
-  <script async src="https://talk.hyvor.com/embed/embed.js" type="module"
-  ></script>
-  <hyvor-talk-comments website-id="12917" page-id=""></hyvor-talk-comments>
+  <Content />
+  <Comments pageId={`it/blog/${slug}`} lang="it" />
 </BlogPost>

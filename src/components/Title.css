@@ -1,30 +1,32 @@
+/* ============================================
+   Title — Gold text + gradient underline
+   Mobile first
+   ============================================ */
 .Title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-width: 50%;
-  margin: 0 auto;
-  h1 {
-    text-align: center;
-    background-color: var(--backgroundColor-tertiary);
-    color: var(--color-primary);
-    border-radius: var(--borderRadius-small);
-    font-size: var(--fontSize-extraLarge);
-    font-weight: var(--fontWeight-800);
-    display: block;
-    margin: var(--space-small) auto;
-    padding: 0 var(--space-medium);
-  }
+  max-width: 90%;
+  margin: var(--space-large) auto var(--space-medium);
 }
 
-@media screen and (max-width: 768px) {
+.Title h1 {
+  text-align: center;
+  color: var(--color-tertiary);
+  background: none;
+  border-radius: 0;
+  font-size: var(--fontSize-extraLarge);
+  font-weight: var(--fontWeight-800);
+  display: inline-block;
+  margin: var(--space-small) auto;
+  padding: 0 var(--space-medium);
+  padding-bottom: var(--space-small);
+  border-bottom: 2px solid var(--color-accent-muted);
+  position: relative;
+}
+
+@media (min-width: 769px) {
   .Title {
-    text-align: center;
-    max-width: 80%;
-    margin: 0 auto;
-    h1 {
-      font-size: var(--fontSize-large);
-      padding: 0 var(--space-medium);
-    }
+    max-width: 60%;
   }
 }

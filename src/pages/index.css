@@ -5,17 +5,18 @@ section {
 .ReelContainer {
   display: flex;
   flex-direction: row;
-  gap: 3.75rem;
+  gap: 2rem;
   margin: var(--space-medium) auto;
-  padding-left: var(--space-large);
-  overflow-x: scroll;
-  scrollbar-color: var(--backgroundColor-tertiary)
-    var(--backgroundColor-primary);
+  padding-left: var(--space-medium);
+  overflow-x: auto;
+  scrollbar-color: var(--color-tertiary) var(--backgroundColor-primary);
   scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
 }
 
-@media screen and (max-width: 768px) {
+@media (min-width: 769px) {
   .ReelContainer {
-    padding-left: var(--space-medium);
+    gap: 3rem;
+    padding-left: var(--space-large);
   }
 }

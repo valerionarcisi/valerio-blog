@@ -1,15 +1,21 @@
+/* ============================================
+   Tags — Monospace, semi-transparent
+   Mobile first
+   ============================================ */
 .Tags {
-  color: var(--color-primary);
-  background-color: var(--backgroundColor-tertiary);
-  padding: var(--space-small);
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-micro);
   text-transform: uppercase;
-  font-size: var(--fontSize-very-small);
+  letter-spacing: 0.05em;
+  color: var(--color-tertiary);
+  background-color: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  padding: 0.15rem 0.5rem;
   border-radius: var(--borderRadius-small);
   text-decoration: none;
-  margin: 0 var(--space-small);
-  font-family: var(--fontFamily-title);
-  color: var(--color-primary);
-  transition: box-shadow var(--transition-fast);
+  margin: 0 0.2rem;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
 }
 
 .Tags:first-of-type {
@@ -17,11 +23,19 @@
 }
 
 .Tags:hover {
-  box-shadow: var(--boxShadow-inverted-hover);
-  color: var(--color-neutral);
-  text-decoration: underline;
+  background-color: rgba(201, 168, 76, 0.2);
+  border-color: var(--color-tertiary);
+  color: var(--color-tertiary);
+  text-decoration: none;
 }
 
 .Tags:visited {
-  color: var(--color-primary);
+  color: var(--color-tertiary);
+}
+
+@media (min-width: 769px) {
+  .Tags {
+    font-size: var(--fontSize-very-small);
+    padding: 0.2rem 0.6rem;
+  }
 }

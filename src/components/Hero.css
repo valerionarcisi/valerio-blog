@@ -1,119 +1,189 @@
+/* ============================================
+   Hero — Full viewport, cinematic overlay
+   Mobile first
+   ============================================ */
 .Hero {
   position: relative;
   width: 100vw;
-  height: 85vh;
+  height: 100vh;
   overflow: hidden;
-  margin-bottom: var(--space-medium);
+  margin-bottom: 0;
   margin-top: 0;
-  .container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -1; /* Make sure the video is in the background */
+}
+
+.Hero .container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.Hero .video {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  border-radius: 0;
+}
+
+/* Scan-lines over video */
+.Hero .container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Gradient overlay — bottom-heavy for text readability */
+.Hero .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 12, 0.92) 0%,
+    rgba(10, 10, 12, 0.6) 35%,
+    rgba(10, 10, 12, 0.2) 65%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  z-index: 2;
+  padding: 1.5rem;
+  padding-bottom: 5rem;
+}
+
+.Hero .content {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+  gap: 0.5rem;
+  background: none;
+  border-radius: 0;
+}
+
+/* Title: big serif */
+.Hero .content h1 {
+  font-family: var(--fontFamily-title);
+  font-size: clamp(2rem, 6vw, 4rem);
+  color: #e8e6e1;
+  margin: 0;
+  padding: 0;
+  background: none;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+
+/* Subtitle line: monospace terminal feel */
+.Hero .content .hero-subtitle {
+  font-family: var(--fontFamily-mono);
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  color: var(--color-accent-cyan);
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.Hero .content .hero-subtitle .prompt {
+  color: var(--color-tertiary);
+  margin-right: 0.3rem;
+}
+
+/* AI tagline */
+.Hero .content .hero-ai-tagline {
+  font-family: var(--fontFamily-mono);
+  font-size: clamp(0.65rem, 1.8vw, 0.9rem);
+  color: var(--color-secondary);
+  margin: 0.5rem 0 0 0;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+/* CTA buttons */
+.Hero .call-to-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* Floating scroll button */
+.Hero .floating-btn {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: floatUpDown 2s ease-in-out infinite;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  z-index: 3;
+}
+
+.Hero .floating-btn:hover {
+  border-color: var(--color-accent-cyan);
+  background: rgba(78, 205, 196, 0.1);
+}
+
+.Hero .floating-btn .arrow {
+  font-size: 1rem;
+}
+
+/* ============================================
+   Desktop
+   ============================================ */
+@media (min-width: 769px) {
+  .Hero .overlay {
+    padding: 3rem 4rem;
+    padding-bottom: 6rem;
   }
 
-  .floating-btn {
-    position: absolute;
-    top: 90%;
-    left: 45π%;
-    transform: translate(-50%, -50%);
-    background-color: var(--backgroundColor-tertiary);
-    color: var(--color-primary);
-    font-family: var(--fontFamily-title);
-    border-radius: var(--borderRadius-2xlarge);
-    height: 50px;
-    width: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: box-shadow var(--transition-fast);
-    animation: floatUpDown 2s ease-in-out infinite; 
-    .arrow {
-      font-size: var(--fontSize-small);
-    }
+  .Hero .content {
+    max-width: 60%;
   }
 
-  .floating-btn:hover {
-    box-shadow: var(--boxShadow-inverted-hover);
-    color: var(--color-neutral);
-  }
-
-  .video {
-    margin-top: 0;
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: -1; /* Make sure the video is in the background */
-  }
-
-  .overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-  }
-
-  .content {
-    display: flex;
-    flex-direction: column;
-    background: rgba(0, 0, 0, 0.55);
-    border-radius: var(--borderRadius-medium);
-    color: var(--color-neutral);
-    text-align: center;
-    max-width: 49%;
-    padding-bottom: calc(var(--space-medium) + 0.5rem);
-  }
-
-  @media screen and (max-width: 768px) {
-    .content {
-      margin-top: var(--space-large);
-      padding: var(--space-medium);
-      max-width: 80%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: var(--space-medium);
-    }
-    .call-to-actions {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-medium);
-      align-items: center;
-    }
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 10px;
-  }
-
-  p {
-    font-size: 1rem;
-    margin-bottom: 20px;
+  .Hero .call-to-actions {
+    flex-direction: row;
+    gap: 1rem;
   }
 }
 
-.button {
-  background-color: #ff5733;
-  color: white;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 5px;
-  font-size: 1.2rem;
-}
+@media (min-width: 1200px) {
+  .Hero .content {
+    max-width: 50%;
+  }
 
-.button:hover {
-  background-color: #e04e2f;
+  .Hero .overlay {
+    padding: 4rem 6rem;
+    padding-bottom: 8rem;
+  }
 }

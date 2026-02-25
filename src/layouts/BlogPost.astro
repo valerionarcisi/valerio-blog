@@ -8,18 +8,28 @@ import Title from "~/components/Title.astro";
 import StructuredData from "~/components/StructuredData.astro";
 import ReadingTime from "~/components/ReadingTime.astro";
 import RelatedPosts from "~/components/RelatedPosts.astro";
-import type { TPost } from "~/services/post";
 import { SITE_TITLE } from "~/consts";
 import "./BlogPost.css";
 
-type Props = Omit<TPost, "content">;
+interface Props {
+  title: string;
+  extract: string;
+  date: string;
+  coverImage: string;
+  tags: string[];
+  slug: string;
+  lang?: string;
+  coverAuthorName?: string | null;
+  coverAuthorLink?: string | null;
+  coverDescription?: string | null;
+}
 
 const {
   title,
   extract,
   date,
   coverImage,
-  lang,
+  lang = "it",
   tags,
   coverAuthorName,
   coverAuthorLink,
@@ -27,7 +37,6 @@ const {
   slug,
 } = Astro.props;
 
-// Get content for reading time calculation
 const content = await Astro.slots.render("default");
 ---
 
@@ -36,14 +45,14 @@ const content = await Astro.slots.render("default");
     <BaseHead
       title={`${title} | ${SITE_TITLE}`}
       description={extract}
-      cover={coverImage.url}
+      cover={coverImage}
     />
     <StructuredData
       type="article"
       title={title}
       description={extract}
       url={Astro.url.href}
-      image={coverImage.url}
+      image={coverImage}
       datePublished={date}
       tags={tags}
     />
@@ -56,11 +65,11 @@ const content = await Astro.slots.render("default");
         <Title title={title} />
         <div class="info">
           <div class="cover-image">
-            {coverImage.url && <img src={coverImage.url} alt={title} />}
+            {coverImage && <img src={coverImage} alt={title} />}
           </div>
           <div class="metadata">
             <div class="tags">
-              {tags.map((tag: string) => <Tag tag={tag} />)}
+              {tags.map((tag: string) => <Tag tag={tag} lang={lang} />)}
             </div>
             <div class="date">
               Posted on <FormattedDate date={new Date(date)} />
@@ -81,11 +90,31 @@ const content = await Astro.slots.render("default");
             </div>
           )
         }
-        <div class="prose" set:html={content} />
+        <div class="prose">
+          <slot />
+        </div>
 
-        <RelatedPosts currentSlug={slug} currentTags={tags} />
+        <RelatedPosts currentSlug={slug} currentTags={tags} lang={lang} />
       </article>
     </main>
     <Footer />
+    <script is:inline>
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.prose pre').forEach(function(pre) {
+          var btn = document.createElement('button');
+          btn.className = 'copy-btn';
+          btn.textContent = 'Copy';
+          btn.addEventListener('click', function() {
+            var code = pre.querySelector('code');
+            if (code) {
+              navigator.clipboard.writeText(code.textContent || '');
+              btn.textContent = '✓';
+              setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            }
+          });
+          pre.appendChild(btn);
+        });
+      });
+    </script>
   </body>
 </html>

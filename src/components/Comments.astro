@@ -1,0 +1,169 @@
+---
+import "./Comments.css";
+
+interface Props {
+  pageId: string;
+  lang: "it" | "en";
+}
+
+const { pageId, lang } = Astro.props;
+
+const labels = {
+  it: {
+    title: "Commenti",
+    name: "Nome",
+    email: "Email",
+    text: "Commento",
+    submit: "Invia commento",
+    success: "Commento inviato! Sarà visibile dopo la moderazione.",
+    error: "Errore nell'invio del commento. Riprova.",
+    loading: "Caricamento commenti...",
+    empty: "Nessun commento ancora. Sii il primo!",
+    on: "il",
+  },
+  en: {
+    title: "Comments",
+    name: "Name",
+    email: "Email",
+    text: "Comment",
+    submit: "Submit comment",
+    success: "Comment submitted! It will be visible after moderation.",
+    error: "Error submitting comment. Please try again.",
+    loading: "Loading comments...",
+    empty: "No comments yet. Be the first!",
+    on: "on",
+  },
+};
+
+const t = labels[lang];
+---
+
+<section class="Comments" data-page-id={pageId} data-lang={lang}>
+  <h2>{t.title}</h2>
+
+  <div class="Comments-list" aria-live="polite">
+    <p class="Comments-loading">{t.loading}</p>
+  </div>
+
+  <form class="Comments-form">
+    <div class="Comments-field">
+      <label for="comment-name">{t.name} *</label>
+      <input type="text" id="comment-name" name="name" required maxlength="100" />
+    </div>
+    <div class="Comments-field">
+      <label for="comment-email">{t.email} *</label>
+      <input type="email" id="comment-email" name="email" required maxlength="254" />
+    </div>
+    <div class="Comments-hp" aria-hidden="true">
+      <label for="comment-website">Website</label>
+      <input type="text" id="comment-website" name="website" tabindex="-1" autocomplete="off" />
+    </div>
+    <div class="Comments-field">
+      <label for="comment-text">{t.text} *</label>
+      <textarea id="comment-text" name="text" required maxlength="5000" rows="4"></textarea>
+    </div>
+    <button type="submit" class="Button">{t.submit}</button>
+    <p class="Comments-message" role="status"></p>
+  </form>
+</section>
+
+<script is:inline>
+  (function () {
+    var section = document.querySelector(".Comments");
+    if (!section) return;
+
+    var pageId = section.dataset.pageId;
+    var lang = section.dataset.lang;
+    var listEl = section.querySelector(".Comments-list");
+    var form = section.querySelector(".Comments-form");
+    var messageEl = section.querySelector(".Comments-message");
+
+    var labels = {
+      it: {
+        empty: "Nessun commento ancora. Sii il primo!",
+        on: "il",
+        success: "Commento inviato! Sarà visibile dopo la moderazione.",
+        error: "Errore nell'invio del commento. Riprova.",
+      },
+      en: {
+        empty: "No comments yet. Be the first!",
+        on: "on",
+        success: "Comment submitted! It will be visible after moderation.",
+        error: "Error submitting comment. Please try again.",
+      },
+    };
+    var t = labels[lang] || labels.en;
+
+    function escapeHtml(str) {
+      var div = document.createElement("div");
+      div.appendChild(document.createTextNode(str));
+      return div.innerHTML;
+    }
+
+    fetch("/api/comments?pageId=" + encodeURIComponent(pageId))
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (comments) {
+        if (!comments.length) {
+          listEl.innerHTML =
+            '<p class="Comments-empty">' + t.empty + "</p>";
+          return;
+        }
+        listEl.innerHTML = comments
+          .map(function (c) {
+            var d = new Date(c.created_at).toLocaleDateString(
+              lang === "it" ? "it-IT" : "en-US"
+            );
+            return (
+              '<div class="Comments-item">' +
+              '<div class="Comments-meta"><strong>' +
+              escapeHtml(c.name) +
+              "</strong> " +
+              '<span class="Comments-date">' +
+              t.on +
+              " " +
+              d +
+              "</span></div>" +
+              '<p class="Comments-text">' +
+              escapeHtml(c.text) +
+              "</p></div>"
+            );
+          })
+          .join("");
+      })
+      .catch(function () {
+        listEl.innerHTML =
+          '<p class="Comments-empty">' + t.empty + "</p>";
+      });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var data = {
+        pageId: pageId,
+        name: form.querySelector('[name="name"]').value,
+        email: form.querySelector('[name="email"]').value,
+        text: form.querySelector('[name="text"]').value,
+        website: form.querySelector('[name="website"]').value,
+      };
+      messageEl.textContent = "";
+      messageEl.className = "Comments-message";
+
+      fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+        .then(function (r) {
+          if (!r.ok) throw new Error();
+          messageEl.textContent = t.success;
+          messageEl.classList.add("Comments-message--success");
+          form.reset();
+        })
+        .catch(function () {
+          messageEl.textContent = t.error;
+          messageEl.classList.add("Comments-message--error");
+        });
+    });
+  })();
+</script>

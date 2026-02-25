@@ -1,0 +1,162 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
+import Title from "~/components/Title.astro";
+import "~/layouts/BlogPost.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Who I Am | ${SITE_TITLE}`}
+      description={SITE_DESCRIPTION}
+    />
+  </head>
+  <body>
+    <Header />
+    <main class="BlogPost">
+      <Title title="Who I Am" />
+      <section class="prose">
+        <p>
+          <img class="avatar" src="/img/me.jpg" alt="Valerio" />
+          Greetings! I am Valerio, a seasoned professional with a diverse background
+          spanning web development and filmmaking, currently based Le Marche, Italy.
+          <br />
+        </p>
+        <hr />
+        <h2>Web Development Expertise:</h2>
+        <p>
+          In my current role as a Fullstack Developer at <a
+            href="https://www.cleafy.com/">Cleafy</a
+          >, I focus on refactoring large PHP apps into modern Javascript. Prior
+          to this, I held a Senior Frontend Developer position at <a
+            href="https://www.teamsystem.com/">Teamsystem</a
+          > where i utilized technologies such as Angular, Typescript and Ngrx.
+        </p>
+        <p>
+          During this experience, I had the opportunity to serve as an internal
+          speaker at a conference focused on Flux Architecture, employing Redux
+          Toolkit and Ngrx.
+        </p>
+        <p>
+          I worked as a Senior Software Engineer at <a
+            href="http://fieldtronics.it/">Fieldtronics Srl</a
+          >. Here, I utilized technologies such as Node.js, React, Docker, and
+          Serverless to drive innovation in agricultural solutions.
+        </p>
+        <p>
+          My journey in web development began at <a
+            href="https://www.new-system.it/">New System Srl</a
+          >, where I cultivated my skills as a PHP and WordPress developer.
+        </p>
+
+        <hr />
+
+        <h2>Personal Insight:</h2>
+        <p>
+          Outside of my professional pursuits, I find fulfillment in the company
+          of my family. Married to Adriana, I am a proud father to two wonderful
+          daughters: Bianca and Lea, who bring joy and balance to my life.
+        </p>
+        <center>
+          <img src="/img/family.jpg" alt="Narcisi Family" />
+        </center>
+        <hr />
+
+        <h2>Filmmaking Journey:</h2>
+        <p>
+          Alongside my passion for web development, I have a deep-rooted
+          interest in storytelling through film. With a degree from <a
+            href="https://www.officinemattoli.it/">Officine Mattoli</a
+          >, I have written and directed several short films, and I possess a
+          strong understanding of screenwriting and production organization. As
+          an Assistant Director, I excel in managing on-set logistics, ensuring
+          smooth communication, and maintaining a focused, efficient
+          environment, which allows the creative team to work seamlessly toward
+          the final vision.
+        </p>
+        <h2>Experience:</h2>
+        <ul>
+          <li>
+            Senior Fullstack Developer at <a
+              target="_blank"
+              href="https://www.cleafy.com/">Cleafy</a
+            >, 2022 to present
+          </li>
+          <li>
+            Senior Frontend Developer at <a
+              target="_blank"
+              href="https://www.teamsystem.com/">Teamsystem</a
+            >, 2020 to 2022
+          </li>
+          <li>
+            Senior Software Engineer at <a
+              target="_blank"
+              href="http://fieldtronics.it/">Fieldtronics</a
+            >, 2017 to 2020
+          </li>
+          <li>
+            Wordpress developer at <a
+              target="_blank"
+              href="https://www.fststudio.com/">FST Studio</a
+            >, 2014 to 2016
+          </li>
+          <li>
+            Stage in the <a target="_blank" href="https://skianet.it/"
+              >Skianet</a
+            >, 2014
+          </li>
+          <li>
+            PHP and WordPress Developer at <a
+              target="_blank"
+              href="https://www.new-system.it/">New System</a
+            >, 2010 to 2014
+          </li>
+        </ul>
+
+        <h2>Skills</h2>
+        <ul>
+          <li>JS/TS</li>
+          <li>HTML / CSS / SASS</li>
+          <li>React</li>
+          <li>Redux</li>
+          <li>Cypress</li>
+          <li>Angular</li>
+          <li>Rxjs</li>
+          <li>Ngrx</li>
+          <li>Node.js</li>
+          <li>Serverless</li>
+          <li>Docker</li>
+        </ul>
+
+        <h2>AI & Building</h2>
+        <p>
+          I believe AI is a powerful tool — but the tool, not the builder.
+          I build things with AI, not the opposite. I drive the process, make the decisions,
+          and use artificial intelligence to amplify creativity and productivity,
+          both in code and cinema.
+        </p>
+
+        <hr />
+        <h2>Get in touch</h2>
+        <p>
+          You can follow me and message me on <a
+            href="https://bsky.app/profile/valnar.bsky.social"
+          >
+            Bluesky
+          </a>,
+          <a href="https://www.linkedin.com/in/cv-valerio-narcisi/">
+            Linkedin
+          </a>,
+          <a href="https://www.instagram.com/narcisi.valerio/"> Instagram </a> or
+          <a href="https://github.com/valerionarcisi"> Github </a>.
+        </p>
+      </section>
+    </main>
+
+    <Footer />
+  </body>
+</html>

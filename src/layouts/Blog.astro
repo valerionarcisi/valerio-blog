@@ -8,12 +8,11 @@ import BlogSearch from "~/components/BlogSearch.astro";
 import '~/layouts/Blog.css'
 import { SITE_DESCRIPTION, SITE_TITLE } from "~/consts";
 
-const { category, posts } = Astro.props;
-
+const { category, posts, lang = "it" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={lang}>
 	<head>
 		<BaseHead title={`Category: ${category || 'Blog'} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 	</head>
@@ -23,12 +22,13 @@ const { category, posts } = Astro.props;
 			<section class="Blog">
 				<Title title={`Category: ${category}` || 'Blog'} />
 				<BlogSearch />
+				<div class="cards-grid">
 					{
-						posts.map((post:any) => ( 
-								<Card {...post } slug={post.slug} />
+						posts.map((post:any) => (
+								<Card {...post} slug={post.slug} lang={lang} />
 						))
-						
 					}
+				</div>
 			</section>
 		</main>
 		<Footer />

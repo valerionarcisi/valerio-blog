@@ -17,7 +17,6 @@ const {
   watchedDate,
   href,
   vote_average,
-  vote_count,
   album,
   type,
   artist,
@@ -25,35 +24,32 @@ const {
 
 const missingThumbnail =
   type === "movie"
-    ? "https://placeholder.pics/svg/178x278/DEDEDE/555555/No%20Poster%20found"
-    : "https://placeholder.pics/svg/185x185/DEDEDE/555555/no%20cover%20found";
+    ? "https://placeholder.pics/svg/178x278/1a1b26/8a8a8e/No%20Poster"
+    : "https://placeholder.pics/svg/185x185/1a1b26/8a8a8e/No%20Cover";
+
+const formattedDate = new Date(watchedDate).toLocaleDateString("en-us", {
+  month: "short",
+  day: "numeric",
+});
 ---
 
 <div class:list={["Reel", type]}>
-  <a href={href} target="_blank">
+  <a href={href} target="_blank" rel="noopener noreferrer">
     <div class="thumbnail">
       <img
-        src={url !== ""
-          ? url
-          : missingThumbnail}
+        src={url !== "" ? url : missingThumbnail}
         alt={title}
+        loading="lazy"
       />
+      {vote_average && (
+        <span class="vote">{vote_average.toFixed(1)}</span>
+      )}
     </div>
   </a>
   <div class="info">
-    <h3 class="title">{title}</h3>
-    {artist && <p>By {artist}</p>}
-    {album && <p>Album:{album} </p>}
-    {vote_average && <p>Vote Avetage:{vote_average} </p>}
-    {vote_count && <p>Vote Count: {vote_count}</p>}
-    <p>
-      {album ? "Listen" : "Watched"} on: {
-        new Date(watchedDate).toLocaleDateString("en-us", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      }
-    </p>
+    <h3 class="reel-title">{title}</h3>
+    {artist && <p class="reel-artist">{artist}</p>}
+    {album && <p class="reel-album">{album}</p>}
+    <p class="reel-date">{formattedDate}</p>
   </div>
 </div>

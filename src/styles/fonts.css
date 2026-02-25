@@ -1,4 +1,3 @@
-/* Font performance optimizations */
 @font-face {
   font-family: 'Staatliches';
   src: url('@fontsource/staatliches/files/staatliches-latin-400-normal.woff2') format('woff2');
@@ -18,6 +17,22 @@
 @font-face {
   font-family: 'Merriweather';
   src: url('@fontsource/merriweather/files/merriweather-latin-700-normal.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('@fontsource/jetbrains-mono/files/jetbrains-mono-latin-700-normal.woff2') format('woff2');
   font-weight: 700;
   font-style: normal;
   font-display: swap;

@@ -1,0 +1,111 @@
+/* ============================================
+   Comments — Self-hosted comment section
+   Mobile first
+   ============================================ */
+.Comments {
+  margin-top: var(--space-large);
+  padding-top: var(--space-large);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.Comments h2 {
+  font-family: var(--fontFamily-title);
+  color: var(--color-tertiary);
+}
+
+.Comments-item {
+  padding: var(--space-medium) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.Comments-meta {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  margin-bottom: var(--space-small);
+}
+
+.Comments-meta strong {
+  color: var(--color-accent-cyan);
+}
+
+.Comments-date {
+  color: var(--color-secondary);
+  margin-left: 0.5rem;
+}
+
+.Comments-text {
+  font-size: var(--fontSize-small);
+  line-height: var(--lineHeight-loose);
+  margin: 0;
+}
+
+.Comments-empty,
+.Comments-loading {
+  color: var(--color-secondary);
+  font-style: italic;
+  font-size: var(--fontSize-small);
+}
+
+/* ============================================
+   Form
+   ============================================ */
+.Comments-form {
+  margin-top: var(--space-large);
+}
+
+.Comments-field {
+  margin-bottom: var(--space-medium);
+}
+
+.Comments-field label {
+  display: block;
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-secondary);
+  margin-bottom: var(--space-small);
+}
+
+.Comments-field input,
+.Comments-field textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--backgroundColor-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--borderRadius-small);
+  color: var(--color-neutral);
+  font-family: var(--fontFamily-body);
+  font-size: var(--fontSize-small);
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.Comments-field input:focus,
+.Comments-field textarea:focus {
+  outline: none;
+  border-color: var(--color-tertiary);
+}
+
+.Comments-hp {
+  position: absolute;
+  left: -9999px;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.Comments-message {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  margin-top: var(--space-medium);
+  min-height: 1.5em;
+}
+
+.Comments-message--success {
+  color: var(--color-accent-cyan);
+}
+
+.Comments-message--error {
+  color: #e74c3c;
+}

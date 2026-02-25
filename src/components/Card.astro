@@ -3,38 +3,41 @@ import { Image } from "astro:assets";
 import FormattedDate from "~/components/FormattedDate.astro";
 import "~/components/Card.css";
 import Tag from "~/components/Tag.astro";
-import { type TAbstractPost } from "~/services/post";
 
-type Props = TAbstractPost;
+interface Props {
+  title: string;
+  extract: string;
+  date: string;
+  coverImage: string;
+  tags: string[];
+  slug: string;
+  lang?: string;
+}
 
-const { title, extract, date, coverImage, tags, slug } = Astro.props;
+const { title, extract, date, coverImage, tags, slug, lang = "it" } = Astro.props;
 
-// Optimize description for better SEO (150-160 chars)
-const optimizedExtract = extract.length > 150 
-  ? extract.substring(0, 147) + "..." 
+const blogPrefix = lang === "it" ? "/blog" : `/en/blog`;
+
+const optimizedExtract = extract.length > 120
+  ? extract.substring(0, 117) + "..."
   : extract;
 ---
 
-<div class="Card">
-  <div class="info">
-    <div class="cover-image">
-      <a href={`/blog/${slug}/`}>
-        {coverImage.url && <Image src={coverImage.url} alt={title} width={400} height={250} loading="lazy" />}
-      </a>
-    </div>
-    <div class="metadata">
-      <div class="tags">
-        {tags.map((tag: string) => <Tag tag={tag} />)}
-      </div>
-      <div class="date">
-        <FormattedDate date={new Date(date)} />
-      </div>
-    </div>
+<a href={`${blogPrefix}/${slug}/`} class="Card">
+  <div class="card-img">
+    {coverImage && <Image src={coverImage} alt={title} width={600} height={340} loading="lazy" />}
+    <div class="card-overlay"></div>
+    <div class="card-glitch"></div>
+    <div class="card-pixelate"></div>
   </div>
-  <div class="content">
-    <a href={`/blog/${slug}/`}>
-      <h3 class="title">{title}</h3>
-    </a>
-    <div class="description">{optimizedExtract}</div>
+  <div class="card-body">
+    <div class="card-meta">
+      <span class="card-date"><FormattedDate date={new Date(date)} /></span>
+      <div class="card-tags">
+        {tags.slice(0, 2).map((tag: string) => <Tag tag={tag} lang={lang} asSpan={true} />)}
+      </div>
+    </div>
+    <h3 class="card-title">{title}</h3>
+    <p class="card-extract">{optimizedExtract}</p>
   </div>
-</div>
+</a>

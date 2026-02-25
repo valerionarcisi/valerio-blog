@@ -12,7 +12,8 @@ import { getMovieById } from "~/services/tmdb";
 import Reel from "~/components/Reel.astro";
 import "./index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
-import fetchHyPosts from "~/services/post";
+import { getCollection } from "astro:content";
+import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 
 const lastWatchedMovies = async () => {
   const xml = await getLetterboxdRss();
@@ -37,19 +38,27 @@ const lastWatchedMovies = async () => {
   return watchedMovies.filter(Boolean);
 };
 
-// Parallelize all data fetching
-const [posts, lastWatched, lastSongs] = await Promise.all([
-  fetchHyPosts(),
+const allEntries = await getCollection("blog");
+const posts = allEntries
+  .filter((e) => getLangFromId(e.id) === "it")
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 5)
+  .map((e) => ({
+    ...e.data,
+    slug: getSlugFromId(e.id),
+  }));
+
+const [lastWatched, lastSongs] = await Promise.all([
   lastWatchedMovies(),
   fetchRecentTracks(),
 ]);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="it">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-    <StructuredData 
+    <StructuredData
       type="website"
       title={SITE_TITLE}
       description={SITE_DESCRIPTION}
@@ -60,22 +69,24 @@ const [posts, lastWatched, lastSongs] = await Promise.all([
   <body>
     <Header />
     <Hero
-      title="Hi I'm Valerio"
-      subtitle="I'm a web developer, director and screenwriter. I currently work at Cleafy as fullstack developer. "
+      title="Ciao, sono Valerio"
+      role="developer.filmmaker"
+      subtitle="I solve problems. I tell stories."
+      aiTagline="AI-assisted, human-driven"
       callToActions={[
         {
-          label: "Connect with me",
+          label: "Connettiti con me",
           href: "http://linkedin.com/in/cv-valerio-narcisi",
         },
         {
-          label: "Watch Caramella's Trailer",
+          label: "Guarda il Trailer di Caramella",
           href: "https://www.youtube.com/watch?v=UnQ8NSXYXao",
         },
       ]}
     />
     <main>
       <section id="last-watched">
-        <Title title="Last watched movies" />
+        <Title title="Ultimi film visti" />
         <div class="ReelContainer">
           {
             lastWatched.map((movie: any) => (
@@ -93,7 +104,7 @@ const [posts, lastWatched, lastSongs] = await Promise.all([
         </div>
       </section>
       <section>
-        <Title title="Last Listened songs" />
+        <Title title="Ultimi brani ascoltati" />
         <div class="ReelContainer">
           {
             lastSongs.map((song) => (
@@ -107,7 +118,7 @@ const [posts, lastWatched, lastSongs] = await Promise.all([
                 watchedDate={
                   song?.date
                     ? song.date["#text"]
-                    : new Date().toLocaleDateString("en-us", {
+                    : new Date().toLocaleDateString("it-IT", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
@@ -119,20 +130,22 @@ const [posts, lastWatched, lastSongs] = await Promise.all([
         </div>
       </section>
       <section>
-        <Title title="Latest posts" />
-        {
-          posts?.map((post) => (
-            <Card
-              date={post.date}
-              title={post.title}
-              extract={post.extract}
-              slug={post.slug}
-              createdAt={post.createdAt}
-              coverImage={post.coverImage}
-              tags={post.tags}
-            />
-          ))
-        }
+        <Title title="Ultimi articoli" />
+        <div class="cards-grid">
+          {
+            posts?.map((post) => (
+              <Card
+                date={post.date}
+                title={post.title}
+                extract={post.extract}
+                slug={post.slug}
+                coverImage={post.coverImage}
+                tags={post.tags}
+                lang="it"
+              />
+            ))
+          }
+        </div>
       </section>
     </main>
     <Footer />

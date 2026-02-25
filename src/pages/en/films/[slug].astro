@@ -1,0 +1,191 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import Title from "~/components/Title.astro";
+import { getCollection, render } from "astro:content";
+import { SITE_TITLE } from "~/consts";
+import { getLangFromId, getSlugFromId, useTranslations } from "~/i18n/utils";
+import Comments from "~/components/Comments.astro";
+import "~/layouts/BlogPost.css";
+
+const t = useTranslations("en");
+
+export async function getStaticPaths() {
+  const allFilms = await getCollection("films");
+  return allFilms
+    .filter(e => getLangFromId(e.id) === "en")
+    .map(entry => ({
+      params: { slug: getSlugFromId(entry.id) },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const film = entry.data;
+const slug = getSlugFromId(entry.id);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`${film.title} (${film.year}) | ${SITE_TITLE}`}
+      description={film.plot}
+      cover={film.coverImage}
+    />
+  </head>
+  <body>
+    <Header />
+    <main>
+      <article class="BlogPost">
+        <Title title={film.title} />
+        <div class="title" style="text-align: center; margin-bottom: var(--space-large);">
+          <h3>{film.year}</h3>
+          <h2>{film.role}</h2>
+        </div>
+
+        <div class="info">
+          <div class="cover-image">
+            <img src={film.coverImage} alt={film.title} />
+          </div>
+        </div>
+
+        {film.trailerLocalPath && (
+          <section style="margin: var(--space-large) auto; max-width: 85%;">
+            <h2>{t("films.trailer")}</h2>
+            <video autoplay muted src={film.trailerLocalPath} controls style="width: 100%;"></video>
+          </section>
+        )}
+
+        <div class="prose">
+          <section>
+            <h2>{t("films.plot")}</h2>
+            <p>{film.plot}</p>
+          </section>
+
+          {film.technicalSpecs && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.specs")}</h2>
+                <ul>
+                  {film.technicalSpecs.shootingFormat && <li><strong>Shooting Format:</strong> {film.technicalSpecs.shootingFormat}</li>}
+                  {film.technicalSpecs.soundFormat && <li><strong>Sound Format:</strong> {film.technicalSpecs.soundFormat}</li>}
+                  {film.technicalSpecs.aspectRatio && <li><strong>Aspect Ratio:</strong> {film.technicalSpecs.aspectRatio}</li>}
+                  {film.technicalSpecs.musicalRights && <li><strong>Musical Rights:</strong> {film.technicalSpecs.musicalRights}</li>}
+                  {film.technicalSpecs.spokenLanguage && <li><strong>Language:</strong> {film.technicalSpecs.spokenLanguage}</li>}
+                  {film.technicalSpecs.subtitleLanguages && <li><strong>Subtitles:</strong> {film.technicalSpecs.subtitleLanguages.join(", ")}</li>}
+                </ul>
+              </section>
+            </>
+          )}
+
+          {film.crew.length > 0 && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.crew")}</h2>
+                <ul>
+                  {film.crew.map((member: any) => (
+                    <li>
+                      <strong>{member.role}:</strong>{" "}
+                      {member.url ? <a target="_blank" href={member.url}>{member.name}</a> : member.name}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          )}
+
+          {film.cast.length > 0 && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.cast")}</h2>
+                <ul>
+                  {film.cast.map((actor: any) => (
+                    <li>
+                      {actor.url ? <a target="_blank" href={actor.url}>{actor.name}</a> : actor.name}
+                      {actor.character && <span> — {actor.character}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          )}
+
+          {film.distribution && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.distribution")}</h2>
+                <p>
+                  {film.distribution.url
+                    ? <a target="_blank" href={film.distribution.url}>{film.distribution.name}</a>
+                    : film.distribution.name}
+                </p>
+              </section>
+            </>
+          )}
+
+          {film.festivals.length > 0 && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.screenings")}</h2>
+                <ul>
+                  {film.festivals.map((fest: any) => (
+                    <li>
+                      <strong>{fest.name} - {fest.year}</strong>
+                      {fest.location && <br />}{fest.location}
+                      {fest.award && <><br /><em>{fest.award}</em></>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          )}
+
+          {film.specialThanks.length > 0 && (
+            <>
+              <hr />
+              <section>
+                <h2>{t("films.thanks")}</h2>
+                <ul>
+                  {film.specialThanks.map((person: any) => (
+                    <li>
+                      {person.url ? <a target="_blank" href={person.url}>{person.name}</a> : person.name}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          )}
+
+          {film.images.length > 0 && (
+            <section style="margin-top: var(--space-large);">
+              {film.images.map((img: any) => (
+                <img src={img.src} alt={img.alt} style="margin-bottom: var(--space-medium);" />
+              ))}
+            </section>
+          )}
+
+          <Content />
+
+          {film.youtubeUrl && (
+            <div style="text-align: center; margin: var(--space-large) 0;">
+              <a href={film.youtubeUrl} target="_blank" class="button">
+                {t("films.watchOn")} YouTube
+              </a>
+            </div>
+          )}
+
+          <Comments pageId={`en/films/${slug}`} lang="en" />
+        </div>
+      </article>
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,53 +1,125 @@
+/* ============================================
+   Reel — Movie/Song cards in horizontal scroll
+   Mobile first
+   ============================================ */
 .Reel {
   border-radius: var(--borderRadius-medium);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: var(--space-large);
-  margin: var(--space-medium) auto;
-  img {
-    transition: var(--transition-fast);
-    box-shadow: var(--boxShadow-medium);
-  }
-
-  img:hover {
-    box-shadow: var(--boxShadow-inverted-hover);
-  }
-
-  .thumbnail {
-    width: 185px;
-    height: 278px;
-    margin-bottom: var(--space-small);
-  }
-  .info {
-    margin-top: var(--space-medium);
-    h3 {
-      margin: 0;
-      margin-bottom: var(--space-small);
-      font-size: var(--fontSize-medium);
-      color: var(--color-neutral);
-    }
-    p {
-      margin: 0;
-      font-size: var(--fontSize-very-micro);
-      color: var(--color-secondary);
-    }
-  }
+  gap: 0.5rem;
+  flex-shrink: 0;
+  min-width: 140px;
+  max-width: 160px;
 }
 
-.song {
+.Reel a {
+  text-decoration: none;
+  display: block;
+}
+
+.Reel .thumbnail {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--borderRadius-medium);
+  width: 160px;
+  height: 240px;
+  background: var(--backgroundColor-secondary);
+}
+
+.Reel .thumbnail img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  .thumbnail {
-    height: 185px;
-    width: 185px;
-    margin-bottom: var(--space-small);
+  display: block;
+  margin: 0;
+  border-radius: var(--borderRadius-medium);
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+.Reel .thumbnail:hover img {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.Reel .thumbnail .vote {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  font-family: var(--fontFamily-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(10, 10, 12, 0.8);
+  color: var(--color-tertiary);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--borderRadius-small);
+  backdrop-filter: blur(4px);
+}
+
+.Reel .info {
+  padding: 0.25rem 0;
+}
+
+.Reel .info .reel-title {
+  margin: 0;
+  font-family: var(--fontFamily-title);
+  font-size: 0.8rem;
+  color: var(--color-neutral);
+  line-height: 1.2;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.Reel .info .reel-artist {
+  margin: 0.15rem 0 0;
+  font-family: var(--fontFamily-mono);
+  font-size: 0.6rem;
+  color: var(--color-accent-cyan);
+}
+
+.Reel .info .reel-album {
+  margin: 0.1rem 0 0;
+  font-size: 0.55rem;
+  color: var(--color-secondary);
+  font-style: italic;
+}
+
+.Reel .info .reel-date {
+  margin: 0.2rem 0 0;
+  font-family: var(--fontFamily-mono);
+  font-size: 0.55rem;
+  color: var(--color-secondary);
+}
+
+/* Song variant — square thumbnails */
+.song .thumbnail {
+  width: 160px;
+  height: 160px;
+}
+
+/* ============================================
+   Desktop — slightly larger
+   ============================================ */
+@media (min-width: 769px) {
+  .Reel {
+    min-width: 170px;
+    max-width: 185px;
   }
-  img {
-    height: 185px;
+
+  .Reel .thumbnail {
     width: 185px;
+    height: 278px;
+  }
+
+  .Reel .info .reel-title {
+    font-size: 0.9rem;
+  }
+
+  .song .thumbnail {
+    width: 185px;
+    height: 160px;
   }
 }

@@ -1,0 +1,36 @@
+---
+import { getCollection, render } from 'astro:content';
+import BlogPost from '~/layouts/BlogPost.astro';
+import Comments from '~/components/Comments.astro';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
+
+export async function getStaticPaths() {
+  const allEntries = await getCollection('blog');
+  return allEntries
+    .filter(e => getLangFromId(e.id) === 'en')
+    .map(entry => ({
+      params: { slug: getSlugFromId(entry.id) },
+      props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const slug = getSlugFromId(entry.id);
+---
+
+<BlogPost
+  slug={slug}
+  title={entry.data.title}
+  extract={entry.data.extract}
+  date={entry.data.date}
+  coverImage={entry.data.coverImage}
+  coverAuthorLink={entry.data.coverAuthorLink}
+  coverAuthorName={entry.data.coverAuthorName}
+  lang="en"
+  tags={entry.data.tags}
+  coverDescription={entry.data.coverDescription}
+>
+  <Content />
+  <Comments pageId={`en/blog/${slug}`} lang="en" />
+</BlogPost>

@@ -1,8 +1,14 @@
 ---
 import { Image } from "astro:assets";
 import HeaderLink from "~/components/HeaderLink.astro";
-import ThemeToggle from "~/components/ThemeToggle.astro";
 import "~/components/Header.css";
+
+const currentPath = Astro.url.pathname;
+const isEn = currentPath.startsWith('/en');
+const otherLang = isEn ? 'IT' : 'EN';
+const langSwitchHref = isEn
+  ? currentPath.replace(/^\/en/, '') || '/'
+  : `/en${currentPath}`;
 ---
 
 <header class="Header">
@@ -13,7 +19,6 @@ import "~/components/Header.css";
     </HeaderLink>
   </div>
   <div class="header-controls">
-    <ThemeToggle />
     <div class="menu-toggle">
       <span></span>
       <span></span>
@@ -21,13 +26,11 @@ import "~/components/Header.css";
     </div>
   </div>
   <nav>
-    <HeaderLink href="/">Home</HeaderLink>
-    <HeaderLink href="/blog">Blog</HeaderLink>
-    <HeaderLink href="/caramella-shortmovie"
-      >Caramella Short movie</HeaderLink
-    >
-    <HeaderLink href="/who-i-am">Who I Am</HeaderLink>
-    <HeaderLink href="/filmmaker-journey">Filmmaker Journey</HeaderLink>
+    <HeaderLink href={isEn ? "/en" : "/"}>Home</HeaderLink>
+    <HeaderLink href={isEn ? "/en/blog" : "/blog"}>Blog</HeaderLink>
+    <HeaderLink href={isEn ? "/en/films" : "/films"}>{isEn ? "Films" : "Film"}</HeaderLink>
+    <HeaderLink href={isEn ? "/en/who-i-am" : "/who-i-am"}>{isEn ? "Who I Am" : "Chi Sono"}</HeaderLink>
+    <a href={langSwitchHref} class="lang-switch">{otherLang}</a>
   </nav>
 </header>
 

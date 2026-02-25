@@ -1,114 +1,167 @@
-.Card {
-  max-width: 70%;
-  margin: var(--space-small) auto;
-  margin-bottom: var(--space-medium);
-  padding: var(--space-medium);
+/* ============================================
+   Cards Grid — Responsive grid container
+   Mobile first
+   ============================================ */
+.cards-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-medium);
+  grid-template-columns: 1fr;
+  gap: var(--space-large);
+  max-width: 95%;
+  margin: 0 auto;
+  padding: var(--space-medium) 0;
+}
 
-  @media screen and (min-width: 769px) and (max-width: 1024px) {
+@media (min-width: 600px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
     max-width: 90%;
   }
+}
 
-  .title {
-    margin-bottom: var(--space-medium);
+@media (min-width: 1024px) {
+  .cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 70%;
+    gap: 2rem;
+  }
+}
+
+/* ============================================
+   Card — Clean vertical card with glitch hover
+   Mobile first
+   ============================================ */
+.Card {
+  display: flex;
+  flex-direction: column;
+  background: var(--backgroundColor-secondary);
+  border-radius: var(--borderRadius-medium);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid var(--border-subtle);
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.Card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--boxShadow-glow-warm);
+  border-color: rgba(201, 168, 76, 0.25);
+}
+
+.Card:visited {
+  color: inherit;
+}
+
+/* ============================================
+   Card Image
+   ============================================ */
+.card-img {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+}
+
+.card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  margin: 0;
+  border-radius: 0;
+  transition: filter var(--transition-fast), transform var(--transition-medium);
+}
+
+.Card:hover .card-img img {
+  filter: saturate(1.15) brightness(1.05);
+  transform: scale(1.03);
+}
+
+/* Vignette overlay */
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(10, 10, 12, 0.35) 0%,
+    transparent 40%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Glitch/pixelate overlays — hidden, kept for HTML compat */
+.card-glitch,
+.card-pixelate {
+  display: none;
+}
+
+/* ============================================
+   Card Body
+   ============================================ */
+.card-body {
+  padding: var(--space-medium);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-small);
+  gap: var(--space-small);
+}
+
+.card-date {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-micro);
+  color: var(--color-secondary);
+  white-space: nowrap;
+}
+
+.card-tags {
+  display: flex;
+  gap: 0.2rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.card-title {
+  font-size: var(--fontSize-medium);
+  margin: var(--space-small) 0;
+  line-height: var(--lineHeight-medium);
+  color: var(--color-neutral);
+}
+
+.card-extract {
+  font-size: var(--fontSize-very-small);
+  color: var(--color-secondary);
+  line-height: var(--lineHeight-loose);
+  margin: 0;
+  flex: 1;
+}
+
+/* ============================================
+   Desktop — bigger text, more padding
+   ============================================ */
+@media (min-width: 769px) {
+  .card-body {
+    padding: var(--space-large);
   }
 
-  h3 {
-    margin-bottom: 0;
+  .card-title {
     font-size: var(--fontSize-large);
   }
 
-  img {
-    height: auto;
-    object-fit: cover;
-    box-shadow: var(--boxShadow-medium);
-    transition: box-shadow var(--transition-fast);
-  }
-  img:hover {
-    box-shadow: var(--boxShadow-inverted-hover);
-  }
-  .description {
-    font-size: var(--fontSize-very-small);
-    color: var(--color-neutral);
-  }
-
-  .info {
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    position: relative;
-
-    .cover-image {
-      width: 100%;
-
-      img {
-        width: 100%;
-        display: block;
-        box-shadow: var(--boxShadow-medium);
-        border-radius: var(--borderRadius-small);
-      }
-    }
-
-    .metadata {
-      position: absolute;
-      bottom: var(--space-large);
-      left: var(--space-small);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: calc(100% - var(--space-small) * 2);
-
-      .tags {
-        font-size: var(--fontSize-very-small);
-        color: var(--color-neutral);
-        padding: var(--space-small);
-        border-radius: var(--borderRadius-small);
-      }
-      .date {
-        font-size: var(--fontSize-very-small);
-        color: var(--color-neutral);
-        background-color: rgba(0, 0, 0, 0.7);
-        padding: var(--space-small);
-        border-radius: var(--borderRadius-small);
-      }
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    .content {
-      margin-top: var(--space-medium);
-      text-align: center;
-    }
-    .info {
-      img {
-        margin-bottom: var(--space-small);
-      }
-      .metadata {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        bottom: var(--space-small);
-        .tags {
-          font-size: var(--fontSize-very-micro);
-        }
-        .date {
-          font-size: var(--fontSize-very-micro);
-        }
-      }
-    }
-  }
-
-  @media screen and (max-width: 768px) {
-    max-width: 90%;
-    grid-template-columns: 1fr;
-    gap: var(--space-medium);
-    h3 {
-      font-size: var(--fontSize-extraLarge);
-    }
-    .description {
-      display: none;
-    }
+  .card-extract {
+    font-size: var(--fontSize-small);
+    margin-top: var(--space-small);
   }
 }

@@ -1,0 +1,153 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import StructuredData from "~/components/StructuredData.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
+import Hero from "~/components/Hero.astro";
+import Title from "~/components/Title.astro";
+import Card from "~/components/Card.astro";
+import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import { getMovieById } from "~/services/tmdb";
+import Reel from "~/components/Reel.astro";
+import "~/pages/index.css";
+import { fetchRecentTracks } from "~/services/audioscrobbler";
+import { getCollection } from "astro:content";
+import { getLangFromId, getSlugFromId } from "~/i18n/utils";
+
+const lastWatchedMovies = async () => {
+  const xml = await getLetterboxdRss();
+  const parsedXml = (await parseXmlContent(await xml.text())) as any;
+
+  const moviePromises = parsedXml.rss.channel[0].item
+    .filter((item: any) => item?.["tmdb:movieId"]?.[0])
+    .map(async (item: any) => {
+      try {
+        const movie = await getMovieById(item["tmdb:movieId"][0]);
+        return { ...movie, ...item };
+      } catch (error) {
+        console.error(
+          `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
+          error
+        );
+        return null;
+      }
+    });
+
+  const watchedMovies = await Promise.all(moviePromises);
+  return watchedMovies.filter(Boolean);
+};
+
+const allEntries = await getCollection("blog");
+const posts = allEntries
+  .filter((e) => getLangFromId(e.id) === "en")
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 5)
+  .map((e) => ({
+    ...e.data,
+    slug: getSlugFromId(e.id),
+  }));
+
+const [lastWatched, lastSongs] = await Promise.all([
+  lastWatchedMovies(),
+  fetchRecentTracks(),
+]);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <StructuredData
+      type="website"
+      title={SITE_TITLE}
+      description={SITE_DESCRIPTION}
+      url={Astro.url.href}
+      image="/img/avatar.png"
+    />
+  </head>
+  <body>
+    <Header />
+    <Hero
+      title="Hi, I'm Valerio_"
+      role="developer.filmmaker"
+      subtitle="I solve problems. I tell stories."
+      aiTagline="AI-assisted, human-driven"
+      callToActions={[
+        {
+          label: "Connect with me",
+          href: "http://linkedin.com/in/cv-valerio-narcisi",
+        },
+        {
+          label: "Watch Caramella's Trailer",
+          href: "https://www.youtube.com/watch?v=UnQ8NSXYXao",
+        },
+      ]}
+    />
+    <main>
+      <section id="last-watched">
+        <Title title="Last watched movies" />
+        <div class="ReelContainer">
+          {
+            lastWatched.map((movie: any) => (
+              <Reel
+                type="movie"
+                vote_average={movie.vote_average}
+                vote_count={movie.vote_count}
+                url={`https://image.tmdb.org/t/p/w185/${movie.poster_path}`}
+                href={movie.link[0]}
+                title={movie["letterboxd:filmTitle"][0]}
+                watchedDate={movie["letterboxd:watchedDate"][0]}
+              />
+            ))
+          }
+        </div>
+      </section>
+      <section>
+        <Title title="Last Listened songs" />
+        <div class="ReelContainer">
+          {
+            lastSongs.map((song) => (
+              <Reel
+                type="song"
+                artist={song.artist["#text"]}
+                album={song.album["#text"]}
+                url={song.image[3]["#text"]}
+                href={song.url}
+                title={song.name}
+                watchedDate={
+                  song?.date
+                    ? song.date["#text"]
+                    : new Date().toLocaleDateString("en-us", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                }
+              />
+            ))
+          }
+        </div>
+      </section>
+      <section>
+        <Title title="Latest posts" />
+        <div class="cards-grid">
+          {
+            posts?.map((post) => (
+              <Card
+                date={post.date}
+                title={post.title}
+                extract={post.extract}
+                slug={post.slug}
+                coverImage={post.coverImage}
+                tags={post.tags}
+                lang="en"
+              />
+            ))
+          }
+        </div>
+      </section>
+    </main>
+    <Footer />
+  </body>
+</html>

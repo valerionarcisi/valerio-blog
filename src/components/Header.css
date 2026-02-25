@@ -1,96 +1,223 @@
+/* ============================================
+   Header — Sticky + Blur + Gradient Border
+   Mobile first
+   ============================================ */
 .Header {
-  background-color: var(--backgroundColor-secondary);
-  background-size: cover;
-  background-position: center;
-  box-shadow: var(--boxShadow-inverted);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(10, 10, 12, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0.4rem 1rem;
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan)) 1;
+}
+
+
+.Header .logo-container {
+  width: 200px;
+}
+
+.Header .logo {
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--color-neutral);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.Header .logo:hover {
+  animation: glitch 0.3s ease;
+  text-shadow:
+    -1px 0 var(--color-accent-cyan),
+    1px 0 var(--color-tertiary);
+}
+
+.Header .logo:visited {
+  color: var(--color-neutral);
+}
+
+.Header .logo img {
+  border-radius: 50%;
+  box-shadow: var(--boxShadow-small);
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.Header .logo div {
+  font-family: var(--fontFamily-title);
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+}
+
+/* Mobile nav — collapsible */
+.Header nav {
+  display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  padding: 0.2rem 1rem;
-  .logo-container {
-    width: 200px;
-  }
-  .logo {
-    height: 50px;
+  width: 100%;
+  background: rgba(10, 10, 12, 0.95);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease-out;
+}
+
+
+.Header nav.active {
+  max-height: 500px;
+  transition: max-height 0.3s ease-in;
+}
+
+.Header nav a {
+  padding: 0.75rem 1rem;
+  display: block;
+  color: var(--color-neutral);
+  text-decoration: none;
+  font-family: var(--fontFamily-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: color var(--transition-fast);
+}
+
+.Header nav a:last-child {
+  border-bottom: none;
+}
+
+.Header nav a:hover {
+  color: var(--color-tertiary);
+}
+
+.Header nav a.active {
+  color: var(--color-tertiary);
+}
+
+/* Language switch — cyan monospace */
+.Header .lang-switch {
+  font-family: var(--fontFamily-mono);
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--color-accent-cyan);
+  border-radius: var(--borderRadius-small);
+  text-decoration: none;
+  color: var(--color-accent-cyan);
+  display: inline-block;
+  text-align: center;
+  transition: all var(--transition-fast);
+  width: fit-content;
+  margin: 0.5rem 1rem;
+}
+
+.Header .lang-switch:hover {
+  background-color: var(--color-accent-cyan);
+  color: var(--backgroundColor-primary);
+}
+
+.Header .lang-switch:visited {
+  color: var(--color-accent-cyan);
+}
+
+/* Header controls (theme toggle + hamburger) */
+.Header .header-controls {
+  position: absolute;
+  top: 0.4rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+/* Hamburger */
+.Header .menu-toggle {
+  display: block;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.Header .menu-toggle span {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background-color: var(--color-neutral);
+  margin: 6px auto;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+}
+
+.Header .menu-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.Header .menu-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.Header .menu-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* ============================================
+   Desktop — horizontal nav
+   ============================================ */
+@media (min-width: 769px) {
+  .Header {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 2rem;
+  }
+
+  .Header nav {
     flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--color-neutral);
-    text-decoration: none;
-    img {
-      border-radius: 50%;
-      box-shadow: var(--boxShadow-thin);
-      width: 32px;
-      height: 32px;
-      margin-bottom: 10px;
-      padding-bottom: 0;
-    }
-  }
-
-  nav {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    background-color: var(--backgroundColor-secondary);
-    overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.3s ease-out;
-  }
-
-  nav.active {
-    max-height: 500px;
-    transition: max-height 0.3s ease-in;
-  }
-
-  nav a {
-    padding: 1rem;
-    display: block;
-    color: var(--color-neutral);
-    text-decoration: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  nav a:last-child {
-    border-bottom: none;
-  }
-
-  .header-controls {
-    position: absolute;
-    top: 0.1rem;
-    right: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    z-index: 2;
-  }
-
-  .menu-toggle {
-    display: block;
-    cursor: pointer;
-    padding: 0.5rem;
+    max-height: none;
+    overflow: visible;
+    width: auto;
     background: none;
-    border: none;
+    gap: 0.25rem;
+    align-items: center;
   }
 
-  .menu-toggle span {
-    display: block;
-    width: 25px;
+  .Header nav a {
+    padding: 0.4rem 0.75rem;
+    border-bottom: none;
+    font-size: 0.8rem;
+    position: relative;
+  }
+
+  .Header nav a::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
     height: 1px;
-    background-color: var(--color-neutral);
-    margin: 8px auto;
-    border-radius: 4px;
-    transition: all 0.3s ease-in-out;
+    background: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan));
+    transition: width var(--transition-fast);
   }
 
-  .menu-toggle.active span:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+  .Header nav a:hover::after,
+  .Header nav a.active::after {
+    width: 80%;
   }
 
-  .menu-toggle.active span:nth-child(2) {
-    opacity: 0;
+  .Header .lang-switch {
+    margin: 0;
+    margin-left: 0.5rem;
   }
 
-  .menu-toggle.active span:nth-child(3) {
-    transform: rotate(-45deg) translate(8px, -8px);
+  .Header .menu-toggle {
+    display: none;
+  }
+
+  .Header .header-controls {
+    position: static;
   }
 }

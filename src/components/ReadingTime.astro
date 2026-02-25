@@ -33,11 +33,13 @@ const readingTimeText = readingTime === 1 ? '1 min read' : `${readingTime} min r
     display: inline-flex;
     align-items: center;
     gap: var(--space-small);
+    font-family: var(--fontFamily-mono);
     font-size: var(--fontSize-very-small);
-    color: var(--color-neutral);
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: var(--space-small);
+    color: #e8e6e1;
+    background-color: rgba(10, 10, 12, 0.75);
+    padding: var(--space-small) 0.5rem;
     border-radius: var(--borderRadius-small);
+    backdrop-filter: blur(4px);
   }
 
   .reading-time-icon {
@@ -49,8 +51,4 @@ const readingTimeText = readingTime === 1 ? '1 min read' : `${readingTime} min r
     font-weight: var(--fontWeight-400);
   }
 
-  /* Light theme adjustments */
-  body[data-theme="light"] .reading-time {
-    background-color: rgba(255, 255, 255, 0.9);
-  }
 </style>

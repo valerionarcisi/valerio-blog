@@ -1,24 +1,25 @@
 import type { APIRoute } from 'astro';
-import fetchHyPosts from '~/services/post';
+import { getCollection } from 'astro:content';
+import { getSlugFromId, getLangFromId } from '~/i18n/utils';
 
 export const GET: APIRoute = async () => {
   try {
-    const posts = await fetchHyPosts();
-    
-    // Create search index with only necessary data
-    const searchData = posts?.map(post => ({
-      title: post.title,
-      slug: post.slug,
-      extract: post.extract,
-      date: post.date,
-      tags: post.tags || []
-    })) || [];
+    const allEntries = await getCollection('blog');
+
+    const searchData = allEntries.map(entry => ({
+      title: entry.data.title,
+      slug: getSlugFromId(entry.id),
+      lang: getLangFromId(entry.id),
+      extract: entry.data.extract,
+      date: entry.data.date,
+      tags: entry.data.tags || [],
+    }));
 
     return new Response(JSON.stringify(searchData), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=300', // Cache for 5 minutes
+        'Cache-Control': 'public, s-maxage=300',
       }
     });
   } catch (error) {
