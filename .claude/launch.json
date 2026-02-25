@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["/Users/valerionarcisi/personal/valerio-blog/.claude/start-dev.sh"],
+      "port": 4321
+    }
+  ]
+}
