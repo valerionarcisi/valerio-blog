@@ -11,6 +11,8 @@ const allFilms = await getCollection("films");
 const films = allFilms
   .filter(e => getLangFromId(e.id) === "en")
   .sort((a, b) => a.data.sortOrder - b.data.sortOrder);
+
+let lastYear = 0;
 ---
 
 <!doctype html>
@@ -22,23 +24,39 @@ const films = allFilms
     <Header />
     <main>
       <Title title="Films" />
-      <div class="films-grid">
-        {films.map(film => (
-          <a href={`/en/films/${getSlugFromId(film.id)}/`} class="film-card">
-            <div class="film-card-img">
-              <img src={film.data.coverImage} alt={film.data.title} />
-              <div class="film-card-overlay"></div>
-            </div>
-            <div class="film-card-info">
-              <h2>{film.data.title}</h2>
-              <span class="year">{film.data.year}</span>
-              <span class="role">{film.data.role}</span>
-              {film.data.festivals.length > 0 && (
-                <span class="festivals">{film.data.festivals.length} festivals</span>
+      <div class="timeline">
+        {films.map((film, i) => {
+          const showYear = film.data.year !== lastYear;
+          lastYear = film.data.year;
+          const side = i % 2 === 0 ? "left" : "right";
+          return (
+            <>
+              {showYear && (
+                <div class="timeline-year">
+                  <span>{film.data.year}</span>
+                </div>
               )}
-            </div>
-          </a>
-        ))}
+              <div class={`timeline-item ${side}`}>
+                <a href={`/en/films/${getSlugFromId(film.id)}/`} class="timeline-content">
+                  <div class="timeline-img">
+                    <img src={film.data.coverImage} alt={film.data.title} />
+                  </div>
+                  <div class="timeline-info">
+                    <h2>{film.data.title}</h2>
+                    <span class="meta">
+                      <span class="year">{film.data.year}</span>
+                      <span class="role">{film.data.role}</span>
+                    </span>
+                    {film.data.festivals.length > 0 && (
+                      <span class="festivals">{film.data.festivals.length} festivals</span>
+                    )}
+                  </div>
+                </a>
+                <div class="timeline-dot"></div>
+              </div>
+            </>
+          );
+        })}
       </div>
     </main>
     <Footer />
@@ -46,38 +64,106 @@ const films = allFilms
 </html>
 
 <style>
-  .films-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--space-large);
-    max-width: 95%;
+  .timeline {
+    position: relative;
+    max-width: 1100px;
     margin: var(--space-large) auto;
+    padding: 1rem 0 2rem;
   }
 
-  .film-card {
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, var(--color-accent-cyan, #4ecdc4) 5%, var(--color-accent-cyan, #4ecdc4) 95%, transparent);
+    transform: translateX(-50%);
+  }
+
+  .timeline-year {
+    position: relative;
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+    z-index: 2;
+  }
+
+  .timeline-year:first-child {
+    margin-top: 0;
+  }
+
+  .timeline-year span {
+    display: inline-block;
+    padding: 0.3rem 1.2rem;
+    background: var(--color-tertiary, #c9a84c);
+    color: #0a0a0c;
+    font-family: var(--fontFamily-heading, 'Staatliches', Impact, sans-serif);
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    border-radius: 20px;
+  }
+
+  .timeline-item {
+    position: relative;
+    width: 50%;
+    margin-bottom: 2rem;
+  }
+
+  .timeline-item.left {
+    padding-right: 2.5rem;
+  }
+
+  .timeline-item.right {
+    margin-left: 50%;
+    padding-left: 2.5rem;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    top: 1.5rem;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--color-accent-cyan, #4ecdc4);
+    border: 3px solid var(--color-tertiary, #c9a84c);
+    z-index: 2;
+  }
+
+  .timeline-item.left .timeline-dot {
+    right: -7px;
+  }
+
+  .timeline-item.right .timeline-dot {
+    left: -7px;
+  }
+
+  .timeline-content {
+    display: block;
     text-decoration: none;
     color: inherit;
-    border-radius: var(--borderRadius-medium);
+    border-radius: var(--borderRadius-medium, 8px);
     overflow: hidden;
-    background: var(--backgroundColor-secondary);
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    background: var(--backgroundColor-secondary, #141416);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: transform var(--transition-fast, 0.2s), box-shadow var(--transition-fast, 0.2s);
   }
 
-  .film-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--boxShadow-glow-warm);
+  .timeline-content:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(201, 168, 76, 0.15);
   }
 
-  .film-card:visited {
+  .timeline-content:visited {
     color: inherit;
   }
 
-  .film-card-img {
+  .timeline-img {
     position: relative;
     overflow: hidden;
   }
 
-  .film-card-img img {
+  .timeline-img img {
     width: 100%;
     aspect-ratio: 2.39 / 1;
     object-fit: cover;
@@ -86,48 +172,38 @@ const films = allFilms
     border-radius: 0;
   }
 
-  .film-card-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      to top,
-      rgba(10, 10, 12, 0.4) 0%,
-      transparent 50%
-    );
-    pointer-events: none;
+  .timeline-info {
+    padding: var(--space-medium, 0.75rem) var(--space-large, 1rem);
   }
 
-  .film-card-info {
-    padding: var(--space-medium) var(--space-large);
+  .timeline-info h2 {
+    margin: 0 0 var(--space-small, 0.25rem);
+    font-size: var(--fontSize-medium, 1.1rem);
+    color: var(--color-neutral, #e8e6e1);
   }
 
-  .film-card-info h2 {
-    margin: 0 0 var(--space-small);
-    font-size: var(--fontSize-large);
-    color: var(--color-neutral);
+  .timeline-info .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
-  .film-card-info .year {
+  .timeline-info .year {
     font-family: var(--fontFamily-mono);
     font-weight: 700;
     font-size: var(--fontSize-very-small);
-    margin-right: var(--space-medium);
-    color: var(--color-tertiary);
+    color: var(--color-tertiary, #c9a84c);
   }
 
-  .film-card-info .role {
+  .timeline-info .role {
     font-family: var(--fontFamily-mono);
     font-style: italic;
     font-size: var(--fontSize-very-small);
-    display: block;
-    margin-top: var(--space-small);
     color: var(--color-secondary);
   }
 
-  .film-card-info .festivals {
+  .timeline-info .festivals {
     display: inline-block;
     margin-top: var(--space-small);
     padding: 2px 10px;
@@ -139,18 +215,27 @@ const films = allFilms
     font-size: var(--fontSize-very-small);
   }
 
-  @media (min-width: 600px) {
-    .films-grid {
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 90%;
+  @media (max-width: 700px) {
+    .timeline::before {
+      left: 20px;
     }
-  }
 
-  @media (min-width: 1024px) {
-    .films-grid {
-      grid-template-columns: repeat(2, 1fr);
-      max-width: 70%;
-      gap: 2rem;
+    .timeline-year {
+      text-align: left;
+      padding-left: 40px;
+    }
+
+    .timeline-item {
+      width: calc(100% - 40px);
+      margin-left: 40px !important;
+      margin-right: 0 !important;
+      padding-left: 1.5rem !important;
+      padding-right: 0 !important;
+    }
+
+    .timeline-dot {
+      left: -27px !important;
+      right: auto !important;
     }
   }
 </style>
