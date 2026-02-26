@@ -6,9 +6,20 @@ import "~/components/Header.css";
 const currentPath = Astro.url.pathname;
 const isEn = currentPath.startsWith('/en');
 const otherLang = isEn ? 'IT' : 'EN';
-const langSwitchHref = isEn
-  ? currentPath.replace(/^\/en/, '') || '/'
-  : `/en${currentPath}`;
+
+const routeMap: Record<string, string> = {
+  '/contatti': '/en/contact',
+  '/en/contact': '/contatti',
+};
+
+function getLangSwitchHref(path: string): string {
+  const normalized = path.replace(/\/$/, '') || '/';
+  if (routeMap[normalized]) return routeMap[normalized] + '/';
+  if (isEn) return (normalized.replace(/^\/en/, '') || '/');
+  return `/en${normalized}`;
+}
+
+const langSwitchHref = getLangSwitchHref(currentPath);
 ---
 
 <header class="Header">

@@ -4,8 +4,44 @@ import { sendContactEmail } from "~/lib/email";
 export const prerender = false;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_ORIGINS = [
+  "https://valerionarcisi.me",
+  "https://www.valerionarcisi.me",
+  "http://localhost:4321",
+  "http://localhost:3000",
+];
+
+const rateLimit = new Map<string, number[]>();
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX_REQUESTS = 3;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimit.get(ip) ?? [];
+  const recent = timestamps.filter(t => now - t < RATE_WINDOW_MS);
+  rateLimit.set(ip, recent);
+
+  if (recent.length >= RATE_MAX_REQUESTS) return true;
+
+  recent.push(now);
+  rateLimit.set(ip, recent);
+  return false;
+}
 
 export const POST: APIRoute = async ({ request }) => {
+  const origin = request.headers.get("origin") ?? "";
+  if (!ALLOWED_ORIGINS.includes(origin)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403 });
+  }
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    ?? request.headers.get("x-real-ip")
+    ?? "unknown";
+
+  if (isRateLimited(ip)) {
+    return new Response(JSON.stringify({ error: "Too many requests" }), { status: 429 });
+  }
+
   const body = await request.json().catch(() => null);
   if (!body) {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400 });

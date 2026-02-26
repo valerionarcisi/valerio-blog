@@ -5,6 +5,7 @@ import Footer from "~/components/Footer.astro";
 import { SITE_TITLE } from "~/consts";
 import Title from "~/components/Title.astro";
 import "~/layouts/BlogPost.css";
+import "~/components/ContactForm.css";
 ---
 
 <!doctype html>
@@ -14,20 +15,6 @@ import "~/layouts/BlogPost.css";
       title={`Contatti | ${SITE_TITLE}`}
       description="Scrivimi un messaggio, ti rispondo il prima possibile."
     />
-    <style>
-      .contact-form { display: flex; flex-direction: column; gap: 1.2rem; max-width: 520px; }
-      .contact-form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--color-secondary); }
-      .contact-form input, .contact-form textarea { padding: 0.6rem 0.8rem; background: var(--color-surface, #141416); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--color-primary, #e8e6e1); font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s; }
-      .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--color-tertiary, #c9a84c); }
-      .contact-form textarea { min-height: 160px; resize: vertical; }
-      .contact-form button { align-self: flex-start; padding: 0.6rem 1.6rem; background: var(--color-tertiary, #c9a84c); color: #0a0a0c; border: none; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; }
-      .contact-form button:hover { opacity: 0.85; }
-      .contact-form button:disabled { opacity: 0.5; cursor: not-allowed; }
-      .hp-field { position: absolute; left: -9999px; }
-      .form-msg { padding: 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-top: 0.5rem; }
-      .form-msg.ok { background: rgba(46,204,113,0.1); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
-      .form-msg.err { background: rgba(231,76,60,0.1); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
-    </style>
   </head>
   <body>
     <Header />
@@ -64,12 +51,20 @@ import "~/layouts/BlogPost.css";
         var form = document.getElementById("contact-form");
         var result = document.getElementById("form-result");
 
+        function showMsg(cls, text) {
+          result.textContent = "";
+          var div = document.createElement("div");
+          div.className = "form-msg " + cls;
+          div.textContent = text;
+          result.appendChild(div);
+        }
+
         form.addEventListener("submit", function(e) {
           e.preventDefault();
           var btn = form.querySelector("button");
           btn.disabled = true;
           btn.textContent = "Invio in corso...";
-          result.innerHTML = "";
+          result.textContent = "";
 
           var data = {
             name: form.name.value.trim(),
@@ -85,14 +80,14 @@ import "~/layouts/BlogPost.css";
           })
           .then(function(r) {
             if (r.ok) {
-              result.innerHTML = '<div class="form-msg ok">Messaggio inviato! Ti rispondo il prima possibile.</div>';
+              showMsg("ok", "Messaggio inviato! Ti rispondo il prima possibile.");
               form.reset();
             } else {
               return r.json().then(function(d) { throw new Error(d.error || "Errore"); });
             }
           })
           .catch(function(err) {
-            result.innerHTML = '<div class="form-msg err">Errore: ' + err.message + '</div>';
+            showMsg("err", "Errore: " + err.message);
           })
           .finally(function() {
             btn.disabled = false;

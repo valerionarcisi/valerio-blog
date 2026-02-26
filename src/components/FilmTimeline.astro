@@ -1,0 +1,77 @@
+---
+import "~/components/FilmTimeline.css";
+import { getSlugFromId } from "~/i18n/utils";
+import type { Lang } from "~/i18n/ui";
+
+interface Props {
+  lang: Lang;
+  films: Array<{
+    id: string;
+    data: {
+      title: string;
+      year: number;
+      role: string;
+      coverImage: string;
+      festivals: Array<unknown>;
+    };
+  }>;
+  festivalLabel: string;
+}
+
+const { lang, films, festivalLabel } = Astro.props;
+const basePath = lang === "it" ? "/films" : "/en/films";
+
+let lastYear = 0;
+
+type FilmEntry = {
+  showYear: boolean;
+  side: "left" | "right";
+  film: Props["films"][number];
+};
+
+const entries: FilmEntry[] = films.map((film, i) => {
+  const showYear = film.data.year !== lastYear;
+  lastYear = film.data.year;
+  return {
+    showYear,
+    side: i % 2 === 0 ? "left" : "right",
+    film,
+  };
+});
+---
+
+<div class="timeline">
+  {entries.map((entry, i) => (
+    <>
+      {entry.showYear && (
+        <div class="timeline-year">
+          <span>{entry.film.data.year}</span>
+        </div>
+      )}
+      <div class={`timeline-item ${entry.side}`}>
+        <a href={`${basePath}/${getSlugFromId(entry.film.id)}/`} class="timeline-content">
+          <div class="timeline-img">
+            <img
+              src={entry.film.data.coverImage}
+              alt={entry.film.data.title}
+              loading={i === 0 ? "eager" : "lazy"}
+              width="550"
+              height="230"
+            />
+          </div>
+          <div class="timeline-info">
+            <h2>{entry.film.data.title}</h2>
+            <span class="meta">
+              <span class="year">{entry.film.data.year}</span>
+              <span class="role">{entry.film.data.role}</span>
+            </span>
+            {entry.film.data.festivals.length > 0 && (
+              <span class="festivals">{entry.film.data.festivals.length} {festivalLabel}</span>
+            )}
+          </div>
+        </a>
+        <div class="timeline-dot"></div>
+      </div>
+    </>
+  ))}
+</div>
