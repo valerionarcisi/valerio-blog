@@ -1,0 +1,33 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Blog from '~/layouts/Blog.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const allEntries = await getCollection('blog');
+  const posts = allEntries
+    .filter(e => getLangFromId(e.id) === 'en')
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+    .map(e => ({
+      ...e.data,
+      slug: getSlugFromId(e.id),
+    }));
+
+  return paginate(posts, { pageSize: 6 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props as any;
+---
+
+<Blog
+  category="Blog"
+  posts={page.data}
+  lang="en"
+  pagination={{
+    currentPage: page.currentPage,
+    lastPage: page.lastPage,
+    url: { prev: page.url.prev, next: page.url.next, current: page.url.current },
+    basePath: "/en/blog/",
+  }}
+/>

@@ -42,7 +42,7 @@ const allEntries = await getCollection("blog");
 const posts = allEntries
   .filter((e) => getLangFromId(e.id) === "it")
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-  .slice(0, 5)
+  .slice(0, 6)
   .map((e) => ({
     ...e.data,
     slug: getSlugFromId(e.id),

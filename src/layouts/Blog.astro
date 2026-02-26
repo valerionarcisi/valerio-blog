@@ -5,10 +5,23 @@ import Footer from "~/components/Footer.astro";
 import Header from "~/components/Header.astro";
 import Title from "~/components/Title.astro";
 import BlogSearch from "~/components/BlogSearch.astro";
+import Pagination from "~/components/Pagination.astro";
 import '~/layouts/Blog.css'
 import { SITE_DESCRIPTION, SITE_TITLE } from "~/consts";
 
-const { category, posts, lang = "it" } = Astro.props;
+interface PaginationData {
+	currentPage: number;
+	lastPage: number;
+	url: { prev: string | undefined; next: string | undefined; current: string };
+	basePath: string;
+}
+
+const { category, posts, lang = "it", pagination } = Astro.props as {
+	category: string;
+	posts: any[];
+	lang?: string;
+	pagination?: PaginationData;
+};
 ---
 
 <!doctype html>
@@ -29,6 +42,14 @@ const { category, posts, lang = "it" } = Astro.props;
 						))
 					}
 				</div>
+				{pagination && (
+					<Pagination
+						currentPage={pagination.currentPage}
+						lastPage={pagination.lastPage}
+						url={pagination.url}
+						basePath={pagination.basePath}
+					/>
+				)}
 			</section>
 		</main>
 		<Footer />

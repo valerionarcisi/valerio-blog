@@ -1,0 +1,68 @@
+---
+import "~/components/Pagination.css";
+
+interface Props {
+  currentPage: number;
+  lastPage: number;
+  url: {
+    prev: string | undefined;
+    next: string | undefined;
+    current: string;
+  };
+  basePath: string;
+}
+
+const { currentPage, lastPage, url, basePath } = Astro.props;
+
+function pageUrl(page: number): string {
+  return page === 1 ? basePath : `${basePath}${page}/`;
+}
+
+function getPageNumbers(current: number, last: number): (number | "ellipsis")[] {
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1);
+
+  const pages: (number | "ellipsis")[] = [1];
+
+  if (current > 3) pages.push("ellipsis");
+
+  const start = Math.max(2, current - 1);
+  const end = Math.min(last - 1, current + 1);
+
+  for (let i = start; i <= end; i++) pages.push(i);
+
+  if (current < last - 2) pages.push("ellipsis");
+
+  pages.push(last);
+  return pages;
+}
+
+const pages = getPageNumbers(currentPage, lastPage);
+---
+
+{lastPage > 1 && (
+  <nav class="pagination" aria-label="Pagination">
+    <a
+      href={url.prev ?? "#"}
+      class:list={[{ "pagination-disabled": !url.prev }]}
+      aria-label="Previous page"
+    >
+      &larr;
+    </a>
+    {pages.map((page) =>
+      page === "ellipsis" ? (
+        <span class="pagination-ellipsis">&hellip;</span>
+      ) : page === currentPage ? (
+        <span class="pagination-current" aria-current="page">{page}</span>
+      ) : (
+        <a href={pageUrl(page)}>{page}</a>
+      )
+    )}
+    <a
+      href={url.next ?? "#"}
+      class:list={[{ "pagination-disabled": !url.next }]}
+      aria-label="Next page"
+    >
+      &rarr;
+    </a>
+  </nav>
+)}

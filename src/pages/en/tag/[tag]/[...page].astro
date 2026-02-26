@@ -1,0 +1,44 @@
+---
+import type { GetStaticPaths } from 'astro';
+import Blog from '~/layouts/Blog.astro';
+import { getCollection } from 'astro:content';
+import { getLangFromId, getSlugFromId } from '~/i18n/utils';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const allEntries = await getCollection('blog');
+  const enPosts = allEntries
+    .filter(e => getLangFromId(e.id) === 'en')
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+    .map(e => ({
+      ...e.data,
+      slug: getSlugFromId(e.id),
+    }));
+
+  const uniqueTags = [...new Set(enPosts.map((post) => post.tags).flat())];
+
+  return uniqueTags.flatMap((tag) => {
+    const filtered = enPosts.filter((post) =>
+      post.tags.some(postTag => postTag.toLowerCase() === tag.toLowerCase())
+    );
+    return paginate(filtered, {
+      params: { tag: tag.toLowerCase() },
+      pageSize: 6,
+    });
+  });
+}) satisfies GetStaticPaths;
+
+const { tag } = Astro.params;
+const { page } = Astro.props as any;
+---
+
+<Blog
+  category={tag}
+  posts={page.data}
+  lang="en"
+  pagination={{
+    currentPage: page.currentPage,
+    lastPage: page.lastPage,
+    url: { prev: page.url.prev, next: page.url.next, current: page.url.current },
+    basePath: `/en/tag/${tag}/`,
+  }}
+/>
