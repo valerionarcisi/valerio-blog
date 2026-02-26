@@ -1,0 +1,105 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import Header from "~/components/Header.astro";
+import Footer from "~/components/Footer.astro";
+import { SITE_TITLE } from "~/consts";
+import Title from "~/components/Title.astro";
+import "~/layouts/BlogPost.css";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <BaseHead
+      title={`Contact | ${SITE_TITLE}`}
+      description="Send me a message, I'll get back to you as soon as possible."
+    />
+    <style>
+      .contact-form { display: flex; flex-direction: column; gap: 1.2rem; max-width: 520px; }
+      .contact-form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem; color: var(--color-secondary); }
+      .contact-form input, .contact-form textarea { padding: 0.6rem 0.8rem; background: var(--color-surface, #141416); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--color-primary, #e8e6e1); font-family: inherit; font-size: 0.9rem; transition: border-color 0.2s; }
+      .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: var(--color-tertiary, #c9a84c); }
+      .contact-form textarea { min-height: 160px; resize: vertical; }
+      .contact-form button { align-self: flex-start; padding: 0.6rem 1.6rem; background: var(--color-tertiary, #c9a84c); color: #0a0a0c; border: none; border-radius: 6px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; }
+      .contact-form button:hover { opacity: 0.85; }
+      .contact-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+      .hp-field { position: absolute; left: -9999px; }
+      .form-msg { padding: 0.8rem; border-radius: 6px; font-size: 0.85rem; margin-top: 0.5rem; }
+      .form-msg.ok { background: rgba(46,204,113,0.1); color: #2ecc71; border: 1px solid rgba(46,204,113,0.3); }
+      .form-msg.err { background: rgba(231,76,60,0.1); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <main class="BlogPost">
+      <Title title="Contact" />
+      <section class="prose">
+        <p>Got a question, a proposal, or just want to say hi? Fill in the form below and I'll get back to you as soon as possible.</p>
+
+        <form class="contact-form" id="contact-form">
+          <label>
+            Name
+            <input type="text" name="name" required maxlength="100" autocomplete="name" />
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" required maxlength="254" autocomplete="email" />
+          </label>
+          <label>
+            Message
+            <textarea name="message" required maxlength="5000"></textarea>
+          </label>
+          <div class="hp-field" aria-hidden="true">
+            <input type="text" name="website" tabindex="-1" autocomplete="off" />
+          </div>
+          <button type="submit">Send</button>
+        </form>
+        <div id="form-result" aria-live="polite"></div>
+      </section>
+    </main>
+    <Footer />
+
+    <script is:inline>
+      (function() {
+        var form = document.getElementById("contact-form");
+        var result = document.getElementById("form-result");
+
+        form.addEventListener("submit", function(e) {
+          e.preventDefault();
+          var btn = form.querySelector("button");
+          btn.disabled = true;
+          btn.textContent = "Sending...";
+          result.innerHTML = "";
+
+          var data = {
+            name: form.name.value.trim(),
+            email: form.email.value.trim(),
+            message: form.message.value.trim(),
+            website: form.website.value
+          };
+
+          fetch("/api/contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          })
+          .then(function(r) {
+            if (r.ok) {
+              result.innerHTML = '<div class="form-msg ok">Message sent! I\'ll get back to you soon.</div>';
+              form.reset();
+            } else {
+              return r.json().then(function(d) { throw new Error(d.error || "Error"); });
+            }
+          })
+          .catch(function(err) {
+            result.innerHTML = '<div class="form-msg err">Error: ' + err.message + '</div>';
+          })
+          .finally(function() {
+            btn.disabled = false;
+            btn.textContent = "Send";
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -44,6 +44,45 @@ export async function notifyNewComment(comment: CommentNotification): Promise<vo
   }
 }
 
+interface ContactMessage {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export async function sendContactEmail(contact: ContactMessage): Promise<boolean> {
+  const apiKey = import.meta.env.RESEND_API_KEY;
+  if (!apiKey) return false;
+
+  try {
+    const res = await fetch(RESEND_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from: "Blog <onboarding@resend.dev>",
+        to: NOTIFY_TO,
+        reply_to: contact.email,
+        subject: `Nuovo messaggio da ${contact.name}`,
+        html: `
+          <div style="font-family:system-ui,sans-serif;max-width:500px">
+            <h2 style="color:#c9a84c;margin:0 0 16px">Messaggio dal modulo contatti</h2>
+            <p><strong>Nome:</strong> ${escapeHtml(contact.name)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(contact.email)}</p>
+            <hr style="border:none;border-top:1px solid #ddd;margin:16px 0"/>
+            <p style="white-space:pre-wrap">${escapeHtml(contact.message)}</p>
+          </div>
+        `,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
