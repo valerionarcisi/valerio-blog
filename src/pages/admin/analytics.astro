@@ -16,17 +16,29 @@ if (!isAuthorized) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Analytics Dashboard</title>
-    <style>
+    <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; }
 
       .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+      .header-left { display: flex; align-items: center; gap: 1rem; }
       h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; }
+
+      .live-badge { display: flex; align-items: center; gap: 0.4rem; background: rgba(46, 204, 113, 0.1); border: 1px solid rgba(46, 204, 113, 0.3); border-radius: 20px; padding: 0.3rem 0.7rem; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; color: #2ecc71; }
+      .live-dot { width: 8px; height: 8px; background: #2ecc71; border-radius: 50%; animation: pulse 2s infinite; }
+      @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
       .periods { display: flex; gap: 0.5rem; flex-wrap: wrap; }
       .periods button { padding: 0.4rem 0.8rem; background: #141416; border: 1px solid #333; color: #8a8a8e; cursor: pointer; border-radius: 4px; font-size: 0.8rem; transition: all 0.2s; }
       .periods button.active { border-color: #c9a84c; color: #c9a84c; }
       .periods button:hover { border-color: #4ecdc4; color: #4ecdc4; }
+
+      .date-range { display: flex; align-items: center; gap: 0.4rem; }
+      .date-range input[type="date"] { padding: 0.35rem 0.5rem; background: #141416; border: 1px solid #333; color: #e8e6e1; border-radius: 4px; font-size: 0.8rem; font-family: inherit; color-scheme: dark; }
+      .date-range input[type="date"]:focus { outline: none; border-color: #4ecdc4; }
+      .date-range span { color: #555; font-size: 0.75rem; }
+      .date-range button { padding: 0.35rem 0.6rem; background: #4ecdc4; border: none; color: #0a0a0c; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+      .date-range button:hover { opacity: 0.8; }
 
       .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
       .stat-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; }
@@ -35,39 +47,59 @@ if (!isAuthorized) {
       .stat-card .value.gold { color: #c9a84c; }
       .stat-card .value.cyan { color: #4ecdc4; }
 
-      .chart-container { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; min-height: 200px; }
+      .chart-container { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; margin-bottom: 2rem; min-height: 200px; }
       .chart-container canvas { width: 100% !important; height: 200px !important; }
 
-      .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-      .table-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; }
-      .table-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a8a8e; margin-bottom: 0.75rem; }
-      .table-card table { width: 100%; border-collapse: collapse; }
-      .table-card th, .table-card td { padding: 0.4rem 0.5rem; text-align: left; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
-      .table-card th { color: #8a8a8e; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
-      .table-card td:last-child, .table-card th:last-child { text-align: right; }
-      .table-card .pathname { font-family: monospace; color: #4ecdc4; font-size: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .table-card .bar { display: inline-block; height: 4px; background: linear-gradient(90deg, #c9a84c, #4ecdc4); border-radius: 2px; margin-right: 0.5rem; vertical-align: middle; }
+      .section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+      .tables-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem; }
+      .tables-grid.compact { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+      .table-card { background: #111113; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1.2rem; }
+      .table-card h3 { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #c9a84c; margin-bottom: 1rem; border-bottom: 1px solid rgba(201,168,76,0.15); padding-bottom: 0.6rem; }
+      .table-row { display: flex; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+      .table-row:last-child { border-bottom: none; }
+      .table-row-label { flex: 1; font-size: 0.8rem; color: #ccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .table-row-label.pathname { font-family: 'JetBrains Mono', monospace; color: #4ecdc4; font-size: 0.75rem; }
+      .table-row-value { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #c9a84c; font-weight: 600; margin-left: 0.75rem; white-space: nowrap; }
+      .table-row-bar { flex-shrink: 0; width: 60px; height: 6px; background: rgba(255,255,255,0.04); border-radius: 3px; margin-left: 0.75rem; overflow: hidden; }
+      .table-row-bar-fill { height: 100%; background: linear-gradient(90deg, #c9a84c, #4ecdc4); border-radius: 3px; transition: width 0.3s; }
 
       .loading { color: #8a8a8e; font-style: italic; padding: 2rem; text-align: center; }
       .error { color: #e74c3c; padding: 1rem; background: rgba(231,76,60,0.1); border-radius: 4px; }
 
-      @media (max-width: 600px) {
+      @media (max-width: 700px) {
         body { padding: 1rem; }
         h1 { font-size: 1.4rem; }
         .summary { grid-template-columns: repeat(2, 1fr); }
         .tables-grid { grid-template-columns: 1fr; }
+        .tables-grid.compact { grid-template-columns: 1fr; }
       }
     </style>
   </head>
   <body>
     <div class="header">
-      <h1>Analytics</h1>
-      <div class="periods">
-        <button data-period="today">Today</button>
-        <button data-period="7d">7D</button>
-        <button data-period="30d" class="active">30D</button>
-        <button data-period="90d">90D</button>
-        <button data-period="12m">12M</button>
+      <div class="header-left">
+        <h1>Analytics</h1>
+        <div class="live-badge">
+          <span class="live-dot"></span>
+          <span id="live-count">-</span> online
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <div class="periods">
+          <button data-period="today">Today</button>
+          <button data-period="7d">7D</button>
+          <button data-period="30d" class="active">30D</button>
+          <button data-period="90d">90D</button>
+          <button data-period="12m">12M</button>
+        </div>
+        <div class="date-range">
+          <input type="date" id="date-from" />
+          <span>—</span>
+          <input type="date" id="date-to" />
+          <button id="date-go">Go</button>
+        </div>
       </div>
     </div>
 
@@ -83,15 +115,29 @@ if (!isAuthorized) {
       <canvas id="chart"></canvas>
     </div>
 
-    <div class="tables-grid" id="tables"></div>
+    <div id="tables"></div>
 
     <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script is:inline define:vars={{ token }}>
-      var currentPeriod = "30d";
       var chartInstance = null;
 
       function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
       function fmtTime(s) { return s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s"; }
+
+      function escapeHtml(s) {
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(String(s)));
+        return div.innerHTML;
+      }
+
+      function renderRow(label, value, pct, isPath) {
+        var cls = isPath ? ' pathname' : '';
+        return '<div class="table-row">' +
+          '<span class="table-row-label' + cls + '" title="' + escapeHtml(label) + '">' + escapeHtml(label) + '</span>' +
+          '<span class="table-row-value">' + fmt(value) + '</span>' +
+          '<span class="table-row-bar"><span class="table-row-bar-fill" style="width:' + pct + '%"></span></span>' +
+          '</div>';
+      }
 
       function renderTable(title, rows, keyField, valueField, isPath) {
         if (!rows || !rows.length) return "";
@@ -100,20 +146,12 @@ if (!isAuthorized) {
           var key = r[keyField] || "Direct";
           var val = Number(r[valueField]) || 0;
           var pct = Math.round(val / max * 100);
-          var cls = isPath ? ' class="pathname"' : "";
-          return "<tr><td" + cls + "><span class=\"bar\" style=\"width:" + pct + "px\"></span>" + escapeHtml(key) + "</td><td>" + fmt(val) + "</td></tr>";
+          return renderRow(key, val, pct, isPath);
         }).join("");
-        return '<div class="table-card"><h3>' + title + '</h3><table><thead><tr><th>' + title + '</th><th>Visitors</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
-      }
-
-      function escapeHtml(s) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(String(s)));
-        return div.innerHTML;
+        return '<div class="table-card"><h3>' + escapeHtml(title) + '</h3>' + rowsHtml + '</div>';
       }
 
       function loadData(period) {
-        currentPeriod = period;
         document.querySelectorAll(".periods button").forEach(function(b) {
           b.classList.toggle("active", b.dataset.period === period);
         });
@@ -156,16 +194,30 @@ if (!isAuthorized) {
             }
           });
 
-          var html = "";
-          html += renderTable("Pages", d.top_pages, "pathname", "visitors", true);
-          html += renderTable("Referrers", d.referrers, "referrer", "visitors", false);
-          html += renderTable("Countries", d.countries, "country", "visitors", false);
-          html += renderTable("Browsers", d.browsers, "browser", "visitors", false);
-          html += renderTable("OS", d.os, "os", "visitors", false);
-          html += renderTable("Devices", d.devices, "device_type", "visitors", false);
-          html += renderTable("Languages", d.languages, "lang", "visitors", false);
-          if (d.utm_sources.length) html += renderTable("UTM Sources", d.utm_sources, "utm_source", "visitors", false);
-          if (d.utm_campaigns.length) html += renderTable("UTM Campaigns", d.utm_campaigns, "utm_campaign", "visitors", false);
+          var html = '';
+
+          var trafficHtml = renderTable("Pages", d.top_pages, "pathname", "visitors", true) +
+                            renderTable("Referrers", d.referrers, "referrer", "visitors", false);
+          if (trafficHtml) {
+            html += '<div class="section-title">Traffic</div><div class="tables-grid">' + trafficHtml + '</div>';
+          }
+
+          var techHtml = renderTable("Countries", d.countries, "country", "visitors", false) +
+                         renderTable("Browsers", d.browsers, "browser", "visitors", false) +
+                         renderTable("OS", d.os, "os", "visitors", false) +
+                         renderTable("Devices", d.devices, "device_type", "visitors", false) +
+                         renderTable("Languages", d.languages, "lang", "visitors", false);
+          if (techHtml) {
+            html += '<div class="section-title">Geo & Tech</div><div class="tables-grid compact">' + techHtml + '</div>';
+          }
+
+          var campHtml = '';
+          if (d.utm_sources.length) campHtml += renderTable("UTM Sources", d.utm_sources, "utm_source", "visitors", false);
+          if (d.utm_campaigns.length) campHtml += renderTable("UTM Campaigns", d.utm_campaigns, "utm_campaign", "visitors", false);
+          if (campHtml) {
+            html += '<div class="section-title">Campaigns</div><div class="tables-grid">' + campHtml + '</div>';
+          }
+
           document.getElementById("tables").innerHTML = html;
         })
         .catch(function(e) {
@@ -173,11 +225,37 @@ if (!isAuthorized) {
         });
       }
 
+      function loadLive() {
+        fetch("/api/stats/live", {
+          headers: { Authorization: "Bearer " + token }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          document.getElementById("live-count").textContent = d.active;
+        })
+        .catch(function() {});
+      }
+
       document.querySelectorAll(".periods button").forEach(function(b) {
         b.addEventListener("click", function() { loadData(b.dataset.period); });
       });
 
+      document.getElementById("date-go").addEventListener("click", function() {
+        var from = document.getElementById("date-from").value;
+        var to = document.getElementById("date-to").value;
+        if (from && to) {
+          document.querySelectorAll(".periods button").forEach(function(b) { b.classList.remove("active"); });
+          loadData("custom&from=" + from + "&to=" + to);
+        }
+      });
+
+      var today = new Date().toISOString().slice(0, 10);
+      document.getElementById("date-to").value = today;
+      document.getElementById("date-from").value = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+
       loadData("30d");
+      loadLive();
+      setInterval(loadLive, 30000);
     </script>
   </body>
 </html>
