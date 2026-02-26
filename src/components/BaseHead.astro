@@ -75,7 +75,8 @@ const fullImageUrl = new URL(socialImage, Astro.url);
 <!-- Privacy-first self-hosted analytics — no cookies, no IP stored -->
 <script is:inline>
 (function(){
-  if(navigator.doNotTrack==="1"||navigator.webdriver)return;
+  if(new URLSearchParams(location.search).has("notrack")){localStorage.setItem("notrack","1");return;}
+  if(localStorage.getItem("notrack")||navigator.doNotTrack==="1"||navigator.webdriver)return;
   var id=Math.random().toString(36).slice(2,10);
   var ref=document.referrer;
   var isUnique=!ref||new URL(ref).hostname!==location.hostname;
