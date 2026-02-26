@@ -5,7 +5,6 @@ interface ImportMetaEnv {
   readonly TURSO_DATABASE_URL: string;
   readonly TURSO_AUTH_TOKEN: string;
   readonly COMMENTS_ADMIN_TOKEN: string;
-}
-interface Window {
-  plausible: any;
+  readonly ANALYTICS_ADMIN_TOKEN: string;
+  readonly RESEND_API_KEY: string;
 }

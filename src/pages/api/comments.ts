@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
+import { notifyNewComment } from "~/lib/email";
 
 export const prerender = false;
 
@@ -60,6 +61,8 @@ export const POST: APIRoute = async ({ request }) => {
     sql: "INSERT INTO comments (page_id, name, email, text) VALUES (?, ?, ?, ?)",
     args: [pageId, name.trim(), email.trim(), text.trim()],
   });
+
+  notifyNewComment({ pageId, name: name.trim(), email: email.trim(), text: text.trim() });
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 201,

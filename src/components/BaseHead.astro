@@ -72,8 +72,37 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   })();
 </script>
 
-<!-- 100% privacy-first analytics -->
-<script is:inline async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+<!-- Privacy-first self-hosted analytics — no cookies, no IP stored -->
+<script is:inline>
+(function(){
+  if(navigator.doNotTrack==="1"||navigator.webdriver)return;
+  var id=Math.random().toString(36).slice(2,10);
+  var ref=document.referrer;
+  var isUnique=!ref||new URL(ref).hostname!==location.hostname;
+  var params=new URLSearchParams(location.search);
+  var utm={s:params.get("utm_source"),m:params.get("utm_medium"),c:params.get("utm_campaign"),t:params.get("utm_content")};
+  if(utm.s||utm.m||utm.c||utm.t){
+    params.delete("utm_source");params.delete("utm_medium");params.delete("utm_campaign");params.delete("utm_content");
+    var qs=params.toString();
+    history.replaceState(null,"",location.pathname+(qs?"?"+qs:"")+location.hash);
+  }
+  var data={type:"pageview",page_id:id,hostname:location.hostname,pathname:location.pathname,referrer:ref||null,
+    utm_source:utm.s,utm_medium:utm.m,utm_campaign:utm.c,utm_content:utm.t,is_unique:isUnique,
+    screen_width:screen.width,screen_height:screen.height,viewport_width:innerWidth,viewport_height:innerHeight,
+    language:navigator.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
+  fetch("/api/collect",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(data),keepalive:true}).catch(function(){});
+  var start=Date.now(),maxScroll=0,hidden=false;
+  function onScroll(){var h=document.documentElement.scrollHeight-innerHeight;if(h>0){var pct=Math.round(scrollY/h*100/5)*5;if(pct>maxScroll)maxScroll=pct;}}
+  window.addEventListener("scroll",onScroll,{passive:true});
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="hidden"&&!hidden){
+      hidden=true;
+      var t=Math.round((Date.now()-start)/1000);
+      navigator.sendBeacon("/api/collect",JSON.stringify({type:"beacon",page_id:id,time_on_page:t,scroll_depth:maxScroll}));
+    }
+  });
+})();
+</script>
 
 
 <!-- Canonical URL -->

@@ -1,0 +1,183 @@
+---
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token");
+const isAuthorized = token === import.meta.env.ANALYTICS_ADMIN_TOKEN;
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Analytics Dashboard</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; }
+
+      .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; }
+
+      .periods { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .periods button { padding: 0.4rem 0.8rem; background: #141416; border: 1px solid #333; color: #8a8a8e; cursor: pointer; border-radius: 4px; font-size: 0.8rem; transition: all 0.2s; }
+      .periods button.active { border-color: #c9a84c; color: #c9a84c; }
+      .periods button:hover { border-color: #4ecdc4; color: #4ecdc4; }
+
+      .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+      .stat-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; }
+      .stat-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a8a8e; margin-bottom: 0.3rem; }
+      .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #e8e6e1; font-family: 'JetBrains Mono', monospace; }
+      .stat-card .value.gold { color: #c9a84c; }
+      .stat-card .value.cyan { color: #4ecdc4; }
+
+      .chart-container { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; min-height: 200px; }
+      .chart-container canvas { width: 100% !important; height: 200px !important; }
+
+      .tables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+      .table-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; }
+      .table-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a8a8e; margin-bottom: 0.75rem; }
+      .table-card table { width: 100%; border-collapse: collapse; }
+      .table-card th, .table-card td { padding: 0.4rem 0.5rem; text-align: left; font-size: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .table-card th { color: #8a8a8e; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .table-card td:last-child, .table-card th:last-child { text-align: right; }
+      .table-card .pathname { font-family: monospace; color: #4ecdc4; font-size: 0.75rem; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .table-card .bar { display: inline-block; height: 4px; background: linear-gradient(90deg, #c9a84c, #4ecdc4); border-radius: 2px; margin-right: 0.5rem; vertical-align: middle; }
+
+      .loading { color: #8a8a8e; font-style: italic; padding: 2rem; text-align: center; }
+      .error { color: #e74c3c; padding: 1rem; background: rgba(231,76,60,0.1); border-radius: 4px; }
+
+      @media (max-width: 600px) {
+        body { padding: 1rem; }
+        h1 { font-size: 1.4rem; }
+        .summary { grid-template-columns: repeat(2, 1fr); }
+        .tables-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>Analytics</h1>
+      <div class="periods">
+        <button data-period="today">Today</button>
+        <button data-period="7d">7D</button>
+        <button data-period="30d" class="active">30D</button>
+        <button data-period="90d">90D</button>
+        <button data-period="12m">12M</button>
+      </div>
+    </div>
+
+    <div class="summary" id="summary">
+      <div class="stat-card"><div class="label">Pageviews</div><div class="value gold" id="s-pageviews">-</div></div>
+      <div class="stat-card"><div class="label">Visitors</div><div class="value cyan" id="s-visitors">-</div></div>
+      <div class="stat-card"><div class="label">Avg Time</div><div class="value" id="s-time">-</div></div>
+      <div class="stat-card"><div class="label">Scroll Depth</div><div class="value" id="s-scroll">-</div></div>
+      <div class="stat-card"><div class="label">Bounce Rate</div><div class="value" id="s-bounce">-</div></div>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="chart"></canvas>
+    </div>
+
+    <div class="tables-grid" id="tables"></div>
+
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script is:inline define:vars={{ token }}>
+      var currentPeriod = "30d";
+      var chartInstance = null;
+
+      function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
+      function fmtTime(s) { return s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s"; }
+
+      function renderTable(title, rows, keyField, valueField, isPath) {
+        if (!rows || !rows.length) return "";
+        var max = Number(rows[0][valueField]) || 1;
+        var rowsHtml = rows.map(function(r) {
+          var key = r[keyField] || "Direct";
+          var val = Number(r[valueField]) || 0;
+          var pct = Math.round(val / max * 100);
+          var cls = isPath ? ' class="pathname"' : "";
+          return "<tr><td" + cls + "><span class=\"bar\" style=\"width:" + pct + "px\"></span>" + escapeHtml(key) + "</td><td>" + fmt(val) + "</td></tr>";
+        }).join("");
+        return '<div class="table-card"><h3>' + title + '</h3><table><thead><tr><th>' + title + '</th><th>Visitors</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>';
+      }
+
+      function escapeHtml(s) {
+        var div = document.createElement("div");
+        div.appendChild(document.createTextNode(String(s)));
+        return div.innerHTML;
+      }
+
+      function loadData(period) {
+        currentPeriod = period;
+        document.querySelectorAll(".periods button").forEach(function(b) {
+          b.classList.toggle("active", b.dataset.period === period);
+        });
+
+        fetch("/api/stats?period=" + period, {
+          headers: { Authorization: "Bearer " + token }
+        })
+        .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
+        .then(function(d) {
+          var s = d.summary;
+          document.getElementById("s-pageviews").textContent = fmt(s.pageviews);
+          document.getElementById("s-visitors").textContent = fmt(s.visitors);
+          document.getElementById("s-time").textContent = fmtTime(s.avg_time_on_page);
+          document.getElementById("s-scroll").textContent = s.avg_scroll_depth + "%";
+          document.getElementById("s-bounce").textContent = s.bounce_rate + "%";
+
+          var labels = d.chart.map(function(c) { return c.date; });
+          var pvData = d.chart.map(function(c) { return Number(c.pageviews); });
+          var vData = d.chart.map(function(c) { return Number(c.visitors); });
+
+          if (chartInstance) chartInstance.destroy();
+          var ctx = document.getElementById("chart").getContext("2d");
+          chartInstance = new Chart(ctx, {
+            type: "line",
+            data: {
+              labels: labels,
+              datasets: [
+                { label: "Pageviews", data: pvData, borderColor: "#c9a84c", backgroundColor: "rgba(201,168,76,0.1)", fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+                { label: "Visitors", data: vData, borderColor: "#4ecdc4", backgroundColor: "rgba(78,205,196,0.05)", fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 }
+              ]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { labels: { color: "#8a8a8e", font: { size: 11 } } } },
+              scales: {
+                x: { ticks: { color: "#8a8a8e", font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: "rgba(255,255,255,0.04)" } },
+                y: { ticks: { color: "#8a8a8e", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.04)" }, beginAtZero: true }
+              },
+              interaction: { intersect: false, mode: "index" }
+            }
+          });
+
+          var html = "";
+          html += renderTable("Pages", d.top_pages, "pathname", "visitors", true);
+          html += renderTable("Referrers", d.referrers, "referrer", "visitors", false);
+          html += renderTable("Countries", d.countries, "country", "visitors", false);
+          html += renderTable("Browsers", d.browsers, "browser", "visitors", false);
+          html += renderTable("OS", d.os, "os", "visitors", false);
+          html += renderTable("Devices", d.devices, "device_type", "visitors", false);
+          html += renderTable("Languages", d.languages, "lang", "visitors", false);
+          if (d.utm_sources.length) html += renderTable("UTM Sources", d.utm_sources, "utm_source", "visitors", false);
+          if (d.utm_campaigns.length) html += renderTable("UTM Campaigns", d.utm_campaigns, "utm_campaign", "visitors", false);
+          document.getElementById("tables").innerHTML = html;
+        })
+        .catch(function(e) {
+          document.getElementById("tables").innerHTML = '<div class="error">Failed to load data: ' + e.message + '</div>';
+        });
+      }
+
+      document.querySelectorAll(".periods button").forEach(function(b) {
+        b.addEventListener("click", function() { loadData(b.dataset.period); });
+      });
+
+      loadData("30d");
+    </script>
+  </body>
+</html>
