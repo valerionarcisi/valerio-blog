@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
+import { verifyBearerToken } from "~/lib/auth";
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ") || authHeader.slice(7) !== import.meta.env.ANALYTICS_ADMIN_TOKEN) {
+  if (!verifyBearerToken(request, import.meta.env.ANALYTICS_ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

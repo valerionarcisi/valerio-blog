@@ -1,12 +1,11 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
+import { verifyBearerToken } from "~/lib/auth";
 
 export const prerender = false;
 
 function isAuthorized(request: Request): boolean {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return false;
-  return authHeader.slice(7) === import.meta.env.COMMENTS_ADMIN_TOKEN;
+  return verifyBearerToken(request, import.meta.env.COMMENTS_ADMIN_TOKEN);
 }
 
 export const GET: APIRoute = async ({ request, url }) => {

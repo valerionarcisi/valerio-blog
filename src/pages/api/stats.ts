@@ -1,13 +1,8 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
+import { verifyBearerToken } from "~/lib/auth";
 
 export const prerender = false;
-
-function isAuthorized(request: Request): boolean {
-  const authHeader = request.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return false;
-  return authHeader.slice(7) === import.meta.env.ANALYTICS_ADMIN_TOKEN;
-}
 
 function getDateRange(period: string, from?: string, to?: string): { from: string; to: string; groupBy: string } {
   const now = new Date();
@@ -43,8 +38,10 @@ function getDateRange(period: string, from?: string, to?: string): { from: strin
   return { from: fromDate, to: toDate, groupBy };
 }
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 export const GET: APIRoute = async ({ request, url }) => {
-  if (!isAuthorized(request)) {
+  if (!verifyBearerToken(request, import.meta.env.ANALYTICS_ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -52,6 +49,13 @@ export const GET: APIRoute = async ({ request, url }) => {
   const customFrom = url.searchParams.get("from") || undefined;
   const customTo = url.searchParams.get("to") || undefined;
   const pathnameFilter = url.searchParams.get("pathname") || undefined;
+
+  if (customFrom && !DATE_RE.test(customFrom)) {
+    return new Response(JSON.stringify({ error: "Invalid from date" }), { status: 400 });
+  }
+  if (customTo && !DATE_RE.test(customTo)) {
+    return new Response(JSON.stringify({ error: "Invalid to date" }), { status: 400 });
+  }
 
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();

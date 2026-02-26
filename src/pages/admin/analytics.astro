@@ -1,8 +1,10 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token");
-const isAuthorized = token === import.meta.env.ANALYTICS_ADMIN_TOKEN;
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ANALYTICS_ADMIN_TOKEN);
 
 if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
@@ -15,6 +17,7 @@ if (!isAuthorized) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
     <title>Analytics Dashboard</title>
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -221,7 +224,12 @@ if (!isAuthorized) {
           document.getElementById("tables").innerHTML = html;
         })
         .catch(function(e) {
-          document.getElementById("tables").innerHTML = '<div class="error">Failed to load data: ' + e.message + '</div>';
+          var errDiv = document.createElement("div");
+          errDiv.className = "error";
+          errDiv.textContent = "Failed to load data: " + e.message;
+          var tables = document.getElementById("tables");
+          tables.textContent = "";
+          tables.appendChild(errDiv);
         });
       }
 

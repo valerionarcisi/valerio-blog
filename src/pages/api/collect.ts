@@ -11,10 +11,55 @@ import {
 
 export const prerender = false;
 
+const ALLOWED_ORIGINS = [
+  "https://valerionarcisi.me",
+  "https://www.valerionarcisi.me",
+  "http://localhost:4321",
+  "http://localhost:3000",
+];
+
+const rateLimit = new Map<string, number[]>();
+const RATE_WINDOW_MS = 10_000;
+const RATE_MAX_REQUESTS = 10;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = rateLimit.get(ip) ?? [];
+  const recent = timestamps.filter(t => now - t < RATE_WINDOW_MS);
+
+  if (recent.length >= RATE_MAX_REQUESTS) {
+    rateLimit.set(ip, recent);
+    return true;
+  }
+
+  recent.push(now);
+  rateLimit.set(ip, recent);
+  return false;
+}
+
+function toFiniteNumber(val: unknown): number | null {
+  if (val == null) return null;
+  const n = Number(val);
+  return Number.isFinite(n) ? n : null;
+}
+
 export const POST: APIRoute = async ({ request }) => {
+  const origin = request.headers.get("origin") ?? "";
+  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+    return new Response(null, { status: 403 });
+  }
+
   const ua = request.headers.get("user-agent") ?? undefined;
   if (isBot(ua)) {
     return new Response(null, { status: 204 });
+  }
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    ?? request.headers.get("x-real-ip")
+    ?? "unknown";
+
+  if (isRateLimited(ip)) {
+    return new Response(null, { status: 429 });
   }
 
   let body: Record<string, unknown>;
@@ -27,11 +72,11 @@ export const POST: APIRoute = async ({ request }) => {
   const type = body.type as string;
 
   if (type === "beacon") {
-    const pageId = body.page_id as string;
-    const timeOnPage = body.time_on_page as number | undefined;
-    const scrollDepth = body.scroll_depth as number | undefined;
-
+    const pageId = typeof body.page_id === "string" ? body.page_id.slice(0, 50) : null;
     if (!pageId) return new Response(null, { status: 400 });
+
+    const timeOnPage = toFiniteNumber(body.time_on_page);
+    const scrollDepth = toFiniteNumber(body.scroll_depth);
 
     await getDb().execute({
       sql: "UPDATE pageviews SET time_on_page = ?, scroll_depth = ? WHERE page_id = ? AND time_on_page IS NULL",
@@ -46,11 +91,12 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   if (type === "pageview") {
-    const pathname = body.pathname as string;
+    const pathname = typeof body.pathname === "string" ? body.pathname : null;
     if (!pathname) return new Response(null, { status: 400 });
 
     const { browser, os } = parseUserAgent(ua);
-    const hostname = body.hostname as string || "valerionarcisi.me";
+    const hostname = typeof body.hostname === "string" ? body.hostname.slice(0, 100) : "valerionarcisi.me";
+    const pageId = typeof body.page_id === "string" ? body.page_id.slice(0, 50) : crypto.randomUUID().slice(0, 8);
 
     await getDb().execute({
       sql: `INSERT INTO pageviews (
@@ -61,24 +107,24 @@ export const POST: APIRoute = async ({ request }) => {
         language, country
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
-        (body.page_id as string) || crypto.randomUUID().slice(0, 8),
+        pageId,
         hostname,
         sanitizePathname(pathname),
         extractHostname(body.referrer as string | undefined),
-        (body.utm_source as string)?.slice(0, 200) || null,
-        (body.utm_medium as string)?.slice(0, 200) || null,
-        (body.utm_campaign as string)?.slice(0, 200) || null,
-        (body.utm_content as string)?.slice(0, 200) || null,
+        typeof body.utm_source === "string" ? body.utm_source.slice(0, 200) : null,
+        typeof body.utm_medium === "string" ? body.utm_medium.slice(0, 200) : null,
+        typeof body.utm_campaign === "string" ? body.utm_campaign.slice(0, 200) : null,
+        typeof body.utm_content === "string" ? body.utm_content.slice(0, 200) : null,
         body.is_unique ? 1 : 0,
         browser,
         os,
-        deviceTypeFromViewport(body.viewport_width as number | undefined),
-        (body.screen_width as number) || null,
-        (body.screen_height as number) || null,
-        (body.viewport_width as number) || null,
-        (body.viewport_height as number) || null,
-        (body.language as string)?.slice(0, 10) || null,
-        countryFromTimezone(body.timezone as string | undefined),
+        deviceTypeFromViewport(toFiniteNumber(body.viewport_width) ?? undefined),
+        toFiniteNumber(body.screen_width),
+        toFiniteNumber(body.screen_height),
+        toFiniteNumber(body.viewport_width),
+        toFiniteNumber(body.viewport_height),
+        typeof body.language === "string" ? body.language.slice(0, 10) : null,
+        countryFromTimezone(typeof body.timezone === "string" ? body.timezone : undefined),
       ],
     });
 

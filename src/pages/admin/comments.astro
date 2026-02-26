@@ -1,8 +1,10 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token");
-const isAuthorized = token === import.meta.env.COMMENTS_ADMIN_TOKEN;
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.COMMENTS_ADMIN_TOKEN);
 
 if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
