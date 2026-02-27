@@ -90,3 +90,16 @@ export function extractHostname(referrer: string | undefined): string | null {
     return null;
   }
 }
+
+export async function generateVisitorHash(hostname: string, ip: string, ua: string): Promise<string> {
+  const date = new Date().toISOString().slice(0, 10);
+  const raw = `${date}:${hostname}:${ip}:${ua}`;
+  const data = new TextEncoder().encode(raw);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  const bytes = new Uint8Array(hash);
+  let hex = "";
+  for (let i = 0; i < 8; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
