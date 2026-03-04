@@ -15,35 +15,35 @@
   from = "/"
   to = "/en/"
   status = 302
-  force = false
+  force = true
   conditions = {Language = ["!it"]}
 
 [[redirects]]
   from = "/blog/*"
   to = "/en/blog/:splat"
   status = 302
-  force = false
+  force = true
   conditions = {Language = ["!it"]}
 
 [[redirects]]
   from = "/films/*"
   to = "/en/films/:splat"
   status = 302
-  force = false
+  force = true
   conditions = {Language = ["!it"]}
 
 [[redirects]]
   from = "/tag/*"
   to = "/en/tag/:splat"
   status = 302
-  force = false
+  force = true
   conditions = {Language = ["!it"]}
 
 [[redirects]]
   from = "/who-i-am"
   to = "/en/who-i-am"
   status = 302
-  force = false
+  force = true
   conditions = {Language = ["!it"]}
 
 [[redirects]]
