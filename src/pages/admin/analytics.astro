@@ -416,7 +416,7 @@ if (!isAuthorized) {
           document.getElementById("s-scroll").textContent = s.avg_scroll_depth + "%";
           document.getElementById("s-bounce").textContent = s.bounce_rate + "%";
 
-          var groupBy = period === "today" ? "hour" : period === "12m" ? "month" : "day";
+          var groupBy = d.period.groupBy || (period === "today" ? "hour" : period === "12m" ? "month" : "day");
           var rawDates = d.chart.map(function(c) { return c.date; });
           var labels = rawDates.map(function(dt) { return fmtChartLabel(dt, groupBy); });
           var pvData = d.chart.map(function(c) { return Number(c.pageviews); });
