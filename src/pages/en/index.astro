@@ -87,7 +87,7 @@ const [lastWatched, lastSongs] = await Promise.all([
     <main>
       <section id="last-watched">
         <Title title="Last watched movies" />
-        <div class="ReelContainer">
+        <div class="ReelContainer" id="movies-reel">
           {
             lastWatched.map((movie: any) => (
               <Reel
@@ -105,7 +105,7 @@ const [lastWatched, lastSongs] = await Promise.all([
       </section>
       <section>
         <Title title="Last Listened songs" />
-        <div class="ReelContainer">
+        <div class="ReelContainer" id="songs-reel">
           {
             lastSongs.map((song) => (
               <Reel
@@ -149,5 +149,66 @@ const [lastWatched, lastSongs] = await Promise.all([
       </section>
     </main>
     <Footer />
+    <script is:inline>
+      (function () {
+        var REFRESH_MS = 15 * 60 * 1000;
+        var MOVIE_PLACEHOLDER = "https://placeholder.pics/svg/178x278/1a1b26/8a8a8e/No%20Poster";
+        var SONG_PLACEHOLDER = "https://placeholder.pics/svg/185x185/1a1b26/8a8a8e/No%20Cover";
+
+        function fmtDate(dateStr) {
+          if (!dateStr) return "";
+          var d = new Date(dateStr);
+          return d.toLocaleDateString("en-us", { month: "short", day: "numeric" });
+        }
+
+        function renderMovie(m) {
+          var img = m.posterPath
+            ? "https://image.tmdb.org/t/p/w185" + m.posterPath
+            : MOVIE_PLACEHOLDER;
+          var vote = m.voteAverage
+            ? '<span class="vote">' + m.voteAverage.toFixed(1) + "</span>"
+            : "";
+          return '<div class="Reel movie">'
+            + '<a href="' + m.link + '" target="_blank" rel="noopener noreferrer">'
+            + '<div class="thumbnail"><img src="' + img + '" alt="' + m.title + '" loading="lazy" />' + vote + "</div>"
+            + "</a>"
+            + '<div class="info"><h3 class="reel-title">' + m.title + "</h3>"
+            + '<p class="reel-date">' + fmtDate(m.watchedDate) + "</p></div></div>";
+        }
+
+        function renderSong(s) {
+          var img = s.image || SONG_PLACEHOLDER;
+          var date = s.date ? fmtDate(s.date) : fmtDate(new Date().toISOString());
+          return '<div class="Reel song">'
+            + '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer">'
+            + '<div class="thumbnail"><img src="' + img + '" alt="' + s.name + '" loading="lazy" /></div>'
+            + "</a>"
+            + '<div class="info"><h3 class="reel-title">' + s.name + "</h3>"
+            + '<p class="reel-artist">' + s.artist + "</p>"
+            + '<p class="reel-album">' + s.album + "</p>"
+            + '<p class="reel-date">' + date + "</p></div></div>";
+        }
+
+        function refresh() {
+          fetch("/api/letterboxd")
+            .then(function (r) { return r.json(); })
+            .then(function (movies) {
+              var el = document.getElementById("movies-reel");
+              if (el && Array.isArray(movies)) el.innerHTML = movies.map(renderMovie).join("");
+            })
+            .catch(function () {});
+
+          fetch("/api/lastfm")
+            .then(function (r) { return r.json(); })
+            .then(function (songs) {
+              var el = document.getElementById("songs-reel");
+              if (el && Array.isArray(songs)) el.innerHTML = songs.map(renderSong).join("");
+            })
+            .catch(function () {});
+        }
+
+        setInterval(refresh, REFRESH_MS);
+      })();
+    </script>
   </body>
 </html>
