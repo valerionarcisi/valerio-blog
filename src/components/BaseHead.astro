@@ -9,11 +9,19 @@ interface Props {
   description: string;
   image?: string;
   cover?: string;
+  lang?: string;
 }
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
-const { title, description, image = "/img/avatar.png", cover } = Astro.props;
+const { title, description, image = "/img/avatar.png", cover, lang } = Astro.props;
+
+const currentLang = lang || (Astro.url.pathname.startsWith("/en") ? "en" : "it");
+const pathname = Astro.url.pathname;
+const itPath = currentLang === "en" ? pathname.replace(/^\/en/, "") || "/" : pathname;
+const enPath = currentLang === "it" ? `/en${pathname}` : pathname;
+const itUrl = new URL(itPath, Astro.site);
+const enUrl = new URL(enPath, Astro.site);
 
 // Optimize meta description (150-160 characters for best SEO)
 const optimizedDescription = description.length > 160 
@@ -112,6 +120,14 @@ const fullImageUrl = new URL(socialImage, Astro.url);
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
 
+<!-- Hreflang for i18n -->
+<link rel="alternate" hreflang="it" href={itUrl} />
+<link rel="alternate" hreflang="en" href={enUrl} />
+<link rel="alternate" hreflang="x-default" href={itUrl} />
+
+<!-- RSS autodiscovery -->
+<link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+
 <!-- Primary Meta Tags -->
 <title>{title}</title>
 <meta name="title" content={title} />
@@ -119,6 +135,7 @@ const fullImageUrl = new URL(socialImage, Astro.url);
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
+<meta property="og:locale" content={currentLang === "en" ? "en_US" : "it_IT"} />
 <meta property="og:url" content={Astro.url} />
 <meta property="og:title" content={title} />
 <meta property="og:description" content={optimizedDescription} />

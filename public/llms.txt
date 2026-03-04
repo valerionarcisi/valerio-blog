@@ -1,0 +1,37 @@
+# Valerio Narcisi
+
+> Personal blog and portfolio of Valerio Narcisi — web developer, film director, and screenwriter based in Le Marche, Italy.
+
+This site is available in Italian (default) and English (/en/).
+
+## About
+
+Valerio Narcisi is a web developer at Cleafy (cybersecurity) and an independent filmmaker. He writes about web development, cinema, and personal reflections.
+
+## Blog Topics
+
+- **Web Development**: TypeScript, React, CSS, Git workflows, API integrations
+- **Cinema & Filmmaking**: Film festival news, behind-the-scenes production, film analysis
+- **Personal Reflections**: Lifestyle, cultural commentary, music
+
+## Selected Technical Articles
+
+- [How to Use Multiple Git Users on the Same Computer](https://valerionarcisi.me/blog/how-to-use-multiple-git-users-on-the-same-computer/)
+- [Result Pattern with React Query Integration Guide](https://valerionarcisi.me/blog/result-pattern-with-react-query-integration-guide/)
+- [Modern CSS for TypeScript Developers: Getting Started with Vanilla Extract](https://valerionarcisi.me/blog/modern-css-for-typescript-developers-getting-started-with-vanilla-extract/)
+- [How I Display My Latest Watched Movies Using Letterboxd RSS Feed](https://valerionarcisi.me/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed/)
+- [How I Display My Recently Played Music Using Last.FM API](https://valerionarcisi.me/blog/how-i-display-my-recently-played-music-using-lastfm-api/)
+
+## Films
+
+Valerio has directed several short films including "Caramella" (winner at Fano Film Festival 2025 and GASP Award), "Non Fa Ridere", and "Gli Ospiti".
+
+- [Films Portfolio](https://valerionarcisi.me/films/)
+
+## Site Info
+
+- Built with Astro 5, TypeScript, plain CSS
+- Self-hosted privacy-first analytics (no cookies, no tracking)
+- RSS feed: https://valerionarcisi.me/rss.xml
+- Languages: Italian (default), English (/en/)
+- Contact: https://valerionarcisi.me/contatti/

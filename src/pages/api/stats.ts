@@ -69,7 +69,7 @@ export const GET: APIRoute = async ({ request, url }) => {
       ? "strftime('%Y-%m', created_at)"
       : "date(created_at)";
 
-  const [summary, chart, topPages, referrers, countries, browsers, os, devices, languages, utmSources, utmCampaigns] = await Promise.all([
+  const [summary, chart, topPages, referrers, countries, browsers, os, devices, languages, utmSources, utmCampaigns, recentVisitors] = await Promise.all([
     db.execute({ sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors, ROUND(AVG(time_on_page)) as avg_time, ROUND(AVG(scroll_depth)) as avg_scroll FROM pageviews ${baseWhere}`, args: baseArgs }),
     db.execute({ sql: `SELECT ${dateExpr} as date, COUNT(*) as pageviews, SUM(is_unique) as visitors FROM pageviews ${baseWhere} GROUP BY date ORDER BY date`, args: baseArgs }),
     db.execute({ sql: `SELECT pathname, COUNT(*) as pageviews, SUM(is_unique) as visitors FROM pageviews ${baseWhere} GROUP BY pathname ORDER BY pageviews DESC LIMIT 20`, args: baseArgs }),
@@ -81,6 +81,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     db.execute({ sql: `SELECT SUBSTR(language, 1, 2) as lang, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND language IS NOT NULL GROUP BY lang ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
     db.execute({ sql: `SELECT utm_source, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_source IS NOT NULL GROUP BY utm_source ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
     db.execute({ sql: `SELECT utm_campaign, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_campaign IS NOT NULL GROUP BY utm_campaign ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
+    db.execute({ sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at FROM pageviews WHERE is_unique = 1 ORDER BY created_at DESC LIMIT 30`, args: [] }),
   ]);
 
   const s = summary.rows[0];
@@ -111,6 +112,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     languages: languages.rows,
     utm_sources: utmSources.rows,
     utm_campaigns: utmCampaigns.rows,
+    recent_visitors: recentVisitors.rows,
   }), {
     status: 200,
     headers: { "Content-Type": "application/json" },

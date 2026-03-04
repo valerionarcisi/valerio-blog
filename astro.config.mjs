@@ -7,7 +7,11 @@ import netlify from "@astrojs/netlify";
 export default defineConfig({
   site: "https://valerionarcisi.me",
   adapter: netlify(),
-  integrations: [sitemap()],
+  integrations: [
+    sitemap({
+      filter: (page) => !page.includes("/admin/"),
+    }),
+  ],
   i18n: {
     locales: ["it", "en"],
     defaultLocale: "it",
