@@ -44,8 +44,12 @@ if (!isAuthorized) {
       .date-range button:hover { opacity: 0.8; }
 
       .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-      .stat-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; }
-      .stat-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a8a8e; margin-bottom: 0.3rem; }
+      .stat-card { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; position: relative; }
+      .stat-card .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8a8a8e; margin-bottom: 0.3rem; display: flex; align-items: center; gap: 0.35rem; }
+      .stat-card .info-icon { width: 14px; height: 14px; border-radius: 50%; border: 1px solid #555; display: inline-flex; align-items: center; justify-content: center; font-size: 0.55rem; color: #555; cursor: help; flex-shrink: 0; transition: all 0.2s; }
+      .stat-card .info-icon:hover { border-color: #c9a84c; color: #c9a84c; }
+      .stat-card .tooltip { display: none; position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1b1e; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.72rem; color: #ccc; line-height: 1.45; white-space: normal; width: max-content; max-width: 240px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+      .stat-card:hover .tooltip { display: block; }
       .stat-card .value { font-size: 1.6rem; font-weight: 700; color: #e8e6e1; font-family: 'JetBrains Mono', monospace; }
       .stat-card .value.gold { color: #c9a84c; }
       .stat-card .value.cyan { color: #4ecdc4; }
@@ -107,11 +111,31 @@ if (!isAuthorized) {
     </div>
 
     <div class="summary" id="summary">
-      <div class="stat-card"><div class="label">Pageviews</div><div class="value gold" id="s-pageviews">-</div></div>
-      <div class="stat-card"><div class="label">Visitors</div><div class="value cyan" id="s-visitors">-</div></div>
-      <div class="stat-card"><div class="label">Avg Time</div><div class="value" id="s-time">-</div></div>
-      <div class="stat-card"><div class="label">Scroll Depth</div><div class="value" id="s-scroll">-</div></div>
-      <div class="stat-card"><div class="label">Bounce Rate</div><div class="value" id="s-bounce">-</div></div>
+      <div class="stat-card">
+        <div class="label">Pageviews <span class="info-icon">?</span></div>
+        <div class="value gold" id="s-pageviews">-</div>
+        <div class="tooltip">Numero totale di pagine visualizzate nel periodo selezionato. Include visite ripetute alla stessa pagina.</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Visitors <span class="info-icon">?</span></div>
+        <div class="value cyan" id="s-visitors">-</div>
+        <div class="tooltip">Visitatori unici giornalieri, calcolati tramite hash anonimo (IP + User-Agent + data). Nessun cookie, nessun dato personale salvato.</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Time <span class="info-icon">?</span></div>
+        <div class="value" id="s-time">-</div>
+        <div class="tooltip">Tempo medio trascorso sulla pagina. Misurato dal caricamento fino a quando l'utente lascia o cambia tab. Max 60 min.</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Scroll Depth <span class="info-icon">?</span></div>
+        <div class="value" id="s-scroll">-</div>
+        <div class="tooltip">Percentuale media di scroll della pagina. 100% = l'utente ha raggiunto il fondo. Arrotondato a multipli di 5%.</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Bounce Rate <span class="info-icon">?</span></div>
+        <div class="value" id="s-bounce">-</div>
+        <div class="tooltip">Percentuale di visitatori unici che hanno trascorso meno di 5 secondi sulla pagina o non hanno interagito.</div>
+      </div>
     </div>
 
     <div class="chart-container">
@@ -126,6 +150,33 @@ if (!isAuthorized) {
 
       function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
       function fmtTime(s) { return s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s"; }
+
+      var DAYS_SHORT = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+      var MONTHS_SHORT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
+
+      function fmtChartLabel(dateStr, groupBy) {
+        if (groupBy === "hour") {
+          return dateStr.slice(11, 16);
+        }
+        if (groupBy === "month") {
+          var parts = dateStr.split("-");
+          return MONTHS_SHORT[parseInt(parts[1], 10) - 1] + " " + parts[0].slice(2);
+        }
+        var d = new Date(dateStr + "T00:00:00");
+        var day = DAYS_SHORT[d.getDay()];
+        return day + " " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()];
+      }
+
+      function fmtTooltipTitle(dateStr, groupBy) {
+        if (groupBy === "hour") return dateStr;
+        if (groupBy === "month") {
+          var parts = dateStr.split("-");
+          return MONTHS_SHORT[parseInt(parts[1], 10) - 1] + " " + parts[0];
+        }
+        var d = new Date(dateStr + "T00:00:00");
+        var day = DAYS_SHORT[d.getDay()];
+        return day + " " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();
+      }
 
       function escapeHtml(s) {
         var div = document.createElement("div");
@@ -171,7 +222,9 @@ if (!isAuthorized) {
           document.getElementById("s-scroll").textContent = s.avg_scroll_depth + "%";
           document.getElementById("s-bounce").textContent = s.bounce_rate + "%";
 
-          var labels = d.chart.map(function(c) { return c.date; });
+          var groupBy = period === "today" ? "hour" : period === "12m" ? "month" : "day";
+          var rawDates = d.chart.map(function(c) { return c.date; });
+          var labels = rawDates.map(function(dt) { return fmtChartLabel(dt, groupBy); });
           var pvData = d.chart.map(function(c) { return Number(c.pageviews); });
           var vData = d.chart.map(function(c) { return Number(c.visitors); });
 
@@ -182,16 +235,60 @@ if (!isAuthorized) {
             data: {
               labels: labels,
               datasets: [
-                { label: "Pageviews", data: pvData, borderColor: "#c9a84c", backgroundColor: "rgba(201,168,76,0.1)", fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
-                { label: "Visitors", data: vData, borderColor: "#4ecdc4", backgroundColor: "rgba(78,205,196,0.05)", fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 }
+                {
+                  label: "Pageviews", data: pvData,
+                  borderColor: "#c9a84c", backgroundColor: "rgba(201,168,76,0.08)",
+                  fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 6,
+                  pointBackgroundColor: "#c9a84c", pointBorderColor: "#0a0a0c", pointBorderWidth: 2,
+                  borderWidth: 2.5
+                },
+                {
+                  label: "Visitors", data: vData,
+                  borderColor: "#4ecdc4", backgroundColor: "rgba(78,205,196,0.05)",
+                  fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 6,
+                  pointBackgroundColor: "#4ecdc4", pointBorderColor: "#0a0a0c", pointBorderWidth: 2,
+                  borderWidth: 2.5
+                }
               ]
             },
             options: {
               responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { labels: { color: "#8a8a8e", font: { size: 11 } } } },
+              plugins: {
+                legend: {
+                  labels: { color: "#8a8a8e", font: { size: 11 }, usePointStyle: true, pointStyle: "circle", padding: 16 }
+                },
+                tooltip: {
+                  backgroundColor: "rgba(20,20,22,0.95)",
+                  titleColor: "#e8e6e1",
+                  bodyColor: "#e8e6e1",
+                  borderColor: "rgba(255,255,255,0.1)",
+                  borderWidth: 1,
+                  cornerRadius: 6,
+                  padding: 10,
+                  titleFont: { size: 12, weight: "600" },
+                  bodyFont: { size: 12 },
+                  displayColors: true,
+                  boxPadding: 4,
+                  callbacks: {
+                    title: function(items) {
+                      var idx = items[0].dataIndex;
+                      return fmtTooltipTitle(rawDates[idx], groupBy);
+                    }
+                  }
+                }
+              },
               scales: {
-                x: { ticks: { color: "#8a8a8e", font: { size: 10 }, maxTicksLimit: 12 }, grid: { color: "rgba(255,255,255,0.04)" } },
-                y: { ticks: { color: "#8a8a8e", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.04)" }, beginAtZero: true }
+                x: {
+                  ticks: { color: "#8a8a8e", font: { size: 10 }, maxRotation: 45, minRotation: 0, maxTicksLimit: 14, autoSkip: true },
+                  grid: { color: "rgba(255,255,255,0.03)", drawTicks: false },
+                  border: { color: "rgba(255,255,255,0.06)" }
+                },
+                y: {
+                  ticks: { color: "#8a8a8e", font: { size: 10 }, padding: 8 },
+                  grid: { color: "rgba(255,255,255,0.04)", drawTicks: false },
+                  border: { display: false },
+                  beginAtZero: true
+                }
               },
               interaction: { intersect: false, mode: "index" }
             }
