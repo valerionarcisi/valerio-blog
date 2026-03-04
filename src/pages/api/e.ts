@@ -157,6 +157,25 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
+    // Behavioral bot detection: 3+ visits with zero engagement → likely bot
+    try {
+      const visits = await db.execute({
+        sql: `SELECT COUNT(*) as total,
+              SUM(CASE WHEN time_on_page IS NOT NULL OR scroll_depth IS NOT NULL THEN 1 ELSE 0 END) as engaged
+              FROM pageviews WHERE visitor_hash = ? AND created_at >= date('now', '-7 days')`,
+        args: [visitorHash],
+      });
+      const row = visits.rows[0];
+      if (Number(row.total) >= 3 && Number(row.engaged) === 0) {
+        await db.execute({
+          sql: "INSERT OR IGNORE INTO bot_hashes (hash) VALUES (?)",
+          args: [visitorHash],
+        });
+      }
+    } catch {
+      // best-effort — bot_hashes table may not exist
+    }
+
     return new Response(null, { status: 204 });
   }
 

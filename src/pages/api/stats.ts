@@ -60,7 +60,8 @@ export const GET: APIRoute = async ({ request, url }) => {
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();
 
-  const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}`;
+  const botFilter = "AND (visitor_hash IS NULL OR visitor_hash NOT IN (SELECT hash FROM bot_hashes))";
+  const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') ${botFilter}${pathnameFilter ? " AND pathname = ?" : ""}`;
   const baseArgs = pathnameFilter ? [range.from, range.to, pathnameFilter] : [range.from, range.to];
 
   const dateExpr = range.groupBy === "hour"
@@ -81,7 +82,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     db.execute({ sql: `SELECT SUBSTR(language, 1, 2) as lang, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND language IS NOT NULL GROUP BY lang ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
     db.execute({ sql: `SELECT utm_source, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_source IS NOT NULL GROUP BY utm_source ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
     db.execute({ sql: `SELECT utm_campaign, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_campaign IS NOT NULL GROUP BY utm_campaign ORDER BY visitors DESC LIMIT 10`, args: baseArgs }),
-    db.execute({ sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at FROM pageviews WHERE is_unique = 1 ORDER BY created_at DESC LIMIT 30`, args: [] }),
+    db.execute({ sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at FROM pageviews WHERE is_unique = 1 ${botFilter} ORDER BY created_at DESC LIMIT 30`, args: [] }),
   ]);
 
   const s = summary.rows[0];
