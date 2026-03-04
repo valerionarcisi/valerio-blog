@@ -3,9 +3,9 @@ title: "The Real Parameter: Why Iterating Matters More Than Writing Code"
 date: "2026-03-04"
 extract: "I built a self-hosted analytics system using Claude. But the interesting part isn't the code — it's the iterative process that turned an idea into a working product in just a few hours."
 tags: ["ai", "javascript", "thoughts", "analytics"]
-coverImage: "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&h=630&fit=crop"
-coverAuthorName: "Lisa Keffer"
-coverAuthorLink: "https://unsplash.com/@lisakeffer"
+coverImage: "/img/blog/il-vero-parametro-perche-iterare-conta-piu-di-scrivere-codice/cover.jpg"
+coverAuthorName: "Todd Quackenbush"
+coverAuthorLink: "https://unsplash.com/@toddquackenbush"
 ---
 
 A few weeks ago I decided to replicate a piece of software I use every day — Simple Analytics — from scratch, with Claude. Not because I needed to. I did it because I wanted to answer a question that's been nagging me for a while: **how long does it take me to replicate a SaaS product with an AI?**
