@@ -1,36 +1,34 @@
-import { z as zod } from 'astro:content';
+import { z as zod } from "astro:content";
 
 export const AUDIO_SCROBBLER_API_KEY = import.meta.env.LASTFM_API_KEY;
-export const AUDIO_SCROBBLER_USER = 'valerionar';
-export const AUDIO_SCROBBLER_VERSION = '2.0';
+export const AUDIO_SCROBBLER_USER = "valerionar";
+export const AUDIO_SCROBBLER_VERSION = "2.0";
 
 const Track = zod.object({
   name: zod.string(),
   url: zod.string(),
   date: zod
     .object({
-      '#text': zod.string(),
+      "#text": zod.string(),
     })
     .optional(),
   album: zod.object({
-    '#text': zod.string(),
+    "#text": zod.string(),
   }),
   artist: zod.object({
-    '#text': zod.string(),
+    "#text": zod.string(),
   }),
   image: zod.array(
     zod.object({
-      '#text': zod.string(),
+      "#text": zod.string(),
       size: zod.string(),
-    })
+    }),
   ),
 });
 
 const AudioScubblerSchema = zod.object({
   recenttracks: zod.object({
-    track: zod.array(
-      Track
-    ),
+    track: zod.array(Track),
   }),
 });
 
@@ -38,9 +36,9 @@ export type AudioScubblerResponse = zod.infer<typeof AudioScubblerSchema>;
 export type AudioScubblerTrack = zod.infer<typeof Track>;
 
 export const fetchRecentTracks = async (
-  method = 'user.getrecenttracks',
-  format = 'json',
-  limit = '20'
+  method = "user.getrecenttracks",
+  format = "json",
+  limit = "20",
 ): Promise<AudioScubblerTrack[]> => {
   const params = new URLSearchParams({
     method,
@@ -52,7 +50,7 @@ export const fetchRecentTracks = async (
 
   try {
     const response = await fetch(
-      `https://ws.audioscrobbler.com/2.0/?${params.toString()}`
+      `https://ws.audioscrobbler.com/2.0/?${params.toString()}`,
     );
 
     // Check if the response is successful
@@ -63,17 +61,22 @@ export const fetchRecentTracks = async (
     const jsonData = await response.json();
 
     // Validate the JSON response with Zod schema
-    const parsedData = AudioScubblerSchema.parse(jsonData).recenttracks.track.filter(
-      (track) => track.image[0]['#text'] !== 'https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png'
-    )
+    const parsedData = AudioScubblerSchema.parse(
+      jsonData,
+    ).recenttracks.track.filter(
+      (track) =>
+        track.album["#text"] !== "" &&
+        track.image[0]["#text"] !==
+          "https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png",
+    );
 
     return parsedData;
   } catch (error) {
     if (error instanceof zod.ZodError) {
-      console.error('Validation error:', error.errors);
-      throw new Error('Invalid data format received from API');
+      console.error("Validation error:", error.errors);
+      throw new Error("Invalid data format received from API");
     } else {
-      console.error('Error fetching recent tracks:', error);
+      console.error("Error fetching recent tracks:", error);
       throw error;
     }
   }
