@@ -9,6 +9,43 @@
   [headers.values]
     Access-Control-Allow-Origin = "*"
 
+# Language-based redirects (edge CDN, zero latency)
+# Redirect non-Italian speakers to /en/ versions
+[[redirects]]
+  from = "/"
+  to = "/en/"
+  status = 302
+  force = false
+  conditions = {Language = ["!it"]}
+
+[[redirects]]
+  from = "/blog/*"
+  to = "/en/blog/:splat"
+  status = 302
+  force = false
+  conditions = {Language = ["!it"]}
+
+[[redirects]]
+  from = "/films/*"
+  to = "/en/films/:splat"
+  status = 302
+  force = false
+  conditions = {Language = ["!it"]}
+
+[[redirects]]
+  from = "/tag/*"
+  to = "/en/tag/:splat"
+  status = 302
+  force = false
+  conditions = {Language = ["!it"]}
+
+[[redirects]]
+  from = "/who-i-am"
+  to = "/en/who-i-am"
+  status = 302
+  force = false
+  conditions = {Language = ["!it"]}
+
 [[redirects]]
   from = "/caramella-shortmovie"
   to = "/films/caramella/"
