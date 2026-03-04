@@ -36,6 +36,14 @@ if (!isAuthorized) {
       .periods button.active { border-color: #c9a84c; color: #c9a84c; }
       .periods button:hover { border-color: #4ecdc4; color: #4ecdc4; }
 
+      .cal-strip { display: flex; align-items: center; gap: 0; background: #141416; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
+      .cal-strip button { padding: 0.45rem 0.6rem; background: transparent; border: none; color: #8a8a8e; cursor: pointer; font-size: 0.85rem; line-height: 1; transition: all 0.2s; }
+      .cal-strip button:hover { color: #4ecdc4; background: rgba(78,205,196,0.08); }
+      .cal-strip button:disabled { opacity: 0.3; cursor: not-allowed; }
+      .cal-strip button:disabled:hover { background: transparent; color: #8a8a8e; }
+      .cal-strip .cal-label { padding: 0.4rem 0.6rem; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: #c9a84c; cursor: pointer; white-space: nowrap; border-left: 1px solid #333; border-right: 1px solid #333; transition: all 0.2s; user-select: none; }
+      .cal-strip .cal-label:hover { background: rgba(201,168,76,0.08); }
+
       .date-range { display: flex; align-items: center; gap: 0.4rem; }
       .date-range input[type="date"] { padding: 0.35rem 0.5rem; background: #141416; border: 1px solid #333; color: #e8e6e1; border-radius: 4px; font-size: 0.8rem; font-family: inherit; color-scheme: dark; }
       .date-range input[type="date"]:focus { outline: none; border-color: #4ecdc4; }
@@ -106,11 +114,16 @@ if (!isAuthorized) {
         <div class="periods">
           <button data-period="today">Today</button>
           <button data-period="7d">7D</button>
-          <button data-period="30d" class="active">30D</button>
+          <button data-period="30d">30D</button>
           <button data-period="90d">90D</button>
           <button data-period="12m">12M</button>
         </div>
-        <div class="date-range">
+        <div class="cal-strip">
+          <button id="nav-prev" title="Previous period">◀</button>
+          <span class="cal-label" id="cal-label" title="Click to set custom range"></span>
+          <button id="nav-next" title="Next period">▶</button>
+        </div>
+        <div class="date-range" id="date-range" style="display:none;">
           <input type="date" id="date-from" />
           <span>—</span>
           <input type="date" id="date-to" />
@@ -268,9 +281,127 @@ if (!isAuthorized) {
         }).join("");
       }
 
-      function loadData(period) {
+      var PERIOD_DAYS = { "today": 1, "7d": 7, "30d": 30, "90d": 90, "12m": 365 };
+      var currentPeriod = "30d";
+      var currentFrom = null;
+      var currentTo = null;
+
+      function savePeriod(period, from, to) {
+        try {
+          var state = { period: period };
+          if (from) state.from = from;
+          if (to) state.to = to;
+          localStorage.setItem("_ap", JSON.stringify(state));
+        } catch(e) {}
+      }
+
+      function loadSavedPeriod() {
+        try {
+          var raw = localStorage.getItem("_ap");
+          if (!raw) return null;
+          return JSON.parse(raw);
+        } catch(e) { return null; }
+      }
+
+      function dateStr(d) { return d.toISOString().slice(0, 10); }
+
+      function fmtCalDate(isoStr) {
+        var d = new Date(isoStr + "T00:00:00");
+        return d.getDate() + " " + MONTHS_SHORT[d.getMonth()];
+      }
+
+      function fmtCalDateFull(isoStr) {
+        var d = new Date(isoStr + "T00:00:00");
+        return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();
+      }
+
+      function updatePeriodLabel() {
+        var label = document.getElementById("cal-label");
+        if (!currentFrom || !currentTo) { label.textContent = ""; return; }
+
+        var text;
+        if (currentFrom === currentTo) {
+          var d = new Date(currentFrom + "T00:00:00");
+          text = "\ud83d\udcc5 " + DAYS_SHORT[d.getDay()] + " " + fmtCalDateFull(currentFrom);
+        } else if (currentPeriod === "12m") {
+          var fromD = new Date(currentFrom + "T00:00:00");
+          var toD = new Date(currentTo + "T00:00:00");
+          text = "\ud83d\udcc5 " + MONTHS_SHORT[fromD.getMonth()] + " " + fromD.getFullYear() + " — " + MONTHS_SHORT[toD.getMonth()] + " " + toD.getFullYear();
+        } else {
+          var fromYear = currentFrom.slice(0, 4);
+          var toYear = currentTo.slice(0, 4);
+          if (fromYear === toYear) {
+            text = "\ud83d\udcc5 " + fmtCalDate(currentFrom) + " — " + fmtCalDateFull(currentTo);
+          } else {
+            text = "\ud83d\udcc5 " + fmtCalDateFull(currentFrom) + " — " + fmtCalDateFull(currentTo);
+          }
+        }
+        label.textContent = text;
+      }
+
+      function updateNavButtons() {
+        var nextBtn = document.getElementById("nav-next");
+        var today = dateStr(new Date());
+        nextBtn.disabled = !currentTo || currentTo >= today;
+      }
+
+      function navigatePeriod(direction) {
+        var days = PERIOD_DAYS[currentPeriod] || 30;
+        var shift = days * direction;
+
+        var from, to;
+        if (currentFrom && currentTo) {
+          from = new Date(currentFrom + "T00:00:00");
+          to = new Date(currentTo + "T00:00:00");
+        } else {
+          to = new Date();
+          from = new Date(Date.now() - (days - 1) * 86400000);
+        }
+
+        from = new Date(from.getTime() + shift * 86400000);
+        to = new Date(to.getTime() + shift * 86400000);
+
+        var today = new Date();
+        if (to > today) to = today;
+
+        var fromStr = dateStr(from);
+        var toStr = dateStr(to);
+
+        document.querySelectorAll(".periods button").forEach(function(b) { b.classList.remove("active"); });
+        document.getElementById("date-from").value = fromStr;
+        document.getElementById("date-to").value = toStr;
+
+        currentFrom = fromStr;
+        currentTo = toStr;
+        savePeriod(currentPeriod, fromStr, toStr);
+        updatePeriodLabel();
+        updateNavButtons();
+
+        loadData("custom&from=" + fromStr + "&to=" + toStr, true);
+      }
+
+      function loadData(period, skipSave) {
+        var basePeriod = period.split("&")[0];
+
+        if (basePeriod !== "custom") {
+          currentPeriod = basePeriod;
+          var days = PERIOD_DAYS[basePeriod] || 30;
+          currentTo = dateStr(new Date());
+          currentFrom = dateStr(new Date(Date.now() - (days - 1) * 86400000));
+        } else {
+          var match = period.match(/from=(\d{4}-\d{2}-\d{2}).*to=(\d{4}-\d{2}-\d{2})/);
+          if (match) {
+            currentFrom = match[1];
+            currentTo = match[2];
+          }
+        }
+
+        if (!skipSave) savePeriod(currentPeriod, currentFrom, currentTo);
+        updatePeriodLabel();
+        updateNavButtons();
+
         document.querySelectorAll(".periods button").forEach(function(b) {
-          b.classList.toggle("active", b.dataset.period === period);
+          b.classList.toggle("active", b.dataset.period === basePeriod);
         });
 
         fetch("/api/stats?period=" + period, {
@@ -407,23 +538,52 @@ if (!isAuthorized) {
       }
 
       document.querySelectorAll(".periods button").forEach(function(b) {
-        b.addEventListener("click", function() { loadData(b.dataset.period); });
+        b.addEventListener("click", function() {
+          currentPeriod = b.dataset.period;
+          loadData(b.dataset.period);
+        });
       });
 
       document.getElementById("date-go").addEventListener("click", function() {
         var from = document.getElementById("date-from").value;
         var to = document.getElementById("date-to").value;
         if (from && to) {
+          currentFrom = from;
+          currentTo = to;
           document.querySelectorAll(".periods button").forEach(function(b) { b.classList.remove("active"); });
+          document.getElementById("date-range").style.display = "none";
           loadData("custom&from=" + from + "&to=" + to);
         }
       });
 
-      var today = new Date().toISOString().slice(0, 10);
-      document.getElementById("date-to").value = today;
-      document.getElementById("date-from").value = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+      document.getElementById("nav-prev").addEventListener("click", function() { navigatePeriod(-1); });
+      document.getElementById("nav-next").addEventListener("click", function() { navigatePeriod(1); });
 
-      loadData("30d");
+      document.getElementById("cal-label").addEventListener("click", function() {
+        var dr = document.getElementById("date-range");
+        dr.style.display = dr.style.display === "none" ? "flex" : "none";
+      });
+
+      var todayStr = dateStr(new Date());
+      document.getElementById("date-to").value = todayStr;
+      document.getElementById("date-from").value = dateStr(new Date(Date.now() - 30 * 86400000));
+
+      var saved = loadSavedPeriod();
+      if (saved && saved.period) {
+        currentPeriod = saved.period;
+        if (saved.from && saved.to) {
+          currentFrom = saved.from;
+          currentTo = saved.to;
+          document.getElementById("date-from").value = saved.from;
+          document.getElementById("date-to").value = saved.to;
+          loadData("custom&from=" + saved.from + "&to=" + saved.to);
+        } else {
+          loadData(saved.period);
+        }
+      } else {
+        loadData("30d");
+      }
+
       loadLive();
       setInterval(loadLive, 30000);
     </script>
