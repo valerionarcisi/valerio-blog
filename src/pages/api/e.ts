@@ -21,7 +21,7 @@ const ALLOWED_ORIGINS = [
   "http://127.0.0.1:3000",
 ];
 
-function toFiniteNumber(val: unknown): number | null {
+export function toFiniteNumber(val: unknown): number | null {
   if (val == null) return null;
   const n = Number(val);
   return Number.isFinite(n) ? n : null;

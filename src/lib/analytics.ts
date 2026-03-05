@@ -102,11 +102,11 @@ export function parseUserAgent(ua: string | undefined): ParsedUA {
   else if (ua.includes("MSIE") || ua.includes("Trident/")) browser = "IE";
 
   let os: string | null = null;
-  if (ua.includes("Windows")) os = "Windows";
+  if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Windows")) os = "Windows";
   else if (ua.includes("Mac OS X") || ua.includes("Macintosh")) os = "macOS";
   else if (ua.includes("Linux") && ua.includes("Android")) os = "Android";
   else if (ua.includes("Linux")) os = "Linux";
-  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
   else if (ua.includes("CrOS")) os = "ChromeOS";
 
   return { browser, os };
