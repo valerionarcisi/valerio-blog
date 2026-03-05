@@ -24,6 +24,7 @@
     "@fontsource/staatliches": "^5.1.1",
     "@libsql/client": "0.14.0",
     "astro": "^5.16.8",
+    "isbot": "5.1.35",
     "normalize.css": "^8.0.1",
     "sharp": "^0.33.5",
     "typescript": "^5.7.3",

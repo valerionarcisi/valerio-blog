@@ -48,7 +48,8 @@ export const POST: APIRoute = async ({ request }) => {
   const type = body.type as string;
 
   if (type === "beacon") {
-    const pageId = typeof body.page_id === "string" ? body.page_id.slice(0, 50) : null;
+    const pageId =
+      typeof body.page_id === "string" ? body.page_id.slice(0, 50) : null;
     if (!pageId) return new Response(null, { status: 400 });
 
     const timeOnPage = toFiniteNumber(body.time_on_page);
@@ -70,13 +71,20 @@ export const POST: APIRoute = async ({ request }) => {
     const pathname = typeof body.pathname === "string" ? body.pathname : null;
     if (!pathname) return new Response(null, { status: 400 });
 
-    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      ?? request.headers.get("x-real-ip")
-      ?? "unknown";
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
 
     const { browser, os } = parseUserAgent(ua);
-    const hostname = typeof body.hostname === "string" ? body.hostname.slice(0, 100) : "valerionarcisi.me";
-    const pageId = typeof body.page_id === "string" ? body.page_id.slice(0, 50) : crypto.randomUUID().slice(0, 8);
+    const hostname =
+      typeof body.hostname === "string"
+        ? body.hostname.slice(0, 100)
+        : "valerionarcisi.me";
+    const pageId =
+      typeof body.page_id === "string"
+        ? body.page_id.slice(0, 50)
+        : crypto.randomUUID().slice(0, 8);
 
     const visitorHash = await generateVisitorHash(hostname, ip, ua ?? "");
     const today = new Date().toISOString().slice(0, 10);
@@ -107,21 +115,33 @@ export const POST: APIRoute = async ({ request }) => {
           hostname,
           sanitizePathname(pathname),
           extractHostname(body.referrer as string | undefined),
-          typeof body.utm_source === "string" ? body.utm_source.slice(0, 200) : null,
-          typeof body.utm_medium === "string" ? body.utm_medium.slice(0, 200) : null,
-          typeof body.utm_campaign === "string" ? body.utm_campaign.slice(0, 200) : null,
-          typeof body.utm_content === "string" ? body.utm_content.slice(0, 200) : null,
+          typeof body.utm_source === "string"
+            ? body.utm_source.slice(0, 200)
+            : null,
+          typeof body.utm_medium === "string"
+            ? body.utm_medium.slice(0, 200)
+            : null,
+          typeof body.utm_campaign === "string"
+            ? body.utm_campaign.slice(0, 200)
+            : null,
+          typeof body.utm_content === "string"
+            ? body.utm_content.slice(0, 200)
+            : null,
           isUnique,
           visitorHash,
           browser,
           os,
-          deviceTypeFromViewport(toFiniteNumber(body.viewport_width) ?? undefined),
+          deviceTypeFromViewport(
+            toFiniteNumber(body.viewport_width) ?? undefined,
+          ),
           toFiniteNumber(body.screen_width),
           toFiniteNumber(body.screen_height),
           toFiniteNumber(body.viewport_width),
           toFiniteNumber(body.viewport_height),
           typeof body.language === "string" ? body.language.slice(0, 10) : null,
-          countryFromTimezone(typeof body.timezone === "string" ? body.timezone : undefined),
+          countryFromTimezone(
+            typeof body.timezone === "string" ? body.timezone : undefined,
+          ),
         ],
       });
     } catch {
@@ -139,29 +159,41 @@ export const POST: APIRoute = async ({ request }) => {
           hostname,
           sanitizePathname(pathname),
           extractHostname(body.referrer as string | undefined),
-          typeof body.utm_source === "string" ? body.utm_source.slice(0, 200) : null,
-          typeof body.utm_medium === "string" ? body.utm_medium.slice(0, 200) : null,
-          typeof body.utm_campaign === "string" ? body.utm_campaign.slice(0, 200) : null,
-          typeof body.utm_content === "string" ? body.utm_content.slice(0, 200) : null,
+          typeof body.utm_source === "string"
+            ? body.utm_source.slice(0, 200)
+            : null,
+          typeof body.utm_medium === "string"
+            ? body.utm_medium.slice(0, 200)
+            : null,
+          typeof body.utm_campaign === "string"
+            ? body.utm_campaign.slice(0, 200)
+            : null,
+          typeof body.utm_content === "string"
+            ? body.utm_content.slice(0, 200)
+            : null,
           isUnique,
           browser,
           os,
-          deviceTypeFromViewport(toFiniteNumber(body.viewport_width) ?? undefined),
+          deviceTypeFromViewport(
+            toFiniteNumber(body.viewport_width) ?? undefined,
+          ),
           toFiniteNumber(body.screen_width),
           toFiniteNumber(body.screen_height),
           toFiniteNumber(body.viewport_width),
           toFiniteNumber(body.viewport_height),
           typeof body.language === "string" ? body.language.slice(0, 10) : null,
-          countryFromTimezone(typeof body.timezone === "string" ? body.timezone : undefined),
+          countryFromTimezone(
+            typeof body.timezone === "string" ? body.timezone : undefined,
+          ),
         ],
       });
     }
 
-    // Behavioral bot detection: 3+ visits with zero engagement → likely bot
+    // Behavioral bot detection: 3+ visits with zero meaningful engagement → likely bot
     try {
       const visits = await db.execute({
         sql: `SELECT COUNT(*) as total,
-              SUM(CASE WHEN time_on_page IS NOT NULL OR scroll_depth IS NOT NULL THEN 1 ELSE 0 END) as engaged
+              SUM(CASE WHEN (time_on_page IS NOT NULL AND time_on_page > 5) OR (scroll_depth IS NOT NULL AND scroll_depth > 0) THEN 1 ELSE 0 END) as engaged
               FROM pageviews WHERE visitor_hash = ? AND created_at >= date('now', '-7 days')`,
         args: [visitorHash],
       });

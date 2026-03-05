@@ -81,8 +81,11 @@ if (!isAuthorized) {
       .table-row-bar-fill { height: 100%; background: linear-gradient(90deg, #c9a84c, #4ecdc4); border-radius: 3px; transition: width 0.3s; }
 
       .recent-visitors { margin-top: 2rem; }
-      .visitor-row { display: grid; grid-template-columns: auto 1fr auto auto; gap: 0.75rem; align-items: center; padding: 0.65rem 0.8rem; background: #111113; border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.78rem; }
+      .visitor-row { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 0.75rem; align-items: center; padding: 0.65rem 0.8rem; background: #111113; border: 1px solid rgba(255,255,255,0.04); border-radius: 6px; margin-bottom: 0.4rem; font-size: 0.78rem; }
       .visitor-row:hover { border-color: rgba(201,168,76,0.2); }
+      .btn-bot { background: none; border: 1px solid #444; border-radius: 4px; cursor: pointer; font-size: 0.75rem; padding: 0.2rem 0.4rem; opacity: 0.4; transition: all 0.2s; line-height: 1; }
+      .btn-bot:hover { opacity: 1; border-color: #e74c3c; }
+      .visitor-row.flagged { opacity: 0.3; text-decoration: line-through; }
       .visitor-flag { font-size: 1.1rem; line-height: 1; }
       .visitor-page { font-family: 'JetBrains Mono', monospace; color: #4ecdc4; font-size: 0.73rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
       .visitor-meta { display: flex; gap: 0.5rem; color: #666; font-size: 0.7rem; white-space: nowrap; }
@@ -254,6 +257,22 @@ if (!isAuthorized) {
         return days + "g fa";
       }
 
+      function flagAsBot(hash, btn) {
+        var row = btn.closest(".visitor-row");
+        fetch("/api/admin/bot", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ hash: hash })
+        })
+        .then(function(r) {
+          if (r.ok) {
+            row.classList.add("flagged");
+            btn.disabled = true;
+            btn.textContent = "\u2705";
+          }
+        });
+      }
+
       function renderRecentVisitors(visitors) {
         if (!visitors || !visitors.length) return '<div class="loading">Nessun visitatore recente</div>';
         return visitors.map(function(v) {
@@ -266,17 +285,21 @@ if (!isAuthorized) {
           var time = v.time_on_page != null ? fmtTime(Number(v.time_on_page)) : "";
           var scroll = v.scroll_depth != null ? v.scroll_depth + "%" : "";
           var ago = timeAgo(v.created_at);
+          var hash = v.visitor_hash || "";
 
           var metaParts = [device + " " + browser + "/" + os];
           if (ref) metaParts.push("da " + ref);
           if (time) metaParts.push("\u23f1 " + time);
           if (scroll) metaParts.push("\u2193 " + scroll);
 
+          var botBtn = hash ? '<button class="btn-bot" onclick="flagAsBot(\'' + escapeHtml(hash) + '\', this)" title="Flag as bot">\ud83e\udd16</button>' : '';
+
           return '<div class="visitor-row">' +
             '<span class="visitor-flag">' + flag + '</span>' +
             '<span class="visitor-page">' + page + '</span>' +
             '<span class="visitor-meta">' + metaParts.map(function(p) { return '<span>' + p + '</span>'; }).join("") + '</span>' +
             '<span class="visitor-time">' + ago + '</span>' +
+            botBtn +
             '</div>';
         }).join("");
       }

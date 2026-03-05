@@ -1,31 +1,83 @@
 const TIMEZONE_COUNTRY: Record<string, string> = {
-  "Europe/Rome": "IT", "Europe/London": "GB", "Europe/Paris": "FR",
-  "Europe/Berlin": "DE", "Europe/Madrid": "ES", "Europe/Amsterdam": "NL",
-  "Europe/Brussels": "BE", "Europe/Zurich": "CH", "Europe/Vienna": "AT",
-  "Europe/Lisbon": "PT", "Europe/Warsaw": "PL", "Europe/Prague": "CZ",
-  "Europe/Budapest": "HU", "Europe/Bucharest": "RO", "Europe/Sofia": "BG",
-  "Europe/Athens": "GR", "Europe/Helsinki": "FI", "Europe/Stockholm": "SE",
-  "Europe/Oslo": "NO", "Europe/Copenhagen": "DK", "Europe/Dublin": "IE",
-  "Europe/Kiev": "UA", "Europe/Moscow": "RU", "Europe/Istanbul": "TR",
-  "Europe/Belgrade": "RS", "Europe/Zagreb": "HR", "Europe/Ljubljana": "SI",
-  "Europe/Bratislava": "SK", "Europe/Tallinn": "EE", "Europe/Riga": "LV",
-  "Europe/Vilnius": "LT", "Europe/Luxembourg": "LU", "Europe/Malta": "MT",
-  "America/New_York": "US", "America/Chicago": "US", "America/Denver": "US",
-  "America/Los_Angeles": "US", "America/Phoenix": "US", "America/Anchorage": "US",
-  "Pacific/Honolulu": "US", "America/Toronto": "CA", "America/Vancouver": "CA",
-  "America/Edmonton": "CA", "America/Winnipeg": "CA", "America/Halifax": "CA",
-  "America/Mexico_City": "MX", "America/Sao_Paulo": "BR", "America/Argentina/Buenos_Aires": "AR",
-  "America/Bogota": "CO", "America/Lima": "PE", "America/Santiago": "CL",
-  "America/Caracas": "VE", "Asia/Tokyo": "JP", "Asia/Seoul": "KR",
-  "Asia/Shanghai": "CN", "Asia/Hong_Kong": "HK", "Asia/Taipei": "TW",
-  "Asia/Singapore": "SG", "Asia/Bangkok": "TH", "Asia/Jakarta": "ID",
-  "Asia/Manila": "PH", "Asia/Ho_Chi_Minh": "VN", "Asia/Kolkata": "IN",
-  "Asia/Karachi": "PK", "Asia/Dhaka": "BD", "Asia/Dubai": "AE",
-  "Asia/Riyadh": "SA", "Asia/Tehran": "IR", "Asia/Jerusalem": "IL",
-  "Africa/Cairo": "EG", "Africa/Lagos": "NG", "Africa/Johannesburg": "ZA",
-  "Africa/Nairobi": "KE", "Africa/Casablanca": "MA",
-  "Australia/Sydney": "AU", "Australia/Melbourne": "AU", "Australia/Perth": "AU",
-  "Australia/Brisbane": "AU", "Pacific/Auckland": "NZ",
+  "Europe/Rome": "IT",
+  "Europe/London": "GB",
+  "Europe/Paris": "FR",
+  "Europe/Berlin": "DE",
+  "Europe/Madrid": "ES",
+  "Europe/Amsterdam": "NL",
+  "Europe/Brussels": "BE",
+  "Europe/Zurich": "CH",
+  "Europe/Vienna": "AT",
+  "Europe/Lisbon": "PT",
+  "Europe/Warsaw": "PL",
+  "Europe/Prague": "CZ",
+  "Europe/Budapest": "HU",
+  "Europe/Bucharest": "RO",
+  "Europe/Sofia": "BG",
+  "Europe/Athens": "GR",
+  "Europe/Helsinki": "FI",
+  "Europe/Stockholm": "SE",
+  "Europe/Oslo": "NO",
+  "Europe/Copenhagen": "DK",
+  "Europe/Dublin": "IE",
+  "Europe/Kiev": "UA",
+  "Europe/Moscow": "RU",
+  "Europe/Istanbul": "TR",
+  "Europe/Belgrade": "RS",
+  "Europe/Zagreb": "HR",
+  "Europe/Ljubljana": "SI",
+  "Europe/Bratislava": "SK",
+  "Europe/Tallinn": "EE",
+  "Europe/Riga": "LV",
+  "Europe/Vilnius": "LT",
+  "Europe/Luxembourg": "LU",
+  "Europe/Malta": "MT",
+  "America/New_York": "US",
+  "America/Chicago": "US",
+  "America/Denver": "US",
+  "America/Los_Angeles": "US",
+  "America/Phoenix": "US",
+  "America/Anchorage": "US",
+  "Pacific/Honolulu": "US",
+  "America/Toronto": "CA",
+  "America/Vancouver": "CA",
+  "America/Edmonton": "CA",
+  "America/Winnipeg": "CA",
+  "America/Halifax": "CA",
+  "America/Mexico_City": "MX",
+  "America/Sao_Paulo": "BR",
+  "America/Argentina/Buenos_Aires": "AR",
+  "America/Bogota": "CO",
+  "America/Lima": "PE",
+  "America/Santiago": "CL",
+  "America/Caracas": "VE",
+  "Asia/Tokyo": "JP",
+  "Asia/Seoul": "KR",
+  "Asia/Shanghai": "CN",
+  "Asia/Hong_Kong": "HK",
+  "Asia/Taipei": "TW",
+  "Asia/Singapore": "SG",
+  "Asia/Bangkok": "TH",
+  "Asia/Jakarta": "ID",
+  "Asia/Manila": "PH",
+  "Asia/Ho_Chi_Minh": "VN",
+  "Asia/Kolkata": "IN",
+  "Asia/Karachi": "PK",
+  "Asia/Dhaka": "BD",
+  "Asia/Dubai": "AE",
+  "Asia/Riyadh": "SA",
+  "Asia/Tehran": "IR",
+  "Asia/Jerusalem": "IL",
+  "Africa/Cairo": "EG",
+  "Africa/Lagos": "NG",
+  "Africa/Johannesburg": "ZA",
+  "Africa/Nairobi": "KE",
+  "Africa/Casablanca": "MA",
+  "Australia/Sydney": "AU",
+  "Australia/Melbourne": "AU",
+  "Australia/Perth": "AU",
+  "Australia/Brisbane": "AU",
+  "Pacific/Auckland": "NZ",
 };
 
 export function countryFromTimezone(tz: string | undefined): string | null {
@@ -67,11 +119,11 @@ export function deviceTypeFromViewport(width: number | undefined): string {
   return "desktop";
 }
 
-const BOT_PATTERNS = /bot|crawler|spider|crawling|headless|phantomjs|lighthouse|pingdom|uptimerobot|slurp|yahoo|bingpreview|facebookexternalhit|twitterbot|linkedinbot|embedly|quora|outbrain|pinterest|semrush|ahref|mj12bot|dotbot|petalbot|bytespider/i;
+import { isbot } from "isbot";
 
 export function isBot(ua: string | undefined): boolean {
   if (!ua) return true;
-  return BOT_PATTERNS.test(ua);
+  return isbot(ua);
 }
 
 export function sanitizePathname(pathname: string): string {
@@ -91,7 +143,11 @@ export function extractHostname(referrer: string | undefined): string | null {
   }
 }
 
-export async function generateVisitorHash(hostname: string, ip: string, ua: string): Promise<string> {
+export async function generateVisitorHash(
+  hostname: string,
+  ip: string,
+  ua: string,
+): Promise<string> {
   const date = new Date().toISOString().slice(0, 10);
   const raw = `${date}:${hostname}:${ip}:${ua}`;
   const data = new TextEncoder().encode(raw);
