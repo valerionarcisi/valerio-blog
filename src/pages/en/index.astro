@@ -207,6 +207,7 @@ const [lastWatched, lastSongs] = await Promise.all([
             .catch(function () {});
         }
 
+        refresh();
         setInterval(refresh, REFRESH_MS);
       })();
     </script>

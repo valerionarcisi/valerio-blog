@@ -8,7 +8,7 @@ export const prerender = false;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const GET: APIRoute = async ({ request, url }) => {
-  if (!verifyBearerToken(request, import.meta.env.ANALYTICS_ADMIN_TOKEN)) {
+  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

@@ -1,0 +1,35 @@
+.admin-nav {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  background: #141416;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 0.25rem;
+  width: fit-content;
+}
+
+.admin-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #8a8a8e;
+  text-decoration: none;
+  transition: color 0.2s, background 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.admin-nav-link:hover {
+  color: #4ecdc4;
+  background: rgba(78, 205, 196, 0.08);
+}
+
+.admin-nav-link.active {
+  color: #c9a84c;
+  background: rgba(201, 168, 76, 0.1);
+  font-weight: 600;
+}

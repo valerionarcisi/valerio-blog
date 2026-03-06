@@ -1,0 +1,26 @@
+---
+import "./AdminNav.css";
+
+interface Props {
+  currentPage: "analytics" | "comments";
+  token: string;
+}
+
+const { currentPage, token } = Astro.props;
+
+const links = [
+  { id: "analytics" as const, label: "Analytics", href: `/admin/analytics?token=${token}` },
+  { id: "comments" as const, label: "Comments", href: `/admin/comments?token=${token}` },
+] as const;
+---
+
+<nav class="admin-nav">
+  {links.map((link) => (
+    <a
+      href={link.href}
+      class:list={["admin-nav-link", { active: currentPage === link.id }]}
+    >
+      {link.label}
+    </a>
+  ))}
+</nav>

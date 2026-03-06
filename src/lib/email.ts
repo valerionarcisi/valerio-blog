@@ -8,11 +8,13 @@ interface CommentNotification {
   text: string;
 }
 
-export async function notifyNewComment(comment: CommentNotification): Promise<void> {
+export async function notifyNewComment(
+  comment: CommentNotification,
+): Promise<void> {
   const apiKey = import.meta.env.RESEND_API_KEY;
   if (!apiKey) return;
 
-  const adminUrl = `https://valerionarcisi.me/admin/comments?token=${import.meta.env.COMMENTS_ADMIN_TOKEN}`;
+  const adminUrl = `https://valerionarcisi.me/admin/comments?token=${import.meta.env.ADMIN_TOKEN}`;
 
   try {
     await fetch(RESEND_API, {
@@ -50,7 +52,9 @@ interface ContactMessage {
   message: string;
 }
 
-export async function sendContactEmail(contact: ContactMessage): Promise<boolean> {
+export async function sendContactEmail(
+  contact: ContactMessage,
+): Promise<boolean> {
   const apiKey = import.meta.env.RESEND_API_KEY;
   if (!apiKey) return false;
 
@@ -84,5 +88,9 @@ export async function sendContactEmail(contact: ContactMessage): Promise<boolean
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }

@@ -1,10 +1,11 @@
 ---
 import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
 
 const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.COMMENTS_ADMIN_TOKEN);
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
 
 if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
@@ -17,6 +18,7 @@ if (!isAuthorized) {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
     <title>Comments Admin</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,7 +44,8 @@ if (!isAuthorized) {
     </style>
   </head>
   <body>
-    <h1>Comments Admin</h1>
+    <AdminNav currentPage="comments" token={token} />
+    <h1>Comments</h1>
     <div class="tabs">
       <button class="active" data-status="pending">Pending</button>
       <button data-status="approved">Approved</button>

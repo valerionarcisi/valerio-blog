@@ -80,13 +80,13 @@ public/
 - `LASTFM_API_KEY` — Music data from Last.FM / Audioscrobbler
 - `TURSO_DATABASE_URL` — Turso SQLite edge database URL
 - `TURSO_AUTH_TOKEN` — Turso authentication token
-- `COMMENTS_ADMIN_TOKEN` — Secret token for comments admin page
+- `ADMIN_TOKEN` — Secret token for admin pages (analytics + comments)
 
 ## Comments System
 
 - **Public API**: `GET/POST /api/comments` — fetch approved comments, submit new ones
 - **Admin API**: `GET/PATCH /api/admin/comments` — list pending, approve/delete (Bearer token auth)
-- **Admin UI**: `/admin/comments?token=COMMENTS_ADMIN_TOKEN`
+- **Admin UI**: `/admin/comments?token=ADMIN_TOKEN`
 - **Anti-spam**: Honeypot hidden field (bots fill it, silently discarded)
 - **Moderation**: All comments pending until manually approved via admin page
 - **Component**: `Comments.astro` with inline i18n labels (IT/EN), client-side JS via `<script is:inline>`
@@ -99,6 +99,7 @@ public/
 ## Documentation Rule
 
 When making significant changes (new features, architectural decisions, design choices), **always update the README.md** with:
+
 - What was added/changed and why
 - Design decisions and trade-offs (e.g., why Turso over Supabase, why self-hosted comments over SaaS)
 - How it works (architecture, data flow)

@@ -5,7 +5,7 @@ import { verifyBearerToken } from "~/lib/auth";
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, import.meta.env.ANALYTICS_ADMIN_TOKEN)) {
+  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -14,8 +14,11 @@ export const GET: APIRoute = async ({ request }) => {
     args: [],
   });
 
-  return new Response(JSON.stringify({ active: Number(result.rows[0].active) || 0 }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return new Response(
+    JSON.stringify({ active: Number(result.rows[0].active) || 0 }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    },
+  );
 };

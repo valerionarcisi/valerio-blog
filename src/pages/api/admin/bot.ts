@@ -5,7 +5,7 @@ import { verifyBearerToken } from "~/lib/auth";
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, import.meta.env.ANALYTICS_ADMIN_TOKEN)) {
+  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 
