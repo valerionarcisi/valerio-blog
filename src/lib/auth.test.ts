@@ -14,8 +14,13 @@ describe("timeSafeEqual", () => {
     expect(timeSafeEqual("short", "longer-string")).toBe(false);
   });
 
-  test("empty strings return true", () => {
-    expect(timeSafeEqual("", "")).toBe(true);
+  test("empty strings return false", () => {
+    expect(timeSafeEqual("", "")).toBe(false);
+  });
+
+  test("undefined input returns false", () => {
+    expect(timeSafeEqual("token", undefined as unknown as string)).toBe(false);
+    expect(timeSafeEqual(undefined as unknown as string, "token")).toBe(false);
   });
 });
 

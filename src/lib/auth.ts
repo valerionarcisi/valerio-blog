@@ -1,4 +1,5 @@
 export function timeSafeEqual(a: string, b: string): boolean {
+  if (!a || !b) return false;
   if (a.length !== b.length) return false;
   const encoder = new TextEncoder();
   const bufA = encoder.encode(a);
