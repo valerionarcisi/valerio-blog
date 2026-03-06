@@ -80,6 +80,20 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   })();
 </script>
 
+<!-- Client-side language redirect (SEO-safe: bots don't execute JS) -->
+<script is:inline>
+(function(){
+  var p = location.pathname;
+  if (p.startsWith("/en/") || p.startsWith("/admin") || p.startsWith("/api/")) return;
+  if (sessionStorage.getItem("_lang")) return;
+  var lang = (navigator.language || "").toLowerCase();
+  if (lang.startsWith("it")) { sessionStorage.setItem("_lang", "it"); return; }
+  sessionStorage.setItem("_lang", "en");
+  var enPath = "/en" + (p === "/" ? "/" : p);
+  location.replace(enPath + location.search + location.hash);
+})();
+</script>
+
 <!-- Privacy-first self-hosted analytics — no cookies, no IP stored -->
 <script is:inline>
 (function(){

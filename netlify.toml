@@ -9,74 +9,8 @@
   [headers.values]
     Access-Control-Allow-Origin = "*"
 
-# Language-based redirects (edge CDN, zero latency)
-# Italian speakers → serve Italian page (rewrite, no redirect)
-# Everyone else → falls through to the unconditional 302 below
-
-# Homepage
-[[redirects]]
-  from = "/"
-  to = "/"
-  status = 200
-  force = true
-  conditions = {Language = ["it"]}
-[[redirects]]
-  from = "/"
-  to = "/en/"
-  status = 302
-  force = true
-
-# Blog
-[[redirects]]
-  from = "/blog/*"
-  to = "/blog/:splat"
-  status = 200
-  force = true
-  conditions = {Language = ["it"]}
-[[redirects]]
-  from = "/blog/*"
-  to = "/en/blog/:splat"
-  status = 302
-  force = true
-
-# Films
-[[redirects]]
-  from = "/films/*"
-  to = "/films/:splat"
-  status = 200
-  force = true
-  conditions = {Language = ["it"]}
-[[redirects]]
-  from = "/films/*"
-  to = "/en/films/:splat"
-  status = 302
-  force = true
-
-# Tags
-[[redirects]]
-  from = "/tag/*"
-  to = "/tag/:splat"
-  status = 200
-  force = true
-  conditions = {Language = ["it"]}
-[[redirects]]
-  from = "/tag/*"
-  to = "/en/tag/:splat"
-  status = 302
-  force = true
-
-# Who I am
-[[redirects]]
-  from = "/who-i-am"
-  to = "/who-i-am"
-  status = 200
-  force = true
-  conditions = {Language = ["it"]}
-[[redirects]]
-  from = "/who-i-am"
-  to = "/en/who-i-am"
-  status = 302
-  force = true
+# Language redirect handled client-side (see BaseHead.astro)
+# to avoid blocking Googlebot from indexing Italian pages
 
 [[redirects]]
   from = "/caramella-shortmovie"
