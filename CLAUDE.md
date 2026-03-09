@@ -27,6 +27,7 @@ Personal blog and portfolio site for Valerio Narcisi (web developer, director, s
 - **Films**: Astro Content Collections in `src/content/films/{locale}/{slug}.md`
 - **Movies watched**: Fetched from Letterboxd RSS + TMDB API at build time
 - **Music**: Fetched from Last.FM API at build time
+- **Sports activities**: Fetched from Strava API at build time (with weekly/monthly stats)
 
 ## Project Structure
 
@@ -49,7 +50,7 @@ src/
       films/
       tag/
     api/         # API endpoints (search, comments, admin)
-  services/      # External API integrations (Letterboxd, TMDB, Last.FM)
+  services/      # External API integrations (Letterboxd, TMDB, Last.FM, Strava)
   styles/        # Global styles
 public/
   img/           # Static images organized by section
@@ -81,6 +82,9 @@ public/
 - `TURSO_DATABASE_URL` — Turso SQLite edge database URL
 - `TURSO_AUTH_TOKEN` — Turso authentication token
 - `ADMIN_TOKEN` — Secret token for admin pages (analytics + comments)
+- `STRAVA_CLIENT_ID` — Strava API app Client ID
+- `STRAVA_CLIENT_SECRET` — Strava API app Client Secret
+- `STRAVA_REFRESH_TOKEN` — Strava refresh token (scope: `activity:read_all`)
 
 ## Comments System
 

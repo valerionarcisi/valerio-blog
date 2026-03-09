@@ -6,4 +6,7 @@ interface ImportMetaEnv {
   readonly TURSO_AUTH_TOKEN: string;
   readonly ADMIN_TOKEN: string;
   readonly RESEND_API_KEY: string;
+  readonly STRAVA_CLIENT_ID: string;
+  readonly STRAVA_CLIENT_SECRET: string;
+  readonly STRAVA_REFRESH_TOKEN: string;
 }

@@ -1,0 +1,49 @@
+---
+import "~/components/ActivityCard.css";
+import {
+  formatDistance,
+  formatDuration,
+  formatPace,
+  activityColor,
+  activityLabel,
+} from "~/services/strava";
+import type { NormalizedActivity } from "~/services/strava";
+
+interface Props {
+  activity: NormalizedActivity;
+}
+
+const { activity } = Astro.props;
+const distance = formatDistance(activity.distance);
+const duration = formatDuration(activity.movingTime);
+const pace = formatPace(activity.averageSpeed, activity.sportType);
+const color = activityColor(activity.sportType);
+const label = activityLabel(activity.sportType);
+const date = new Date(activity.date).toLocaleDateString("en-us", {
+  month: "short",
+  day: "numeric",
+});
+const hasDistance = activity.distance > 0;
+---
+
+<a
+  class="ActivityCard"
+  href={activity.url}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <div class="activity-type">
+    <span class="activity-dot" style={`background:${color}`}></span>
+    <span class="activity-label">{label}</span>
+  </div>
+  <h3 class="activity-name">{activity.name}</h3>
+  <div class="activity-stats">
+    {hasDistance && <span class="stat">{distance}</span>}
+    <span class="stat">{duration}</span>
+    {pace && <span class="stat pace">{pace}</span>}
+    {activity.elevation > 0 && (
+      <span class="stat">↑{Math.round(activity.elevation)}m</span>
+    )}
+  </div>
+  <span class="activity-date">{date}</span>
+</a>

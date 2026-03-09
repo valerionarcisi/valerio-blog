@@ -1,0 +1,79 @@
+---
+import "~/components/StravaSummary.css";
+import {
+  formatDistance,
+  formatDuration,
+  formatPaceFromSecondsPerKm,
+} from "~/services/strava";
+import type { PeriodStats } from "~/services/strava";
+
+interface Props {
+  stats: PeriodStats;
+  weekLabel?: string;
+  monthLabel?: string;
+  activitiesLabel?: string;
+  paceLabel?: string;
+  elevationLabel?: string;
+}
+
+const {
+  stats,
+  weekLabel = "This week",
+  monthLabel = "This month",
+  activitiesLabel = "activities",
+  paceLabel = "avg pace",
+  elevationLabel = "elev.",
+} = Astro.props;
+
+const renderPeriod = (s: typeof stats.weekly) => ({
+  distance: formatDistance(s.totalDistance),
+  duration: formatDuration(s.totalMovingTime),
+  pace: formatPaceFromSecondsPerKm(s.averagePace),
+  elevation: s.totalElevation > 0 ? `↑${Math.round(s.totalElevation)}m` : "",
+  count: s.totalActivities,
+});
+
+const weekly = renderPeriod(stats.weekly);
+const monthly = renderPeriod(stats.monthly);
+---
+
+<div class="StravaSummary">
+  <div class="summary-card">
+    <span class="summary-label">{weekLabel}</span>
+    <div class="summary-stats">
+      <div class="summary-row">
+        <span class="summary-value">{weekly.distance}</span>
+      </div>
+      <span class="summary-detail">
+        {weekly.count} {activitiesLabel} · {weekly.duration}
+      </span>
+      {weekly.pace && (
+        <span class="summary-detail">
+          <span class="accent">{weekly.pace}</span> {paceLabel}
+        </span>
+      )}
+      {weekly.elevation && (
+        <span class="summary-detail">{weekly.elevation} {elevationLabel}</span>
+      )}
+    </div>
+  </div>
+  <div class="summary-card">
+    <span class="summary-label">{monthLabel}</span>
+    <div class="summary-stats">
+      <div class="summary-row">
+        <span class="summary-value">{monthly.distance}</span>
+      </div>
+      <span class="summary-detail">
+        {monthly.count} {activitiesLabel} · {monthly.duration}
+      </span>
+      {monthly.pace && (
+        <span class="summary-detail">
+          <span class="accent">{monthly.pace}</span> {paceLabel}
+        </span>
+      )}
+      {monthly.elevation && (
+        <span class="summary-detail">{monthly.elevation} {elevationLabel}</span>
+      )}
+    </div>
+  </div>
+</div>

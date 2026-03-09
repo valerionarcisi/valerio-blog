@@ -4,6 +4,7 @@ date: "2025-02-19"
 extract: "Managing multiple Git accounts on the same computer is a common need for developers working on both personal and professional projects. Here's a comprehensive guide on how to configure and manage multiple Git accounts effectively."
 tags:
   - "git"
+  - "how-to"
 coverImage: "/img/blog/how-to-use-multiple-git-users-on-the-same-computer/cm8zzc3wp2jnx07k1je4q4tlc.jpg"
 coverAuthorName: Flow
 coverAuthorLink: "https://flowthemovie.com/"

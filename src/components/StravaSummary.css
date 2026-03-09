@@ -1,0 +1,69 @@
+.StravaSummary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  padding-left: var(--space-medium);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.StravaSummary::-webkit-scrollbar {
+  display: none;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 150px;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface, #151518);
+  border: 1px solid var(--border, #252528);
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
+.summary-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted, #8a8a8e);
+}
+
+.summary-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary, #e8e6e3);
+}
+
+.summary-unit {
+  font-size: 0.65rem;
+  color: var(--text-muted, #8a8a8e);
+}
+
+.summary-detail {
+  font-size: 0.68rem;
+  color: var(--text-muted, #8a8a8e);
+}
+
+.summary-detail .accent {
+  color: var(--accent, #c8a000);
+}
+
+@media (min-width: 769px) {
+  .StravaSummary {
+    padding-left: var(--space-large);
+  }
+}

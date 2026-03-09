@@ -6,6 +6,7 @@ tags:
   - "lastfm"
   - "javascript"
   - "music"
+  - "how-to"
 coverImage: "/img/blog/how-i-display-my-recently-played-music-using-lastfm-api/cmf6m7ms30hr707leynw5nthm.png"
 ---
 

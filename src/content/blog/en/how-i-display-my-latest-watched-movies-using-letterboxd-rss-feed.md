@@ -6,6 +6,7 @@ tags:
   - "letterboxd"
   - "movies"
   - "javascript"
+  - "how-to"
 coverImage: "/img/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed/cmf6lzl380c4v07le5r2apkfc.png"
 ---
 

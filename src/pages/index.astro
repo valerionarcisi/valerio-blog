@@ -12,6 +12,9 @@ import { getMovieById } from "~/services/tmdb";
 import Reel from "~/components/Reel.astro";
 import "./index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
+import { fetchRecentActivities, fetchActivityStats } from "~/services/strava";
+import ActivityCard from "~/components/ActivityCard.astro";
+import StravaSummary from "~/components/StravaSummary.astro";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 
@@ -48,9 +51,11 @@ const posts = allEntries
     slug: getSlugFromId(e.id),
   }));
 
-const [lastWatched, lastSongs] = await Promise.all([
+const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.all([
   lastWatchedMovies(),
   fetchRecentTracks(),
+  fetchRecentActivities(5).catch(() => []),
+  fetchActivityStats().catch(() => null),
 ]);
 ---
 
@@ -129,6 +134,26 @@ const [lastWatched, lastSongs] = await Promise.all([
           }
         </div>
       </section>
+      {lastActivities.length > 0 && (
+        <section>
+          <Title title="Ultime attività sportive" />
+          {activityStats && (
+            <StravaSummary
+              stats={activityStats}
+              weekLabel="Questa settimana"
+              monthLabel="Questo mese"
+              activitiesLabel="attività"
+              paceLabel="passo medio"
+              elevationLabel="disl."
+            />
+          )}
+          <div class="ReelContainer">
+            {lastActivities.map((activity) => (
+              <ActivityCard activity={activity} />
+            ))}
+          </div>
+        </section>
+      )}
       <section>
         <Title title="Ultimi articoli" />
         <div class="cards-grid">
