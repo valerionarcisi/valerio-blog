@@ -12,15 +12,11 @@ coverImage: "/img/blog/21-giorni-senza-alcol-breve-storia-di-un-grande-cambiamen
 As soon as I arrived with my family, I had a beer as an aperitif. During dinner I knocked back wine without thinking much about the quantity; we had walked there.
 While dinner went on with an endless parade of more or less greasy carbs, I kept one eye on my daughter Bianca, the older one, and the other on my wife who was going crazy chasing the little one, Lea.
 
-
 Every now and then I sipped wine, the bottle was right there and I saw no reason not to. At the end of dinner, right during the midnight toast, I drank the sparkling wine and then a cocktail to close the evening. Before leaving, I asked my wife if she felt like smoking a cigarette with me. I hadn't smoked in years. She was in.
-
 
 We started the search, and through a truly peculiar twist of fate, one of those sequences of coincidences that only destiny can orchestrate, I ran into Giacomo, an old high school classmate of mine.
 
-
 > He stopped me and kept me from completing the search. We went home empty-handed. The little ones were asleep.
-
 
 ## The Day After
 
@@ -28,9 +24,7 @@ The next day we got up. It was the first day of 2025: pasty mouth and blurry mem
 
 Totally normal, like almost every weekend when it comes down to it. Because I'm not an alcoholic, in fact, I only drink on weekends. That's not true, obviously. I also drink during the week if I'm feeling stressed. At least a liter of beer, without it I have trouble falling asleep.
 
-
 At that time I had started going back to therapy, and my therapist had ordered me to "Stop Drinking," simple and clear. Find a way and do it. I know I have to, but I'm scared, I don't know where to start.
-
 
 I'm sitting in the bathroom. I'm scrolling Instagram and I find a carousel of images from an online magazine. The carousel isn't so much about the carcinogenic effects of alcohol but about how the body reacts when you stop drinking. One piece of data catches my eye:
 
@@ -39,7 +33,6 @@ I'm sitting in the bathroom. I'm scrolling Instagram and I find a carousel of im
 21 days without alcohol, I don't think that's happened to me since I was 14, when I had my first encounters with alcohol, more or less violent, more or less hidden.
 
 My psychologist during my first sessions pointed out something about me that, like it or not, is part of who I am: I'm competitive, much more than I'd like to be. It's a part of me I don't like, but it's there. While reading that data on Instagram, I realized it was time to hack myself, to work around my own nature to start doing what I went to therapy for. Let's see if I can go without alcohol for 21 days. Challenge accepted, let's start!
-
 
 ## The Challenge
 
@@ -51,7 +44,6 @@ Once I got past that, I had to fight the urge to drink at the end of the day. Fo
 Obviously I didn't have withdrawal symptoms, not that, but I had to overcome a ton of issues and I had to stay strong. I had to face all the lunches and dinners with relatives, where food is just an excuse to drink. For those, I simply camouflaged my glass by pouring half a finger of wine and then topping it off with water. That was for the first period. Now I can have my after-dinner drink without problems, but I avoid drinking half a bottle of wine by myself. But during those 21 days I avoided it as much as possible.
 
 I have to be honest about one thing: not having much of a social life, it wasn't hard to avoid parties, aperitifs, bars, etc., simply because I rarely go out, and the little I do is usually to go to the cinema alone.
-
 
 ### Useful Tips
 
@@ -74,8 +66,8 @@ But the thirst is always around the corner. I went to dinner with a friend and, 
 Today is April first, four months have now passed where alcohol is no longer part of my weekly diet. I don't know how, but during this period so many things have unlocked for me: I'm trying to start a small production company, I've dropped below 70 kg, something that hadn't happened since I was 25. But the thing that struck me the most is how so many small relationship problems I had just disappeared. All gone. I can't wrap my head around it, but it happened.
 
 ## Below is the video of one of my long runs: 21km.
-<div class="embedly-responsive" style="position: relative;padding-bottom: 78.2227%;height: 0;overflow: hidden;"><iframe class="embedly-embed" frameborder="0" scrolling="no" allowfullscreen src="https://cdn.embedly.com/widgets/media.html?src=https://www.relive.com/view/vPOpKNGAVEv/widget?r=embed-site&url=https://www.relive.com/view/vPOpKNGAVEv?r=embed-site&image=https://www.relive.com/view/vPOpKNGAVEv/png?x-ref=embed-site&key=f1631a41cb254ca5b035dc5747a5bd75&type=text/html&schema=relive" width="100%" height="801" style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;"></iframe></div>
 
+<div class="embedly-responsive" style="position: relative;padding-bottom: 78.2227%;height: 0;overflow: hidden;"><iframe class="embedly-embed" frameborder="0" scrolling="no" allowfullscreen src="https://cdn.embedly.com/widgets/media.html?src=https://www.relive.com/view/vPOpKNGAVEv/widget?r=embed-site&url=https://www.relive.com/view/vPOpKNGAVEv?r=embed-site&image=https://www.relive.com/view/vPOpKNGAVEv/png?x-ref=embed-site&key=f1631a41cb254ca5b035dc5747a5bd75&type=text/html&schema=relive" width="100%" height="801" style="position: absolute;top: 0;left: 0;width: 100%;height: 100%;"></iframe></div>
 
 Consider that I've always had problems with alcohol: license suspended in November 2015, I was mugged in May 2016 where I woke up at night in terrible condition on a sidewalk, plus various other stupid things I did. Only now, on the threshold of 40, have I tackled this head on. I don't know why, but it happened.
 

@@ -35,7 +35,9 @@
   display: block;
   margin: 0;
   border-radius: var(--borderRadius-medium);
-  transition: transform var(--transition-fast), filter var(--transition-fast);
+  transition:
+    transform var(--transition-fast),
+    filter var(--transition-fast);
 }
 
 .Reel .thumbnail:hover img {

@@ -1,7 +1,7 @@
 ---
 title: "4 No per abbracciare la semplicità"
 date: "2024-11-20"
-extract: "Nella mia ricerca di costruire un blog più efficiente, ho imparato l'importanza della semplicità e dell'adattabilità. Dicendo \"No\" a strumenti complessi come vanilla-extract ed effect-ts, e abbracciando soluzioni dirette come CSS globale, zod per la validazione e HyGraph per la gestione dei contenuti, ho snellito il mio processo di sviluppo. Condivido le lezioni apprese e i cambiamenti fatti per migliorare la mia esperienza di blogging."
+extract: 'Nella mia ricerca di costruire un blog più efficiente, ho imparato l''importanza della semplicità e dell''adattabilità. Dicendo "No" a strumenti complessi come vanilla-extract ed effect-ts, e abbracciando soluzioni dirette come CSS globale, zod per la validazione e HyGraph per la gestione dei contenuti, ho snellito il mio processo di sviluppo. Condivido le lezioni apprese e i cambiamenti fatti per migliorare la mia esperienza di blogging.'
 tags:
   - "CSS"
   - "vanilla-extract"
@@ -17,7 +17,7 @@ Qui sotto una breve lista di "No!" che mi sono detto per costruire un rapporto m
 
 Prima di tutto, ho eliminato [vanilla-extract](https://vanilla-extract.style/) perché aggiornare il mio CSS era diventato troppo complesso. Al suo posto, ho creato un file CSS globale dove ho definito la mia palette colori e incluso tutto ciò di cui il mio blog ha bisogno.
 
-Poi ho iniziato a usare classi annidate per stilizzare i miei componenti Astro. *Keep it simple, stupid.*
+Poi ho iniziato a usare classi annidate per stilizzare i miei componenti Astro. _Keep it simple, stupid._
 
 ```jsx
 .Card {
@@ -44,7 +44,7 @@ Pensavo che i preprocessor CSS fossero essenziali per le librerie, ma ora, con f
 
 ## No Effect-ts!
 
-Era un ottimo modo di lavorare, ma era diventato troppo complesso aggiornare la mia logica. Volevo espandere le sezioni *Last Watched Movie* e *Last Listened Song*, ma aggiornarle era diventato eccessivamente difficile.
+Era un ottimo modo di lavorare, ma era diventato troppo complesso aggiornare la mia logica. Volevo espandere le sezioni _Last Watched Movie_ e _Last Listened Song_, ma aggiornarle era diventato eccessivamente difficile.
 
 Sebbene [effect-ts](https://effect.website/) sia fantastico per prevenire errori — ti obbliga a gestire ogni caso d'uso, inclusa la promise restituita dal metodo `.json()` — per me era diventato troppo difficile da mantenere.
 

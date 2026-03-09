@@ -1,6 +1,7 @@
 Crea un nuovo blog post per valerionarcisi.me.
 
 Chiedi queste informazioni una alla volta:
+
 1. Titolo (italiano)
 2. Titolo (inglese)
 3. Tag (lista separata da virgola)
@@ -12,6 +13,7 @@ Chiedi queste informazioni una alla volta:
 9. Il contenuto del post: chiedi se vuole scriverlo in italiano o inglese prima, poi traduci nell'altra lingua
 
 Poi:
+
 - Genera slug dal titolo IT (lowercase, spazi→hyphens, rimuovi caratteri speciali, rimuovi accenti)
 - Data = oggi (YYYY-MM-DD)
 - Crea `src/content/blog/it/{slug}.md` con frontmatter + contenuto IT

@@ -22,7 +22,7 @@ Ma la cosa che rende questo premio ancora più surreale è il contesto in cui è
 
 ![Meme Caramella al Fano Film Festival](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7ylmp3e07lgv46cuwpk.png)
 
-*In effetti, è stato più o meno così! 😄*
+_In effetti, è stato più o meno così! 😄_
 
 ## Il percorso di Caramella
 
@@ -50,7 +50,7 @@ Alcune foto dalla serata al Fano International Film Festival:
 ![DSC_2963-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7u9n7iq07lbqblktfqo.jpg)
 ![DSC_2962-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7seme4b07k123a6ee2h.jpg)
 ![DSC_2956-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7q5n7ij07lbxo66ppbc.jpg)
-![DSC_0669-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7ogmfbe08k406y73sby.jpg) 
+![DSC_0669-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7ogmfbe08k406y73sby.jpg)
 ![DSC_0668-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7mcme4407k1k2hmxtkx.jpg)
 ![DSC_0665-optimized.jpg](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7jtmfb708k43lnrnu3v.jpg)
 

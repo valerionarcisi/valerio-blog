@@ -5,6 +5,7 @@ Clone privacy-first di Simple Analytics, self-hosted su Turso + Astro + Netlify 
 ## Obiettivo
 
 Sostituire Simple Analytics ($9/mese) con un sistema self-hosted che:
+
 - Non usa cookie, localStorage o fingerprinting
 - Non salva IP address
 - Non richiede banner GDPR
@@ -32,30 +33,30 @@ Browser                    Netlify Functions              Turso
 
 ## Dati raccolti per pageview
 
-| Campo | Sorgente | Note |
-|-------|----------|------|
-| `pathname` | `window.location.pathname` | No query string, no hash |
-| `referrer` | `document.referrer` | Solo hostname, dominio esterno |
-| `utm_source` | URL param | Estratto e poi rimosso dall'URL |
-| `utm_medium` | URL param | Estratto e poi rimosso dall'URL |
-| `utm_campaign` | URL param | Estratto e poi rimosso dall'URL |
-| `utm_content` | URL param | Estratto e poi rimosso dall'URL |
-| `is_unique` | Referrer check | `true` se referrer hostname != current hostname |
-| `screen_width` | `screen.width` | Dimensione schermo |
-| `screen_height` | `screen.height` | Dimensione schermo |
-| `viewport_width` | `window.innerWidth` | Dimensione viewport |
-| `viewport_height` | `window.innerHeight` | Dimensione viewport |
-| `language` | `navigator.language` | Es. `it-IT`, `en-US` |
-| `timezone` | `Intl.DateTimeFormat().resolvedOptions().timeZone` | Per derivare country |
-| `user_agent` | `navigator.userAgent` | Parsato server-side |
+| Campo             | Sorgente                                           | Note                                            |
+| ----------------- | -------------------------------------------------- | ----------------------------------------------- |
+| `pathname`        | `window.location.pathname`                         | No query string, no hash                        |
+| `referrer`        | `document.referrer`                                | Solo hostname, dominio esterno                  |
+| `utm_source`      | URL param                                          | Estratto e poi rimosso dall'URL                 |
+| `utm_medium`      | URL param                                          | Estratto e poi rimosso dall'URL                 |
+| `utm_campaign`    | URL param                                          | Estratto e poi rimosso dall'URL                 |
+| `utm_content`     | URL param                                          | Estratto e poi rimosso dall'URL                 |
+| `is_unique`       | Referrer check                                     | `true` se referrer hostname != current hostname |
+| `screen_width`    | `screen.width`                                     | Dimensione schermo                              |
+| `screen_height`   | `screen.height`                                    | Dimensione schermo                              |
+| `viewport_width`  | `window.innerWidth`                                | Dimensione viewport                             |
+| `viewport_height` | `window.innerHeight`                               | Dimensione viewport                             |
+| `language`        | `navigator.language`                               | Es. `it-IT`, `en-US`                            |
+| `timezone`        | `Intl.DateTimeFormat().resolvedOptions().timeZone` | Per derivare country                            |
+| `user_agent`      | `navigator.userAgent`                              | Parsato server-side                             |
 
 ### Dati derivati server-side
 
-| Campo | Derivato da | Note |
-|-------|-------------|------|
-| `country` | `timezone` | Mapping timezone -> country (no IP geolocation) |
-| `browser` | `user_agent` | Nome browser (Chrome, Firefox, Safari...) |
-| `os` | `user_agent` | Sistema operativo |
+| Campo         | Derivato da      | Note                                              |
+| ------------- | ---------------- | ------------------------------------------------- |
+| `country`     | `timezone`       | Mapping timezone -> country (no IP geolocation)   |
+| `browser`     | `user_agent`     | Nome browser (Chrome, Firefox, Safari...)         |
+| `os`          | `user_agent`     | Sistema operativo                                 |
 | `device_type` | `viewport_width` | mobile (<768), tablet (768-1024), desktop (>1024) |
 
 ### Dati NON raccolti
@@ -72,10 +73,10 @@ Browser                    Netlify Functions              Turso
 
 Quando l'utente lascia la pagina o la nasconde, lo script invia un secondo beacon con:
 
-| Campo | Sorgente | Note |
-|-------|----------|------|
-| `time_on_page` | Timer JS | Secondi di permanenza (solo tempo con tab visibile) |
-| `scroll_depth` | `window.scrollY` | Percentuale massima raggiunta, arrotondata al 5% |
+| Campo          | Sorgente         | Note                                                |
+| -------------- | ---------------- | --------------------------------------------------- |
+| `time_on_page` | Timer JS         | Secondi di permanenza (solo tempo con tab visibile) |
+| `scroll_depth` | `window.scrollY` | Percentuale massima raggiunta, arrotondata al 5%    |
 
 Questi vengono inviati con `navigator.sendBeacon()` su `visibilitychange` e collegati al pageview tramite un `page_id` generato client-side (UUID casuale, non persistente).
 
@@ -130,6 +131,7 @@ CREATE INDEX idx_pv_page_id   ON pageviews(page_id);
 Riceve un pageview dal tracking script.
 
 **Request body:**
+
 ```json
 {
   "type": "pageview",
@@ -152,6 +154,7 @@ Riceve un pageview dal tracking script.
 ```
 
 **Oppure beacon di aggiornamento:**
+
 ```json
 {
   "type": "beacon",
@@ -162,6 +165,7 @@ Riceve un pageview dal tracking script.
 ```
 
 **Logica server-side:**
+
 1. Validazione campi (pathname obbligatorio, lunghezze max)
 2. Se `type === "pageview"`:
    - Deriva `country` da `timezone` (lookup table statica)
@@ -190,6 +194,7 @@ Restituisce dati aggregati per la dashboard. Protetto da Bearer token (`ANALYTIC
 | `pathname` | - | Filtra per pagina specifica |
 
 **Response:**
+
 ```json
 {
   "period": { "from": "2026-01-27", "to": "2026-02-26" },
@@ -205,7 +210,11 @@ Restituisce dati aggregati per la dashboard. Protetto da Bearer token (`ANALYTIC
     { "date": "2026-01-28", "pageviews": 95, "visitors": 62 }
   ],
   "top_pages": [
-    { "pathname": "/blog/non-fa-ridere-backstage", "pageviews": 450, "visitors": 320 }
+    {
+      "pathname": "/blog/non-fa-ridere-backstage",
+      "pageviews": 450,
+      "visitors": 320
+    }
   ],
   "referrers": [
     { "referrer": "google.com", "visitors": 400 },
@@ -232,16 +241,13 @@ Restituisce dati aggregati per la dashboard. Protetto da Bearer token (`ANALYTIC
     { "language": "it", "visitors": 1400 },
     { "language": "en", "visitors": 400 }
   ],
-  "utm_sources": [
-    { "utm_source": "twitter", "visitors": 120 }
-  ],
-  "utm_campaigns": [
-    { "utm_campaign": "launch", "visitors": 80 }
-  ]
+  "utm_sources": [{ "utm_source": "twitter", "visitors": 120 }],
+  "utm_campaigns": [{ "utm_campaign": "launch", "visitors": 80 }]
 }
 ```
 
 **Regole aggregazione:**
+
 - `visitors` = COUNT di `is_unique = 1`
 - `pageviews` = COUNT totale
 - `bounce_rate` = percentuale di unique visitors con `time_on_page < 5` o NULL
@@ -324,18 +330,18 @@ Pagina Astro SSR, protetta da token (`?token=ANALYTICS_ADMIN_TOKEN`), stessa log
 
 ## File da creare/modificare
 
-| File | Azione | Scopo |
-|------|--------|-------|
-| `src/components/BaseHead.astro` | **Modifica** | Sostituisci script Simple Analytics con tracking script inline |
-| `src/lib/analytics.ts` | **Crea** | Utility: parse UA, timezone->country mapping, validazione |
-| `src/pages/api/collect.ts` | **Crea** | Endpoint POST per ricevere pageview e beacon |
-| `src/pages/api/stats.ts` | **Crea** | Endpoint GET per aggregati dashboard (protetto) |
-| `src/pages/admin/analytics.astro` | **Crea** | Dashboard SSR |
-| `src/components/AnalyticsDashboard.css` | **Crea** | Stili dashboard |
-| `scripts/init-analytics-db.ts` | **Crea** | Script per creare tabella pageviews |
-| `src/env.d.ts` | **Modifica** | Aggiungere `ANALYTICS_ADMIN_TOKEN` |
-| `src/pages/privacy-policy.astro` | **Modifica** | Aggiornare testo (menzioniamo analytics anonimo) |
-| `src/pages/en/privacy-policy.astro` | **Modifica** | Aggiornare testo EN |
+| File                                    | Azione       | Scopo                                                          |
+| --------------------------------------- | ------------ | -------------------------------------------------------------- |
+| `src/components/BaseHead.astro`         | **Modifica** | Sostituisci script Simple Analytics con tracking script inline |
+| `src/lib/analytics.ts`                  | **Crea**     | Utility: parse UA, timezone->country mapping, validazione      |
+| `src/pages/api/collect.ts`              | **Crea**     | Endpoint POST per ricevere pageview e beacon                   |
+| `src/pages/api/stats.ts`                | **Crea**     | Endpoint GET per aggregati dashboard (protetto)                |
+| `src/pages/admin/analytics.astro`       | **Crea**     | Dashboard SSR                                                  |
+| `src/components/AnalyticsDashboard.css` | **Crea**     | Stili dashboard                                                |
+| `scripts/init-analytics-db.ts`          | **Crea**     | Script per creare tabella pageviews                            |
+| `src/env.d.ts`                          | **Modifica** | Aggiungere `ANALYTICS_ADMIN_TOKEN`                             |
+| `src/pages/privacy-policy.astro`        | **Modifica** | Aggiornare testo (menzioniamo analytics anonimo)               |
+| `src/pages/en/privacy-policy.astro`     | **Modifica** | Aggiornare testo EN                                            |
 
 ### Dipendenze
 

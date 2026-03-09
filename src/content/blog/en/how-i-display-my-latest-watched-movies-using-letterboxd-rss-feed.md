@@ -22,6 +22,7 @@ I built an automated system that fetches my latest watched movies from Letterbox
 ### Step 1: Accessing Letterboxd RSS Feed
 
 Letterboxd provides RSS feeds for user activities. The feed URL follows this pattern:
+
 ```
 https://letterboxd.com/username/rss/
 ```
@@ -34,7 +35,7 @@ I created a service that fetches and parses the XML content from Letterboxd:
 
 ```javascript
 export const getLetterboxdRss = async () => {
-  const response = await fetch('https://letterboxd.com/valerionarcisi/rss/');
+  const response = await fetch("https://letterboxd.com/valerionarcisi/rss/");
   return response;
 };
 
@@ -65,7 +66,10 @@ const lastWatchedMovies = async () => {
         const movie = await getMovieById(item["tmdb:movieId"][0]);
         return { ...movie, ...item };
       } catch (error) {
-        console.error(`Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`, error);
+        console.error(
+          `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
+          error,
+        );
         return null;
       }
     });
@@ -78,6 +82,7 @@ const lastWatchedMovies = async () => {
 ### Step 4: Displaying the Movies
 
 I created a custom `Reel` component that displays each movie with:
+
 - Movie poster from TMDb
 - Title from Letterboxd
 - My rating (vote_average)
@@ -89,6 +94,7 @@ The component handles the visual presentation with hover effects and responsive 
 ### Step 5: Performance Optimization
 
 To ensure fast page loads, I:
+
 - **Parallelize API calls** using `Promise.all()`
 - **Cache TMDb responses** to avoid hitting rate limits
 - **Handle errors gracefully** when movie data isn't available
@@ -110,4 +116,4 @@ This integration keeps my website dynamic and personal while requiring zero manu
 
 This approach demonstrates how RSS feeds can still be powerful tools for content syndication and personal website automation in 2025. Sometimes the simplest solutions are the most effective!
 
-*Want to see it in action? Check out the "Last watched movies" section on my homepage, or view my complete film diary on [Letterboxd](https://letterboxd.com/valerionarcisi/).*
+_Want to see it in action? Check out the "Last watched movies" section on my homepage, or view my complete film diary on [Letterboxd](https://letterboxd.com/valerionarcisi/)._

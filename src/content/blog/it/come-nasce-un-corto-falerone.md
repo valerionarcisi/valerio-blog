@@ -10,11 +10,11 @@ tags:
 coverImage: "/img/blog/come-nasce-un-corto-falerone/8E4A6521.jpg"
 ---
 
-Il 22 febbraio siamo saliti sul palco del Teatro Beato Pellegrino di Falerone per *Come nasce un corto?*, una serata dedicata al racconto del processo creativo dietro i nostri cortometraggi.
+Il 22 febbraio siamo saliti sul palco del Teatro Beato Pellegrino di Falerone per _Come nasce un corto?_, una serata dedicata al racconto del processo creativo dietro i nostri cortometraggi.
 
 ![Il panel al completo sul palco](/img/blog/come-nasce-un-corto-falerone/8E4A6521.jpg)
 
-Abbiamo proiettato *Arturo* e *Caramella*, e subito dopo ci siamo seduti per parlarne con il pubblico. Sul palco con me c'erano **Stefano Teodori**, co-autore e direttore della fotografia, **Giacomo Bottoni**, attore, e **Daniele Viozzi**, aiuto regia di *Caramella* e assistente alla produzione e alla regia di *Non fa ridere*. A moderare la serata, l'assessore alla cultura **Eleonora Concetti**.
+Abbiamo proiettato _Arturo_ e _Caramella_, e subito dopo ci siamo seduti per parlarne con il pubblico. Sul palco con me c'erano **Stefano Teodori**, co-autore e direttore della fotografia, **Giacomo Bottoni**, attore, e **Daniele Viozzi**, aiuto regia di _Caramella_ e assistente alla produzione e alla regia di _Non fa ridere_. A moderare la serata, l'assessore alla cultura **Eleonora Concetti**.
 
 ![Valerio parla al microfono durante il Q&A](/img/blog/come-nasce-un-corto-falerone/8E4A6534.jpg)
 
@@ -22,9 +22,9 @@ Il pubblico era molto coinvolto. Un signore ha insistito parecchio sulla parte t
 
 ![Stefano e Giacomo durante il dibattito](/img/blog/come-nasce-un-corto-falerone/8E4A6568.jpg)
 
-Poi è arrivato il momento di *Arturo*. Un corto che ha più di dieci anni, interpretato da persone di una certa età. Alcune di loro non ci sono più. Ricordarle sul palco, davanti a quelle immagini, è stato inevitabile e necessario.
+Poi è arrivato il momento di _Arturo_. Un corto che ha più di dieci anni, interpretato da persone di una certa età. Alcune di loro non ci sono più. Ricordarle sul palco, davanti a quelle immagini, è stato inevitabile e necessario.
 
-*Caramella* invece è stato emozionante come sempre. Rivederlo non stanca mai. Il finale rimane un colpo ben assestato.
+_Caramella_ invece è stato emozionante come sempre. Rivederlo non stanca mai. Il finale rimane un colpo ben assestato.
 
 ![Il panel visto dalla prospettiva del pubblico](/img/blog/come-nasce-un-corto-falerone/8E4A6583.jpg)
 

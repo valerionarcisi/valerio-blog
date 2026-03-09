@@ -71,12 +71,12 @@ interface ApiError {
 class UserService {
   async fetchUsers(): Promise<Result<User[], ApiError>> {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch("/api/users");
 
       if (!response.ok) {
         return err({
-          message: 'Failed to fetch users',
-          code: 'FETCH_ERROR',
+          message: "Failed to fetch users",
+          code: "FETCH_ERROR",
           statusCode: response.status,
         });
       }
@@ -85,8 +85,8 @@ class UserService {
       return ok(users);
     } catch (error) {
       return err({
-        message: 'Network error occurred',
-        code: 'NETWORK_ERROR',
+        message: "Network error occurred",
+        code: "NETWORK_ERROR",
         statusCode: 0,
       });
     }
@@ -98,16 +98,16 @@ class UserService {
 
       if (response.status === 404) {
         return err({
-          message: 'User not found',
-          code: 'USER_NOT_FOUND',
+          message: "User not found",
+          code: "USER_NOT_FOUND",
           statusCode: 404,
         });
       }
 
       if (!response.ok) {
         return err({
-          message: 'Failed to fetch user',
-          code: 'FETCH_ERROR',
+          message: "Failed to fetch user",
+          code: "FETCH_ERROR",
           statusCode: response.status,
         });
       }
@@ -116,8 +116,8 @@ class UserService {
       return ok(user);
     } catch (error) {
       return err({
-        message: 'Network error occurred',
-        code: 'NETWORK_ERROR',
+        message: "Network error occurred",
+        code: "NETWORK_ERROR",
         statusCode: 0,
       });
     }
@@ -132,13 +132,13 @@ class UserService {
 Il concetto chiave è che con il Result Pattern, **le tue API restituiscono sempre HTTP 200 (successo)**, e lo stato reale di successo/errore è codificato nel tipo `Result<T, E>` all'interno dei dati della risposta.
 
 ```typescript
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { match } from 'ts-pattern';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { match } from "ts-pattern";
 
 // Utilizzo diretto con React Query
 export const useFetchUsers = () => {
   return useQuery({
-    queryKey: ['users'],
+    queryKey: ["users"],
     queryFn: () => userService.fetchUsers(), // Returns Promise<Result<User[], ApiError>>
     // No need for error handling here - Result pattern handles it
   });
@@ -146,7 +146,7 @@ export const useFetchUsers = () => {
 
 export const useFetchUserById = (id: string | undefined) => {
   return useQuery({
-    queryKey: ['users', id],
+    queryKey: ["users", id],
     queryFn: () => userService.fetchUserById(id!),
     enabled: !!id,
   });
@@ -160,18 +160,19 @@ export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (userData: CreateUserRequest) => userService.createUser(userData),
+    mutationFn: (userData: CreateUserRequest) =>
+      userService.createUser(userData),
     onSuccess: (result) => {
       // Handle result using ts-pattern
       match(result)
         .with({ type: "ok" }, ({ value: user }) => {
           // Success case
-          console.log('User created:', user.name);
-          queryClient.invalidateQueries({ queryKey: ['users'] });
+          console.log("User created:", user.name);
+          queryClient.invalidateQueries({ queryKey: ["users"] });
         })
         .with({ type: "err" }, ({ error }) => {
           // Error case
-          console.error('Creation failed:', error.message);
+          console.error("Creation failed:", error.message);
         })
         .exhaustive();
     },
@@ -333,11 +334,12 @@ export const CreateUserForm: React.FC = () => {
 ## Concetti chiave
 
 ### 1. Le API restituiscono sempre successo
+
 Con il Result Pattern, le tue chiamate HTTP restituiscono sempre 200 OK. Il successo/fallimento è codificato nel tipo Result:
 
 ```typescript
 // API Response is always successful HTTP-wise
-const response = await fetch('/api/users'); // Always 200 OK
+const response = await fetch("/api/users"); // Always 200 OK
 const result: Result<User[], ApiError> = await response.json();
 
 // The actual success/error is in the Result
@@ -352,11 +354,12 @@ match(result)
 ```
 
 ### 2. Niente stati di errore di React Query
+
 Dato che la chiamata HTTP ha sempre successo, `isError` di React Query sarà raramente true. Tutta la gestione degli errori avviene tramite pattern matching sul tipo Result:
 
 ```typescript
 const { data: result, isLoading } = useQuery({
-  queryKey: ['users'],
+  queryKey: ["users"],
   queryFn: fetchUsers, // Returns Result<User[], ApiError>
 });
 
@@ -365,6 +368,7 @@ const { data: result, isLoading } = useQuery({
 ```
 
 ### 3. Type safety con ts-pattern
+
 La libreria `ts-pattern` fornisce pattern matching esaustivo, garantendo la gestione di tutti i casi:
 
 ```typescript

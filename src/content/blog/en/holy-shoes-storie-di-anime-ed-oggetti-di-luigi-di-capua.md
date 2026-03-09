@@ -7,7 +7,6 @@ tags:
 coverImage: "/img/blog/holy-shoes-storie-di-anime-ed-oggetti-di-luigi-di-capua/7IlUUTT3SlKvoDZVVjxU.jpg"
 ---
 
-
 Debut film by Luigi Di Capua, presented at Torino Film Festival 2023 (not in competition).
 
 Di Capua's film turns out to be interesting even though it has its flaws in my opinion.

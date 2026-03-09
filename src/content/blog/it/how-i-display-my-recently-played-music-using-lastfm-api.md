@@ -22,11 +22,13 @@ Ho costruito un sistema automatizzato che recupera le tracce recenti dalle API d
 ### Step 1: Configurazione delle API Last.fm
 
 Last.fm fornisce API robuste per accedere ai dati degli utenti. Per iniziare servono:
+
 1. Un account Last.fm con lo scrobbling abilitato
 2. Una API key dal portale sviluppatori di Last.fm
 3. Il proprio username
 
 L'endpoint per le tracce recenti segue questo schema:
+
 ```
 https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=USERNAME&api_key=API_KEY&format=json
 ```
@@ -38,17 +40,17 @@ Ho creato un service che gestisce le chiamate API e l'elaborazione dei dati:
 ```javascript
 export const fetchRecentTracks = async (limit = 10) => {
   const API_KEY = import.meta.env.LASTFM_API_KEY;
-  const USERNAME = 'valerionarcisi';
+  const USERNAME = "valerionarcisi";
 
   try {
     const response = await fetch(
-      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=${limit}`
+      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=${limit}`,
     );
 
     const data = await response.json();
     return data.recenttracks?.track || [];
   } catch (error) {
-    console.error('Error fetching Last.fm data:', error);
+    console.error("Error fetching Last.fm data:", error);
     return [];
   }
 };
@@ -57,6 +59,7 @@ export const fetchRecentTracks = async (limit = 10) => {
 ### Step 3: Elaborare i dati delle tracce
 
 Le API di Last.fm restituiscono metadati ricchi per ogni traccia, tra cui:
+
 - Titolo del brano e nome dell'artista
 - Informazioni sull'album e copertina
 - Timestamp di riproduzione (o stato "now playing")
@@ -66,14 +69,14 @@ Elaboro questi dati per estrarre ciò che serve per la visualizzazione:
 
 ```javascript
 const processTrackData = (tracks) => {
-  return tracks.map(track => ({
+  return tracks.map((track) => ({
     name: track.name,
-    artist: track.artist['#text'] || track.artist.name,
-    album: track.album['#text'],
-    image: track.image[3]['#text'], // Large image size
+    artist: track.artist["#text"] || track.artist.name,
+    album: track.album["#text"],
+    image: track.image[3]["#text"], // Large image size
     url: track.url,
-    date: track.date ? track.date['#text'] : 'Now Playing',
-    isNowPlaying: track['@attr']?.nowplaying === 'true'
+    date: track.date ? track.date["#text"] : "Now Playing",
+    isNowPlaying: track["@attr"]?.nowplaying === "true",
   }));
 };
 ```
@@ -81,6 +84,7 @@ const processTrackData = (tracks) => {
 ### Step 4: Mostrare la musica
 
 Ho creato un componente `Reel` (lo stesso usato per i film) che mostra ogni traccia con:
+
 - Copertina dell'album come immagine principale
 - Titolo del brano e nome dell'artista
 - Nome dell'album
@@ -92,6 +96,7 @@ Il componente include un indicatore speciale per le tracce in riproduzione e fal
 ### Step 5: Performance e affidabilità
 
 Per garantire un'esperienza utente fluida:
+
 - **Cache delle API** per rispettare i rate limit di Last.fm
 - **Immagini di fallback** quando la copertina dell'album non è disponibile
 - **Gestione errori** per problemi di rete o downtime delle API
@@ -107,6 +112,7 @@ L'integrazione si aggiorna in tempo reale, quindi se sto ascoltando musica attiv
 ## Perché Last.fm?
 
 A differenza delle API di Spotify che mostrano solo le tracce recenti dalla loro piattaforma, Last.fm aggrega i dati di ascolto da più fonti:
+
 - Spotify, Apple Music, YouTube Music
 - Player musicali locali come iTunes o Foobar2000
 - Dischi in vinile (con scrobbling manuale)
@@ -128,4 +134,4 @@ La musica è qualcosa di profondamente personale, e mostrare le mie tracce recen
 
 Questa integrazione rappresenta un altro tassello del puzzle nel creare un sito veramente personale che riflette chi sono al di là del mio lavoro professionale.
 
-*Vuoi vedere cosa sto ascoltando adesso? Dai un'occhiata alla sezione "Last Listened songs" sulla mia homepage, oppure segui il mio percorso musicale completo su [Last.fm](https://last.fm/user/valerionarcisi).*
+_Vuoi vedere cosa sto ascoltando adesso? Dai un'occhiata alla sezione "Last Listened songs" sulla mia homepage, oppure segui il mio percorso musicale completo su [Last.fm](https://last.fm/user/valerionarcisi)._

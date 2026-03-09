@@ -2,7 +2,7 @@
 import "./AdminNav.css";
 
 interface Props {
-  currentPage: "analytics" | "comments";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery";
   token: string;
 }
 
@@ -11,6 +11,8 @@ const { currentPage, token } = Astro.props;
 const links = [
   { id: "analytics" as const, label: "Analytics", href: `/admin/analytics?token=${token}` },
   { id: "comments" as const, label: "Comments", href: `/admin/comments?token=${token}` },
+  { id: "meal-plan" as const, label: "Meal Plan", href: `/admin/meal-plan?token=${token}` },
+  { id: "grocery" as const, label: "Spesa", href: `/admin/grocery?token=${token}` },
 ] as const;
 ---
 

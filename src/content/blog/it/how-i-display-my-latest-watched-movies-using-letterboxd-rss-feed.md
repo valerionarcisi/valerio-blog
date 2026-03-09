@@ -22,6 +22,7 @@ Ho costruito un sistema automatizzato che recupera gli ultimi film visti dal fee
 ### Step 1: Accedere al feed RSS di Letterboxd
 
 Letterboxd fornisce feed RSS per le attività degli utenti. L'URL del feed segue questo schema:
+
 ```
 https://letterboxd.com/username/rss/
 ```
@@ -34,7 +35,7 @@ Ho creato un service che recupera e analizza il contenuto XML da Letterboxd:
 
 ```javascript
 export const getLetterboxdRss = async () => {
-  const response = await fetch('https://letterboxd.com/valerionarcisi/rss/');
+  const response = await fetch("https://letterboxd.com/valerionarcisi/rss/");
   return response;
 };
 
@@ -65,7 +66,10 @@ const lastWatchedMovies = async () => {
         const movie = await getMovieById(item["tmdb:movieId"][0]);
         return { ...movie, ...item };
       } catch (error) {
-        console.error(`Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`, error);
+        console.error(
+          `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
+          error,
+        );
         return null;
       }
     });
@@ -78,6 +82,7 @@ const lastWatchedMovies = async () => {
 ### Step 4: Mostrare i film
 
 Ho creato un componente `Reel` personalizzato che mostra ogni film con:
+
 - Locandina del film da TMDb
 - Titolo da Letterboxd
 - Il mio voto (vote_average)
@@ -89,6 +94,7 @@ Il componente gestisce la presentazione visiva con effetti hover e design respon
 ### Step 5: Ottimizzazione delle performance
 
 Per garantire caricamenti rapidi:
+
 - **Chiamate API in parallelo** usando `Promise.all()`
 - **Cache delle risposte TMDb** per evitare di superare i rate limit
 - **Gestione errori elegante** quando i dati del film non sono disponibili
@@ -110,4 +116,4 @@ Questa integrazione mantiene il mio sito dinamico e personale senza richiedere a
 
 Questo approccio dimostra come i feed RSS possano ancora essere strumenti potenti per la distribuzione di contenuti e l'automazione di siti personali nel 2025. A volte le soluzioni più semplici sono le più efficaci!
 
-*Vuoi vederlo in azione? Dai un'occhiata alla sezione "Last watched movies" sulla mia homepage, oppure sfoglia il mio diario cinematografico completo su [Letterboxd](https://letterboxd.com/valerionarcisi/).*
+_Vuoi vederlo in azione? Dai un'occhiata alla sezione "Last watched movies" sulla mia homepage, oppure sfoglia il mio diario cinematografico completo su [Letterboxd](https://letterboxd.com/valerionarcisi/)._

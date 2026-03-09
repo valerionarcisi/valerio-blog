@@ -19,7 +19,7 @@ Below is a short list of "No's!" I shouted to myself to build a better relations
 
 First of all, I got rid of [vanilla-extract](https://vanilla-extract.style/) because updating my CSS had become too complex. Instead, I created a global CSS file where I defined my color palette and included everything my blog needs.
 
-Next, I started using nested classes to style my Astro components. *Keep it simple, stupid.*
+Next, I started using nested classes to style my Astro components. _Keep it simple, stupid._
 
 ```jsx
 .Card {
@@ -46,7 +46,7 @@ I used to think that CSS preprocessors were essential for libraries, but now, wi
 
 ## No Effect-ts!
 
-It was a great way to work, but it became too complex to update my logic. I wanted to expand my *Last Watched Movie* and *Last Listened Song* sections, but updating these parts became overly difficult.
+It was a great way to work, but it became too complex to update my logic. I wanted to expand my _Last Watched Movie_ and _Last Listened Song_ sections, but updating these parts became overly difficult.
 
 While [effect-ts](https://effect.website/) is fantastic for preventing errors—forcing you to handle every use case, including the promise returned by the `.json()` method—it became too hard for me to maintain.
 

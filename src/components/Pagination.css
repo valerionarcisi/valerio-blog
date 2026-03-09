@@ -19,7 +19,10 @@
   padding: 0 var(--space-medium);
   border-radius: var(--borderRadius-small);
   text-decoration: none;
-  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
   border: 1px solid var(--border-subtle);
   color: var(--color-secondary);
 }

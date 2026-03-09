@@ -10,11 +10,11 @@ tags:
 coverImage: "/img/blog/come-nasce-un-corto-falerone/8E4A6521.jpg"
 ---
 
-On February 22 we stepped on stage at the Teatro Beato Pellegrino in Falerone for *Come nasce un corto?* (How is a short film born?), an evening dedicated to telling the story of the creative process behind our short films.
+On February 22 we stepped on stage at the Teatro Beato Pellegrino in Falerone for _Come nasce un corto?_ (How is a short film born?), an evening dedicated to telling the story of the creative process behind our short films.
 
 ![The full panel on stage](/img/blog/come-nasce-un-corto-falerone/8E4A6521.jpg)
 
-We screened *Arturo* and *Caramella*, and right after we sat down to talk about them with the audience. On stage with me were **Stefano Teodori**, co-author and director of photography, **Giacomo Bottoni**, actor, and **Daniele Viozzi**, assistant director of *Caramella* and production and directing assistant of *Non fa ridere*. The evening was moderated by **Eleonora Concetti**, city councilor for culture.
+We screened _Arturo_ and _Caramella_, and right after we sat down to talk about them with the audience. On stage with me were **Stefano Teodori**, co-author and director of photography, **Giacomo Bottoni**, actor, and **Daniele Viozzi**, assistant director of _Caramella_ and production and directing assistant of _Non fa ridere_. The evening was moderated by **Eleonora Concetti**, city councilor for culture.
 
 ![Valerio speaking during the Q&A](/img/blog/come-nasce-un-corto-falerone/8E4A6534.jpg)
 
@@ -22,9 +22,9 @@ The audience was very engaged. One man kept pushing on the technical side, convi
 
 ![Stefano and Giacomo during the discussion](/img/blog/come-nasce-un-corto-falerone/8E4A6568.jpg)
 
-Then came the moment for *Arturo*. A short film that is over ten years old, featuring people of a certain age. Some of them are no longer with us. Remembering them on stage, in front of those images, was both inevitable and necessary.
+Then came the moment for _Arturo_. A short film that is over ten years old, featuring people of a certain age. Some of them are no longer with us. Remembering them on stage, in front of those images, was both inevitable and necessary.
 
-*Caramella*, on the other hand, was moving as always. Watching it again never gets old. The ending remains a well-placed punch.
+_Caramella_, on the other hand, was moving as always. Watching it again never gets old. The ending remains a well-placed punch.
 
 ![The panel seen from the audience's perspective](/img/blog/come-nasce-un-corto-falerone/8E4A6583.jpg)
 

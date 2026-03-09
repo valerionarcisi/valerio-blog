@@ -11,6 +11,7 @@ Carefreeness ended the day Ligabue gave in to that bunch of idiots who are his f
 
 But who the hell are these jerks who go to church (me included, back then) who like Piccola stella senza cielo (me included, back then) that have to lecture Ligabue on style and art? How dare they?
 ![ligabue.jpg](/img/blog/ligabue-e-la-fine-della-spensieratezza/Kxq6rSw3SO6X4ckBucIc.jpg)
+
 > From there everything fell apart: I saw God fall, religion, school, and work. What's the point of all this? Where did my carefreeness go with Sara un bel souvenir playing in the background? Everything lost its meaning. Everyone talks and tells you how or what you should do. Liga gave in, I'll give in too.
 
 ![image.png](/img/blog/ligabue-e-la-fine-della-spensieratezza/K7pTnONqTXysQI5Bki9A.png)

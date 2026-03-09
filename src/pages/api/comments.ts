@@ -62,7 +62,12 @@ export const POST: APIRoute = async ({ request }) => {
     args: [pageId, name.trim(), email.trim(), text.trim()],
   });
 
-  notifyNewComment({ pageId, name: name.trim(), email: email.trim(), text: text.trim() });
+  notifyNewComment({
+    pageId,
+    name: name.trim(),
+    email: email.trim(),
+    text: text.trim(),
+  });
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 201,

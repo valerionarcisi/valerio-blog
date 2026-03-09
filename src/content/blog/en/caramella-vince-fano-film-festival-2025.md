@@ -22,7 +22,7 @@ It was absurd seeing Caramella alongside these works. A short film born as a **d
 
 ![Meme Caramella al Fano Film Festival](/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7ylmp3e07lgv46cuwpk.png)
 
-*In fact, it went pretty much like this! :)*
+_In fact, it went pretty much like this! :)_
 
 ## The journey of Caramella
 

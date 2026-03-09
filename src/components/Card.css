@@ -71,7 +71,9 @@
   display: block;
   margin: 0;
   border-radius: 0;
-  transition: filter var(--transition-fast), transform var(--transition-medium);
+  transition:
+    filter var(--transition-fast),
+    transform var(--transition-medium);
 }
 
 .Card:hover .card-img img {

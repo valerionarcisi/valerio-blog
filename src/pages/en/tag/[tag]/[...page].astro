@@ -35,6 +35,7 @@ const { page } = Astro.props as any;
   category={tag}
   posts={page.data}
   lang="en"
+  noindex
   pagination={{
     currentPage: page.currentPage,
     lastPage: page.lastPage,

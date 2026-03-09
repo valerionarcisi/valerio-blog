@@ -4,7 +4,9 @@
     {
       "name": "dev",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["/Users/valerionarcisi/personal/valerio-blog/.claude/start-dev.sh"],
+      "runtimeArgs": [
+        "/Users/valerionarcisi/personal/valerio-blog/.claude/start-dev.sh"
+      ],
       "port": 4321
     }
   ]

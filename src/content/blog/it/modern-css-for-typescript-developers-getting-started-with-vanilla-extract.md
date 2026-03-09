@@ -40,19 +40,19 @@ Nella mia configurazione Astro ho aggiunto il plugin di vanilla extract:
 ```jsx
 //astro.config.mjs
 
-import { defineConfig } from 'astro/config';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import react from '@astrojs/react';
-import netlify from '@astrojs/netlify';
+import { defineConfig } from "astro/config";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
+import react from "@astrojs/react";
+import netlify from "@astrojs/netlify";
 
-import sitemap from '@astrojs/sitemap';
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
   // Enable React to support React JSX components.
   integrations: [react(), sitemap()],
   prefetch: true,
-  output: 'server',
+  output: "server",
   adapter: netlify(),
   vite: {
     plugins: [vanillaExtractPlugin()],
@@ -67,9 +67,9 @@ Ho strutturato il mio codice in questo modo.
 Ho creato un tema di default
 
 ```jsx
-import { createTheme } from '@vanilla-extract/css';
-import { tokens } from './tokens.css';
-import { vars } from './vars.css';
+import { createTheme } from "@vanilla-extract/css";
+import { tokens } from "./tokens.css";
+import { vars } from "./vars.css";
 
 // @ts-ignore
 export const defaultTheme = createTheme(vars, tokens);
@@ -219,8 +219,8 @@ Come puoi vedere sto usando Box. Box è un componente amorfico che ci dà il pie
 Dopo averlo installato puoi creare il tuo componente Box
 
 ```jsx
-import { createBox } from '@dessert-box/react';
-import { valerioSprinkles } from '../../styles/sprinkles.css';
+import { createBox } from "@dessert-box/react";
+import { valerioSprinkles } from "../../styles/sprinkles.css";
 
 const Box = createBox({ atoms: valerioSprinkles });
 
@@ -249,7 +249,7 @@ A mio parere, è davvero utile per stilizzare rapidamente.
 
 ```jsx
 globalStyle(`  ${postBodyStyle} > p > img.alignright`, {
-  float: 'right',
+  float: "right",
   marginLeft: vars.space.large,
   marginTop: vars.space.large,
   marginBottom: vars.space.large,

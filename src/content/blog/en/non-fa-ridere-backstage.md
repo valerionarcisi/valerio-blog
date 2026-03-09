@@ -10,7 +10,7 @@ tags:
 coverImage: "/img/blog/non-fa-ridere-backstage/gruppo.jpg"
 ---
 
-I finished shooting *Non fa ridere*.
+I finished shooting _Non fa ridere_.
 
 Four days of filming at Ristorante L'Oasi del Gusto in Piane di Falerone, with a crew and cast who gave everything they had. Time was short, there was so much to do, and it wasn't always easy.
 
@@ -34,4 +34,4 @@ But what touched me most was going back to that restaurant. I used to go there a
 
 ![Cast and crew group photo](/img/blog/non-fa-ridere-backstage/gruppo.jpg)
 
-Now the editing begins. *Non fa ridere* still has a long way to go. But the hardest part — and the most beautiful — is done.
+Now the editing begins. _Non fa ridere_ still has a long way to go. But the hardest part — and the most beautiful — is done.

@@ -10,7 +10,7 @@ tags:
 coverImage: "/img/blog/non-fa-ridere-backstage/gruppo.jpg"
 ---
 
-Ho finito di girare *Non fa ridere*.
+Ho finito di girare _Non fa ridere_.
 
 Quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone, con una troupe e un cast che hanno dato tutto. Il tempo era poco, le cose da fare tantissime, e non sempre è stato facile.
 
@@ -34,4 +34,4 @@ Ma la cosa che più mi ha toccato è stata tornare in quel ristorante. Ci andavo
 
 ![La foto di gruppo di cast e crew](/img/blog/non-fa-ridere-backstage/gruppo.jpg)
 
-Ora inizia il montaggio. *Non fa ridere* ha ancora tanta strada da fare. Ma la parte più difficile — e più bella — è fatta.
+Ora inizia il montaggio. _Non fa ridere_ ha ancora tanta strada da fare. Ma la parte più difficile — e più bella — è fatta.

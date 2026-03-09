@@ -139,7 +139,9 @@ async function main() {
     }
   }
 
-  console.log(`\n✅ Done! ${urlToLocalPath.size} unique images downloaded, ${totalReplacements} URL replacements made.`);
+  console.log(
+    `\n✅ Done! ${urlToLocalPath.size} unique images downloaded, ${totalReplacements} URL replacements made.`,
+  );
 }
 
 function escapeRegex(string) {

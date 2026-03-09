@@ -14,7 +14,12 @@ footer {
   color: var(--color-neutral);
   font-size: var(--fontSize-small);
   border-top: 1px solid transparent;
-  border-image: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan)) 1;
+  border-image: linear-gradient(
+      90deg,
+      var(--color-tertiary),
+      var(--color-accent-cyan)
+    )
+    1;
 }
 
 footer h3 {

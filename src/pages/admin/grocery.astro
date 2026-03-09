@@ -1,0 +1,346 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const groceryList = [
+  {
+    category: "Pane e Carboidrati",
+    emoji: "🍞",
+    cost: 15,
+    items: [
+      "Pane integrale o ai cereali",
+      "Gallette di riso o altro cereale",
+      "Fette wasa (Fibre, Fit)",
+      "Fette biscottate integrali",
+      "Pasta (vari formati)",
+      "Riso basmati",
+      "Cereali alternativi (farro, orzo, quinoa, grano saraceno, cous cous)",
+    ],
+  },
+  {
+    category: "Carne",
+    emoji: "🥩",
+    cost: 28,
+    items: [
+      "Petto di pollo (200g x ~3 porzioni)",
+      "Macinata magra (180g x ~2 porzioni)",
+      "Fesa di tacchino / cotto magro (~200g)",
+      "Carne rossa magra: fesa, noce, scamone (200g x ~1 porzione)",
+      "Hamburger carne magra (dal macellaio, 200g)",
+    ],
+  },
+  {
+    category: "Pesce",
+    emoji: "🐟",
+    cost: 32,
+    items: [
+      "Tonno al naturale in scatola (scatolette da 80g, ~8-10)",
+      "Sgombro/salmone al naturale in scatola (~2 conf.)",
+      "Pesce magro fresco: merluzzo, platessa, spigola, orata (~250g x 1)",
+      "Pesce spada / sgombro / tonno fresco (~200-250g x 1)",
+      "Salmone affumicato (100g x 1)",
+      "Gamberi o mazzancolle (~250g x 1)",
+    ],
+  },
+  {
+    category: "Uova e Latticini",
+    emoji: "🥚",
+    cost: 22,
+    items: [
+      "Uova (confezione da 6)",
+      "Yogurt greco 0% bianco 150g (x3-4)",
+      "Yogurt kefyr bianco 500g (x1)",
+      "Mozzarella light 100g (x1)",
+      "Ricotta (es. Vallelata ricottina 100g)",
+      "Parmigiano stagionato (pezzo piccolo)",
+      "Formaggio magro spalmabile (Exquisa Fitline / Philadelphia Protein)",
+      "Dessert proteico 170-200g (x2-3)",
+    ],
+  },
+  {
+    category: "Affettati",
+    emoji: "🥓",
+    cost: 14,
+    items: [
+      "Crudo magro (~100g)",
+      "Cotto magro (~100g)",
+      "Fesa di tacchino (~100g)",
+      "Bresaola (~100g)",
+      "Speck sgrassato (opzionale)",
+    ],
+  },
+  {
+    category: "Legumi e Vegetali",
+    emoji: "🫘",
+    cost: 14,
+    items: [
+      "Ceci in scatola (x2-3 barattoli)",
+      "Lenticchie in scatola (x1-2 barattoli)",
+      "Piselli (160g, anche surgelati)",
+      "Burger vegetali (Bio Appetì, Valsoia, Kioene — 2 pz)",
+      "Cotolette di legumi (x4)",
+      "Hummus di ceci 250g (es. Fior di Natura)",
+    ],
+  },
+  {
+    category: "Frutta",
+    emoji: "🍎",
+    cost: 12,
+    items: [
+      "Frutta fresca di stagione (x7-8 pezzi, 200-250g l'uno)",
+      "Banane (x2)",
+      "Frutti di bosco (150g x1)",
+      "Limoni (x2)",
+    ],
+  },
+  {
+    category: "Verdura",
+    emoji: "🥬",
+    cost: 18,
+    items: [
+      "Verdure a foglia verde (lattuga, rucola, valeriana, indivia)",
+      "Zucchine",
+      "Pomodorini",
+      "Carote",
+      "Sedano / finocchio",
+      "Funghi",
+      "Patate (250g per insalata)",
+      "Avocado (x1 grande)",
+      "Verdure per minestrone (mix)",
+      "Verdure per contorno a sazietà (a scelta)",
+    ],
+  },
+  {
+    category: "Condimenti e Creme",
+    emoji: "🫒",
+    cost: 8,
+    note: "Molti durano più settimane",
+    items: [
+      "Olio extravergine di oliva",
+      "Crema 100% arachidi",
+      "Crema di nocciole (Novi / Rigoni di Asiago)",
+      "Marmellata a ridotto tenore di zuccheri",
+      "Miele",
+      "Patè di olive",
+      "Curry in polvere",
+      "Cannella",
+      "Spezie ed aromi vari",
+      "Aceto balsamico (opzionale)",
+    ],
+  },
+  {
+    category: "Snack e Dolci",
+    emoji: "🍫",
+    cost: 20,
+    items: [
+      "Cioccolato fondente >85% cacao (tavoletta)",
+      "Mandorle / nocciole non pelate (~200g)",
+      "Noci secche / pinoli (piccola quantità)",
+      "Barretta proteica ~200 kcal (x2-3)",
+      "Crackers magri (es. Magretti Galbusera)",
+      "Biscotti integrali (es. Misura)",
+      "Biscotti secchi (oro saiwa / osvego)",
+      "Fiocchi d'avena o frumento integrale",
+    ],
+  },
+  {
+    category: "Bevande",
+    emoji: "☕",
+    cost: 8,
+    note: "Molti durano più settimane",
+    items: [
+      "Tisane / tè",
+      "Caffè d'orzo",
+      "Yogurt bianco da bere (es. Actimel, x2-3)",
+      "Vino bianco secco (per sfumare, piccola bottiglia)",
+    ],
+  },
+  {
+    category: "Per il dolce fatto in casa",
+    emoji: "🧁",
+    cost: 2,
+    items: [
+      "Farina tipo 1 o 2 o integrale o avena",
+    ],
+  },
+];
+
+const totalCost = groceryList.reduce((sum, s) => sum + s.cost, 0);
+const totalItems = groceryList.reduce((sum, s) => sum + s.items.length, 0);
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Lista della Spesa</title>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0a0a0c;
+        color: #e8e6e1;
+        padding: 1rem;
+        min-height: 100vh;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      .summary-bar {
+        display: flex;
+        gap: 1.5rem;
+        align-items: baseline;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+      }
+      .summary-total {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #c8a000;
+      }
+      .summary-total small {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #888;
+      }
+      .summary-detail {
+        font-size: 0.75rem;
+        color: #888;
+      }
+
+      .grocery-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .grocery-card {
+        background: #151518;
+        border: 1px solid #252528;
+        border-radius: 0.5rem;
+      }
+      .grocery-card summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.55rem 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      .grocery-card summary::-webkit-details-marker { display: none; }
+      .grocery-card summary::before {
+        content: "▸";
+        color: #555;
+        font-size: 0.7rem;
+        width: 0.8rem;
+        flex-shrink: 0;
+      }
+      .grocery-card[open] summary::before { content: "▾"; }
+      .grocery-card[open] summary { border-bottom: 1px solid #252528; }
+
+      .grocery-card .emoji { font-size: 1rem; }
+      .grocery-count {
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: #666;
+      }
+      .grocery-cost {
+        margin-left: auto;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #c8a000;
+      }
+
+      .grocery-body {
+        padding: 0.4rem 0.75rem 0.5rem;
+      }
+
+      .grocery-note {
+        font-size: 0.65rem;
+        color: #666;
+        font-style: italic;
+        margin-bottom: 0.2rem;
+      }
+
+      .grocery-items {
+        list-style: none;
+        padding: 0;
+        columns: 2;
+        column-gap: 1rem;
+      }
+      .grocery-items li {
+        font-size: 0.78rem;
+        line-height: 1.4;
+        padding: 0.1rem 0 0.1rem 0.7rem;
+        position: relative;
+        color: #bbb;
+        break-inside: avoid;
+      }
+      .grocery-items li::before {
+        content: "·";
+        position: absolute;
+        left: 0;
+        color: #555;
+        font-weight: 700;
+      }
+
+      @media (max-width: 500px) {
+        body { padding: 0.75rem; }
+        .summary-total { font-size: 1.4rem; }
+        .grocery-items { columns: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="grocery" token={token} />
+
+    <h2 style="font-size:1.1rem; margin-bottom:0.75rem; color:#e8e6e1;">
+      Lista della Spesa Settimanale
+    </h2>
+
+    <div class="summary-bar">
+      <div class="summary-total">
+        ~{totalCost}€ <small>/settimana</small>
+      </div>
+      <div class="summary-detail">
+        {totalItems} prodotti · {groceryList.length} categorie
+      </div>
+    </div>
+
+    <div class="grocery-list">
+      {groceryList.map((section) => (
+        <details class="grocery-card">
+          <summary>
+            <span class="emoji">{section.emoji}</span>
+            {section.category}
+            <span class="grocery-count">({section.items.length})</span>
+            <span class="grocery-cost">~{section.cost}€</span>
+          </summary>
+          <div class="grocery-body">
+            {"note" in section && section.note && (
+              <div class="grocery-note">{section.note}</div>
+            )}
+            <ul class="grocery-items">
+              {section.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </details>
+      ))}
+    </div>
+  </body>
+</html>

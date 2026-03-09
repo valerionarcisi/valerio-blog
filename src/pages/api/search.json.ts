@@ -1,12 +1,12 @@
-import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { getSlugFromId, getLangFromId } from '~/i18n/utils';
+import type { APIRoute } from "astro";
+import { getCollection } from "astro:content";
+import { getSlugFromId, getLangFromId } from "~/i18n/utils";
 
 export const GET: APIRoute = async () => {
   try {
-    const allEntries = await getCollection('blog');
+    const allEntries = await getCollection("blog");
 
-    const searchData = allEntries.map(entry => ({
+    const searchData = allEntries.map((entry) => ({
       title: entry.data.title,
       slug: getSlugFromId(entry.id),
       lang: getLangFromId(entry.id),
@@ -18,17 +18,17 @@ export const GET: APIRoute = async () => {
     return new Response(JSON.stringify(searchData), {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=300',
-      }
+        "Content-Type": "application/json",
+        "Cache-Control": "public, s-maxage=300",
+      },
     });
   } catch (error) {
-    console.error('Error generating search data:', error);
+    console.error("Error generating search data:", error);
     return new Response(JSON.stringify([]), {
       status: 500,
       headers: {
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     });
   }
 };

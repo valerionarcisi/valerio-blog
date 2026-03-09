@@ -106,14 +106,13 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: 9999;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.015) 2px,
-      rgba(0, 0, 0, 0.015) 4px
-    );
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.015) 2px,
+    rgba(0, 0, 0, 0.015) 4px
+  );
   opacity: var(--grain-opacity);
 }
 
@@ -149,10 +148,20 @@ h6 {
   color: var(--color-neutral);
 }
 
-h1 { font-size: var(--fontSize-extraLarge); }
-h2 { font-size: var(--fontSize-large); }
-h3 { font-size: var(--fontSize-medium); }
-h4, h5, h6 { font-size: var(--fontSize-base); }
+h1 {
+  font-size: var(--fontSize-extraLarge);
+}
+h2 {
+  font-size: var(--fontSize-large);
+}
+h3 {
+  font-size: var(--fontSize-medium);
+}
+h4,
+h5,
+h6 {
+  font-size: var(--fontSize-base);
+}
 
 p {
   font-size: var(--fontSize-small);
@@ -170,7 +179,9 @@ a {
   text-decoration: underline;
   text-decoration-color: var(--color-tertiary);
   text-underline-offset: 3px;
-  transition: color var(--transition-fast), text-decoration-color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    text-decoration-color var(--transition-fast);
   word-wrap: break-word;
 }
 
@@ -183,19 +194,30 @@ a:hover {
   text-decoration-color: var(--color-accent-cyan);
 }
 
-h1 a, h2 a, h3 a, h4 a, h5 a, p a {
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+p a {
   color: var(--color-tertiary);
   text-decoration: underline;
 }
 
-h1 a:hover, h2 a:hover, h3 a:hover, h4 a:hover, h5 a:hover, p a:hover {
+h1 a:hover,
+h2 a:hover,
+h3 a:hover,
+h4 a:hover,
+h5 a:hover,
+p a:hover {
   color: var(--color-accent-cyan);
 }
 
 /* ============================================
    Lists
    ============================================ */
-ul, ol {
+ul,
+ol {
   font-size: var(--fontSize-small);
   padding-left: 1.5rem;
 }
@@ -274,7 +296,9 @@ code {
   border-radius: var(--borderRadius-small);
   cursor: pointer;
   opacity: 0;
-  transition: opacity var(--transition-fast), background var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    background var(--transition-fast);
   z-index: 10;
 }
 
@@ -341,11 +365,22 @@ main {
    Glitch Animation
    ============================================ */
 @keyframes glitch {
-  0%, 100% { transform: translate(0); }
-  20% { transform: translate(-1px, 1px); }
-  40% { transform: translate(1px, -1px); }
-  60% { transform: translate(-1px, 0); }
-  80% { transform: translate(1px, 1px); }
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(1px, 1px);
+  }
 }
 
 .glitch-hover:hover {
@@ -359,8 +394,13 @@ main {
    Blinking cursor (terminal feel)
    ============================================ */
 @keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .cursor-blink::after {
@@ -374,9 +414,15 @@ main {
    Floating scroll button
    ============================================ */
 @keyframes floatUpDown {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-  100% { transform: translateY(0); }
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 
 /* ============================================

@@ -40,19 +40,19 @@ In my astro configuration i added the related vanilla extract plugin:
 ```jsx
 //astro.config.mjs
 
-import { defineConfig } from 'astro/config';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import react from '@astrojs/react';
-import netlify from '@astrojs/netlify';
+import { defineConfig } from "astro/config";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
+import react from "@astrojs/react";
+import netlify from "@astrojs/netlify";
 
-import sitemap from '@astrojs/sitemap';
+import sitemap from "@astrojs/sitemap";
 
 // https://astro.build/config
 export default defineConfig({
   // Enable React to support React JSX components.
   integrations: [react(), sitemap()],
   prefetch: true,
-  output: 'server',
+  output: "server",
   adapter: netlify(),
   vite: {
     plugins: [vanillaExtractPlugin()],
@@ -67,9 +67,9 @@ I have structured my code in this way.
 I have created a default theme
 
 ```jsx
-import { createTheme } from '@vanilla-extract/css';
-import { tokens } from './tokens.css';
-import { vars } from './vars.css';
+import { createTheme } from "@vanilla-extract/css";
+import { tokens } from "./tokens.css";
+import { vars } from "./vars.css";
 
 // @ts-ignore
 export const defaultTheme = createTheme(vars, tokens);
@@ -224,8 +224,8 @@ As you can see i’m using Box. Box is an anamorphic component that give to use 
 After installing it you can create your Box component
 
 ```jsx
-import { createBox } from '@dessert-box/react';
-import { valerioSprinkles } from '../../styles/sprinkles.css';
+import { createBox } from "@dessert-box/react";
+import { valerioSprinkles } from "../../styles/sprinkles.css";
 
 const Box = createBox({ atoms: valerioSprinkles });
 
@@ -254,7 +254,7 @@ In my opinion, it's really useful for quick styling.
 
 ```jsx
 globalStyle(`  ${postBodyStyle} > p > img.alignright`, {
-  float: 'right',
+  float: "right",
   marginLeft: vars.space.large,
   marginTop: vars.space.large,
   marginBottom: vars.space.large,

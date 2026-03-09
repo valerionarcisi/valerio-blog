@@ -11,6 +11,7 @@ coverDescription: a movie by Gints Zilbalodis (2024)
 ---
 
 ## Prerequisites
+
 - Git installed
 - GitHub access (or other Git service)
 - Terminal with zsh (optional but recommended)
@@ -30,6 +31,7 @@ ssh-keygen -t rsa -b 4096 -C "work.email@company.com"
 ```
 
 ## 2. Configure SSH Config
+
 Create or modify the ~/.ssh/config file:
 
 ```bash
@@ -51,7 +53,9 @@ Host github.com-work
 ```
 
 ## 3. Configure Git Config
+
 Create two separate Git configuration files:
+
 ```bash
 # ~/.gitconfig-personal
 [user]
@@ -63,9 +67,10 @@ Create two separate Git configuration files:
     name = WorkName
     email = work.email@company.com
 ```
+
 Modify the main ~/.gitconfig file:
 
-``` bash
+```bash
 [includeIf "gitdir:~/personal/"]
     path = ~/.gitconfig-personal
 
@@ -74,15 +79,18 @@ Modify the main ~/.gitconfig file:
 ```
 
 ## 4. Organize Projects
+
 ```bash
 ~/personal/    # Personal projects
 ~/www/         # Work projects
 ```
 
 ## 5. Copy the personal and work public key:
+
 ```bash
 cat ~/.ssh/id_rsa_personal.pub | pbcopy
 ```
+
 Add to Personal GitHub Account:
 
 - Log into your personal GitHub account
@@ -96,6 +104,7 @@ Do the same for the work key
 ```bash
 cat ~/.ssh/id_rsa_work.pub | pbcopy
 ```
+
 etc...
 
 ## 6. Test your connection
@@ -113,11 +122,13 @@ ssh -T git@github.com-work
 This setup creates an automated Git identity switching based on your project's location:
 
 ### When working in `~/personal/*` directories:
+
 - Git automatically uses your personal email and username
 - Commits will be associated with your personal GitHub account
 - SSH authentication uses your personal key
 
 ### When working in `~/www/*` directories:
+
 - Git automatically uses your work email and username
 - Commits will be associated with your work GitHub account
 - SSH authentication uses your work key
@@ -125,6 +136,6 @@ This setup creates an automated Git identity switching based on your project's l
 This directory-based configuration eliminates the need to manually switch between Git accounts and helps prevent accidentally committing with the wrong identity. You can verify your current Git identity at any time using the `git config user.name` or `git config user.email` command .
 
 Remember: The key to this working correctly is maintaining a consistent project organization:
+
 - Always keep personal projects under `~/personal/`
 - Always keep work projects under `~/www/`
-

@@ -9,7 +9,7 @@ export default defineConfig({
   adapter: netlify(),
   integrations: [
     sitemap({
-      filter: (page) => !page.includes("/admin/"),
+      filter: (page) => !page.includes("/admin/") && !page.includes("/tag/"),
     }),
   ],
   i18n: {

@@ -10,7 +10,6 @@ coverAuthorName: taxidrivers.it
 coverAuthorLink: "https://www.taxidrivers.it/"
 ---
 
-
 Dostoevskij opens with Enzo ([Filippo Timi](https://letterboxd.com/actor/filippo-timi/)) lying on the floor of his house. He's motionless, smiling and crying while staring at the ceiling.
 
 ![dostoevskij.png](/img/blog/dostoevskij-dei-fratelli-dinncenzo/zOgULimT76656jvqDYTF.png)

@@ -10,7 +10,6 @@ coverAuthorName: taxidrivers.it
 coverAuthorLink: "https://www.taxidrivers.it/"
 ---
 
-
 Dostoevskij si apre con Enzo ([Filippo Timi](https://letterboxd.com/actor/filippo-timi/)) steso sul pavimento della casa. È immobile, sorride e piange mentre guarda il soffitto.
 
 ![dostoevskij.png](/img/blog/dostoevskij-dei-fratelli-dinncenzo/zOgULimT76656jvqDYTF.png)

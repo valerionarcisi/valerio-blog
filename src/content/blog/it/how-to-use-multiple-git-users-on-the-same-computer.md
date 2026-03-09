@@ -11,6 +11,7 @@ coverDescription: a movie by Gints Zilbalodis (2024)
 ---
 
 ## Prerequisiti
+
 - Git installato
 - Accesso a GitHub (o altro servizio Git)
 - Terminale con zsh (opzionale ma consigliato)
@@ -30,6 +31,7 @@ ssh-keygen -t rsa -b 4096 -C "work.email@company.com"
 ```
 
 ## 2. Configurare SSH Config
+
 Crea o modifica il file ~/.ssh/config:
 
 ```bash
@@ -51,7 +53,9 @@ Host github.com-work
 ```
 
 ## 3. Configurare Git Config
+
 Crea due file di configurazione Git separati:
+
 ```bash
 # ~/.gitconfig-personal
 [user]
@@ -63,9 +67,10 @@ Crea due file di configurazione Git separati:
     name = WorkName
     email = work.email@company.com
 ```
+
 Modifica il file principale ~/.gitconfig:
 
-``` bash
+```bash
 [includeIf "gitdir:~/personal/"]
     path = ~/.gitconfig-personal
 
@@ -74,15 +79,18 @@ Modifica il file principale ~/.gitconfig:
 ```
 
 ## 4. Organizzare i progetti
+
 ```bash
 ~/personal/    # Progetti personali
 ~/www/         # Progetti di lavoro
 ```
 
 ## 5. Copiare la chiave pubblica personale e di lavoro:
+
 ```bash
 cat ~/.ssh/id_rsa_personal.pub | pbcopy
 ```
+
 Aggiungi all'account GitHub personale:
 
 - Accedi al tuo account GitHub personale
@@ -96,6 +104,7 @@ Fai lo stesso per la chiave di lavoro
 ```bash
 cat ~/.ssh/id_rsa_work.pub | pbcopy
 ```
+
 ecc...
 
 ## 6. Testare la connessione
@@ -113,11 +122,13 @@ ssh -T git@github.com-work
 Questa configurazione crea un cambio automatico dell'identità Git basato sulla posizione del progetto:
 
 ### Quando lavori nelle directory `~/personal/*`:
+
 - Git usa automaticamente la tua email e username personali
 - I commit saranno associati al tuo account GitHub personale
 - L'autenticazione SSH usa la tua chiave personale
 
 ### Quando lavori nelle directory `~/www/*`:
+
 - Git usa automaticamente la tua email e username di lavoro
 - I commit saranno associati al tuo account GitHub di lavoro
 - L'autenticazione SSH usa la tua chiave di lavoro
@@ -125,5 +136,6 @@ Questa configurazione crea un cambio automatico dell'identità Git basato sulla 
 Questa configurazione basata sulle directory elimina la necessità di cambiare manualmente tra account Git e aiuta a prevenire commit accidentali con l'identità sbagliata. Puoi verificare la tua identità Git corrente in qualsiasi momento usando il comando `git config user.name` o `git config user.email`.
 
 Ricorda: la chiave perché tutto funzioni correttamente è mantenere un'organizzazione coerente dei progetti:
+
 - Tieni sempre i progetti personali sotto `~/personal/`
 - Tieni sempre i progetti di lavoro sotto `~/www/`

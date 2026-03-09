@@ -6,12 +6,12 @@ Welcome to the repository for my personal blog! This project is built using the 
 
 ### Features
 
-* **Astro Framework**: A modern static site builder that provides excellent performance and a great developer experience.
-* **Hygraph CMS**: All blog content is managed through a headless Hygraph CMS, providing a flexible and powerful GraphQL API.
-* **Netlify Deployment**: Configured for continuous deployment on Netlify, automatically building and deploying new changes pushed to the `main` branch.
-* **pnpm Package Manager**: The project uses `pnpm` for fast, space-efficient dependency management, as specified in the `netlify.toml` and `package.json` files.
-* **ESLint and Prettier**: Maintain code quality and consistent formatting with pre-configured ESLint and Prettier.
-* **TypeScript Support**: Enjoy type safety and autocompletion throughout the project with a robust TypeScript configuration.
+- **Astro Framework**: A modern static site builder that provides excellent performance and a great developer experience.
+- **Hygraph CMS**: All blog content is managed through a headless Hygraph CMS, providing a flexible and powerful GraphQL API.
+- **Netlify Deployment**: Configured for continuous deployment on Netlify, automatically building and deploying new changes pushed to the `main` branch.
+- **pnpm Package Manager**: The project uses `pnpm` for fast, space-efficient dependency management, as specified in the `netlify.toml` and `package.json` files.
+- **ESLint and Prettier**: Maintain code quality and consistent formatting with pre-configured ESLint and Prettier.
+- **TypeScript Support**: Enjoy type safety and autocompletion throughout the project with a robust TypeScript configuration.
 
 ---
 
@@ -31,11 +31,11 @@ To get a local copy up and running, follow these simple steps.
 
 You'll need to have Node.js and `pnpm` installed on your machine.
 
-* **Node.js**: Make sure you have a recent version (e.g., 18 or later).
-* **pnpm**: If you don't have it, you can install it via npm:
-    ```bash
-    npm install -g pnpm
-    ```
+- **Node.js**: Make sure you have a recent version (e.g., 18 or later).
+- **pnpm**: If you don't have it, you can install it via npm:
+  ```bash
+  npm install -g pnpm
+  ```
 
 #### Installation
 
@@ -52,5 +52,7 @@ You'll need to have Node.js and `pnpm` installed on your machine.
 #### Development Server
 
 Run the development server to see your changes in real-time. This command will start the server and open the project in your browser.
+
 ```bash
 pnpm dev
+```

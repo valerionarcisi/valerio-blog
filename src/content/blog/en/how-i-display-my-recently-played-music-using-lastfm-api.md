@@ -22,11 +22,13 @@ I built an automated system that fetches my recent tracks from Last.fm's API and
 ### Step 1: Last.fm API Setup
 
 Last.fm provides a robust API for accessing user data. To get started, you need:
+
 1. A Last.fm account with scrobbling enabled
 2. An API key from Last.fm developers portal
 3. Your username
 
 The API endpoint for recent tracks follows this pattern:
+
 ```
 https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=USERNAME&api_key=API_KEY&format=json
 ```
@@ -38,17 +40,17 @@ I created a service that handles the API calls and data processing:
 ```javascript
 export const fetchRecentTracks = async (limit = 10) => {
   const API_KEY = import.meta.env.LASTFM_API_KEY;
-  const USERNAME = 'valerionarcisi';
-  
+  const USERNAME = "valerionarcisi";
+
   try {
     const response = await fetch(
-      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=${limit}`
+      `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=${limit}`,
     );
-    
+
     const data = await response.json();
     return data.recenttracks?.track || [];
   } catch (error) {
-    console.error('Error fetching Last.fm data:', error);
+    console.error("Error fetching Last.fm data:", error);
     return [];
   }
 };
@@ -57,6 +59,7 @@ export const fetchRecentTracks = async (limit = 10) => {
 ### Step 3: Processing Track Data
 
 The Last.fm API returns rich metadata for each track, including:
+
 - Song title and artist name
 - Album information and artwork
 - Play timestamp (or "now playing" status)
@@ -66,14 +69,14 @@ I process this data to extract what I need for display:
 
 ```javascript
 const processTrackData = (tracks) => {
-  return tracks.map(track => ({
+  return tracks.map((track) => ({
     name: track.name,
-    artist: track.artist['#text'] || track.artist.name,
-    album: track.album['#text'],
-    image: track.image[3]['#text'], // Large image size
+    artist: track.artist["#text"] || track.artist.name,
+    album: track.album["#text"],
+    image: track.image[3]["#text"], // Large image size
     url: track.url,
-    date: track.date ? track.date['#text'] : 'Now Playing',
-    isNowPlaying: track['@attr']?.nowplaying === 'true'
+    date: track.date ? track.date["#text"] : "Now Playing",
+    isNowPlaying: track["@attr"]?.nowplaying === "true",
   }));
 };
 ```
@@ -81,6 +84,7 @@ const processTrackData = (tracks) => {
 ### Step 4: Displaying the Music
 
 I created a `Reel` component (the same used for movies) that displays each track with:
+
 - Album artwork as the main visual
 - Song title and artist name
 - Album name
@@ -92,6 +96,7 @@ The component includes a special indicator for currently playing tracks and grac
 ### Step 5: Performance and Reliability
 
 To ensure a smooth user experience:
+
 - **API caching** to respect Last.fm's rate limits
 - **Fallback images** when album artwork is unavailable
 - **Error handling** for network issues or API downtime
@@ -107,6 +112,7 @@ The integration updates in real-time, so if I'm actively listening to music, it 
 ## Why Last.fm?
 
 Unlike Spotify's API which only shows recent tracks from their platform, Last.fm aggregates listening data from multiple sources:
+
 - Spotify, Apple Music, YouTube Music
 - Local music players like iTunes or Foobar2000
 - Vinyl records (with manual scrobbling)
@@ -128,4 +134,4 @@ Music is deeply personal, and displaying my recent tracks adds authenticity to m
 
 This integration represents another piece of the puzzle in creating a truly personal website that reflects who I am beyond just my professional work.
 
-*Want to see what I'm listening to right now? Check out the "Last Listened songs" section on my homepage, or follow my complete music journey on [Last.fm](https://last.fm/user/valerionarcisi).*
+_Want to see what I'm listening to right now? Check out the "Last Listened songs" section on my homepage, or follow my complete music journey on [Last.fm](https://last.fm/user/valerionarcisi)._

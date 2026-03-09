@@ -16,11 +16,12 @@ interface PaginationData {
 	basePath: string;
 }
 
-const { category, posts, lang = "it", pagination } = Astro.props as {
+const { category, posts, lang = "it", pagination, noindex = false } = Astro.props as {
 	category: string;
 	posts: any[];
 	lang?: string;
 	pagination?: PaginationData;
+	noindex?: boolean;
 };
 ---
 
@@ -28,6 +29,7 @@ const { category, posts, lang = "it", pagination } = Astro.props as {
 <html lang={lang}>
 	<head>
 		<BaseHead title={`Category: ${category || 'Blog'} | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		{noindex && <meta name="robots" content="noindex, follow" />}
 	</head>
 	<body>
 	<Header />

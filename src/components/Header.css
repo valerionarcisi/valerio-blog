@@ -11,9 +11,13 @@
   -webkit-backdrop-filter: blur(12px);
   padding: 0.4rem 1rem;
   border-bottom: 1px solid transparent;
-  border-image: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan)) 1;
+  border-image: linear-gradient(
+      90deg,
+      var(--color-tertiary),
+      var(--color-accent-cyan)
+    )
+    1;
 }
-
 
 .Header .logo-container {
   width: 200px;
@@ -66,7 +70,6 @@
   max-height: 0;
   transition: max-height 0.3s ease-out;
 }
-
 
 .Header nav.active {
   max-height: 500px;
@@ -199,7 +202,11 @@
     transform: translateX(-50%);
     width: 0;
     height: 1px;
-    background: linear-gradient(90deg, var(--color-tertiary), var(--color-accent-cyan));
+    background: linear-gradient(
+      90deg,
+      var(--color-tertiary),
+      var(--color-accent-cyan)
+    );
     transition: width var(--transition-fast);
   }
 

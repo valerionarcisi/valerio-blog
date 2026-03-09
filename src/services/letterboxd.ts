@@ -1,8 +1,8 @@
-import { parseString } from 'xml2js';
+import { parseString } from "xml2js";
 
 export const getLetterboxdRss = async (): Promise<Response> => {
   try {
-    const response = await fetch('https://letterboxd.com/valenar/rss/');
+    const response = await fetch("https://letterboxd.com/valenar/rss/");
 
     if (!response.ok) {
       throw new Error(`Failed to fetch RSS feed. Status: ${response.status}`);
@@ -10,7 +10,7 @@ export const getLetterboxdRss = async (): Promise<Response> => {
 
     return response;
   } catch (error) {
-    console.error('Error fetching RSS feed:', error);
+    console.error("Error fetching RSS feed:", error);
     throw error;
   }
 };

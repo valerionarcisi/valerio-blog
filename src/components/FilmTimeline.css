@@ -12,7 +12,13 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(to bottom, transparent, var(--color-accent-cyan, #4ecdc4) 5%, var(--color-accent-cyan, #4ecdc4) 95%, transparent);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-accent-cyan, #4ecdc4) 5%,
+    var(--color-accent-cyan, #4ecdc4) 95%,
+    transparent
+  );
   transform: translateX(-50%);
 }
 
@@ -32,7 +38,7 @@
   padding: 0.3rem 1.2rem;
   background: var(--color-tertiary, #c9a84c);
   color: #0a0a0c;
-  font-family: var(--fontFamily-heading, 'Staatliches', Impact, sans-serif);
+  font-family: var(--fontFamily-heading, "Staatliches", Impact, sans-serif);
   font-size: 1.1rem;
   letter-spacing: 0.05em;
   border-radius: 20px;
@@ -80,7 +86,9 @@
   overflow: hidden;
   background: var(--backgroundColor-secondary, #141416);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: transform var(--transition-fast, 0.2s), box-shadow var(--transition-fast, 0.2s);
+  transition:
+    transform var(--transition-fast, 0.2s),
+    box-shadow var(--transition-fast, 0.2s);
 }
 
 .timeline-content:hover {

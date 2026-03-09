@@ -6,7 +6,12 @@ p + p {
 }
 
 /* Better heading spacing */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   margin-top: var(--space-large);
   margin-bottom: var(--space-medium);
 }
@@ -19,7 +24,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* List improvements */
-ul, ol {
+ul,
+ol {
   margin-top: var(--space-small);
   margin-bottom: var(--space-medium);
   padding-left: 1.2rem;
@@ -57,7 +63,8 @@ table {
   border-spacing: 0;
 }
 
-td, th {
+td,
+th {
   padding: var(--space-small) var(--space-medium);
 }
 
