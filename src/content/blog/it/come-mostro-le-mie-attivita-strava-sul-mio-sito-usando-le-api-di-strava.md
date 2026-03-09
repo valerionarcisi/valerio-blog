@@ -6,7 +6,7 @@ tags:
   - "javascript"
   - "astro"
   - "how-to"
-coverImage: "https://images.unsplash.com/photo-1486218119243-13883505764c?w=1200"
+coverImage: "/img/blog/come-mostro-le-mie-attivita-strava-sul-mio-sito-usando-le-api-di-strava/cover.jpg"
 coverAuthorName: "Sporlab"
 coverAuthorLink: "https://unsplash.com/@sporlab"
 ---
