@@ -6,9 +6,9 @@ tags:
   - "javascript"
   - "astro"
   - "how-to"
-coverImage: "https://images.unsplash.com/photo-1748252011080-2c1b4fca6388?w=1200"
-coverAuthorName: "Karla Arróniz"
-coverAuthorLink: "https://unsplash.com/@karlaarroniz"
+coverImage: "https://images.unsplash.com/photo-1486218119243-13883505764c?w=1200"
+coverAuthorName: "Sporlab"
+coverAuthorLink: "https://unsplash.com/@sporlab"
 ---
 
 Sports are an important part of my daily routine. I run, walk, work out — and I log everything on Strava. I wanted these activities to show up on my personal website too, alongside my watched movies and listened music, to give visitors a more complete snapshot of my daily life.

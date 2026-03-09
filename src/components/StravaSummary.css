@@ -1,69 +1,62 @@
 .StravaSummary {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-  padding-left: var(--space-medium);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.StravaSummary::-webkit-scrollbar {
-  display: none;
-}
-
-.summary-card {
-  display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  min-width: 150px;
-  padding: 0.6rem 0.75rem;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.75rem;
+  margin-left: var(--space-medium);
+  margin-right: var(--space-medium);
+  border-left: 2px solid var(--accent, #c8a000);
   background: var(--surface, #151518);
-  border: 1px solid var(--border, #252528);
-  border-radius: 0.5rem;
-  flex-shrink: 0;
-}
-
-.summary-label {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted, #8a8a8e);
-}
-
-.summary-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
+  border-radius: 0 0.35rem 0.35rem 0;
 }
 
 .summary-row {
   display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
-.summary-value {
-  font-size: 1rem;
+.summary-badge {
+  display: inline-block;
+  min-width: 2rem;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent, #c8a000);
+  border: 1px solid var(--accent, #c8a000);
+  border-radius: 0.2rem;
+  flex-shrink: 0;
+}
+
+.summary-km {
   font-weight: 700;
   color: var(--color-primary, #e8e6e3);
 }
 
-.summary-unit {
-  font-size: 0.65rem;
-  color: var(--text-muted, #8a8a8e);
-}
-
-.summary-detail {
-  font-size: 0.68rem;
-  color: var(--text-muted, #8a8a8e);
-}
-
-.summary-detail .accent {
+.summary-pace {
   color: var(--accent, #c8a000);
+  font-weight: 600;
+}
+
+.summary-meta {
+  color: var(--text-muted, #8a8a8e);
+}
+
+.summary-sep {
+  color: var(--text-muted, #8a8a8e);
+  opacity: 0.4;
 }
 
 @media (min-width: 769px) {
   .StravaSummary {
-    padding-left: var(--space-large);
+    margin-left: var(--space-large);
+    margin-right: var(--space-large);
   }
 }

@@ -138,14 +138,7 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
         <section>
           <Title title="Ultime attività sportive" />
           {activityStats && (
-            <StravaSummary
-              stats={activityStats}
-              weekLabel="Questa settimana"
-              monthLabel="Questo mese"
-              activitiesLabel="attività"
-              paceLabel="passo medio"
-              elevationLabel="disl."
-            />
+            <StravaSummary stats={activityStats} />
           )}
           <div class="ReelContainer">
             {lastActivities.map((activity) => (

@@ -6,9 +6,9 @@ tags:
   - "javascript"
   - "astro"
   - "how-to"
-coverImage: "https://images.unsplash.com/photo-1748252011080-2c1b4fca6388?w=1200"
-coverAuthorName: "Karla Arróniz"
-coverAuthorLink: "https://unsplash.com/@karlaarroniz"
+coverImage: "https://images.unsplash.com/photo-1486218119243-13883505764c?w=1200"
+coverAuthorName: "Sporlab"
+coverAuthorLink: "https://unsplash.com/@sporlab"
 ---
 
 Lo sport è una parte importante della mia routine. Corro, cammino, mi alleno — e registro tutto su Strava. Volevo che queste attività apparissero anche sul mio sito personale, accanto ai film visti e alla musica ascoltata, per dare ai visitatori un'istantanea più completa della mia quotidianità.

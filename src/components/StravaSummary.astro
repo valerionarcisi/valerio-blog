@@ -11,21 +11,15 @@ interface Props {
   stats: PeriodStats;
   weekLabel?: string;
   monthLabel?: string;
-  activitiesLabel?: string;
-  paceLabel?: string;
-  elevationLabel?: string;
 }
 
 const {
   stats,
-  weekLabel = "This week",
-  monthLabel = "This month",
-  activitiesLabel = "activities",
-  paceLabel = "avg pace",
-  elevationLabel = "elev.",
+  weekLabel = "7d",
+  monthLabel = "30d",
 } = Astro.props;
 
-const renderPeriod = (s: typeof stats.weekly) => ({
+const fmt = (s: typeof stats.weekly) => ({
   distance: formatDistance(s.totalDistance),
   duration: formatDuration(s.totalMovingTime),
   pace: formatPaceFromSecondsPerKm(s.averagePace),
@@ -33,47 +27,45 @@ const renderPeriod = (s: typeof stats.weekly) => ({
   count: s.totalActivities,
 });
 
-const weekly = renderPeriod(stats.weekly);
-const monthly = renderPeriod(stats.monthly);
+const w = fmt(stats.weekly);
+const m = fmt(stats.monthly);
 ---
 
 <div class="StravaSummary">
-  <div class="summary-card">
-    <span class="summary-label">{weekLabel}</span>
-    <div class="summary-stats">
-      <div class="summary-row">
-        <span class="summary-value">{weekly.distance}</span>
-      </div>
-      <span class="summary-detail">
-        {weekly.count} {activitiesLabel} · {weekly.duration}
-      </span>
-      {weekly.pace && (
-        <span class="summary-detail">
-          <span class="accent">{weekly.pace}</span> {paceLabel}
-        </span>
-      )}
-      {weekly.elevation && (
-        <span class="summary-detail">{weekly.elevation} {elevationLabel}</span>
-      )}
-    </div>
+  <div class="summary-row">
+    <span class="summary-badge">{weekLabel}</span>
+    <span class="summary-km">{w.distance}</span>
+    <span class="summary-sep">·</span>
+    <span class="summary-meta">{w.count} att.</span>
+    {w.pace && (
+      <>
+        <span class="summary-sep">·</span>
+        <span class="summary-pace">{w.pace}</span>
+      </>
+    )}
+    {w.elevation && (
+      <>
+        <span class="summary-sep">·</span>
+        <span class="summary-meta">{w.elevation}</span>
+      </>
+    )}
   </div>
-  <div class="summary-card">
-    <span class="summary-label">{monthLabel}</span>
-    <div class="summary-stats">
-      <div class="summary-row">
-        <span class="summary-value">{monthly.distance}</span>
-      </div>
-      <span class="summary-detail">
-        {monthly.count} {activitiesLabel} · {monthly.duration}
-      </span>
-      {monthly.pace && (
-        <span class="summary-detail">
-          <span class="accent">{monthly.pace}</span> {paceLabel}
-        </span>
-      )}
-      {monthly.elevation && (
-        <span class="summary-detail">{monthly.elevation} {elevationLabel}</span>
-      )}
-    </div>
+  <div class="summary-row">
+    <span class="summary-badge">{monthLabel}</span>
+    <span class="summary-km">{m.distance}</span>
+    <span class="summary-sep">·</span>
+    <span class="summary-meta">{m.count} att.</span>
+    {m.pace && (
+      <>
+        <span class="summary-sep">·</span>
+        <span class="summary-pace">{m.pace}</span>
+      </>
+    )}
+    {m.elevation && (
+      <>
+        <span class="summary-sep">·</span>
+        <span class="summary-meta">{m.elevation}</span>
+      </>
+    )}
   </div>
 </div>
