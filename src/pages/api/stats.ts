@@ -104,8 +104,8 @@ export const GET: APIRoute = async ({ request, url }) => {
       args: baseArgs,
     }),
     db.execute({
-      sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash FROM pageviews WHERE is_unique = 1 ${botFilter} ORDER BY created_at DESC LIMIT 30`,
-      args: [],
+      sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash FROM pageviews ${baseWhere} AND is_unique = 1 ORDER BY created_at DESC LIMIT 30`,
+      args: baseArgs,
     }),
   ]);
 
