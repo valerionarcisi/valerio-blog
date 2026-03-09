@@ -37,7 +37,7 @@
 
 .summary-km {
   font-weight: 700;
-  color: var(--color-primary, #e8e6e3);
+  color: #e8e6e3;
 }
 
 .summary-pace {
