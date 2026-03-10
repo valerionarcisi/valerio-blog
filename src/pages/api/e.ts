@@ -189,7 +189,7 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Behavioral bot detection: 3+ visits with zero meaningful engagement → likely bot
+    // Behavioral bot detection: 2+ visits with zero meaningful engagement → likely bot
     try {
       const visits = await db.execute({
         sql: `SELECT COUNT(*) as total,
@@ -198,7 +198,7 @@ export const POST: APIRoute = async ({ request }) => {
         args: [visitorHash],
       });
       const row = visits.rows[0];
-      if (Number(row.total) >= 3 && Number(row.engaged) === 0) {
+      if (Number(row.total) >= 2 && Number(row.engaged) === 0) {
         await db.execute({
           sql: "INSERT OR IGNORE INTO bot_hashes (hash) VALUES (?)",
           args: [visitorHash],

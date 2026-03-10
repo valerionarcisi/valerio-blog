@@ -9,12 +9,34 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  let body: { hash?: string };
+  let body: { hash?: string; hashes?: string[] };
   try {
     body = await request.json();
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON" }), {
       status: 400,
+    });
+  }
+
+  const db = getDb();
+
+  if (body.hashes && Array.isArray(body.hashes)) {
+    const valid = body.hashes.filter(
+      (h) => typeof h === "string" && h.length > 0 && h.length <= 32,
+    );
+    if (valid.length === 0) {
+      return new Response(JSON.stringify({ error: "No valid hashes" }), {
+        status: 400,
+      });
+    }
+    const placeholders = valid.map(() => "(?)").join(",");
+    await db.execute({
+      sql: `INSERT OR IGNORE INTO bot_hashes (hash) VALUES ${placeholders}`,
+      args: valid,
+    });
+    return new Response(JSON.stringify({ ok: true, flagged: valid.length }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
     });
   }
 
@@ -25,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 
-  await getDb().execute({
+  await db.execute({
     sql: "INSERT OR IGNORE INTO bot_hashes (hash) VALUES (?)",
     args: [hash],
   });
