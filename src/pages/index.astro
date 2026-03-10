@@ -234,12 +234,24 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
           return html;
         }
 
+        function fixBrokenImages(container, placeholder) {
+          if (!container) return;
+          container.querySelectorAll("img").forEach(function (img) {
+            function onFail() { img.removeEventListener("error", onFail); img.src = placeholder; }
+            img.addEventListener("error", onFail);
+            if (img.complete && img.naturalWidth === 0 && img.src !== placeholder) onFail();
+          });
+        }
+
         function refresh() {
           fetch("/api/letterboxd")
             .then(function (r) { return r.json(); })
             .then(function (movies) {
               var el = document.getElementById("movies-reel");
-              if (el && Array.isArray(movies)) el.innerHTML = movies.map(renderMovie).join("");
+              if (el && Array.isArray(movies)) {
+                el.innerHTML = movies.map(renderMovie).join("");
+                fixBrokenImages(el, MOVIE_PLACEHOLDER);
+              }
             })
             .catch(function () {});
 
@@ -247,7 +259,10 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
             .then(function (r) { return r.json(); })
             .then(function (songs) {
               var el = document.getElementById("songs-reel");
-              if (el && Array.isArray(songs)) el.innerHTML = songs.map(renderSong).join("");
+              if (el && Array.isArray(songs)) {
+                el.innerHTML = songs.map(renderSong).join("");
+                fixBrokenImages(el, SONG_PLACEHOLDER);
+              }
             })
             .catch(function () {});
 
