@@ -134,19 +134,19 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
           }
         </div>
       </section>
-      {lastActivities.length > 0 && (
-        <section>
-          <Title title="Ultime attività sportive" />
+      <section id="strava-section" style={lastActivities.length === 0 ? "display:none" : ""}>
+        <Title title="Ultime attività sportive" />
+        <div id="strava-summary">
           {activityStats && (
             <StravaSummary stats={activityStats} />
           )}
-          <div class="ReelContainer">
-            {lastActivities.map((activity) => (
-              <ActivityCard activity={activity} />
-            ))}
-          </div>
-        </section>
-      )}
+        </div>
+        <div class="ReelContainer" id="strava-reel">
+          {lastActivities.map((activity) => (
+            <ActivityCard activity={activity} />
+          ))}
+        </div>
+      </section>
       <section>
         <Title title="Ultimi articoli" />
         <div class="cards-grid">
@@ -207,6 +207,33 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
             + '<p class="reel-date">' + date + "</p></div></div>";
         }
 
+        function renderActivity(a) {
+          var stats = "";
+          if (a.hasDistance) stats += '<span class="stat">' + a.formattedDistance + "</span>";
+          stats += '<span class="stat">' + a.formattedDuration + "</span>";
+          if (a.formattedPace) stats += '<span class="stat pace">' + a.formattedPace + "</span>";
+          if (a.formattedElevation) stats += '<span class="stat">' + a.formattedElevation + "</span>";
+          return '<a class="ActivityCard" href="' + a.url + '" target="_blank" rel="noopener noreferrer">'
+            + '<div class="activity-type">'
+            + '<span class="activity-dot" style="background:' + a.color + '"></span>'
+            + '<span class="activity-label">' + a.label + "</span></div>"
+            + '<h3 class="activity-name">' + a.name + "</h3>"
+            + '<div class="activity-stats">' + stats + "</div>"
+            + '<span class="activity-date">' + a.formattedDate + "</span></a>";
+        }
+
+        function renderSummaryRow(s, badge) {
+          var html = '<div class="summary-row">'
+            + '<span class="summary-badge">' + badge + "</span>"
+            + '<span class="summary-km">' + s.distance + "</span>"
+            + '<span class="summary-sep">·</span>'
+            + '<span class="summary-meta">' + s.count + " att.</span>";
+          if (s.pace) html += '<span class="summary-sep">·</span><span class="summary-pace">' + s.pace + "</span>";
+          if (s.elevation) html += '<span class="summary-sep">·</span><span class="summary-meta">' + s.elevation + "</span>";
+          html += "</div>";
+          return html;
+        }
+
         function refresh() {
           fetch("/api/letterboxd")
             .then(function (r) { return r.json(); })
@@ -221,6 +248,26 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
             .then(function (songs) {
               var el = document.getElementById("songs-reel");
               if (el && Array.isArray(songs)) el.innerHTML = songs.map(renderSong).join("");
+            })
+            .catch(function () {});
+
+          fetch("/api/strava")
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.error) return;
+              var section = document.getElementById("strava-section");
+              var reel = document.getElementById("strava-reel");
+              var summary = document.getElementById("strava-summary");
+              if (section && data.activities && data.activities.length > 0) {
+                section.style.display = "";
+                if (reel) reel.innerHTML = data.activities.map(renderActivity).join("");
+                if (summary && data.stats) {
+                  summary.innerHTML = '<div class="StravaSummary">'
+                    + renderSummaryRow(data.stats.weekly, "7d")
+                    + renderSummaryRow(data.stats.monthly, "30d")
+                    + "</div>";
+                }
+              }
             })
             .catch(function () {});
         }
