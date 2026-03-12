@@ -226,6 +226,12 @@
   border-radius: 2rem;
   transition: border-color 0.2s, opacity 0.3s;
   max-width: calc(100% - 3rem);
+  animation: pillBounce 2s ease-in-out infinite;
+}
+
+@keyframes pillBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-4px); }
 }
 
 .hero-mobile-pill.hidden {

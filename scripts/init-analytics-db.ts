@@ -17,6 +17,7 @@ await db.executeMultiple(`
     utm_campaign    TEXT,
     utm_content     TEXT,
     is_unique       INTEGER NOT NULL DEFAULT 0,
+    visitor_hash    TEXT,
     time_on_page    INTEGER,
     scroll_depth    INTEGER,
     browser         TEXT,
@@ -31,10 +32,16 @@ await db.executeMultiple(`
     created_at      TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS bot_hashes (
+    hash TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE INDEX IF NOT EXISTS idx_pv_created ON pageviews(created_at);
   CREATE INDEX IF NOT EXISTS idx_pv_pathname ON pageviews(pathname);
   CREATE INDEX IF NOT EXISTS idx_pv_hostname ON pageviews(hostname, created_at);
   CREATE INDEX IF NOT EXISTS idx_pv_page_id ON pageviews(page_id);
+  CREATE INDEX IF NOT EXISTS idx_pv_visitor_hash ON pageviews(visitor_hash);
 `);
 
 console.log("Analytics table created successfully.");

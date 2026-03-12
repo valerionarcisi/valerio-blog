@@ -4,6 +4,18 @@ import { verifyBearerToken } from "~/lib/auth";
 
 export const prerender = false;
 
+async function recalcUniqueForHashes(
+  db: ReturnType<typeof getDb>,
+  hashes: string[],
+) {
+  for (const h of hashes) {
+    await db.execute({
+      sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
+      args: [h],
+    });
+  }
+}
+
 export const POST: APIRoute = async ({ request }) => {
   if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
@@ -34,6 +46,7 @@ export const POST: APIRoute = async ({ request }) => {
       sql: `INSERT OR IGNORE INTO bot_hashes (hash) VALUES ${placeholders}`,
       args: valid,
     });
+    await recalcUniqueForHashes(db, valid);
     return new Response(JSON.stringify({ ok: true, flagged: valid.length }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -51,6 +64,7 @@ export const POST: APIRoute = async ({ request }) => {
     sql: "INSERT OR IGNORE INTO bot_hashes (hash) VALUES (?)",
     args: [hash],
   });
+  await recalcUniqueForHashes(db, [hash]);
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,

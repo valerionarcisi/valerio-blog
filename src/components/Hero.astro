@@ -97,9 +97,14 @@ const latestLabel = lang === "it" ? "Ultimo articolo" : "Latest post";
   const pill = document.querySelector('.hero-mobile-pill') as HTMLElement;
   const hero = document.querySelector('.Hero') as HTMLElement;
   if (pill && hero) {
+    let lastY = window.scrollY;
     const toggle = () => {
-      const heroBottom = hero.getBoundingClientRect().bottom;
-      pill.classList.toggle('hidden', heroBottom < 100);
+      const y = window.scrollY;
+      const heroRect = hero.getBoundingClientRect();
+      const inHero = heroRect.top <= 0 && heroRect.bottom > window.innerHeight * 0.5;
+      const nearTop = y < 50;
+      pill.classList.toggle('hidden', !nearTop && !inHero);
+      lastY = y;
     };
     window.addEventListener('scroll', toggle, { passive: true });
     toggle();

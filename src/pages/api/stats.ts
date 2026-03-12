@@ -31,8 +31,14 @@ export const GET: APIRoute = async ({ request, url }) => {
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();
 
-  const botFilter =
-    "AND (visitor_hash IS NULL OR visitor_hash NOT IN (SELECT hash FROM bot_hashes))";
+  let botFilter = "";
+  try {
+    await db.execute("SELECT 1 FROM bot_hashes LIMIT 0");
+    botFilter =
+      "AND (visitor_hash IS NULL OR visitor_hash NOT IN (SELECT hash FROM bot_hashes))";
+  } catch {
+    // bot_hashes table does not exist yet — skip filter
+  }
   const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') ${botFilter}${pathnameFilter ? " AND pathname = ?" : ""}`;
   const baseArgs = pathnameFilter
     ? [range.from, range.to, pathnameFilter]
