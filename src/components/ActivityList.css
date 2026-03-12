@@ -1,0 +1,78 @@
+.ActivityList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0 var(--space-medium);
+  margin: var(--space-small) 0;
+}
+
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid #1e1e22;
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+  font-size: 0.78rem;
+}
+
+.activity-row:last-child {
+  border-bottom: none;
+}
+
+.activity-row:hover {
+  background: #1a1a1e;
+}
+
+.activity-row .activity-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-row .activity-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+.activity-row .activity-stats {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.7rem;
+  color: var(--text-muted, #8a8a8e);
+}
+
+.activity-row .activity-stats .pace {
+  color: var(--accent, #c8a000);
+}
+
+.activity-row .activity-date {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  color: var(--text-muted, #8a8a8e);
+  min-width: 3rem;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .activity-row .activity-stats {
+    gap: 0.35rem;
+    font-size: 0.65rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .ActivityList {
+    padding: 0 var(--space-large);
+  }
+}

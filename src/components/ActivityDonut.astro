@@ -1,0 +1,61 @@
+---
+import type { TypeDistribution } from "~/services/strava";
+import "./ActivityDonut.css";
+
+interface Props {
+  distribution: TypeDistribution[];
+  totalActivities: number;
+}
+
+const { distribution, totalActivities } = Astro.props;
+
+const radius = 36;
+const strokeWidth = 8;
+const circumference = 2 * Math.PI * radius;
+const cx = 50;
+const cy = 50;
+
+let accumulatedOffset = 0;
+const segments = distribution.map((d) => {
+  const length = (d.percentage / 100) * circumference;
+  const offset = accumulatedOffset;
+  accumulatedOffset += length;
+  return { ...d, length, offset };
+});
+---
+
+<div class="ActivityDonut">
+  <div class="donut-chart">
+    <svg viewBox="0 0 100 100" role="img" aria-label="Activity type distribution">
+      <circle cx={cx} cy={cy} r={radius} fill="none" stroke="var(--border)" stroke-width={strokeWidth} />
+      {segments.map((seg) => (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={radius}
+          fill="none"
+          stroke={seg.color}
+          stroke-width={strokeWidth}
+          stroke-dasharray={`${seg.length} ${circumference - seg.length}`}
+          stroke-dashoffset={-seg.offset}
+          stroke-linecap="round"
+          transform={`rotate(-90 ${cx} ${cy})`}
+          opacity="0.85"
+        >
+          <title>{seg.label}: {seg.count} ({seg.percentage}%)</title>
+        </circle>
+      ))}
+      <text x={cx} y={cy - 4} text-anchor="middle" fill="#e8e6e1" font-size="14" font-weight="700" font-family="'Staatliches', sans-serif">{totalActivities}</text>
+      <text x={cx} y={cy + 8} text-anchor="middle" fill="#8a8a8e" font-size="6" text-transform="uppercase" letter-spacing="0.5">{totalActivities === 1 ? "att." : "att."}</text>
+    </svg>
+  </div>
+  <div class="donut-legend">
+    {segments.map((seg) => (
+      <div class="legend-item">
+        <span class="legend-dot" style={`background:${seg.color}`} />
+        <span class="legend-text">{seg.label}</span>
+        <span class="legend-pct">{seg.percentage}%</span>
+      </div>
+    ))}
+  </div>
+</div>

@@ -1,0 +1,48 @@
+---
+import "~/components/ActivityList.css";
+import {
+  formatDistance,
+  formatDuration,
+  formatPace,
+  activityColor,
+} from "~/services/strava";
+import type { NormalizedActivity } from "~/services/strava";
+
+interface Props {
+  activities: NormalizedActivity[];
+}
+
+const { activities } = Astro.props;
+---
+
+<div class="ActivityList" id="strava-reel">
+  {activities.map((a) => {
+    const distance = formatDistance(a.distance);
+    const duration = formatDuration(a.movingTime);
+    const pace = formatPace(a.averageSpeed, a.sportType);
+    const color = activityColor(a.sportType);
+    const date = new Date(a.date).toLocaleDateString("en-us", {
+      month: "short",
+      day: "numeric",
+    });
+    const hasDistance = a.distance > 0;
+    return (
+      <a
+        class="activity-row"
+        href={a.url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span class="activity-dot" style={`background:${color}`} />
+        <span class="activity-name">{a.name}</span>
+        <span class="activity-stats">
+          {hasDistance && <span>{distance}</span>}
+          <span>{duration}</span>
+          {pace && <span class="pace">{pace}</span>}
+          {a.elevation > 0 && <span>↑{Math.round(a.elevation)}m</span>}
+        </span>
+        <span class="activity-date">{date}</span>
+      </a>
+    );
+  })}
+</div>

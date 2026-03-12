@@ -12,9 +12,11 @@ import { getMovieById } from "~/services/tmdb";
 import Reel from "~/components/Reel.astro";
 import "./index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
-import { fetchRecentActivities, fetchActivityStats } from "~/services/strava";
-import ActivityCard from "~/components/ActivityCard.astro";
+import { fetchRecentActivities, fetchFullStats } from "~/services/strava";
+import ActivityList from "~/components/ActivityList.astro";
 import StravaSummary from "~/components/StravaSummary.astro";
+import RunWeeklyChart from "~/components/RunWeeklyChart.astro";
+import ActivityDonut from "~/components/ActivityDonut.astro";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 
@@ -51,11 +53,11 @@ const posts = allEntries
     slug: getSlugFromId(e.id),
   }));
 
-const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.all([
+const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
   lastWatchedMovies(),
   fetchRecentTracks(),
   fetchRecentActivities(5).catch(() => []),
-  fetchActivityStats().catch(() => null),
+  fetchFullStats().catch(() => null),
 ]);
 ---
 
@@ -88,6 +90,8 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
           href: "https://www.youtube.com/watch?v=UnQ8NSXYXao",
         },
       ]}
+      latestPost={posts[0]}
+      lang="it"
     />
     <main>
       <section id="last-watched">
@@ -136,16 +140,27 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
       </section>
       <section id="strava-section" style={lastActivities.length === 0 ? "display:none" : ""}>
         <Title title="Ultime attività sportive" />
-        <div id="strava-summary">
-          {activityStats && (
-            <StravaSummary stats={activityStats} />
+        <div class="strava-top" id="strava-top">
+          <div id="strava-summary">
+            {fullStats && (
+              <StravaSummary stats={fullStats.periodStats} />
+            )}
+          </div>
+          {fullStats && (
+            <div id="strava-donut">
+              <ActivityDonut
+                distribution={fullStats.typeDistribution}
+                totalActivities={fullStats.periodStats.monthly.totalActivities}
+              />
+            </div>
           )}
         </div>
-        <div class="ReelContainer" id="strava-reel">
-          {lastActivities.map((activity) => (
-            <ActivityCard activity={activity} />
-          ))}
+        <div class="strava-chart-full" id="strava-charts">
+          {fullStats && (
+            <RunWeeklyChart weeks={fullStats.weeklyRunStats} />
+          )}
         </div>
+        <ActivityList activities={lastActivities} />
       </section>
       <section>
         <Title title="Ultimi articoli" />
@@ -209,16 +224,14 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
 
         function renderActivity(a) {
           var stats = "";
-          if (a.hasDistance) stats += '<span class="stat">' + a.formattedDistance + "</span>";
-          stats += '<span class="stat">' + a.formattedDuration + "</span>";
-          if (a.formattedPace) stats += '<span class="stat pace">' + a.formattedPace + "</span>";
-          if (a.formattedElevation) stats += '<span class="stat">' + a.formattedElevation + "</span>";
-          return '<a class="ActivityCard" href="' + a.url + '" target="_blank" rel="noopener noreferrer">'
-            + '<div class="activity-type">'
+          if (a.hasDistance) stats += "<span>" + a.formattedDistance + "</span>";
+          stats += "<span>" + a.formattedDuration + "</span>";
+          if (a.formattedPace) stats += '<span class="pace">' + a.formattedPace + "</span>";
+          if (a.formattedElevation) stats += "<span>" + a.formattedElevation + "</span>";
+          return '<a class="activity-row" href="' + a.url + '" target="_blank" rel="noopener noreferrer">'
             + '<span class="activity-dot" style="background:' + a.color + '"></span>'
-            + '<span class="activity-label">' + a.label + "</span></div>"
-            + '<h3 class="activity-name">' + a.name + "</h3>"
-            + '<div class="activity-stats">' + stats + "</div>"
+            + '<span class="activity-name">' + a.name + "</span>"
+            + '<span class="activity-stats">' + stats + "</span>"
             + '<span class="activity-date">' + a.formattedDate + "</span></a>";
         }
 
@@ -232,6 +245,132 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
           if (s.elevation) html += '<span class="summary-sep">·</span><span class="summary-meta">' + s.elevation + "</span>";
           html += "</div>";
           return html;
+        }
+
+        function fmtPace(secPerKm) {
+          var m = Math.floor(secPerKm / 60);
+          var s = Math.round(secPerKm % 60);
+          return m + ":" + (s < 10 ? "0" : "") + s + " /km";
+        }
+
+        function renderLineChart(weeks) {
+          var hasData = false;
+          for (var i = 0; i < weeks.length; i++) { if (weeks[i].runs > 0) hasData = true; }
+          if (!hasData) return '<div class="RunWeeklyChart"><div class="chart-empty">Nessuna corsa recente</div></div>';
+
+          var svgW = 440, svgH = 170, padX = 40, padY = 24, padBottom = 28;
+          var chartW = svgW - padX * 2, chartH = svgH - padY - padBottom;
+          var distances = [], paces = [];
+          for (var i = 0; i < weeks.length; i++) {
+            distances.push(weeks[i].distance / 1000);
+            if (weeks[i].pace > 0) paces.push(weeks[i].pace);
+          }
+          var maxDist = Math.max.apply(null, distances.concat([1]));
+          var minPace = paces.length > 0 ? Math.min.apply(null, paces) - 15 : 240;
+          var maxPace = paces.length > 0 ? Math.max.apply(null, paces) + 15 : 420;
+          var xStep = weeks.length > 1 ? chartW / (weeks.length - 1) : chartW;
+
+          var bestIdx = 0;
+          for (var i = 1; i < distances.length; i++) { if (distances[i] > distances[bestIdx]) bestIdx = i; }
+
+          var distPts = [], pacePts = [];
+          for (var i = 0; i < weeks.length; i++) {
+            var x = padX + i * xStep;
+            var dy = padY + chartH - (distances[i] / maxDist) * chartH;
+            distPts.push({ x: x, y: dy, v: distances[i] });
+            if (weeks[i].pace > 0) {
+              var norm = (maxPace - weeks[i].pace) / (maxPace - minPace);
+              var py = padY + chartH - norm * chartH;
+              pacePts.push({ x: x, y: py, v: weeks[i].pace });
+            }
+          }
+
+          var distLine = "", distArea = "", paceLine = "";
+          for (var i = 0; i < distPts.length; i++) {
+            distLine += (i === 0 ? "M" : "L") + distPts[i].x + "," + distPts[i].y + " ";
+          }
+          distArea = distLine + "L" + distPts[distPts.length - 1].x + "," + (padY + chartH) + " L" + distPts[0].x + "," + (padY + chartH) + " Z";
+          for (var i = 0; i < pacePts.length; i++) {
+            paceLine += (i === 0 ? "M" : "L") + pacePts[i].x + "," + pacePts[i].y + " ";
+          }
+
+          var svg = "";
+          var gridPcts = [0.25, 0.5, 0.75];
+          for (var g = 0; g < gridPcts.length; g++) {
+            var gy = padY + chartH - chartH * gridPcts[g];
+            svg += '<line x1="' + padX + '" y1="' + gy + '" x2="' + (svgW - padX) + '" y2="' + gy + '" stroke="#252528" stroke-width="0.5" stroke-dasharray="3,4"/>';
+          }
+          svg += '<line x1="' + padX + '" y1="' + (padY + chartH) + '" x2="' + (svgW - padX) + '" y2="' + (padY + chartH) + '" stroke="#333" stroke-width="0.5"/>';
+
+          var distYVals = [0, maxDist / 2, maxDist];
+          for (var i = 0; i < distYVals.length; i++) {
+            var ly = padY + chartH - (distYVals[i] / maxDist) * chartH;
+            svg += '<text x="' + (padX - 4) + '" y="' + (ly + 2) + '" text-anchor="end" fill="#fc4c02" font-size="7" font-family="JetBrains Mono, monospace" opacity="0.6">' + distYVals[i].toFixed(0) + "</text>";
+          }
+          var paceYVals = [minPace, (minPace + maxPace) / 2, maxPace];
+          for (var i = 0; i < paceYVals.length; i++) {
+            var ly = padY + chartH - ((maxPace - paceYVals[i]) / (maxPace - minPace)) * chartH;
+            var pm = Math.floor(paceYVals[i] / 60);
+            var ps = Math.round(paceYVals[i] % 60);
+            svg += '<text x="' + (svgW - padX + 4) + '" y="' + (ly + 2) + '" text-anchor="start" fill="#c8a000" font-size="7" font-family="JetBrains Mono, monospace" opacity="0.6">' + pm + ":" + (ps < 10 ? "0" : "") + ps + "</text>";
+          }
+
+          svg += '<path d="' + distArea + '" fill="#fc4c02" opacity="0.08"/>';
+          svg += '<path d="' + distLine + '" fill="none" stroke="#fc4c02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+          if (pacePts.length > 1) {
+            svg += '<path d="' + paceLine + '" fill="none" stroke="#c8a000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>';
+          }
+
+          for (var i = 0; i < distPts.length; i++) {
+            var isBest = i === bestIdx && distances[bestIdx] > 0;
+            var elev = weeks[i].elevation > 0 ? " ↑" + Math.round(weeks[i].elevation) + "m" : "";
+            var tip = weeks[i].weekLabel + ": " + distPts[i].v.toFixed(1) + " km — " + weeks[i].runs + " corse" + elev;
+            if (isBest) svg += '<circle cx="' + distPts[i].x + '" cy="' + distPts[i].y + '" r="9" fill="#fc4c02" opacity="0.12"/>';
+            svg += '<g><circle cx="' + distPts[i].x + '" cy="' + distPts[i].y + '" r="' + (isBest ? 5 : 3.5) + '" fill="' + (isBest ? "#ff6b2b" : "#fc4c02") + '" stroke="#151518" stroke-width="' + (isBest ? 2 : 1.5) + '"/>';
+            svg += '<title>' + tip + "</title></g>";
+          }
+          for (var i = 0; i < weeks.length; i++) {
+            if (weeks[i].runs > 0) {
+              svg += '<text x="' + distPts[i].x + '" y="' + (distPts[i].y - 8) + '" text-anchor="middle" fill="#8a8a8e" font-size="6" font-family="JetBrains Mono, monospace">' + weeks[i].runs + "x</text>";
+            }
+          }
+          for (var i = 0; i < pacePts.length; i++) {
+            svg += '<g><circle cx="' + pacePts[i].x + '" cy="' + pacePts[i].y + '" r="2.5" fill="#c8a000" stroke="#151518" stroke-width="1"/>';
+            svg += '<title>' + fmtPace(pacePts[i].v) + "</title></g>";
+          }
+
+          for (var i = 0; i < weeks.length; i++) {
+            var x = padX + i * xStep;
+            svg += '<text x="' + x + '" y="' + (svgH - 6) + '" text-anchor="middle" fill="#8a8a8e" font-size="6.5" font-family="JetBrains Mono, monospace">' + weeks[i].weekLabel + "</text>";
+          }
+
+          var header = '<div class="chart-header"><span class="chart-title">Corsa settimanale</span>'
+            + '<div class="chart-legend"><span class="legend-item"><span class="legend-line dist"></span>km</span>'
+            + '<span class="legend-item"><span class="legend-line pace"></span>pace</span></div></div>';
+
+          return '<div class="RunWeeklyChart">' + header + '<svg viewBox="0 0 ' + svgW + " " + svgH + '" role="img">' + svg + "</svg></div>";
+        }
+
+        function renderDonut(dist, total) {
+          var r = 36, sw = 8, cx = 50, cy = 50;
+          var circ = 2 * Math.PI * r;
+          var acc = 0;
+          var arcs = '<circle cx="50" cy="50" r="36" fill="none" stroke="#252528" stroke-width="8"/>';
+          for (var i = 0; i < dist.length; i++) {
+            var seg = dist[i];
+            var len = (seg.percentage / 100) * circ;
+            arcs += '<circle cx="50" cy="50" r="36" fill="none" stroke="' + seg.color + '" stroke-width="8" stroke-dasharray="' + len + " " + (circ - len) + '" stroke-dashoffset="' + (-acc) + '" stroke-linecap="round" transform="rotate(-90 50 50)" opacity="0.85"><title>' + seg.label + ": " + seg.count + " (" + seg.percentage + "%)</title></circle>";
+            acc += len;
+          }
+          var svg = '<svg viewBox="0 0 100 100" role="img">' + arcs
+            + '<text x="50" y="46" text-anchor="middle" fill="#e8e6e1" font-size="14" font-weight="700" font-family="Staatliches, sans-serif">' + total + "</text>"
+            + '<text x="50" y="58" text-anchor="middle" fill="#8a8a8e" font-size="6">att.</text></svg>';
+          var legend = "";
+          for (var i = 0; i < dist.length; i++) {
+            var s = dist[i];
+            legend += '<div class="legend-item"><span class="legend-dot" style="background:' + s.color + '"></span><span class="legend-text">' + s.label + '</span><span class="legend-pct">' + s.percentage + "%</span></div>";
+          }
+          return '<div class="ActivityDonut"><div class="donut-chart">' + svg + '</div><div class="donut-legend">' + legend + "</div></div>";
         }
 
         function fixBrokenImages(container, placeholder) {
@@ -273,6 +412,8 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
               var section = document.getElementById("strava-section");
               var reel = document.getElementById("strava-reel");
               var summary = document.getElementById("strava-summary");
+              var charts = document.getElementById("strava-charts");
+              var donutEl = document.getElementById("strava-donut");
               if (section && data.activities && data.activities.length > 0) {
                 section.style.display = "";
                 if (reel) reel.innerHTML = data.activities.map(renderActivity).join("");
@@ -281,6 +422,13 @@ const [lastWatched, lastSongs, lastActivities, activityStats] = await Promise.al
                     + renderSummaryRow(data.stats.weekly, "7d")
                     + renderSummaryRow(data.stats.monthly, "30d")
                     + "</div>";
+                }
+                if (donutEl && data.typeDistribution) {
+                  var total = data.stats ? data.stats.monthly.count : 0;
+                  donutEl.innerHTML = renderDonut(data.typeDistribution, total);
+                }
+                if (charts && data.weeklyRunStats) {
+                  charts.innerHTML = renderLineChart(data.weeklyRunStats);
                 }
               }
             })

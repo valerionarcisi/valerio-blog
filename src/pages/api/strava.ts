@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import {
   fetchRecentActivities,
-  fetchActivityStats,
+  fetchFullStats,
   formatDistance,
   formatDuration,
   formatPace,
@@ -14,9 +14,9 @@ export const prerender = false;
 
 export const GET: APIRoute = async () => {
   try {
-    const [activities, stats] = await Promise.all([
+    const [activities, fullStats] = await Promise.all([
       fetchRecentActivities(5),
-      fetchActivityStats(),
+      fetchFullStats(),
     ]);
 
     const formatted = activities.map((a) => ({
@@ -35,7 +35,7 @@ export const GET: APIRoute = async () => {
         a.elevation > 0 ? `↑${Math.round(a.elevation)}m` : "",
     }));
 
-    const formatStats = (s: typeof stats.weekly) => ({
+    const formatStats = (s: typeof fullStats.periodStats.weekly) => ({
       distance: formatDistance(s.totalDistance),
       duration: formatDuration(s.totalMovingTime),
       pace: formatPaceFromSecondsPerKm(s.averagePace),
@@ -47,9 +47,12 @@ export const GET: APIRoute = async () => {
       JSON.stringify({
         activities: formatted,
         stats: {
-          weekly: formatStats(stats.weekly),
-          monthly: formatStats(stats.monthly),
+          weekly: formatStats(fullStats.periodStats.weekly),
+          monthly: formatStats(fullStats.periodStats.monthly),
         },
+        dailyBreakdown: fullStats.dailyBreakdown,
+        typeDistribution: fullStats.typeDistribution,
+        weeklyRunStats: fullStats.weeklyRunStats,
       }),
       {
         headers: {

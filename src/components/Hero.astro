@@ -1,10 +1,21 @@
 ---
 import '~/components/Hero.css'
 import Button from '~/components/Button.astro'
+import FormattedDate from '~/components/FormattedDate.astro'
+import Tag from '~/components/Tag.astro'
 
 interface CallToAction {
     label: string;
     href: string;
+}
+
+interface LatestPost {
+    title: string;
+    slug: string;
+    date: string;
+    tags: string[];
+    coverImage?: string;
+    extract?: string;
 }
 
 interface Props {
@@ -13,9 +24,13 @@ interface Props {
     role: string;
     aiTagline?: string;
     callToActions: CallToAction[];
+    latestPost?: LatestPost;
+    lang?: string;
 }
 
-const { title, subtitle, role, aiTagline, callToActions } = Astro.props;
+const { title, subtitle, role, aiTagline, callToActions, latestPost, lang = "it" } = Astro.props;
+const blogPrefix = lang === "it" ? "/blog" : "/en/blog";
+const latestLabel = lang === "it" ? "Ultimo articolo" : "Latest post";
 ---
 
 <section class="Hero">
@@ -26,6 +41,24 @@ const { title, subtitle, role, aiTagline, callToActions } = Astro.props;
   </div>
 
   <div class="overlay">
+    {latestPost && (
+      <a class="hero-latest-post" href={`${blogPrefix}/${latestPost.slug}/`}>
+        {latestPost.coverImage && (
+          <img class="hlp-cover" src={latestPost.coverImage} alt="" loading="eager" />
+        )}
+        <span class="hlp-label">{latestLabel}</span>
+        <span class="hlp-title">{latestPost.title}</span>
+        {latestPost.extract && (
+          <span class="hlp-extract">{latestPost.extract.length > 100 ? latestPost.extract.substring(0, 97) + "..." : latestPost.extract}</span>
+        )}
+        <span class="hlp-meta">
+          <FormattedDate date={new Date(latestPost.date)} />
+          {latestPost.tags.slice(0, 2).map((tag) => (
+            <Tag tag={tag} lang={lang} asSpan={true} />
+          ))}
+        </span>
+      </a>
+    )}
     <div class="content">
       <h1 class="cursor-blink">{title}</h1>
       <p class="hero-subtitle">

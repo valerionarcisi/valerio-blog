@@ -1,0 +1,167 @@
+---
+import type { WeeklyRunStats } from "~/services/strava";
+import { formatPaceFromSecondsPerKm } from "~/services/strava";
+import "./RunWeeklyChart.css";
+
+interface Props {
+  weeks: WeeklyRunStats[];
+}
+
+const { weeks } = Astro.props;
+
+const hasData = weeks.some((w) => w.runs > 0);
+
+const svgW = 440;
+const svgH = 170;
+const padX = 40;
+const padY = 24;
+const padBottom = 28;
+const chartW = svgW - padX * 2;
+const chartH = svgH - padY - padBottom;
+
+const distances = weeks.map((w) => w.distance / 1000);
+const paces = weeks.filter((w) => w.pace > 0).map((w) => w.pace);
+
+const maxDist = Math.max(...distances, 1);
+const minPace = paces.length > 0 ? Math.min(...paces) - 15 : 240;
+const maxPace = paces.length > 0 ? Math.max(...paces) + 15 : 420;
+
+const xStep = weeks.length > 1 ? chartW / (weeks.length - 1) : chartW;
+
+const bestWeekIdx = distances.reduce((best, d, i) => (d > distances[best] ? i : best), 0);
+
+const distPoints = weeks.map((w, i) => {
+  const x = padX + i * xStep;
+  const y = padY + chartH - (distances[i] / maxDist) * chartH;
+  return { x, y, value: distances[i] };
+});
+
+const pacePoints = weeks.map((w, i) => {
+  const x = padX + i * xStep;
+  const normalized = w.pace > 0 ? (maxPace - w.pace) / (maxPace - minPace) : 0;
+  const y = padY + chartH - normalized * chartH;
+  return { x, y, value: w.pace, hasValue: w.pace > 0 };
+}).filter((p) => p.hasValue);
+
+const distLine = distPoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+const paceLine = pacePoints.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+
+const distArea = distLine + ` L${distPoints[distPoints.length - 1].x},${padY + chartH} L${distPoints[0].x},${padY + chartH} Z`;
+
+const distYLabels = [0, maxDist / 2, maxDist].map((v) => ({
+  value: v.toFixed(0),
+  y: padY + chartH - (v / maxDist) * chartH,
+}));
+
+const paceYLabels = [minPace, (minPace + maxPace) / 2, maxPace].map((v) => {
+  const mins = Math.floor(v / 60);
+  const secs = Math.round(v % 60);
+  return {
+    value: `${mins}:${secs.toString().padStart(2, "0")}`,
+    y: padY + chartH - ((maxPace - v) / (maxPace - minPace)) * chartH,
+  };
+});
+
+const fmtElev = (e: number) => e > 0 ? `↑${Math.round(e)}m` : "";
+---
+
+<div class="RunWeeklyChart">
+  <div class="chart-header">
+    <span class="chart-title">Corsa settimanale</span>
+    <div class="chart-legend">
+      <span class="legend-item"><span class="legend-line dist"></span>km</span>
+      <span class="legend-item"><span class="legend-line pace"></span>pace</span>
+    </div>
+  </div>
+  {hasData ? (
+    <svg viewBox={`0 0 ${svgW} ${svgH}`} role="img" aria-label="Weekly running stats">
+      {[0.25, 0.5, 0.75].map((pct) => (
+        <line
+          x1={padX}
+          y1={padY + chartH - chartH * pct}
+          x2={svgW - padX}
+          y2={padY + chartH - chartH * pct}
+          stroke="#252528"
+          stroke-width="0.5"
+          stroke-dasharray="3,4"
+        />
+      ))}
+      <line x1={padX} y1={padY + chartH} x2={svgW - padX} y2={padY + chartH} stroke="#333" stroke-width="0.5" />
+
+      {distYLabels.map((l) => (
+        <text x={padX - 4} y={l.y + 2} text-anchor="end" fill="#fc4c02" font-size="7" font-family="'JetBrains Mono', monospace" opacity="0.6">
+          {l.value}
+        </text>
+      ))}
+
+      {paceYLabels.map((l) => (
+        <text x={svgW - padX + 4} y={l.y + 2} text-anchor="start" fill="#c8a000" font-size="7" font-family="'JetBrains Mono', monospace" opacity="0.6">
+          {l.value}
+        </text>
+      ))}
+
+      <path d={distArea} fill="#fc4c02" opacity="0.08" />
+      <path d={distLine} fill="none" stroke="#fc4c02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+      {pacePoints.length > 1 && (
+        <path d={paceLine} fill="none" stroke="#c8a000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3" />
+      )}
+
+      {distPoints.map((p, i) => {
+        const isBest = i === bestWeekIdx && distances[bestWeekIdx] > 0;
+        const r = isBest ? 5 : 3.5;
+        const sw = isBest ? 2 : 1.5;
+        const elevStr = fmtElev(weeks[i].elevation);
+        const tooltip = `${weeks[i].weekLabel}: ${p.value.toFixed(1)} km — ${weeks[i].runs} corse${elevStr ? " " + elevStr : ""}`;
+        return (
+          <g>
+            {isBest && (
+              <circle cx={p.x} cy={p.y} r="9" fill="#fc4c02" opacity="0.12" />
+            )}
+            <circle cx={p.x} cy={p.y} r={r} fill={isBest ? "#ff6b2b" : "#fc4c02"} stroke="#151518" stroke-width={sw} />
+            <title>{tooltip}</title>
+          </g>
+        );
+      })}
+
+      {weeks.map((w, i) => {
+        if (w.runs === 0) return null;
+        const p = distPoints[i];
+        return (
+          <text
+            x={p.x}
+            y={p.y - 8}
+            text-anchor="middle"
+            fill="#8a8a8e"
+            font-size="6"
+            font-family="'JetBrains Mono', monospace"
+          >
+            {w.runs}x
+          </text>
+        );
+      })}
+
+      {pacePoints.map((p) => (
+        <g>
+          <circle cx={p.x} cy={p.y} r="2.5" fill="#c8a000" stroke="#151518" stroke-width="1" />
+          <title>{formatPaceFromSecondsPerKm(p.value)}</title>
+        </g>
+      ))}
+
+      {weeks.map((w, i) => (
+        <text
+          x={padX + i * xStep}
+          y={svgH - 6}
+          text-anchor="middle"
+          fill="#8a8a8e"
+          font-size="6.5"
+          font-family="'JetBrains Mono', monospace"
+        >
+          {w.weekLabel}
+        </text>
+      ))}
+    </svg>
+  ) : (
+    <div class="chart-empty">Nessuna corsa recente</div>
+  )}
+</div>

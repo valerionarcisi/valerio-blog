@@ -129,15 +129,163 @@ const computeStats = (activities: StravaActivity[]): ActivityStats => {
   };
 };
 
+export interface DailyBreakdown {
+  date: string;
+  distance: number;
+  duration: number;
+  type: string;
+  color: string;
+}
+
+export interface TypeDistribution {
+  type: string;
+  label: string;
+  color: string;
+  totalDistance: number;
+  totalDuration: number;
+  count: number;
+  percentage: number;
+}
+
+export interface WeeklyRunStats {
+  weekLabel: string;
+  weekStart: string;
+  distance: number;
+  pace: number;
+  runs: number;
+  elevation: number;
+}
+
+export interface FullStats {
+  periodStats: PeriodStats;
+  dailyBreakdown: DailyBreakdown[];
+  typeDistribution: TypeDistribution[];
+  weeklyRunStats: WeeklyRunStats[];
+}
+
+const computeDailyBreakdown = (activities: StravaActivity[]): DailyBreakdown[] => {
+  const days: DailyBreakdown[] = [];
+  const now = new Date();
+
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+
+    const dayActivities = activities.filter(
+      (a) => a.start_date.slice(0, 10) === key,
+    );
+
+    if (dayActivities.length === 0) {
+      days.push({ date: key, distance: 0, duration: 0, type: "", color: "#252528" });
+      continue;
+    }
+
+    const totalDistance = dayActivities.reduce((s, a) => s + a.distance, 0);
+    const totalDuration = dayActivities.reduce((s, a) => s + a.moving_time, 0);
+    const primary = dayActivities.reduce((best, a) =>
+      a.moving_time > best.moving_time ? a : best,
+    );
+
+    days.push({
+      date: key,
+      distance: totalDistance,
+      duration: totalDuration,
+      type: primary.sport_type,
+      color: activityColor(primary.sport_type),
+    });
+  }
+
+  return days;
+};
+
+const computeTypeDistribution = (activities: StravaActivity[]): TypeDistribution[] => {
+  const groups = new Map<string, { distance: number; duration: number; count: number }>();
+
+  for (const a of activities) {
+    const key = a.sport_type;
+    const prev = groups.get(key) ?? { distance: 0, duration: 0, count: 0 };
+    groups.set(key, {
+      distance: prev.distance + a.distance,
+      duration: prev.duration + a.moving_time,
+      count: prev.count + 1,
+    });
+  }
+
+  const totalCount = activities.length;
+  return Array.from(groups.entries())
+    .map(([type, g]) => ({
+      type,
+      label: activityLabel(type),
+      color: activityColor(type),
+      totalDistance: g.distance,
+      totalDuration: g.duration,
+      count: g.count,
+      percentage: totalCount > 0 ? Math.round((g.count / totalCount) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
+};
+
+const computeWeeklyRunStats = (activities: StravaActivity[], weeks: number): WeeklyRunStats[] => {
+  const runs = activities.filter((a) => a.sport_type === "Run" || a.sport_type === "TrailRun");
+  const result: WeeklyRunStats[] = [];
+  const now = new Date();
+
+  for (let w = weeks - 1; w >= 0; w--) {
+    const weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() - w * 7);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekStart = new Date(weekEnd);
+    weekStart.setDate(weekStart.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekRuns = runs.filter((a) => {
+      const d = new Date(a.start_date);
+      return d >= weekStart && d <= weekEnd;
+    });
+
+    const totalDistance = weekRuns.reduce((s, a) => s + a.distance, 0);
+    const totalTime = weekRuns.reduce((s, a) => s + a.moving_time, 0);
+    const totalElevation = weekRuns.reduce((s, a) => s + a.total_elevation_gain, 0);
+    const avgPace = totalDistance > 0 ? totalTime / (totalDistance / 1000) : 0;
+
+    const startDay = weekStart.getDate();
+    const endDay = weekEnd.getDate();
+    const startM = weekStart.getMonth() + 1;
+    const endM = weekEnd.getMonth() + 1;
+    const label = startM === endM
+      ? `${startDay}–${endDay}/${endM}`
+      : `${startDay}/${startM}–${endDay}/${endM}`;
+
+    result.push({
+      weekLabel: label,
+      weekStart: weekStart.toISOString().slice(0, 10),
+      distance: totalDistance,
+      pace: avgPace,
+      runs: weekRuns.length,
+      elevation: totalElevation,
+    });
+  }
+
+  return result;
+};
+
 export const fetchActivityStats = async (): Promise<PeriodStats> => {
+  const { periodStats } = await fetchFullStats();
+  return periodStats;
+};
+
+export const fetchFullStats = async (): Promise<FullStats> => {
   const accessToken = await refreshAccessToken();
 
   const now = Math.floor(Date.now() / 1000);
+  const twoMonthsAgo = now - 60 * 24 * 60 * 60;
   const oneMonthAgo = now - 30 * 24 * 60 * 60;
   const oneWeekAgo = now - 7 * 24 * 60 * 60;
 
   const response = await fetch(
-    `${API_URL}/athlete/activities?after=${oneMonthAgo}&per_page=100`,
+    `${API_URL}/athlete/activities?after=${twoMonthsAgo}&per_page=200`,
     { headers: { Authorization: `Bearer ${accessToken}` } },
   );
 
@@ -145,15 +293,23 @@ export const fetchActivityStats = async (): Promise<PeriodStats> => {
     throw new Error(`Failed to fetch Strava stats. Status: ${response.status}`);
   }
 
-  const activities: StravaActivity[] = await response.json();
+  const allActivities: StravaActivity[] = await response.json();
 
-  const weeklyActivities = activities.filter(
+  const monthlyActivities = allActivities.filter(
+    (a) => new Date(a.start_date).getTime() / 1000 >= oneMonthAgo,
+  );
+  const weeklyActivities = allActivities.filter(
     (a) => new Date(a.start_date).getTime() / 1000 >= oneWeekAgo,
   );
 
   return {
-    weekly: computeStats(weeklyActivities),
-    monthly: computeStats(activities),
+    periodStats: {
+      weekly: computeStats(weeklyActivities),
+      monthly: computeStats(monthlyActivities),
+    },
+    dailyBreakdown: computeDailyBreakdown(monthlyActivities),
+    typeDistribution: computeTypeDistribution(monthlyActivities),
+    weeklyRunStats: computeWeeklyRunStats(allActivities, 8),
   };
 };
 

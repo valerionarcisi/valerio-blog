@@ -1,0 +1,68 @@
+.RunWeeklyChart {
+  flex: 1;
+  min-width: 0;
+}
+
+.RunWeeklyChart .chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding: 0 4px;
+}
+
+.RunWeeklyChart .chart-title {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  color: #8a8a8e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.RunWeeklyChart .chart-legend {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.RunWeeklyChart .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.65rem;
+  color: #8a8a8e;
+}
+
+.RunWeeklyChart .legend-line {
+  display: inline-block;
+  width: 16px;
+  height: 2px;
+}
+
+.RunWeeklyChart .legend-line.dist {
+  background: #fc4c02;
+}
+
+.RunWeeklyChart .legend-line.pace {
+  background: #c8a000;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #c8a000 0,
+    #c8a000 4px,
+    transparent 4px,
+    transparent 7px
+  );
+}
+
+.RunWeeklyChart svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.RunWeeklyChart .chart-empty {
+  color: #8a8a8e;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 2rem 0;
+}
