@@ -72,16 +72,17 @@ const latestLabel = lang === "it" ? "Ultimo articolo" : "Latest post";
         {callToActions.map((cta) => <Button label={cta.label} href={cta.href} />)}
       </div>
     </div>
-    {latestPost && (
-      <a class="hero-mobile-post" href={`${blogPrefix}/${latestPost.slug}/`}>
-        <span class="hmp-label">{latestLabel}</span>
-        <span class="hmp-title">{latestPost.title}</span>
-      </a>
-    )}
     <button class="floating-btn">
       <span class="arrow">&#8595;</span>
     </button>
   </div>
+
+  {latestPost && (
+    <a class="hero-mobile-pill" href={`${blogPrefix}/${latestPost.slug}/`}>
+      <span class="hmp-swipe">swipe &rarr;</span>
+      <span class="hmp-title">{latestPost.title}</span>
+    </a>
+  )}
 </section>
 
 <script>
@@ -92,4 +93,15 @@ const latestLabel = lang === "it" ? "Ultimo articolo" : "Latest post";
       targetSection.scrollIntoView({ behavior: 'smooth' });
     }
   });
+
+  const pill = document.querySelector('.hero-mobile-pill') as HTMLElement;
+  const hero = document.querySelector('.Hero') as HTMLElement;
+  if (pill && hero) {
+    const toggle = () => {
+      const heroBottom = hero.getBoundingClientRect().bottom;
+      pill.classList.toggle('hidden', heroBottom < 100);
+    };
+    window.addEventListener('scroll', toggle, { passive: true });
+    toggle();
+  }
 </script>

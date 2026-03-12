@@ -71,7 +71,7 @@
   align-items: flex-start;
   z-index: 2;
   padding: 1.5rem;
-  padding-bottom: 9rem;
+  padding-bottom: 5rem;
 }
 
 .Hero .content {
@@ -206,43 +206,50 @@
   margin: 0;
 }
 
-/* Mobile latest post hint */
-.hero-mobile-post {
-  position: absolute;
-  bottom: 4rem;
-  left: 1.5rem;
-  right: 1.5rem;
+/* Mobile latest post pill — fixed below header */
+.hero-mobile-pill {
+  position: fixed;
+  top: 4.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.5rem;
   text-decoration: none;
   color: inherit;
-  z-index: 3;
-  padding: 0.5rem 0.75rem;
-  background: rgba(10, 10, 12, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.4rem;
-  transition: border-color 0.2s;
+  z-index: 100;
+  padding: 0.35rem 0.85rem;
+  background: rgba(10, 10, 12, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 2rem;
+  transition: border-color 0.2s, opacity 0.3s;
+  max-width: calc(100% - 3rem);
 }
 
-.hero-mobile-post:hover {
-  border-color: rgba(78, 205, 196, 0.3);
+.hero-mobile-pill.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
-.hmp-label {
+.hero-mobile-pill:hover {
+  border-color: rgba(78, 205, 196, 0.4);
+}
+
+.hmp-swipe {
   font-family: var(--fontFamily-mono);
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   color: var(--color-accent-cyan, #4ecdc4);
-  opacity: 0.9;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .hmp-title {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 500;
   color: #e8e6e1;
   line-height: 1.3;
   white-space: nowrap;
@@ -302,7 +309,7 @@
     display: flex;
   }
 
-  .hero-mobile-post {
+  .hero-mobile-pill {
     display: none;
   }
 
