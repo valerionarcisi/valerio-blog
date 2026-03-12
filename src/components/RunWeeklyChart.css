@@ -75,6 +75,18 @@
   display: block;
 }
 
+@media (max-width: 768px) {
+  .RunWeeklyChart .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .RunWeeklyChart svg {
+    height: 150px;
+  }
+}
+
 .RunWeeklyChart .chart-empty {
   color: #8a8a8e;
   font-size: 0.8rem;

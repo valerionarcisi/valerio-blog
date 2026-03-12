@@ -72,6 +72,12 @@ const latestLabel = lang === "it" ? "Ultimo articolo" : "Latest post";
         {callToActions.map((cta) => <Button label={cta.label} href={cta.href} />)}
       </div>
     </div>
+    {latestPost && (
+      <a class="hero-mobile-post" href={`${blogPrefix}/${latestPost.slug}/`}>
+        <span class="hmp-label">{latestLabel}</span>
+        <span class="hmp-title">{latestPost.title}</span>
+      </a>
+    )}
     <button class="floating-btn">
       <span class="arrow">&#8595;</span>
     </button>
