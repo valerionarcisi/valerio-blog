@@ -44,6 +44,10 @@ section {
     flex: 1;
   }
 
+  .strava-top #strava-donut {
+    flex: 1;
+  }
+
   .strava-chart-full {
     padding: 0 var(--space-large);
   }

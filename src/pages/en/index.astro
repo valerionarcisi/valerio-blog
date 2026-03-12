@@ -258,7 +258,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
           for (var i = 0; i < weeks.length; i++) { if (weeks[i].runs > 0) hasData = true; }
           if (!hasData) return '<div class="RunWeeklyChart"><div class="chart-empty">No recent runs</div></div>';
 
-          var svgW = 440, svgH = 170, padX = 40, padY = 24, padBottom = 28;
+          var svgW = 700, svgH = 160, padX = 40, padY = 24, padBottom = 28;
           var chartW = svgW - padX * 2, chartH = svgH - padY - padBottom;
           var distances = [], paces = [];
           for (var i = 0; i < weeks.length; i++) {
