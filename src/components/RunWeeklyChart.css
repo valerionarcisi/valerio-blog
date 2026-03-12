@@ -54,6 +54,21 @@
   );
 }
 
+.RunWeeklyChart .legend-label-nx {
+  font-size: 0.55rem;
+  color: #8a8a8e;
+  margin-right: 1px;
+}
+
+.RunWeeklyChart .legend-dot-best {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ff6b2b;
+  box-shadow: 0 0 4px rgba(252, 76, 2, 0.4);
+}
+
 .RunWeeklyChart svg {
   width: 100%;
   height: auto;

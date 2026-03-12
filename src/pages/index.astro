@@ -346,7 +346,9 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
 
           var header = '<div class="chart-header"><span class="chart-title">Corsa settimanale</span>'
             + '<div class="chart-legend"><span class="legend-item"><span class="legend-line dist"></span>km</span>'
-            + '<span class="legend-item"><span class="legend-line pace"></span>pace</span></div></div>';
+            + '<span class="legend-item"><span class="legend-line pace"></span>pace</span>'
+            + '<span class="legend-item"><span class="legend-label-nx">3x</span>corse</span>'
+            + '<span class="legend-item"><span class="legend-dot-best"></span>best</span></div></div>';
 
           return '<div class="RunWeeklyChart">' + header + '<svg viewBox="0 0 ' + svgW + " " + svgH + '" role="img">' + svg + "</svg></div>";
         }
