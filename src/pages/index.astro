@@ -353,6 +353,121 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
           return '<div class="RunWeeklyChart">' + header + '<svg viewBox="0 0 ' + svgW + " " + svgH + '" role="img">' + svg + "</svg></div>";
         }
 
+        function renderHeatmap(days) {
+          if (!days || days.length === 0) return '<div class="RunWeeklyChart"><div class="chart-empty">Nessuna attività recente</div></div>';
+
+          var isYear = days.length > 60;
+          var cellGap = 2;
+          var labelW = 18;
+          var dayLabels = ["", "L", "", "M", "", "V", ""];
+          var maxDur = 1;
+          for (var i = 0; i < days.length; i++) { if (days[i].duration > maxDur) maxDur = days[i].duration; }
+
+          var weeks = [];
+          var currentWeek = [];
+          for (var i = 0; i < days.length; i++) {
+            var d = new Date(days[i].date + "T12:00:00");
+            var dow = (d.getDay() + 6) % 7;
+            if (i === 0 && dow > 0) {
+              for (var p = 0; p < dow; p++) currentWeek.push(null);
+            }
+            currentWeek.push(days[i]);
+            if (dow === 6 || i === days.length - 1) {
+              weeks.push(currentWeek);
+              currentWeek = [];
+            }
+          }
+
+          var cols = weeks.length;
+          var targetW = 700;
+          var cellSize = Math.floor((targetW - labelW) / cols - cellGap);
+          cellSize = Math.max(8, Math.min(cellSize, 14));
+          var svgW = labelW + cols * (cellSize + cellGap);
+          var svgH = 7 * (cellSize + cellGap) + 20;
+
+          var svg = '';
+          for (var r = 0; r < 7; r++) {
+            if (!dayLabels[r]) continue;
+            svg += '<text x="' + (labelW - 3) + '" y="' + (r * (cellSize + cellGap) + cellSize / 2 + 3) + '" text-anchor="end" fill="#8a8a8e" font-size="6" font-family="JetBrains Mono, monospace">' + dayLabels[r] + '</text>';
+          }
+
+          var monthLabels = [];
+          for (var c = 0; c < weeks.length; c++) {
+            var week = weeks[c];
+            for (var r = 0; r < week.length; r++) {
+              var day = week[r];
+              var x = labelW + c * (cellSize + cellGap);
+              var y = r * (cellSize + cellGap);
+
+              if (!day) {
+                svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="#1a1a1c" opacity="0.3"/>';
+                continue;
+              }
+
+              var intensity = day.duration > 0 ? Math.max(0.15, day.duration / maxDur) : 0;
+              var fill = day.duration > 0 ? day.color || '#fc4c02' : '#1a1a1c';
+              var opacity = day.duration > 0 ? (0.3 + intensity * 0.7).toFixed(2) : '0.4';
+
+              var dateLabel = new Date(day.date + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+              var durMin = Math.round(day.duration / 60);
+              var distKm = (day.distance / 1000).toFixed(1);
+              var tip = day.duration > 0 ? dateLabel + ": " + distKm + " km — " + durMin + " min" : dateLabel + ": riposo";
+
+              svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="' + fill + '" opacity="' + opacity + '" data-tip="' + tip.replace(/"/g, '&quot;') + '" style="cursor:pointer"><title>' + tip + '</title></rect>';
+
+              if (r === 0) {
+                var dd = new Date(day.date + "T12:00:00");
+                if (dd.getDate() <= 7) {
+                  var mLabel = dd.toLocaleDateString("it-IT", { month: "short" });
+                  if (monthLabels.indexOf(mLabel) === -1) {
+                    monthLabels.push(mLabel);
+                    svg += '<text x="' + x + '" y="' + (svgH - 4) + '" text-anchor="start" fill="#8a8a8e" font-size="7" font-family="JetBrains Mono, monospace">' + mLabel + '</text>';
+                  }
+                }
+              }
+            }
+          }
+
+          var totalDays = 0, activeDays = 0;
+          for (var i = 0; i < days.length; i++) {
+            totalDays++;
+            if (days[i].duration > 0) activeDays++;
+          }
+
+          var periodLabel = isYear ? "Attività ultimo anno" : "Attività ultimi 30 giorni";
+          var header = '<div class="chart-header"><span class="chart-title">' + periodLabel + '</span>'
+            + '<span class="legend-item" style="font-size:0.65rem;color:#8a8a8e;font-family:JetBrains Mono,monospace">' + activeDays + '/' + totalDays + ' giorni attivi</span></div>';
+
+          var svgTag = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" role="img" aria-label="Activity heatmap" style="width:100%;min-width:' + svgW + 'px;display:block">' + svg + '</svg>';
+          return '<div class="RunWeeklyChart">' + header + '<div class="heatmap-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">' + svgTag + '</div></div>';
+        }
+
+        function initHeatmapTooltip(container) {
+          var tip = document.createElement('div');
+          tip.style.cssText = 'position:absolute;background:#1a1a1c;border:1px solid #333;color:#e8e6e1;font-size:0.72rem;font-family:JetBrains Mono,monospace;padding:0.4rem 0.6rem;border-radius:4px;pointer-events:none;z-index:20;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:none;';
+          container.style.position = 'relative';
+          container.appendChild(tip);
+
+          container.addEventListener('click', function(e) {
+            var rect = e.target.closest('rect[data-tip]');
+            if (!rect) { tip.style.display = 'none'; return; }
+            var text = rect.getAttribute('data-tip');
+            tip.textContent = text;
+            tip.style.display = 'block';
+            var contRect = container.getBoundingClientRect();
+            var cellRect = rect.getBoundingClientRect();
+            var x = cellRect.left - contRect.left + cellRect.width / 2;
+            var y = cellRect.top - contRect.top - 4;
+            var tipW = tip.offsetWidth;
+            tip.style.left = Math.max(0, Math.min(x - tipW / 2, contRect.width - tipW)) + 'px';
+            tip.style.top = (y - tip.offsetHeight) + 'px';
+          });
+
+          document.addEventListener('click', function(e) {
+            if (!container.contains(e.target)) tip.style.display = 'none';
+          });
+        }
+
         function renderDonut(dist, total) {
           var r = 36, sw = 8, cx = 50, cy = 50;
           var circ = 2 * Math.PI * r;
@@ -429,8 +544,14 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
                   var total = data.stats ? data.stats.monthly.count : 0;
                   donutEl.innerHTML = renderDonut(data.typeDistribution, total);
                 }
-                if (charts && data.weeklyRunStats) {
-                  charts.innerHTML = renderLineChart(data.weeklyRunStats);
+                if (charts) {
+                  var heatDays = data.yearlyBreakdown || data.dailyBreakdown;
+                  if (heatDays) {
+                    charts.innerHTML = renderHeatmap(heatDays);
+                    initHeatmapTooltip(charts);
+                    var scrollWrap = charts.querySelector('.heatmap-scroll');
+                    if (scrollWrap) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
+                  }
                 }
               }
             })

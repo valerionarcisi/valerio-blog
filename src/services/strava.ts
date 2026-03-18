@@ -159,15 +159,16 @@ export interface WeeklyRunStats {
 export interface FullStats {
   periodStats: PeriodStats;
   dailyBreakdown: DailyBreakdown[];
+  yearlyBreakdown: DailyBreakdown[];
   typeDistribution: TypeDistribution[];
   weeklyRunStats: WeeklyRunStats[];
 }
 
-const computeDailyBreakdown = (activities: StravaActivity[]): DailyBreakdown[] => {
+const computeDailyBreakdown = (activities: StravaActivity[], numDays = 30): DailyBreakdown[] => {
   const days: DailyBreakdown[] = [];
   const now = new Date();
 
-  for (let i = 29; i >= 0; i--) {
+  for (let i = numDays - 1; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(d.getDate() - i);
     const key = d.toISOString().slice(0, 10);
@@ -280,20 +281,25 @@ export const fetchFullStats = async (): Promise<FullStats> => {
   const accessToken = await refreshAccessToken();
 
   const now = Math.floor(Date.now() / 1000);
-  const twoMonthsAgo = now - 60 * 24 * 60 * 60;
+  const oneYearAgo = now - 365 * 24 * 60 * 60;
   const oneMonthAgo = now - 30 * 24 * 60 * 60;
   const oneWeekAgo = now - 7 * 24 * 60 * 60;
 
-  const response = await fetch(
-    `${API_URL}/athlete/activities?after=${twoMonthsAgo}&per_page=200`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch Strava stats. Status: ${response.status}`);
+  const allActivities: StravaActivity[] = [];
+  let page = 1;
+  while (true) {
+    const response = await fetch(
+      `${API_URL}/athlete/activities?after=${oneYearAgo}&per_page=200&page=${page}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch Strava stats. Status: ${response.status}`);
+    }
+    const batch: StravaActivity[] = await response.json();
+    allActivities.push(...batch);
+    if (batch.length < 200) break;
+    page++;
   }
-
-  const allActivities: StravaActivity[] = await response.json();
 
   const monthlyActivities = allActivities.filter(
     (a) => new Date(a.start_date).getTime() / 1000 >= oneMonthAgo,
@@ -308,6 +314,7 @@ export const fetchFullStats = async (): Promise<FullStats> => {
       monthly: computeStats(monthlyActivities),
     },
     dailyBreakdown: computeDailyBreakdown(monthlyActivities),
+    yearlyBreakdown: computeDailyBreakdown(allActivities, 365),
     typeDistribution: computeTypeDistribution(monthlyActivities),
     weeklyRunStats: computeWeeklyRunStats(allActivities, 8),
   };

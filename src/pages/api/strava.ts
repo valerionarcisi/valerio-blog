@@ -51,6 +51,7 @@ export const GET: APIRoute = async () => {
           monthly: formatStats(fullStats.periodStats.monthly),
         },
         dailyBreakdown: fullStats.dailyBreakdown,
+        yearlyBreakdown: fullStats.yearlyBreakdown,
         typeDistribution: fullStats.typeDistribution,
         weeklyRunStats: fullStats.weeklyRunStats,
       }),
