@@ -1,0 +1,679 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
+import rawData from "../../../data/body-comp/measurements.json";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const measurements = rawData.measurements;
+const nutritionPlan = rawData.nutrition_plan;
+const sources = rawData.sources;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Body Composition</title>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; }
+
+      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 1.5rem; }
+      h2 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.2rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
+
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.8rem;
+        margin-bottom: 2rem;
+      }
+      .stat-card {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 0.8rem;
+        text-align: center;
+        transition: border-color 0.2s;
+        position: relative;
+      }
+      .stat-card:hover { border-color: #c9a84c; }
+      .stat-card .label { font-size: 0.7rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+      .info-icon { display: inline-block; width: 14px; height: 14px; line-height: 14px; text-align: center; border-radius: 50%; background: rgba(255,255,255,0.06); color: #8a8a8e; font-size: 0.55rem; cursor: help; vertical-align: middle; margin-left: 0.2rem; }
+      .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 260px; z-index: 10; line-height: 1.4; text-align: left; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+      .stat-card:hover .tooltip { display: block; }
+      .chart-card { position: relative; }
+      .chart-tooltip { display: none; position: absolute; top: 0.3rem; right: 0.5rem; background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 280px; z-index: 10; line-height: 1.4; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+      .chart-card:hover .chart-tooltip { display: block; }
+      .stat-card .value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: #e8e6e1; font-weight: 700; }
+      .stat-card .delta { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.2rem; }
+      .delta.pos { color: #2ecc71; }
+      .delta.neg { color: #e74c3c; }
+      .delta.neutral { color: #8a8a8e; }
+
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+      }
+      .chart-card {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 1rem;
+      }
+      .chart-card.full { grid-column: 1 / -1; }
+      .chart-card h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .chart-wrap { position: relative; width: 100%; }
+      .chart-wrap canvas { width: 100% !important; }
+
+      .donut-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+      }
+      .donut-card {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .donut-card h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .donut-wrap { position: relative; width: 220px; height: 220px; }
+      .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
+      .donut-center .big { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #e8e6e1; }
+      .donut-center .sub { font-size: 0.65rem; color: #8a8a8e; }
+
+      .source-legend {
+        display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; font-size: 0.75rem; color: #8a8a8e;
+      }
+      .source-legend span { display: flex; align-items: center; gap: 0.3rem; }
+      .source-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+      .source-dot.mancini { background: #4ecdc4; }
+      .source-dot.cardinali { background: #c9a84c; }
+
+      .data-table-wrap {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 1rem;
+        overflow-x: auto;
+        margin-bottom: 2rem;
+      }
+      .data-table-wrap h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; }
+      thead th { color: #8a8a8e; text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #333; white-space: nowrap; font-weight: 500; }
+      tbody td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #1a1a1c; color: #e8e6e1; white-space: nowrap; }
+      tbody tr:hover { background: rgba(201, 168, 76, 0.04); }
+      .src-badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.6rem; }
+      .src-badge.mancini { background: rgba(78,205,196,0.15); color: #4ecdc4; }
+      .src-badge.cardinali { background: rgba(201,168,76,0.15); color: #c9a84c; }
+
+      .daily-tips {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .tip-card {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 8px;
+        padding: 1rem 1.2rem;
+        transition: border-color 0.3s;
+      }
+      .tip-card:hover { border-color: #c9a84c; }
+      .tip-card .tip-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+      .tip-card .tip-cat { font-size: 0.65rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+      .tip-card .tip-text { font-size: 0.82rem; color: #e8e6e1; line-height: 1.5; }
+      .tip-card.wellness { border-left: 3px solid #2ecc71; }
+      .tip-card.consistency { border-left: 3px solid #f39c12; }
+      .tip-card.meditation { border-left: 3px solid #9b59b6; }
+
+      @media (max-width: 800px) {
+        .summary-grid { grid-template-columns: repeat(3, 1fr); }
+        .charts-grid, .donut-row { grid-template-columns: 1fr; }
+        .stat-card .value { font-size: 1.1rem; }
+        .daily-tips { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 500px) {
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        body { padding: 1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="body-comp" token={token} />
+    <h1>Body Composition</h1>
+
+    <div class="daily-tips" id="daily-tips"></div>
+
+    <div class="source-legend">
+      <span><span class="source-dot mancini"></span> Dott.ssa Mancini</span>
+      <span><span class="source-dot cardinali"></span> Dott. Cardinali</span>
+    </div>
+
+    <div class="summary-grid" id="summary"></div>
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <h3>Composizione Corporea (kg)</h3>
+        <div class="chart-tooltip">Andamento di peso totale, massa magra (FFM) e massa grassa (FM) nel tempo. La FFM comprende muscoli, ossa, organi e acqua. Idealmente la FFM resta stabile o cresce mentre la FM diminuisce.</div>
+        <div class="chart-wrap"><canvas id="comp-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Body Fat %</h3>
+        <div class="chart-tooltip">Percentuale di massa grassa sul peso totale. Per un uomo adulto: <b style="color:#2ecc71">verde &lt;15%</b> atletico, <b style="color:#f1c40f">giallo 15-20%</b> normale, <b style="color:#e74c3c">rosso &gt;20%</b> da ridurre.</div>
+        <div class="chart-wrap"><canvas id="bf-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Angolo di Fase (PhA)</h3>
+        <div class="chart-tooltip">Parametro bioelettrico che indica la qualità cellulare e lo stato di salute. Range sano: 5-7° (banda verde). Valori più alti indicano buona massa cellulare e idratazione.</div>
+        <div class="chart-wrap"><canvas id="pha-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>BMI</h3>
+        <div class="chart-tooltip">Indice di Massa Corporea (peso/altezza²). <b style="color:#3498db">&lt;18.5</b> sottopeso, <b style="color:#2ecc71">18.5-25</b> normopeso, <b style="color:#f1c40f">25-30</b> sovrappeso, <b style="color:#e74c3c">&gt;30</b> obeso. Non distingue tra massa grassa e magra.</div>
+        <div class="chart-wrap"><canvas id="bmi-chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Metabolismo Basale (kcal)</h3>
+        <div class="chart-tooltip">Calorie bruciate a riposo in 24h. Dipende da massa magra, età e sesso. Più alta la massa muscolare, più alto il metabolismo basale.</div>
+        <div class="chart-wrap"><canvas id="bmr-chart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="donut-row">
+      <div class="donut-card">
+        <h3>Composizione Attuale</h3>
+        <div class="donut-wrap">
+          <canvas id="comp-donut"></canvas>
+          <div class="donut-center">
+            <div class="big" id="donut-weight">-</div>
+            <div class="sub">kg</div>
+          </div>
+        </div>
+      </div>
+      <div class="donut-card">
+        <h3>Macros Target</h3>
+        <div class="donut-wrap">
+          <canvas id="macros-donut"></canvas>
+          <div class="donut-center">
+            <div class="big" id="donut-kcal">-</div>
+            <div class="sub">kcal/day avg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card full">
+        <h3>Piano Alimentare — Kcal Settimanali</h3>
+        <div class="chart-wrap"><canvas id="kcal-bar"></canvas></div>
+      </div>
+    </div>
+
+    <div class="data-table-wrap">
+      <h3>Storico Misurazioni</h3>
+      <table id="data-table">
+        <thead>
+          <tr>
+            <th>Data</th><th>Source</th><th>Peso</th><th>BMI</th><th>FM%</th><th>FM kg</th><th>FFM kg</th><th>BCM kg</th><th>PhA</th><th>BMR</th><th>TBW L</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+    <script is:inline define:vars={{ measurements, nutritionPlan, sources }}>
+      // Daily tips — cambiano ogni giorno basandosi sul day-of-year
+      (function() {
+        var wellness = [
+          "Zero alcol oggi. Il fegato ha bisogno di 72 ore senza alcol per rigenerarsi completamente. Daglielo.",
+          "L'alcol blocca la combustione dei grassi per 24-48 ore. Ogni birra annulla ore di allenamento.",
+          "Bevi acqua frizzante con limone stasera. Il rituale del bere resta, le calorie vuote spariscono.",
+          "Una notte senza alcol = sonno REM profondo, testosterone più alto, cortisolo più basso. Domani sarai un'altra persona.",
+          "L'alcol disidrata le cellule e peggiora l'angolo di fase. Ogni giorno senza è un giorno che il tuo PhA migliora.",
+          "Il fegato non può bruciare grassi mentre processa alcol. Scegli: una birra o il fisico che vuoi.",
+          "Sostituisci l'alcol con una tisana o un kombucha. Stessi rituali, zero danni.",
+          "L'alcol riduce la sintesi proteica del 20%. I tuoi muscoli crescono solo quando non bevi.",
+          "Stasera niente alcol. Domani mattina ti sveglierai con la mente limpida e il corpo grato.",
+          "L'alcol aumenta i livelli di estrogeni e riduce il testosterone. Il contrario di quello che vuoi per la composizione corporea.",
+          "Ogni giorno senza alcol è un investimento nel tuo metabolismo. La FM% che vedi nei grafici scende anche grazie a questo.",
+          "Dormi almeno 7.5 ore stanotte. Il sonno è il singolo fattore più importante per il recupero — l'alcol lo sabota.",
+          "L'alcol contiene 7 kcal/g (quasi come i grassi). Una serata fuori può aggiungere 800-1200 calorie vuote.",
+          "Il tuo BMR migliora senza alcol: il corpo brucia più calorie a riposo quando il fegato non è impegnato a detossificare.",
+          "Bevi 2L d'acqua oggi. L'idratazione che l'alcol toglie, l'acqua la restituisce. TBW e BCM ringraziano.",
+          "Cammina almeno 8.000 passi oggi. Il movimento a bassa intensità brucia grassi — ma solo se l'alcol non li ha bloccati.",
+          "Mangia proteine ad ogni pasto. La massa magra si costruisce a tavola — e si distrugge al bar.",
+          "Fai le scale invece dell'ascensore. Piccoli gesti contano, ma contano di più se non li annulli con l'alcol.",
+          "L'alcol impoverisce le riserve di vitamina B, zinco e magnesio. Tutti minerali essenziali per la massa muscolare.",
+          "Oggi mangia pesce. Gli omega-3 riparano l'infiammazione — quella che l'alcol crea sistematicamente.",
+          "Prepara i pasti di domani stasera. Chi pianifica non ha bisogno dell'alcol per 'rilassarsi'.",
+          "L'alcol peggiora l'ansia del giorno dopo. Il rilassamento che cerchi nel drink lo trovi nella meditazione.",
+          "Prenditi 15 minuti di sole. La vitamina D è essenziale per umore e sistema immunitario — l'alcol la depleta.",
+          "Fai una doccia fredda di 30 secondi. Riduce l'infiammazione che l'alcol crea, e ti dà una scarica di endorfine naturali.",
+          "Cucina qualcosa di nuovo stasera. Il tempo che spenderesti a bere, investilo nel nutrirti.",
+          "Guarda i tuoi dati: da quando bevi meno, FM% cala e FFM tiene. I numeri non mentono.",
+          "Mastica lentamente. Mangiare consapevole è l'opposto del bere per abitudine — allena la stessa disciplina.",
+          "Riduci il caffè dopo le 14. Caffeina + alcol = sonno distrutto. Elimina almeno uno dei due.",
+          "Stasera spegni gli schermi 1 ora prima di dormire. Il relax vero si costruisce senza sostanze.",
+          "Controlla la postura adesso. Un corpo che tratti bene è un corpo che non ha bisogno di anestetici.",
+          "Oggi inizia il pasto con le verdure. Chi mangia bene non cerca comfort nell'alcol.",
+        ];
+
+        var consistency = [
+          "Quanti giorni senza alcol questa settimana? Ogni giorno pulito è un mattone in più nella fondamenta.",
+          "La costanza batte l'intensità. Un giorno senza alcol non è eroico — è normale. Rendilo la nuova normalità.",
+          "Segna i giorni senza alcol. Il tracking crea consapevolezza e la consapevolezza crea il cambiamento.",
+          "Non saltare l'allenamento: anche 15 minuti contano. E contano il doppio se ieri sera non hai bevuto.",
+          "L'alcol è il nemico invisibile della costanza. Ruba energia, motivazione e sonno — i tre pilastri del progresso.",
+          "La disciplina è libertà. Dire no a un drink stasera è dire sì al te stesso di domani mattina.",
+          "Non aspettare la motivazione per non bere. Decidi prima, la motivazione arriva dopo.",
+          "Festeggia: quanti giorni consecutivi senza alcol? Ogni giorno è una vittoria. Non dimenticarlo.",
+          "I tuoi dati BIA parlano chiaro: i periodi senza alcol corrispondono ai risultati migliori. I numeri non mentono.",
+          "Pianifica le situazioni sociali in anticipo. Decidi cosa berrai PRIMA di uscire, non al momento.",
+          "Non cercare la perfezione. Se ieri hai bevuto, oggi è un nuovo giorno. Ricomincia senza sensi di colpa.",
+          "Oggi fai qualcosa che il te di domani ti ringrazierà: non bere. Domani ti sveglierai grato.",
+          "Rompi il ciclo tutto-o-niente. Un drink non cancella una settimana di disciplina — ma non farne due.",
+          "La forza di volontà è un muscolo: ogni volta che rifiuti un drink, la prossima volta sarà più facile.",
+          "Tieni una bottiglia d'acqua sempre a portata. L'abitudine di bere qualcosa si sposta su ciò che è disponibile.",
+          "Prepara l'ambiente per il successo: niente alcol in casa. Se non c'è, non lo bevi.",
+          "Ricorda perché hai iniziato: la salute del fegato, la composizione corporea, la lucidità mentale. Sono tutti collegati.",
+          "Fai il letto appena sveglio. Una piccola disciplina mattutina innesca una catena di discipline per tutto il giorno.",
+          "Non confrontarti con chi beve 'socialmente'. Il tuo percorso è tuo. I tuoi obiettivi richiedono i tuoi sacrifici.",
+          "Premiati con qualcosa che non sia alcol. Un buon libro, una corsa, un film, del tempo per te.",
+          "Sii grato per le mattine lucide. Per l'energia costante. Per il sonno profondo. L'alcol ti rubava tutto questo.",
+          "Ogni ricaduta è un insegnamento, non un fallimento. Cosa ha triggerato la voglia? Identifica il pattern.",
+          "Sii paziente: il fegato si rigenera, la composizione corporea migliora, il sonno torna profondo. Ma servono settimane.",
+          "Trova un alleato. Qualcuno che sappia del tuo obiettivo e ti supporti nelle situazioni sociali.",
+          "Non rimandare a lunedì. Se vuoi smettere, il momento migliore è questo momento.",
+          "L'alcol costa: soldi, calorie, ore di sonno perso, giorni di performance ridotta. Fai il conto.",
+          "Automatizza la scelta: 'Io non bevo durante la settimana.' Punto. Le regole chiare eliminano la fatica decisionale.",
+          "Se cadi, rialzati subito. Non 'da lunedì', non 'dal mese prossimo'. Adesso. Il prossimo pasto, il prossimo momento.",
+          "Monitora il sonno. Noterai che le notti senza alcol producono un sonno incomparabilmente migliore.",
+          "Oggi resisti a una tentazione. Quella resistenza ti renderà più forte di qualsiasi allenamento in palestra.",
+          "Sei qui, stai monitorando il tuo corpo, stai cercando di migliorare. L'alcol non fa parte di questa versione di te.",
+        ];
+
+        var meditation = [
+          "Dedica 5 minuti al respiro consapevole. Inspira 4 secondi, trattieni 4, espira 6. Ripeti.",
+          "Fai un body scan di 3 minuti: parti dai piedi e sali lentamente fino alla testa, notando ogni sensazione.",
+          "Oggi pratica la gratitudine: scrivi 3 cose per cui sei grato. Cambia la chimica del cervello.",
+          "Prova la meditazione camminata: cammina lentamente, sentendo ogni passo, per 10 minuti.",
+          "Siediti in silenzio per 5 minuti. Osserva i pensieri senza giudicarli, come nuvole che passano.",
+          "Pratica il 'non fare' per 10 minuti. Niente telefono, niente musica. Solo tu e il presente.",
+          "Fai 10 respiri profondi prima di ogni pasto. Attiva il sistema nervoso parasimpatico e migliora la digestione.",
+          "Stasera prima di dormire, ripercorri la giornata con gratitudine. Cosa è andato bene?",
+          "Oggi nota 5 cose belle che normalmente ignori. Un colore, un suono, un profumo.",
+          "Pratica la gentilezza verso te stesso. Parlati come parleresti al tuo migliore amico.",
+          "Fai una pausa di 2 minuti tra un task e l'altro. Chiudi gli occhi, respira, ricomincia.",
+          "Prova il metodo 4-7-8: inspira 4s, trattieni 7s, espira 8s. Potente antistress naturale.",
+          "Osserva un tramonto o un'alba oggi. Connettiti con qualcosa di più grande di te.",
+          "Scrivi a mano per 5 minuti. Il pensiero fluido su carta libera la mente dal rumore.",
+          "Pratica l'ascolto profondo oggi. In una conversazione, ascolta senza pensare a cosa rispondere.",
+          "Dedica 3 minuti alla visualizzazione: immaginati nella versione migliore di te tra 6 mesi.",
+          "Oggi pratica il 'lasciare andare'. Scegli un pensiero ricorrente e deciditi a non alimentarlo.",
+          "Fai un digital detox di 1 ora. Il silenzio digitale è la nuova meditazione.",
+          "Prima di reagire a qualcosa, conta fino a 5. Lo spazio tra stimolo e risposta è la tua libertà.",
+          "Sorridi intenzionalmente 10 volte oggi. Il sorriso rilascia endorfine anche quando è 'forzato'.",
+          "Pratica la curiosità compassionevole: quando sbagli, chiediti 'cosa posso imparare?' invece di giudicarti.",
+          "Oggi fai un atto di gentilezza anonimo. Dare senza aspettarsi nulla è pura meditazione in azione.",
+          "Prova a mangiare un pasto in silenzio totale. Nota sapori, consistenze, temperature.",
+          "Concediti 5 minuti di stretching meditativo. Movimenti lenti, respiro profondo, mente vuota.",
+          "Stasera scrivi una lettera di gratitudine a qualcuno. Non devi spedirla, basta scriverla.",
+          "Nota il tuo respiro adesso. Senza cambiarlo. Solo osservalo. Questo è meditare.",
+          "Oggi scegli un mantra: 'Sono abbastanza' oppure 'Ogni passo conta'. Ripetilo nei momenti difficili.",
+          "Pratica l'accettazione radicale: oggi accetta ciò che non puoi cambiare e agisci su ciò che puoi.",
+          "Fai 3 minuti di respirazione a narici alternate. Equilibra i due emisferi cerebrali.",
+          "Prima di dormire, perdona qualcuno (anche te stesso). Il rancore pesa più di qualsiasi grasso.",
+          "Inizia la giornata con un'intenzione: 'Oggi scelgo [calma/energia/gentilezza/focus]'. Una parola basta.",
+        ];
+
+        var now = new Date();
+        var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+        var w = wellness[dayOfYear % wellness.length];
+        var c = consistency[dayOfYear % consistency.length];
+        var m = meditation[dayOfYear % meditation.length];
+
+        document.getElementById("daily-tips").innerHTML =
+          '<div class="tip-card wellness"><div class="tip-icon">🌿</div><div class="tip-cat">Benessere</div><div class="tip-text">' + w + '</div></div>' +
+          '<div class="tip-card consistency"><div class="tip-icon">🎯</div><div class="tip-cat">Costanza</div><div class="tip-text">' + c + '</div></div>' +
+          '<div class="tip-card meditation"><div class="tip-icon">🧘</div><div class="tip-cat">Meditazione</div><div class="tip-text">' + m + '</div></div>';
+      })();
+
+      var M = measurements;
+      var last = M[M.length - 1];
+      var prev = M[M.length - 2];
+
+      function fmtDate(d) {
+        var p = d.split("-");
+        return p[2] + "/" + p[1] + "/" + p[0].slice(2);
+      }
+
+      function delta(curr, prev, unit, invert) {
+        if (curr == null || prev == null) return '<span class="delta neutral">—</span>';
+        var d = Math.round((curr - prev) * 10) / 10;
+        var sign = d > 0 ? "+" : "";
+        var cls = d === 0 ? "neutral" : (invert ? (d > 0 ? "neg" : "pos") : (d > 0 ? "pos" : "neg"));
+        return '<span class="delta ' + cls + '">' + sign + d + " " + unit + "</span>";
+      }
+
+      var cards = [
+        { label: "Peso", value: last.weight_kg + " kg", d: delta(last.weight_kg, prev.weight_kg, "kg", true), tip: "Peso corporeo totale. Include massa grassa, magra, acqua e ossa." },
+        { label: "FM%", value: last.fm_pct + "%", d: delta(last.fm_pct, prev.fm_pct, "%", true), tip: "Percentuale di massa grassa. Per uomo adulto: &lt;15% atletico, 15-20% nella norma, &gt;20% da ridurre." },
+        { label: "FFM", value: last.ffm_kg + " kg", d: delta(last.ffm_kg, prev.ffm_kg, "kg", false), tip: "Massa magra (Fat-Free Mass): tutto ciò che non è grasso — muscoli, ossa, organi, acqua. Ideale: 77-85% del peso." },
+        { label: "BMI", value: last.bmi, d: delta(last.bmi, prev.bmi, "", true), tip: "Indice di Massa Corporea (peso/altezza²). Normopeso: 18.5-25. Non distingue grasso da muscolo." },
+        { label: "PhA", value: last.pha_deg + "°", d: delta(last.pha_deg, prev.pha_deg, "°", false), tip: "Angolo di Fase: indica la qualità delle cellule. Range sano 5-7°. Più alto = migliore stato cellulare e idratazione." },
+        { label: "BMR", value: Math.round(last.bmr_kcal) + " kcal", d: delta(last.bmr_kcal, prev.bmr_kcal, "kcal", false), tip: "Metabolismo Basale: calorie bruciate a riposo in 24h. Dipende dalla massa magra." },
+      ];
+
+      var sumEl = document.getElementById("summary");
+      sumEl.innerHTML = cards.map(function(c) {
+        return '<div class="stat-card"><div class="label">' + c.label + ' <span class="info-icon">?</span></div><div class="value">' + c.value + "</div>" + c.d + '<div class="tooltip">' + c.tip + '</div></div>';
+      }).join("");
+
+      var labels = M.map(function(m) { return fmtDate(m.date); });
+      var srcColors = M.map(function(m) { return m.source === "cardinali" ? "#c9a84c" : "#4ecdc4"; });
+
+      var FONT = { family: "system-ui", size: 11 };
+      var GRID = { color: "rgba(255,255,255,0.06)" };
+      var TICK = { color: "#8a8a8e", font: FONT };
+
+      var baseOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { color: "#8a8a8e", font: FONT, boxWidth: 12, padding: 8 } },
+          tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, padding: 8, bodyFont: FONT, titleFont: FONT }
+        },
+        scales: {
+          x: { ticks: TICK, grid: { display: false } },
+          y: { ticks: TICK, grid: GRID }
+        }
+      };
+
+      function makeLineOpts(extra) {
+        var o = JSON.parse(JSON.stringify(baseOpts));
+        if (extra) {
+          if (extra.yMin != null) o.scales.y.min = extra.yMin;
+          if (extra.yMax != null) o.scales.y.max = extra.yMax;
+          if (extra.annotations) o.plugins.annotation = extra.annotations;
+        }
+        return o;
+      }
+
+      // 1. Composizione corporea (Peso, FFM, FM)
+      new Chart(document.getElementById("comp-chart"), {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            { label: "Peso", data: M.map(function(m) { return m.weight_kg; }), borderColor: "#e8e6e1", backgroundColor: "rgba(232,230,225,0.1)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 },
+            { label: "FFM", data: M.map(function(m) { return m.ffm_kg; }), borderColor: "#4ecdc4", backgroundColor: "rgba(78,205,196,0.1)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 4, fill: true, tension: 0.3 },
+            { label: "FM", data: M.map(function(m) { return m.fm_kg; }), borderColor: "#e74c3c", backgroundColor: "rgba(231,76,60,0.15)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 4, fill: true, tension: 0.3 }
+          ]
+        },
+        options: makeLineOpts({ yMin: 0 })
+      });
+
+      // 2. Body Fat %
+      (function() {
+        var ctx = document.getElementById("bf-chart");
+        var data = M.map(function(m) { return m.fm_pct; });
+        var opts = makeLineOpts({ yMin: 0, yMax: 30 });
+        opts.plugins.legend = { display: false };
+
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "FM%", data: data, borderColor: "#e74c3c", backgroundColor: "transparent", borderWidth: 2.5, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 }
+            ]
+          },
+          options: opts,
+          plugins: [{
+            id: "zones",
+            beforeDraw: function(chart) {
+              var ctx2 = chart.ctx;
+              var yAxis = chart.scales.y;
+              var xAxis = chart.scales.x;
+              var zones = [
+                { min: 0, max: 15, color: "rgba(46,204,113,0.08)" },
+                { min: 15, max: 20, color: "rgba(241,196,15,0.08)" },
+                { min: 20, max: 30, color: "rgba(231,76,60,0.08)" }
+              ];
+              zones.forEach(function(z) {
+                var top = yAxis.getPixelForValue(z.max);
+                var bot = yAxis.getPixelForValue(z.min);
+                ctx2.fillStyle = z.color;
+                ctx2.fillRect(xAxis.left, top, xAxis.width, bot - top);
+              });
+            }
+          }]
+        });
+      })();
+
+      // 3. Angolo di Fase
+      (function() {
+        var ctx = document.getElementById("pha-chart");
+        var data = M.map(function(m) { return m.pha_deg; });
+        var opts = makeLineOpts({ yMin: 4, yMax: 10 });
+        opts.plugins.legend = { display: false };
+
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "PhA", data: data, borderColor: "#9b59b6", backgroundColor: "transparent", borderWidth: 2.5, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 }
+            ]
+          },
+          options: opts,
+          plugins: [{
+            id: "phaZone",
+            beforeDraw: function(chart) {
+              var ctx2 = chart.ctx;
+              var yAxis = chart.scales.y;
+              var xAxis = chart.scales.x;
+              var top = yAxis.getPixelForValue(7);
+              var bot = yAxis.getPixelForValue(5);
+              ctx2.fillStyle = "rgba(46,204,113,0.08)";
+              ctx2.fillRect(xAxis.left, top, xAxis.width, bot - top);
+              ctx2.strokeStyle = "rgba(46,204,113,0.2)";
+              ctx2.setLineDash([5, 5]);
+              [5, 7].forEach(function(v) {
+                var y = yAxis.getPixelForValue(v);
+                ctx2.beginPath(); ctx2.moveTo(xAxis.left, y); ctx2.lineTo(xAxis.right, y); ctx2.stroke();
+              });
+              ctx2.setLineDash([]);
+            }
+          }]
+        });
+      })();
+
+      // 4. BMI
+      (function() {
+        var ctx = document.getElementById("bmi-chart");
+        var data = M.map(function(m) { return m.bmi; });
+        var opts = makeLineOpts({ yMin: 15, yMax: 35 });
+        opts.plugins.legend = { display: false };
+
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "BMI", data: data, borderColor: "#f39c12", backgroundColor: "transparent", borderWidth: 2.5, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 }
+            ]
+          },
+          options: opts,
+          plugins: [{
+            id: "bmiZones",
+            beforeDraw: function(chart) {
+              var ctx2 = chart.ctx;
+              var yAxis = chart.scales.y;
+              var xAxis = chart.scales.x;
+              var zones = [
+                { min: 15, max: 18.5, color: "rgba(52,152,219,0.08)" },
+                { min: 18.5, max: 25, color: "rgba(46,204,113,0.08)" },
+                { min: 25, max: 30, color: "rgba(241,196,15,0.08)" },
+                { min: 30, max: 35, color: "rgba(231,76,60,0.08)" }
+              ];
+              zones.forEach(function(z) {
+                var top = yAxis.getPixelForValue(z.max);
+                var bot = yAxis.getPixelForValue(z.min);
+                ctx2.fillStyle = z.color;
+                ctx2.fillRect(xAxis.left, top, xAxis.width, bot - top);
+              });
+            }
+          }]
+        });
+      })();
+
+      // 5. BMR
+      (function() {
+        var ctx = document.getElementById("bmr-chart");
+        var data = M.map(function(m) { return m.bmr_kcal; });
+        var opts = makeLineOpts({ yMin: 1600, yMax: 1900 });
+        opts.plugins.legend = { display: false };
+
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              { label: "BMR", data: data, borderColor: "#2ecc71", backgroundColor: "rgba(46,204,113,0.08)", borderWidth: 2.5, pointBackgroundColor: srcColors, pointRadius: 5, fill: true, tension: 0.3 }
+            ]
+          },
+          options: opts
+        });
+      })();
+
+      // 6. Composizione attuale donut
+      (function() {
+        var fmKg = last.fm_kg;
+        var ffmKg = last.ffm_kg;
+        document.getElementById("donut-weight").textContent = last.weight_kg;
+
+        new Chart(document.getElementById("comp-donut"), {
+          type: "doughnut",
+          data: {
+            labels: ["FM (" + fmKg + " kg)", "FFM (" + ffmKg + " kg)"],
+            datasets: [{ data: [fmKg, ffmKg], backgroundColor: ["#e74c3c", "#4ecdc4"], borderColor: "#141416", borderWidth: 2 }]
+          },
+          options: {
+            responsive: true,
+            cutout: "65%",
+            plugins: {
+              legend: { position: "bottom", labels: { color: "#8a8a8e", font: FONT, padding: 12, boxWidth: 12 } },
+              tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, bodyFont: FONT }
+            }
+          }
+        });
+      })();
+
+      // 7. Macros donut
+      (function() {
+        if (!nutritionPlan) return;
+        var t = nutritionPlan.macros_target;
+        var avgKcal = Math.round(nutritionPlan.daily_kcal.reduce(function(a, b) { return a + b; }, 0) / nutritionPlan.daily_kcal.length);
+        document.getElementById("donut-kcal").textContent = avgKcal;
+
+        new Chart(document.getElementById("macros-donut"), {
+          type: "doughnut",
+          data: {
+            labels: ["Proteine " + t.protein_pct + "%", "Lipidi " + t.fat_pct + "%", "Glucidi " + t.carb_pct + "%"],
+            datasets: [{ data: [t.protein_pct, t.fat_pct, t.carb_pct], backgroundColor: ["#e74c3c", "#f39c12", "#2ecc71"], borderColor: "#141416", borderWidth: 2 }]
+          },
+          options: {
+            responsive: true,
+            cutout: "65%",
+            plugins: {
+              legend: { position: "bottom", labels: { color: "#8a8a8e", font: FONT, padding: 12, boxWidth: 12 } },
+              tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, bodyFont: FONT }
+            }
+          }
+        });
+      })();
+
+      // 8. Kcal settimanali bar
+      (function() {
+        if (!nutritionPlan) return;
+        var avgKcal = Math.round(nutritionPlan.daily_kcal.reduce(function(a, b) { return a + b; }, 0) / nutritionPlan.daily_kcal.length);
+        var opts = makeLineOpts({ yMin: 0, yMax: 2400 });
+        opts.plugins.legend = { display: false };
+
+        new Chart(document.getElementById("kcal-bar"), {
+          type: "bar",
+          data: {
+            labels: nutritionPlan.daily_labels,
+            datasets: [
+              { label: "Kcal", data: nutritionPlan.daily_kcal, backgroundColor: nutritionPlan.daily_kcal.map(function(k) { return k > avgKcal ? "rgba(241,196,15,0.6)" : "rgba(78,205,196,0.6)"; }), borderColor: nutritionPlan.daily_kcal.map(function(k) { return k > avgKcal ? "#f1c40f" : "#4ecdc4"; }), borderWidth: 1, borderRadius: 4 }
+            ]
+          },
+          options: opts,
+          plugins: [{
+            id: "avgLine",
+            afterDraw: function(chart) {
+              var yAxis = chart.scales.y;
+              var xAxis = chart.scales.x;
+              var y = yAxis.getPixelForValue(avgKcal);
+              var ctx2 = chart.ctx;
+              ctx2.save();
+              ctx2.strokeStyle = "#c9a84c";
+              ctx2.lineWidth = 1.5;
+              ctx2.setLineDash([6, 4]);
+              ctx2.beginPath(); ctx2.moveTo(xAxis.left, y); ctx2.lineTo(xAxis.right, y); ctx2.stroke();
+              ctx2.setLineDash([]);
+              ctx2.fillStyle = "#c9a84c";
+              ctx2.font = "11px system-ui";
+              ctx2.fillText("avg " + avgKcal, xAxis.right - 52, y - 6);
+              ctx2.restore();
+            }
+          }]
+        });
+      })();
+
+      // 9. Data table
+      (function() {
+        var tbody = document.getElementById("table-body");
+        var rows = M.slice().reverse().map(function(m) {
+          var srcCls = m.source === "cardinali" ? "cardinali" : "mancini";
+          var srcLabel = m.source === "cardinali" ? "Cardinali" : "Mancini";
+          return "<tr>" +
+            "<td>" + fmtDate(m.date) + "</td>" +
+            '<td><span class="src-badge ' + srcCls + '">' + srcLabel + "</span></td>" +
+            "<td>" + m.weight_kg + "</td>" +
+            "<td>" + m.bmi + "</td>" +
+            "<td>" + (m.fm_pct != null ? m.fm_pct + "%" : "—") + "</td>" +
+            "<td>" + m.fm_kg + "</td>" +
+            "<td>" + m.ffm_kg + "</td>" +
+            "<td>" + m.bcm_kg + "</td>" +
+            "<td>" + m.pha_deg + "°</td>" +
+            "<td>" + Math.round(m.bmr_kcal) + "</td>" +
+            "<td>" + m.tbw_l + "</td>" +
+            "</tr>";
+        });
+        tbody.innerHTML = rows.join("");
+      })();
+    </script>
+  </body>
+</html>

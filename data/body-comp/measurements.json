@@ -1,0 +1,190 @@
+{
+  "subject": {
+    "name": "Valerio Narcisi",
+    "dob": "1986-05-01",
+    "sex": "M"
+  },
+  "sources": [
+    {
+      "id": "mancini",
+      "doctor": "Dott.ssa Francesca Mancini",
+      "role": "Biologo Nutrizionista",
+      "software": "BodygramPlus 1.2.2.8",
+      "height_cm": 168,
+      "notes": "Values in PDF are normalized per meter (kg/m, L/m). Absolute values computed as value × 1.68"
+    },
+    {
+      "id": "cardinali",
+      "doctor": "Dott. Claudio Cardinali",
+      "role": "Biologo Nutrizionista",
+      "software": "BodygramPlus 1.2.2.8",
+      "height_cm": 167,
+      "notes": "Values in PDF are absolute (kg, L)"
+    }
+  ],
+  "measurements": [
+    {
+      "date": "2023-09-28",
+      "source": "mancini",
+      "weight_kg": 71.3,
+      "bmi": 25.3,
+      "pha_deg": 7.6,
+      "bmr_kcal": 1744.0,
+      "bcm_kg": 34.3,
+      "ffm_kg": 56.4,
+      "fm_kg": 14.8,
+      "fm_pct": 20.8,
+      "tbw_l": 41.2,
+      "rz_ohm": 491,
+      "xc_ohm": 65
+    },
+    {
+      "date": "2023-12-22",
+      "source": "mancini",
+      "weight_kg": 70.9,
+      "bmi": 25.1,
+      "pha_deg": 7.9,
+      "bmr_kcal": 1746.9,
+      "bcm_kg": 34.4,
+      "ffm_kg": 55.4,
+      "fm_kg": 15.5,
+      "fm_pct": 21.8,
+      "tbw_l": 39.3,
+      "rz_ohm": 527,
+      "xc_ohm": 73
+    },
+    {
+      "date": "2024-03-15",
+      "source": "mancini",
+      "weight_kg": 72.1,
+      "bmi": 25.5,
+      "pha_deg": 7.5,
+      "bmr_kcal": 1719.2,
+      "bcm_kg": 33.4,
+      "ffm_kg": 55.3,
+      "fm_kg": 16.8,
+      "fm_pct": 23.3,
+      "tbw_l": 40.2,
+      "rz_ohm": 513,
+      "xc_ohm": 67
+    },
+    {
+      "date": "2024-05-16",
+      "source": "mancini",
+      "weight_kg": 71.4,
+      "bmi": 25.3,
+      "pha_deg": 7.7,
+      "bmr_kcal": 1736.6,
+      "bcm_kg": 34.1,
+      "ffm_kg": 55.6,
+      "fm_kg": 15.8,
+      "fm_pct": 22.1,
+      "tbw_l": 39.8,
+      "rz_ohm": 519,
+      "xc_ohm": 70
+    },
+    {
+      "date": "2024-07-18",
+      "source": "mancini",
+      "weight_kg": 71.5,
+      "bmi": 25.3,
+      "pha_deg": 7.8,
+      "bmr_kcal": 1797.4,
+      "bcm_kg": 36.1,
+      "ffm_kg": 58.5,
+      "fm_kg": 13.1,
+      "fm_pct": 18.3,
+      "tbw_l": 42.5,
+      "rz_ohm": 464,
+      "xc_ohm": 64
+    },
+    {
+      "date": "2024-09-26",
+      "source": "mancini",
+      "weight_kg": 72.5,
+      "bmi": 25.7,
+      "pha_deg": 8.0,
+      "bmr_kcal": 1788.3,
+      "bcm_kg": 35.8,
+      "ffm_kg": 57.5,
+      "fm_kg": 15.1,
+      "fm_pct": 20.8,
+      "tbw_l": 41.2,
+      "rz_ohm": 495,
+      "xc_ohm": 70
+    },
+    {
+      "date": "2024-12-11",
+      "source": "mancini",
+      "weight_kg": 70.3,
+      "bmi": 24.9,
+      "pha_deg": 7.9,
+      "bmr_kcal": 1776.8,
+      "bcm_kg": 35.4,
+      "ffm_kg": 57.0,
+      "fm_kg": 13.3,
+      "fm_pct": 18.9,
+      "tbw_l": 41.3,
+      "rz_ohm": 482,
+      "xc_ohm": 67
+    },
+    {
+      "date": "2025-03-18",
+      "source": "cardinali",
+      "weight_kg": 67.9,
+      "bmi": 24.3,
+      "pha_deg": 7.5,
+      "bmr_kcal": 1751.7,
+      "bcm_kg": 34.5,
+      "bcm_pct_ffm": 60.5,
+      "ffm_kg": 57.1,
+      "ffm_pct": 84.0,
+      "fm_kg": 10.8,
+      "fm_pct": 16.0,
+      "tbw_l": 41.6,
+      "tbw_pct": 61.2,
+      "ecw_l": 16.5,
+      "ecw_pct_tbw": 39.6,
+      "nak": 0.9,
+      "rz_ohm": 463,
+      "xc_ohm": 61
+    },
+    {
+      "date": "2025-05-13",
+      "source": "cardinali",
+      "weight_kg": 65.8,
+      "bmi": 23.6,
+      "pha_deg": 7.7,
+      "bmr_kcal": 1755.5,
+      "bcm_kg": 34.7,
+      "bcm_pct_ffm": 61.1,
+      "ffm_kg": 56.7,
+      "ffm_pct": 86.2,
+      "fm_kg": 9.1,
+      "fm_pct": 13.8,
+      "tbw_l": 41.3,
+      "tbw_pct": 62.8,
+      "ecw_l": 16.2,
+      "ecw_pct_tbw": 39.1,
+      "nak": 1.0,
+      "rz_ohm": 460,
+      "xc_ohm": 62
+    }
+  ],
+  "nutrition_plan": {
+    "date": "2024-03-19",
+    "source": "mancini",
+    "macros_target": {
+      "protein_pct": 29.56,
+      "fat_pct": 22.62,
+      "carb_pct": 47.53
+    },
+    "macros_average": {
+      "protein_pct": 28.71,
+      "fat_pct": 22.69,
+      "carb_pct": 46.35
+    },
+    "daily_kcal": [1800, 1720, 1790, 1760, 1720, 2100, 1800],
+    "daily_labels": ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"]
+  }
+}

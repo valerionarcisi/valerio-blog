@@ -63,6 +63,10 @@ if (!isAuthorized) {
       .stat-card .value.gold { color: #c9a84c; }
       .stat-card .value.cyan { color: #4ecdc4; }
 
+      .suspect-card { border-color: rgba(231,76,60,0.25); }
+      .suspect-card:hover { border-color: rgba(231,76,60,0.5); }
+      .suspect-card button:hover { opacity: 0.85; }
+
       .chart-container { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1rem; margin-bottom: 2rem; min-height: 200px; }
       .chart-container canvas { width: 100% !important; height: 200px !important; }
 
@@ -191,6 +195,12 @@ if (!isAuthorized) {
         <div class="label">Bounce Rate <span class="info-icon">?</span></div>
         <div class="value" id="s-bounce">-</div>
         <div class="tooltip">Percentuale di visitatori unici che hanno trascorso meno di 5 secondi sulla pagina o non hanno interagito.</div>
+      </div>
+      <div class="stat-card suspect-card">
+        <div class="label">Suspected Bots <span class="info-icon">?</span></div>
+        <div class="value" style="color:#e74c3c;" id="s-suspects">-</div>
+        <div class="tooltip">Visitatori con zero engagement (tempo ≤5s e scroll 0%). Non ancora flaggati come bot. Esclusi dai conteggi principali solo dopo il flag.</div>
+        <button id="flag-suspects-btn" style="display:none;margin-top:0.4rem;font-size:0.68rem;padding:0.25rem 0.6rem;background:#e74c3c;color:#fff;border:none;border-radius:4px;cursor:pointer;width:100%;">🤖 Flag all as bot</button>
       </div>
     </div>
 
@@ -350,6 +360,7 @@ if (!isAuthorized) {
       }
 
       var _lastVisitors = [];
+      var _suspectCountries = {};
       function flagAllBots() {
         var hashes = [];
         _lastVisitors.forEach(function(v) {
@@ -637,24 +648,28 @@ if (!isAuthorized) {
             style: function(feature) {
               var code = feature.properties.code;
               var val = countryMap[code] || 0;
+              var suspects = _suspectCountries[code] || 0;
+              var isSuspect = suspects > 0 && suspects >= val * 0.5;
               return {
-                fillColor: getMapColor(val, maxVal),
-                weight: 0.5,
-                color: "#333",
+                fillColor: isSuspect ? "rgba(231,76,60,0.4)" : getMapColor(val, maxVal),
+                weight: isSuspect ? 1.5 : 0.5,
+                color: isSuspect ? "#e74c3c" : "#333",
                 fillOpacity: val > 0 ? 0.85 : 0.3
               };
             },
             onEachFeature: function(feature, layer) {
               var code = feature.properties.code;
               var val = countryMap[code] || 0;
-              if (val > 0) {
-                var name = countryFlag(code) + " " + (COUNTRY_FLAGS[code] ? code : code);
-                layer.bindTooltip(
-                  "<b>" + code + "</b> — <span>" + fmt(val) + "</span> visitors",
-                  { className: "map-info-tooltip", sticky: true }
-                );
+              var suspects = _suspectCountries[code] || 0;
+              if (val > 0 || suspects > 0) {
+                var tip = "<b>" + code + "</b> — <span>" + fmt(val) + "</span> visitors";
+                if (suspects > 0) {
+                  tip += " <span style='color:#e74c3c'>(" + suspects + " sospetti)</span>";
+                }
+                layer.bindTooltip(tip, { className: "map-info-tooltip", sticky: true });
+                var hoverColor = suspects > 0 && suspects >= val * 0.5 ? "#e74c3c" : "#4ecdc4";
                 layer.on("mouseover", function(e) {
-                  layer.setStyle({ weight: 2, color: "#4ecdc4", fillOpacity: 0.95 });
+                  layer.setStyle({ weight: 2, color: hoverColor, fillOpacity: 0.95 });
                   layer.bringToFront();
                 });
                 layer.on("mouseout", function(e) {
@@ -810,6 +825,20 @@ if (!isAuthorized) {
           document.getElementById("s-scroll").textContent = s.avg_scroll_depth + "%";
           document.getElementById("s-bounce").textContent = s.bounce_rate + "%";
 
+          var suspectN = d.suspicious ? d.suspicious.count : 0;
+          document.getElementById("s-suspects").textContent = fmt(suspectN);
+          var flagBtn = document.getElementById("flag-suspects-btn");
+          flagBtn.style.display = suspectN > 0 ? "block" : "none";
+          flagBtn.disabled = false;
+          flagBtn.textContent = "\ud83e\udd16 Flag all as bot (" + suspectN + ")";
+
+          _suspectCountries = {};
+          if (d.suspicious && d.suspicious.countries) {
+            d.suspicious.countries.forEach(function(c) {
+              if (c.country) _suspectCountries[c.country] = Number(c.suspects) || 0;
+            });
+          }
+
           var groupBy = d.period.groupBy || (period === "today" ? "hour" : period === "12m" ? "month" : "day");
           var rawDates = d.chart.map(function(c) { return c.date; });
           var labels = rawDates.map(function(dt) { return fmtChartLabel(dt, groupBy); });
@@ -954,6 +983,30 @@ if (!isAuthorized) {
       document.getElementById("nav-prev").addEventListener("click", function() { navigatePeriod(-1); });
       document.getElementById("nav-next").addEventListener("click", function() { navigatePeriod(1); });
       document.getElementById("flag-all-bots").addEventListener("click", flagAllBots);
+
+      document.getElementById("flag-suspects-btn").addEventListener("click", function() {
+        var btn = document.getElementById("flag-suspects-btn");
+        if (!currentFrom || !currentTo) return;
+        btn.disabled = true;
+        btn.textContent = "Flagging...";
+        fetch("/api/admin/bot", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          btn.textContent = d.flagged + " flagged!";
+          setTimeout(function() {
+            if (currentFrom && currentTo) {
+              loadData("custom&from=" + currentFrom + "&to=" + currentTo, true);
+            } else {
+              loadData(currentPeriod);
+            }
+          }, 1000);
+        })
+        .catch(function() { btn.textContent = "Error"; });
+      });
 
       document.getElementById("cal-label").addEventListener("click", function() {
         var dr = document.getElementById("date-range");

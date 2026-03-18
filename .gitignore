@@ -21,3 +21,6 @@ pnpm-debug.log*
 
 # Environment variables
 .env
+
+# Body comp PDFs (personal data)
+data/body-comp/*.pdf

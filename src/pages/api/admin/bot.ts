@@ -21,7 +21,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  let body: { hash?: string; hashes?: string[] };
+  let body: { hash?: string; hashes?: string[]; flagSuspicious?: boolean; from?: string; to?: string };
   try {
     body = await request.json();
   } catch {
@@ -31,6 +31,36 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const db = getDb();
+  const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+  if (body.flagSuspicious && body.from && body.to) {
+    if (!DATE_RE.test(body.from) || !DATE_RE.test(body.to)) {
+      return new Response(JSON.stringify({ error: "Invalid date range" }), {
+        status: 400,
+      });
+    }
+    const suspects = await db.execute({
+      sql: `SELECT DISTINCT visitor_hash FROM pageviews WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND visitor_hash IS NOT NULL AND visitor_hash NOT IN (SELECT hash FROM bot_hashes) AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)`,
+      args: [body.from, body.to],
+    });
+    const hashes = suspects.rows.map((r) => String(r.visitor_hash));
+    if (hashes.length === 0) {
+      return new Response(JSON.stringify({ ok: true, flagged: 0 }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    const placeholders = hashes.map(() => "(?)").join(",");
+    await db.execute({
+      sql: `INSERT OR IGNORE INTO bot_hashes (hash) VALUES ${placeholders}`,
+      args: hashes,
+    });
+    await recalcUniqueForHashes(db, hashes);
+    return new Response(JSON.stringify({ ok: true, flagged: hashes.length }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   if (body.hashes && Array.isArray(body.hashes)) {
     const valid = body.hashes.filter(

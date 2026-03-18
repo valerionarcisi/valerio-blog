@@ -2,7 +2,7 @@
 import "./AdminNav.css";
 
 interface Props {
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation";
   token: string;
 }
 
@@ -13,6 +13,8 @@ const links = [
   { id: "comments" as const, label: "Comments", href: `/admin/comments?token=${token}` },
   { id: "meal-plan" as const, label: "Meal Plan", href: `/admin/meal-plan?token=${token}` },
   { id: "grocery" as const, label: "Spesa", href: `/admin/grocery?token=${token}` },
+  { id: "body-comp" as const, label: "Body Comp", href: `/admin/body-comp?token=${token}` },
+  { id: "meditation" as const, label: "Medita", href: `/admin/meditation?token=${token}` },
 ] as const;
 ---
 

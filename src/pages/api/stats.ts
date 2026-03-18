@@ -51,6 +51,8 @@ export const GET: APIRoute = async ({ request, url }) => {
         ? "strftime('%Y-%m', created_at)"
         : "date(created_at)";
 
+  const suspectWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND visitor_hash IS NOT NULL ${botFilter ? "AND visitor_hash NOT IN (SELECT hash FROM bot_hashes)" : ""} AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)${pathnameFilter ? " AND pathname = ?" : ""}`;
+
   const [
     summary,
     chart,
@@ -64,6 +66,8 @@ export const GET: APIRoute = async ({ request, url }) => {
     utmSources,
     utmCampaigns,
     recentVisitors,
+    suspectCount,
+    suspectCountries,
   ] = await Promise.all([
     db.execute({
       sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors, ROUND(AVG(time_on_page)) as avg_time, ROUND(AVG(scroll_depth)) as avg_scroll FROM pageviews ${baseWhere}`,
@@ -113,6 +117,14 @@ export const GET: APIRoute = async ({ request, url }) => {
       sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash FROM pageviews ${baseWhere} AND is_unique = 1 ORDER BY created_at DESC LIMIT 30`,
       args: baseArgs,
     }),
+    db.execute({
+      sql: `SELECT COUNT(DISTINCT visitor_hash) as count FROM pageviews ${suspectWhere}`,
+      args: baseArgs,
+    }),
+    db.execute({
+      sql: `SELECT country, COUNT(DISTINCT visitor_hash) as suspects FROM pageviews ${suspectWhere} AND country IS NOT NULL GROUP BY country ORDER BY suspects DESC`,
+      args: baseArgs,
+    }),
   ]);
 
   const s = summary.rows[0];
@@ -152,6 +164,10 @@ export const GET: APIRoute = async ({ request, url }) => {
       utm_sources: utmSources.rows,
       utm_campaigns: utmCampaigns.rows,
       recent_visitors: recentVisitors.rows,
+      suspicious: {
+        count: Number(suspectCount.rows[0].count) || 0,
+        countries: suspectCountries.rows,
+      },
     }),
     {
       status: 200,
