@@ -461,13 +461,31 @@ if (!isAuthorized) {
         if (!voiceEnabled) window.speechSynthesis.cancel();
       });
 
-      // Timer
+      // Wake Lock — keeps screen on during meditation
+      var wakeLock = null;
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator) {
+            wakeLock = await navigator.wakeLock.request('screen');
+          }
+        } catch (e) { /* not supported or denied */ }
+      }
+      function releaseWakeLock() {
+        if (wakeLock) { wakeLock.release(); wakeLock = null; }
+      }
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && isRunning) requestWakeLock();
+      });
+
+      // Timer — uses real timestamps so it survives background throttling
       var timerSeconds = 600;
       var timerTotal = 600;
       var timerInterval = null;
       var isRunning = false;
       var guidedStepIdx = 0;
       var guidedTimeouts = [];
+      var timerEndTime = null;
+      var pausedRemaining = null;
 
       function fmtTimer(s) {
         var m = Math.floor(s / 60);
@@ -557,6 +575,28 @@ if (!isAuthorized) {
       var breathIdx = 0;
       var breathInterval = null;
 
+      function timerTick() {
+        if (!isRunning || !timerEndTime) return;
+        var now = Date.now();
+        var remaining = Math.max(0, Math.round((timerEndTime - now) / 1000));
+        timerSeconds = remaining;
+        updateDisplay();
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          clearInterval(breathInterval);
+          clearGuidedVoice();
+          releaseWakeLock();
+          isRunning = false;
+          timerEndTime = null;
+          var btn = document.getElementById("timer-start");
+          btn.textContent = "Inizia";
+          btn.className = "timer-btn start";
+          document.getElementById("breath-circle").classList.remove("active");
+          document.getElementById("breath-label").textContent = "Sessione completata";
+          speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
+        }
+      }
+
       document.getElementById("timer-start").addEventListener("click", function() {
         var btn = this;
         if (!isRunning) {
@@ -567,7 +607,13 @@ if (!isAuthorized) {
           breathIdx = 0;
           document.getElementById("breath-label").textContent = breathPhases[0];
 
-          if (timerSeconds === timerTotal) {
+          requestWakeLock();
+
+          if (pausedRemaining != null) {
+            timerEndTime = Date.now() + pausedRemaining * 1000;
+            pausedRemaining = null;
+          } else {
+            timerEndTime = Date.now() + timerSeconds * 1000;
             startGuidedVoice();
           }
 
@@ -578,26 +624,15 @@ if (!isAuthorized) {
             }
           }, 2000);
 
-          timerInterval = setInterval(function() {
-            timerSeconds--;
-            updateDisplay();
-            if (timerSeconds <= 0) {
-              clearInterval(timerInterval);
-              clearInterval(breathInterval);
-              clearGuidedVoice();
-              isRunning = false;
-              btn.textContent = "Inizia";
-              btn.className = "timer-btn start";
-              document.getElementById("breath-circle").classList.remove("active");
-              document.getElementById("breath-label").textContent = "Sessione completata";
-              speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
-            }
-          }, 1000);
+          timerInterval = setInterval(timerTick, 500);
         } else {
           isRunning = false;
+          pausedRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+          timerEndTime = null;
           clearInterval(timerInterval);
           clearInterval(breathInterval);
           clearGuidedVoice();
+          releaseWakeLock();
           btn.textContent = "Riprendi";
           btn.className = "timer-btn start";
           document.getElementById("breath-circle").classList.remove("active");
@@ -607,9 +642,12 @@ if (!isAuthorized) {
 
       document.getElementById("timer-reset").addEventListener("click", function() {
         isRunning = false;
+        timerEndTime = null;
+        pausedRemaining = null;
         clearInterval(timerInterval);
         clearInterval(breathInterval);
         clearGuidedVoice();
+        releaseWakeLock();
         var activePreset = document.querySelector(".timer-presets button.active");
         timerSeconds = activePreset ? parseInt(activePreset.dataset.min) * 60 : 600;
         timerTotal = timerSeconds;
