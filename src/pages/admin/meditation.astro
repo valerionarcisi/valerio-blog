@@ -24,7 +24,7 @@ if (!isAuthorized) {
       body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; }
 
       h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
-      .subtitle { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 2rem; }
+      .subtitle { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1.5rem; }
 
       .day-badge {
         display: inline-block;
@@ -38,168 +38,69 @@ if (!isAuthorized) {
         margin-bottom: 1.5rem;
       }
 
-      .meditation-hero {
-        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
-        border: 1px solid rgba(155, 89, 182, 0.2);
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        text-align: center;
-      }
-      .meditation-hero .quote {
-        font-size: 1.1rem;
-        font-style: italic;
-        color: #ccc;
-        line-height: 1.6;
-        max-width: 600px;
-        margin: 0 auto 1rem;
-      }
-      .meditation-hero .author {
-        font-size: 0.75rem;
-        color: #8a8a8e;
-      }
-
-      .session-card {
-        background: #141416;
-        border: 1px solid #222;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-      }
-      .session-card h2 {
-        font-family: 'Staatliches', Impact, sans-serif;
-        color: #bb86fc;
-        font-size: 1.1rem;
-        letter-spacing: 0.02em;
-        margin-bottom: 1rem;
-      }
-      .session-card .step {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1.2rem;
-        align-items: flex-start;
-      }
-      .step-num {
-        flex-shrink: 0;
-        width: 28px;
-        height: 28px;
-        line-height: 28px;
-        text-align: center;
-        border-radius: 50%;
-        background: rgba(155, 89, 182, 0.15);
-        color: #bb86fc;
-        font-size: 0.75rem;
-        font-weight: 700;
-        font-family: 'JetBrains Mono', monospace;
-      }
-      .step-content { flex: 1; }
-      .step-title { font-weight: 600; color: #e8e6e1; font-size: 0.9rem; margin-bottom: 0.2rem; }
-      .step-desc { color: #aaa; font-size: 0.82rem; line-height: 1.5; }
-      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.3rem; }
-
-      .timer-section {
-        background: #141416;
-        border: 1px solid #222;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
-      }
-      .timer-display {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 3.5rem;
-        color: #e8e6e1;
-        margin: 1rem 0;
-        letter-spacing: 0.05em;
-      }
-      .timer-label { font-size: 0.75rem; color: #8a8a8e; margin-bottom: 1rem; }
-      .timer-presets { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
-      .timer-presets button {
-        padding: 0.4rem 0.8rem;
-        background: #1a1a1c;
-        border: 1px solid #333;
-        color: #8a8a8e;
-        cursor: pointer;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        transition: all 0.2s;
-      }
-      .timer-presets button.active { border-color: #bb86fc; color: #bb86fc; }
-      .timer-presets button:hover { border-color: #bb86fc; color: #bb86fc; }
-
-      .timer-controls { display: flex; gap: 0.8rem; justify-content: center; }
-      .timer-btn {
-        padding: 0.6rem 1.8rem;
-        border: none;
-        border-radius: 8px;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-weight: 600;
-      }
-      .timer-btn.start { background: #bb86fc; color: #0a0a0c; }
-      .timer-btn.start:hover { background: #ce9ffc; }
-      .timer-btn.pause { background: #f39c12; color: #0a0a0c; }
-      .timer-btn.pause:hover { background: #f1c40f; }
-      .timer-btn.reset { background: #333; color: #8a8a8e; }
-      .timer-btn.reset:hover { background: #444; color: #e8e6e1; }
-      .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.8rem; }
-      .timer-btn.voice.active { background: rgba(155,89,182,0.2); color: #bb86fc; border: 1px solid rgba(155,89,182,0.3); }
-      .timer-btn.voice:hover { background: rgba(155,89,182,0.3); color: #bb86fc; }
-
-      .progress-ring {
-        width: 200px;
-        height: 200px;
-        margin: 0 auto;
-      }
-      .progress-ring circle {
-        transition: stroke-dashoffset 1s linear;
-        transform: rotate(-90deg);
-        transform-origin: 50% 50%;
-      }
-
-      .focus-grid {
+      /* Stats grid */
+      .stats-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
       }
-      .focus-card {
+      .stat-box {
         background: #141416;
         border: 1px solid #222;
         border-radius: 8px;
-        padding: 1.2rem;
-        transition: border-color 0.2s;
-      }
-      .focus-card:hover { border-color: rgba(155,89,182,0.4); }
-      .focus-card .fc-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
-      .focus-card .fc-title { font-size: 0.8rem; color: #bb86fc; font-weight: 600; margin-bottom: 0.3rem; }
-      .focus-card .fc-text { font-size: 0.78rem; color: #aaa; line-height: 1.5; }
-
-      .breath-visual {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(155,89,182,0.3) 0%, rgba(155,89,182,0) 70%);
-        margin: 1rem auto;
-        animation: none;
-      }
-      .breath-visual.active {
-        animation: breathe 8s ease-in-out infinite;
-      }
-      @keyframes breathe {
-        0%, 100% { transform: scale(0.6); opacity: 0.4; }
-        25% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1); opacity: 0.8; }
-        75% { transform: scale(0.6); opacity: 0.4; }
-      }
-      .breath-label {
+        padding: 0.75rem;
         text-align: center;
-        font-size: 0.85rem;
-        color: #bb86fc;
-        min-height: 1.4em;
+      }
+      .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #bb86fc; }
+      .stat-label { font-size: 0.65rem; color: #8a8a8e; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+      /* Heatmap */
+      .heatmap-section {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+      }
+      .heatmap-title { font-size: 0.7rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+      .heatmap-grid {
+        display: grid;
+        grid-template-rows: repeat(7, 1fr);
+        grid-auto-flow: column;
+        gap: 2px;
+        width: fit-content;
+        min-width: 100%;
+      }
+      .heatmap-cell {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+        background: #1a1a1e;
+        cursor: default;
+        position: relative;
+      }
+      .heatmap-cell.l1 { background: rgba(155, 89, 182, 0.25); }
+      .heatmap-cell.l2 { background: rgba(155, 89, 182, 0.45); }
+      .heatmap-cell.l3 { background: rgba(155, 89, 182, 0.7); }
+      .heatmap-cell.l4 { background: #bb86fc; }
+      .heatmap-cell.today { outline: 1px solid #c9a84c; outline-offset: 1px; }
+      .heatmap-legend {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-top: 0.5rem;
+        font-size: 0.6rem;
+        color: #666;
+      }
+      .heatmap-legend-cell {
+        width: 10px;
+        height: 10px;
+        border-radius: 2px;
       }
 
+      /* Streak bar */
       .streak-bar {
         background: #141416;
         border: 1px solid #222;
@@ -208,34 +109,128 @@ if (!isAuthorized) {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         flex-wrap: wrap;
         gap: 0.8rem;
       }
       .streak-info { display: flex; align-items: center; gap: 0.8rem; }
       .streak-num { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; color: #bb86fc; }
       .streak-text { font-size: 0.75rem; color: #8a8a8e; }
-      .streak-dots { display: flex; gap: 3px; }
-      .streak-dot { width: 10px; height: 10px; border-radius: 50%; background: #222; border: 1px solid #333; }
-      .streak-dot.done { background: #bb86fc; border-color: #bb86fc; }
-      .streak-dot.today { border-color: #c9a84c; box-shadow: 0 0 4px rgba(201,168,76,0.4); }
+      .streak-best { font-size: 0.65rem; color: #555; }
       .done-btn {
-        padding: 0.5rem 1.2rem;
+        padding: 0.6rem 1.4rem;
         background: rgba(155,89,182,0.15);
         border: 1px solid rgba(155,89,182,0.3);
         color: #bb86fc;
         border-radius: 6px;
         cursor: pointer;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         transition: all 0.2s;
+        min-height: 44px;
       }
       .done-btn:hover { background: rgba(155,89,182,0.25); }
-      .done-btn.checked { background: #bb86fc; color: #0a0a0c; border-color: #bb86fc; }
+      .done-btn.checked { background: #bb86fc; color: #0a0a0c; border-color: #bb86fc; font-weight: 600; }
+
+      /* Quote */
+      .meditation-hero {
+        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
+        border: 1px solid rgba(155, 89, 182, 0.2);
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      .meditation-hero .quote { font-size: 1.1rem; font-style: italic; color: #ccc; line-height: 1.6; max-width: 600px; margin: 0 auto 1rem; }
+      .meditation-hero .author { font-size: 0.75rem; color: #8a8a8e; }
+
+      /* Focus cards */
+      .focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+      .focus-card { background: #141416; border: 1px solid #222; border-radius: 8px; padding: 1.2rem; }
+      .focus-card:hover { border-color: rgba(155,89,182,0.4); }
+      .focus-card .fc-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
+      .focus-card .fc-title { font-size: 0.8rem; color: #bb86fc; font-weight: 600; margin-bottom: 0.3rem; }
+      .focus-card .fc-text { font-size: 0.78rem; color: #aaa; line-height: 1.5; }
+
+      /* Timer */
+      .timer-section {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+      .timer-ring-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto; }
+      .timer-ring-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+      .timer-ring-bg { fill: none; stroke: #222; stroke-width: 6; }
+      .timer-ring-fg { fill: none; stroke: #bb86fc; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.5s linear; }
+      .timer-ring-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+      }
+      .timer-display { font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; color: #e8e6e1; letter-spacing: 0.05em; }
+      .timer-label { font-size: 0.7rem; color: #8a8a8e; }
+      .breath-label { text-align: center; font-size: 0.85rem; color: #bb86fc; min-height: 1.4em; margin: 0.5rem 0; }
+      .timer-presets { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
+      .timer-presets button {
+        padding: 0.5rem 0.9rem;
+        background: #1a1a1c;
+        border: 1px solid #333;
+        color: #8a8a8e;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+        min-height: 44px;
+      }
+      .timer-presets button.active { border-color: #bb86fc; color: #bb86fc; }
+      .timer-presets button:hover { border-color: #bb86fc; color: #bb86fc; }
+      .timer-controls { display: flex; gap: 0.8rem; justify-content: center; }
+      .timer-btn {
+        padding: 0.7rem 1.8rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+        min-height: 44px;
+      }
+      .timer-btn.start { background: #bb86fc; color: #0a0a0c; }
+      .timer-btn.start:hover { background: #ce9ffc; }
+      .timer-btn.pause { background: #f39c12; color: #0a0a0c; }
+      .timer-btn.reset { background: #333; color: #8a8a8e; }
+      .timer-btn.reset:hover { background: #444; color: #e8e6e1; }
+      .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.8rem; }
+      .timer-btn.voice.active { background: rgba(155,89,182,0.2); color: #bb86fc; border: 1px solid rgba(155,89,182,0.3); }
+
+      /* Session card */
+      .session-card {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 1.5rem;
+      }
+      .session-card h2 { font-family: 'Staatliches', Impact, sans-serif; color: #bb86fc; font-size: 1.1rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
+      .session-card .step { display: flex; gap: 1rem; margin-bottom: 1.2rem; align-items: flex-start; }
+      .step-num { flex-shrink: 0; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: rgba(155, 89, 182, 0.15); color: #bb86fc; font-size: 0.75rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+      .step-content { flex: 1; }
+      .step-title { font-weight: 600; color: #e8e6e1; font-size: 0.9rem; margin-bottom: 0.2rem; }
+      .step-desc { color: #aaa; font-size: 0.82rem; line-height: 1.5; }
+      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.3rem; }
+
+      .loading-msg { text-align: center; color: #555; font-size: 0.8rem; padding: 2rem; }
 
       @media (max-width: 700px) {
         .focus-grid { grid-template-columns: 1fr; }
-        .timer-display { font-size: 2.5rem; }
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .timer-display { font-size: 2.2rem; }
         body { padding: 1rem; }
+        .heatmap-cell { width: 9px; height: 9px; }
       }
     </style>
   </head>
@@ -246,12 +241,33 @@ if (!isAuthorized) {
 
     <div class="day-badge" id="day-badge"></div>
 
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-box"><div class="stat-value" id="stat-streak">-</div><div class="stat-label">Streak</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-total">-</div><div class="stat-label">Sessioni</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-minutes">-</div><div class="stat-label">Min totali</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-month">-</div><div class="stat-label">Questo mese</div></div>
+    </div>
+
+    <div class="heatmap-section">
+      <div class="heatmap-title">Ultimi 365 giorni</div>
+      <div class="heatmap-grid" id="heatmap"></div>
+      <div class="heatmap-legend">
+        <span>Meno</span>
+        <div class="heatmap-legend-cell" style="background:#1a1a1e"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.25)"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.45)"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.7)"></div>
+        <div class="heatmap-legend-cell" style="background:#bb86fc"></div>
+        <span>Di più</span>
+      </div>
+    </div>
+
     <div class="streak-bar">
       <div class="streak-info">
         <div class="streak-num" id="streak-num">0</div>
         <div>
           <div class="streak-text">giorni consecutivi</div>
-          <div class="streak-dots" id="streak-dots"></div>
+          <div class="streak-best" id="streak-best"></div>
         </div>
       </div>
       <button class="done-btn" id="done-btn">Segna come fatto oggi</button>
@@ -263,10 +279,17 @@ if (!isAuthorized) {
 
     <div class="timer-section">
       <h2 style="font-family:'Staatliches',Impact,sans-serif;color:#bb86fc;font-size:1.1rem;letter-spacing:0.02em;margin-bottom:0.5rem;">Timer Meditazione</h2>
-      <div class="breath-visual" id="breath-circle"></div>
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring-svg" viewBox="0 0 200 200">
+          <circle class="timer-ring-bg" cx="100" cy="100" r="90" />
+          <circle class="timer-ring-fg" id="timer-ring" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0" />
+        </svg>
+        <div class="timer-ring-text">
+          <div class="timer-display" id="timer-display">10:00</div>
+          <div class="timer-label">minuti</div>
+        </div>
+      </div>
       <div class="breath-label" id="breath-label"></div>
-      <div class="timer-display" id="timer-display">10:00</div>
-      <div class="timer-label">minuti</div>
       <div class="timer-presets" id="timer-presets">
         <button data-min="5">5 min</button>
         <button data-min="10" class="active">10 min</button>
@@ -284,13 +307,155 @@ if (!isAuthorized) {
 
     <div class="session-card" id="daily-session"></div>
 
-    <script is:inline>
+    <script is:inline define:vars={{ token }}>
+      var API_URL = '/api/admin/meditation';
+      var AUTH_HEADER = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      var meditationData = [];
+
       var now = new Date();
       var dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
       var dayNames = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
       var monthNames = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
       document.getElementById("day-badge").textContent = dayNames[now.getDay()] + " " + now.getDate() + " " + monthNames[now.getMonth()] + " — Giorno " + dayOfYear;
 
+      function todayStr() {
+        var d = new Date();
+        return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      }
+
+      function dateStr(d) {
+        return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+      }
+
+      // Fetch data from DB
+      async function loadData() {
+        try {
+          var res = await fetch(API_URL, { headers: AUTH_HEADER });
+          meditationData = await res.json();
+        } catch(e) {
+          meditationData = [];
+        }
+        renderAll();
+      }
+
+      async function saveSession(date, durationMin, sessionType, note) {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: AUTH_HEADER,
+          body: JSON.stringify({ date: date, duration_min: durationMin, session_type: sessionType, note: note })
+        });
+        await loadData();
+      }
+
+      // Stats calculation
+      function calcStreak(dates) {
+        if (dates.length === 0) return { current: 0, best: 0 };
+        var sorted = dates.slice().sort().reverse();
+        var today = todayStr();
+        var check = new Date();
+
+        if (sorted[0] !== today) {
+          var yesterday = new Date(check);
+          yesterday.setDate(yesterday.getDate() - 1);
+          if (sorted[0] !== dateStr(yesterday)) return { current: 0, best: calcBest(sorted) };
+          check = yesterday;
+        }
+
+        var current = 0;
+        for (var i = 0; i < sorted.length; i++) {
+          var expected = new Date(check);
+          expected.setDate(expected.getDate() - i);
+          if (sorted[i] === dateStr(expected)) { current++; } else { break; }
+        }
+        return { current: current, best: Math.max(current, calcBest(sorted)) };
+      }
+
+      function calcBest(sorted) {
+        if (sorted.length === 0) return 0;
+        var asc = sorted.slice().sort();
+        var best = 1, run = 1;
+        for (var i = 1; i < asc.length; i++) {
+          var prev = new Date(asc[i-1]);
+          var curr = new Date(asc[i]);
+          var diff = (curr - prev) / 86400000;
+          if (diff === 1) { run++; best = Math.max(best, run); }
+          else if (diff > 1) { run = 1; }
+        }
+        return best;
+      }
+
+      function renderAll() {
+        var dates = meditationData.map(function(r) { return r.date; });
+        var dateMap = {};
+        meditationData.forEach(function(r) { dateMap[r.date] = r; });
+
+        var streak = calcStreak(dates);
+        document.getElementById("stat-streak").textContent = streak.current;
+        document.getElementById("streak-num").textContent = streak.current;
+        document.getElementById("streak-best").textContent = "Record: " + streak.best;
+        document.getElementById("stat-total").textContent = dates.length;
+
+        var totalMin = meditationData.reduce(function(s, r) { return s + (r.duration_min || 0); }, 0);
+        document.getElementById("stat-minutes").textContent = totalMin;
+
+        var thisMonth = todayStr().substring(0, 7);
+        var monthCount = dates.filter(function(d) { return d.startsWith(thisMonth); }).length;
+        document.getElementById("stat-month").textContent = monthCount;
+
+        // Done button
+        var btn = document.getElementById("done-btn");
+        if (dates.indexOf(todayStr()) !== -1) {
+          btn.textContent = "Fatto oggi ✓";
+          btn.classList.add("checked");
+        } else {
+          btn.textContent = "Segna come fatto oggi";
+          btn.classList.remove("checked");
+        }
+
+        // Heatmap
+        renderHeatmap(dateMap);
+      }
+
+      function renderHeatmap(dateMap) {
+        var grid = document.getElementById("heatmap");
+        var today = new Date();
+        today.setHours(0,0,0,0);
+        var todayS = dateStr(today);
+
+        var startDay = new Date(today);
+        startDay.setDate(startDay.getDate() - 364);
+        var dow = startDay.getDay();
+        startDay.setDate(startDay.getDate() - dow);
+
+        var html = "";
+        var d = new Date(startDay);
+        while (d <= today) {
+          var ds = dateStr(d);
+          var entry = dateMap[ds];
+          var cls = "heatmap-cell";
+          if (entry) {
+            var min = entry.duration_min || 0;
+            if (min <= 5) cls += " l1";
+            else if (min <= 10) cls += " l2";
+            else if (min <= 20) cls += " l3";
+            else cls += " l4";
+          }
+          if (ds === todayS) cls += " today";
+          var title = ds;
+          if (entry) title += " — " + (entry.duration_min || 0) + " min" + (entry.session_type ? " (" + entry.session_type + ")" : "");
+          html += '<div class="' + cls + '" title="' + title + '"></div>';
+          d.setDate(d.getDate() + 1);
+        }
+        grid.innerHTML = html;
+      }
+
+      // Done button - manual mark
+      document.getElementById("done-btn").addEventListener("click", function() {
+        if (meditationData.some(function(r) { return r.date === todayStr(); })) return;
+        saveSession(todayStr(), 0, null, null);
+      });
+
+      // Quotes, focus, sessions — same as before
       var quotes = [
         { text: "Tutto ciò che sorge, passa. Questa è la legge della natura.", author: "S.N. Goenka" },
         { text: "La mente è il nostro strumento più potente. Impara ad osservarla e diventerai libero.", author: "S.N. Goenka" },
@@ -308,17 +473,17 @@ if (!isAuthorized) {
         { text: "Meditare non è fuggire dalla realtà, è vedere la realtà per la prima volta.", author: "S.N. Goenka" },
         { text: "Il silenzio non è vuoto. È pieno di risposte.", author: "Tradizione contemplativa" },
         { text: "Equanimità: osservare piacere e dolore con lo stesso distacco. Questo è il cammino.", author: "S.N. Goenka" },
-        { text: "Un momento di consapevolezza può cambiare un'intera giornata. Un giorno di consapevolezza può cambiare un'intera vita.", author: "Buddha" },
+        { text: "Un momento di consapevolezza può cambiare un'intera giornata.", author: "Buddha" },
         { text: "La mente è come l'acqua: quando è agitata è difficile vedere. Quando è calma, tutto diventa chiaro.", author: "Prasad Mahes" },
         { text: "Non reagire. Osserva e lascia andare.", author: "S.N. Goenka" },
         { text: "La meditazione non è un esercizio mattutino. È uno stile di vita.", author: "Tradizione Vipassana" },
         { text: "Stai seduto. Osserva il respiro. Questo è sufficiente.", author: "Ajahn Chah" },
         { text: "Non c'è nulla da raggiungere. C'è solo da lasciar cadere.", author: "Tradizione Zen" },
-        { text: "La consapevolezza è il sentiero verso l'immortalità; la distrazione è il sentiero verso la morte.", author: "Dhammapada" },
-        { text: "Respira. Lascia andare. E ricorda a te stesso che questo momento è l'unico che hai.", author: "Tradizione Vipassana" },
+        { text: "La consapevolezza è il sentiero verso l'immortalità.", author: "Dhammapada" },
+        { text: "Respira. Lascia andare. Questo momento è l'unico che hai.", author: "Tradizione Vipassana" },
         { text: "La reazione crea legami. L'osservazione crea libertà.", author: "S.N. Goenka" },
         { text: "Ogni respiro è un'opportunità per ricominciare.", author: "Tradizione mindfulness" },
-        { text: "La sofferenza nasce dall'attaccamento. L'attaccamento nasce dall'inconsapevolezza.", author: "Buddha" },
+        { text: "La sofferenza nasce dall'attaccamento.", author: "Buddha" },
         { text: "Sii l'osservatore dei tuoi pensieri, non la loro vittima.", author: "Buddha" },
         { text: "Il corpo sa quello che la mente nega. Ascoltalo.", author: "Tradizione Vipassana" },
         { text: "Medita non per diventare bravo a meditare. Medita per diventare bravo a vivere.", author: "Tradizione contemporanea" },
@@ -326,105 +491,69 @@ if (!isAuthorized) {
       ];
 
       var sessions = [
-        {
-          title: "Anapana — Consapevolezza del respiro",
-          steps: [
-            { t: "Postura", d: "Siediti con la schiena dritta, gambe incrociate o su una sedia. Mani sulle ginocchia. Chiudi gli occhi.", dur: "1 min" },
-            { t: "Respiro naturale", d: "Porta l'attenzione all'area tra le narici e il labbro superiore. Senti l'aria che entra e esce. Non modificare il respiro.", dur: "3 min" },
-            { t: "Triangolo del respiro", d: "Nota le sensazioni nella narice destra, poi nella sinistra, poi sul labbro. Sposta l'attenzione lentamente tra questi tre punti.", dur: "4 min" },
-            { t: "Ritorno", d: "Quando la mente vaga (e lo farà), semplicemente torna. Senza giudizio, senza frustrazione. Ogni ritorno è una ripetizione che rafforza la consapevolezza.", dur: "continuo" },
-          ]
-        },
-        {
-          title: "Body Scan — Scansione delle sensazioni",
-          steps: [
-            { t: "Preparazione", d: "Chiudi gli occhi. 2 minuti di Anapana per calmare la mente. Senti il respiro sul labbro superiore.", dur: "2 min" },
-            { t: "Dalla testa ai piedi", d: "Porta l'attenzione alla sommità della testa. Nota qualsiasi sensazione: calore, formicolio, pressione, nulla. Scendi lentamente: fronte, occhi, guance, mascella, collo.", dur: "4 min" },
-            { t: "Tronco e arti", d: "Spalle, braccia, mani, petto, addome, schiena. Per ogni zona, resta 10-15 secondi. Osserva senza reagire. Piacevole o spiacevole, è uguale.", dur: "4 min" },
-            { t: "Gambe e piedi", d: "Cosce, ginocchia, polpacci, piedi, dita. Chiudi con una consapevolezza diffusa di tutto il corpo simultaneamente.", dur: "3 min" },
-          ]
-        },
-        {
-          title: "Metta — Meditazione di amorevole gentilezza",
-          steps: [
-            { t: "Centra il respiro", d: "2 minuti di Anapana. Porta calma nella mente.", dur: "2 min" },
-            { t: "Gentilezza verso te stesso", d: "Ripeti mentalmente: 'Che io possa essere felice. Che io possa essere libero dalla sofferenza. Che io possa essere in pace.' Sentilo nel corpo.", dur: "3 min" },
-            { t: "Verso chi ami", d: "Pensa a una persona cara. Ripeti le stesse frasi per lei. Visualizza il suo volto, senti calore nel petto.", dur: "3 min" },
-            { t: "Verso tutti gli esseri", d: "Espandi questa gentilezza a tutti: amici, sconosciuti, persino chi ti ha ferito. 'Che tutti gli esseri possano essere felici.'", dur: "4 min" },
-          ]
-        },
-        {
-          title: "Vipassana profonda — Impermanenza",
-          steps: [
-            { t: "Anapana iniziale", d: "3 minuti di consapevolezza del respiro. Affina l'attenzione.", dur: "3 min" },
-            { t: "Sensazioni sottili", d: "Cerca le sensazioni più sottili: vibrazioni, pulsazioni, flussi di energia. Non immaginare, osserva solo ciò che c'è realmente.", dur: "4 min" },
-            { t: "Anicca — Impermanenza", d: "Nota come ogni sensazione sorge e passa. Nulla resta uguale. Questo è Anicca. Osservalo direttamente, non come concetto ma come esperienza.", dur: "4 min" },
-            { t: "Equanimità", d: "Non desiderare le sensazioni piacevoli, non rifiutare quelle spiacevoli. Mantieni perfetto equilibrio. Questo è il cuore della Vipassana.", dur: "3 min" },
-          ]
-        },
-        {
-          title: "Consapevolezza del corpo in movimento",
-          steps: [
-            { t: "Anapana seduto", d: "Inizia con 3 minuti di osservazione del respiro da seduto.", dur: "3 min" },
-            { t: "Alzarsi consapevoli", d: "Alzati molto lentamente. Nota ogni micro-movimento: l'intenzione di alzarti, i muscoli che si attivano, il cambio di equilibrio.", dur: "1 min" },
-            { t: "Camminata lenta", d: "Cammina avanti e indietro per 3-4 metri. Piede che si alza, si muove, si appoggia. Ogni passo è un universo di sensazioni.", dur: "5 min" },
-            { t: "Ritorno seduto", d: "Siediti di nuovo lentamente. Chiudi con 2 minuti di body scan. Nota come il corpo si sente diverso dopo il movimento consapevole.", dur: "3 min" },
-          ]
-        },
-        {
-          title: "Osservazione dei pensieri",
-          steps: [
-            { t: "Anapana", d: "Calma la mente con 3 minuti di respiro consapevole.", dur: "3 min" },
-            { t: "Etichettare", d: "Quando arriva un pensiero, etichettalo: 'pensiero', 'ricordo', 'pianificazione', 'giudizio'. Non seguirlo, torna al respiro.", dur: "4 min" },
-            { t: "Lo spazio tra i pensieri", d: "Cerca il silenzio tra un pensiero e l'altro. Quello spazio è la tua vera natura. Non devi crearlo, solo notarlo.", dur: "3 min" },
-            { t: "Lasciare andare", d: "Immagina ogni pensiero come una nuvola che passa nel cielo. Tu sei il cielo, non le nuvole. Riposa in questa vastità.", dur: "3 min" },
-          ]
-        },
-        {
-          title: "Meditazione sul suono e silenzio",
-          steps: [
-            { t: "Respiro iniziale", d: "2 minuti di Anapana. Occhi chiusi, postura stabile.", dur: "2 min" },
-            { t: "Ascolto aperto", d: "Apri l'udito a tutti i suoni: vicini e lontani, forti e deboli. Non giudicare, non etichettare. Solo ascolta.", dur: "4 min" },
-            { t: "Il suono interno", d: "Porta l'attenzione al suono del silenzio — quel leggero ronzio o vibrazione che c'è quando tutto tace. Quello è il suono della consapevolezza.", dur: "4 min" },
-            { t: "Integrazione", d: "Espandi la consapevolezza: suoni esterni, suono interno, respiro, sensazioni del corpo. Tutto contemporaneamente. Sei pura presenza.", dur: "3 min" },
-          ]
-        },
+        { title: "Anapana — Consapevolezza del respiro", steps: [
+          { t: "Postura", d: "Siediti con la schiena dritta, gambe incrociate o su una sedia. Mani sulle ginocchia. Chiudi gli occhi.", dur: "1 min" },
+          { t: "Respiro naturale", d: "Porta l'attenzione all'area tra le narici e il labbro superiore. Senti l'aria che entra e esce. Non modificare il respiro.", dur: "3 min" },
+          { t: "Triangolo del respiro", d: "Nota le sensazioni nella narice destra, poi nella sinistra, poi sul labbro. Sposta l'attenzione lentamente tra questi tre punti.", dur: "4 min" },
+          { t: "Ritorno", d: "Quando la mente vaga, semplicemente torna. Senza giudizio. Ogni ritorno rafforza la consapevolezza.", dur: "continuo" },
+        ]},
+        { title: "Body Scan — Scansione delle sensazioni", steps: [
+          { t: "Preparazione", d: "Chiudi gli occhi. 2 minuti di Anapana per calmare la mente.", dur: "2 min" },
+          { t: "Dalla testa ai piedi", d: "Porta l'attenzione alla sommità della testa. Nota qualsiasi sensazione: calore, formicolio, pressione, nulla. Scendi lentamente.", dur: "4 min" },
+          { t: "Tronco e arti", d: "Spalle, braccia, mani, petto, addome, schiena. Per ogni zona, resta 10-15 secondi. Osserva senza reagire.", dur: "4 min" },
+          { t: "Gambe e piedi", d: "Cosce, ginocchia, polpacci, piedi, dita. Chiudi con una consapevolezza diffusa di tutto il corpo.", dur: "3 min" },
+        ]},
+        { title: "Metta — Meditazione di amorevole gentilezza", steps: [
+          { t: "Centra il respiro", d: "2 minuti di Anapana. Porta calma nella mente.", dur: "2 min" },
+          { t: "Gentilezza verso te stesso", d: "Ripeti: 'Che io possa essere felice. Che io possa essere libero dalla sofferenza. Che io possa essere in pace.'", dur: "3 min" },
+          { t: "Verso chi ami", d: "Pensa a una persona cara. Ripeti le stesse frasi per lei. Visualizza il suo volto.", dur: "3 min" },
+          { t: "Verso tutti gli esseri", d: "Espandi questa gentilezza a tutti: amici, sconosciuti, persino chi ti ha ferito.", dur: "4 min" },
+        ]},
+        { title: "Vipassana profonda — Impermanenza", steps: [
+          { t: "Anapana iniziale", d: "3 minuti di consapevolezza del respiro. Affina l'attenzione.", dur: "3 min" },
+          { t: "Sensazioni sottili", d: "Cerca le sensazioni più sottili: vibrazioni, pulsazioni, flussi di energia. Non immaginare, osserva solo ciò che c'è.", dur: "4 min" },
+          { t: "Anicca — Impermanenza", d: "Nota come ogni sensazione sorge e passa. Nulla resta uguale. Questo è Anicca.", dur: "4 min" },
+          { t: "Equanimità", d: "Non desiderare le sensazioni piacevoli, non rifiutare quelle spiacevoli. Mantieni perfetto equilibrio.", dur: "3 min" },
+        ]},
+        { title: "Consapevolezza del corpo in movimento", steps: [
+          { t: "Anapana seduto", d: "Inizia con 3 minuti di osservazione del respiro da seduto.", dur: "3 min" },
+          { t: "Alzarsi consapevoli", d: "Alzati molto lentamente. Nota ogni micro-movimento.", dur: "1 min" },
+          { t: "Camminata lenta", d: "Cammina avanti e indietro per 3-4 metri. Piede che si alza, si muove, si appoggia.", dur: "5 min" },
+          { t: "Ritorno seduto", d: "Siediti di nuovo lentamente. Chiudi con 2 minuti di body scan.", dur: "3 min" },
+        ]},
+        { title: "Osservazione dei pensieri", steps: [
+          { t: "Anapana", d: "Calma la mente con 3 minuti di respiro consapevole.", dur: "3 min" },
+          { t: "Etichettare", d: "Quando arriva un pensiero, etichettalo: 'pensiero', 'ricordo', 'pianificazione', 'giudizio'. Non seguirlo.", dur: "4 min" },
+          { t: "Lo spazio tra i pensieri", d: "Cerca il silenzio tra un pensiero e l'altro. Quello spazio è la tua vera natura.", dur: "3 min" },
+          { t: "Lasciare andare", d: "Ogni pensiero come una nuvola che passa. Tu sei il cielo, non le nuvole.", dur: "3 min" },
+        ]},
+        { title: "Meditazione sul suono e silenzio", steps: [
+          { t: "Respiro iniziale", d: "2 minuti di Anapana. Occhi chiusi, postura stabile.", dur: "2 min" },
+          { t: "Ascolto aperto", d: "Apri l'udito a tutti i suoni: vicini e lontani. Non giudicare, non etichettare. Solo ascolta.", dur: "4 min" },
+          { t: "Il suono interno", d: "Porta l'attenzione al suono del silenzio — quel leggero ronzio quando tutto tace.", dur: "4 min" },
+          { t: "Integrazione", d: "Espandi la consapevolezza: suoni esterni, suono interno, respiro, sensazioni del corpo. Tutto insieme.", dur: "3 min" },
+        ]},
       ];
 
       var focusAreas = [
-        [
-          { icon: "🫁", title: "Respiro", text: "Oggi concentrati sulla qualità del respiro. Nota la differenza tra inspirazione ed espirazione. La pausa naturale tra i due." },
-          { icon: "🌊", title: "Impermanenza", text: "Anicca. Osserva come ogni sensazione nasce, cambia e scompare. Nulla è permanente — questa è la chiave della libertà." },
-        ],
-        [
-          { icon: "⚡", title: "Sensazioni", text: "Oggi presta attenzione alle sensazioni sottili: formicolii, vibrazioni, calore. Sono sempre lì, devi solo affinare l'attenzione." },
-          { icon: "🪷", title: "Equanimità", text: "Pratica l'equilibrio perfetto: non desiderare il piacevole, non rifiutare lo spiacevole. Osserva tutto con lo stesso distacco." },
-        ],
-        [
-          { icon: "🧠", title: "Mente", text: "Osserva i pattern mentali di oggi. Quali pensieri tornano? Non seguirli: notali, etichettali, lasciali andare." },
-          { icon: "💛", title: "Compassione", text: "Oggi pratica metta verso te stesso. Sei abbastanza. Stai facendo del tuo meglio. Trattati con la gentilezza che riservi agli altri." },
-        ],
-        [
-          { icon: "🦴", title: "Corpo", text: "Il corpo è il tuo ancoramento. Oggi nota le tensioni nascoste: mascella, spalle, addome. Dove accumuli stress? Osserva e lascia andare." },
-          { icon: "🔄", title: "Costanza", text: "La pratica regolare conta più della pratica perfetta. Anche 5 minuti oggi sono meglio di zero. Sii presente, il resto viene da sé." },
-        ],
-        [
-          { icon: "👁️", title: "Osservazione", text: "Oggi sii l'osservatore neutro. Non chi sente il dolore, ma chi osserva il dolore. Non chi pensa, ma chi osserva il pensiero." },
-          { icon: "🌙", title: "Silenzio", text: "Cerca momenti di silenzio nella giornata. Il silenzio non è assenza — è la presenza più pura. Dentro il silenzio trovi te stesso." },
-        ],
-        [
-          { icon: "🌬️", title: "Lasciare andare", text: "Oggi pratica il 'non-fare'. Non resistere a nulla, non aggrapparti a nulla. Il fiume scorre meglio quando non cerchi di controllarlo." },
-          { icon: "🎯", title: "Intenzione", text: "Setta un'intenzione per la pratica. Non un obiettivo, un'intenzione: 'Oggi pratico per coltivare calma' oppure 'Oggi osservo senza giudicare'." },
-        ],
-        [
-          { icon: "✨", title: "Gratitudine", text: "Inizia la pratica con 30 secondi di gratitudine silenziosa. Per il corpo che funziona, per il tempo che hai dedicato, per la consapevolezza stessa." },
-          { icon: "🏔️", title: "Stabilità", text: "Sii come una montagna: le nuvole passano, il vento soffia, ma la montagna resta. Tu sei la montagna. I pensieri sono le nuvole." },
-        ],
+        [{ icon: "🫁", title: "Respiro", text: "Oggi concentrati sulla qualità del respiro. Nota la differenza tra inspirazione ed espirazione." },
+         { icon: "🌊", title: "Impermanenza", text: "Anicca. Osserva come ogni sensazione nasce, cambia e scompare." }],
+        [{ icon: "⚡", title: "Sensazioni", text: "Oggi presta attenzione alle sensazioni sottili: formicolii, vibrazioni, calore." },
+         { icon: "🪷", title: "Equanimità", text: "Pratica l'equilibrio perfetto: non desiderare il piacevole, non rifiutare lo spiacevole." }],
+        [{ icon: "🧠", title: "Mente", text: "Osserva i pattern mentali di oggi. Quali pensieri tornano? Notali, etichettali, lasciali andare." },
+         { icon: "💛", title: "Compassione", text: "Oggi pratica metta verso te stesso. Sei abbastanza. Stai facendo del tuo meglio." }],
+        [{ icon: "🦴", title: "Corpo", text: "Il corpo è il tuo ancoramento. Nota le tensioni nascoste: mascella, spalle, addome." },
+         { icon: "🔄", title: "Costanza", text: "La pratica regolare conta più della pratica perfetta. Anche 5 minuti oggi sono meglio di zero." }],
+        [{ icon: "👁️", title: "Osservazione", text: "Oggi sii l'osservatore neutro. Non chi sente il dolore, ma chi osserva il dolore." },
+         { icon: "🌙", title: "Silenzio", text: "Cerca momenti di silenzio nella giornata. Il silenzio non è assenza — è la presenza più pura." }],
+        [{ icon: "🌬️", title: "Lasciare andare", text: "Oggi pratica il 'non-fare'. Non resistere a nulla, non aggrapparti a nulla." },
+         { icon: "🎯", title: "Intenzione", text: "Setta un'intenzione per la pratica. Non un obiettivo: 'Oggi pratico per coltivare calma'." }],
+        [{ icon: "✨", title: "Gratitudine", text: "Inizia con 30 secondi di gratitudine silenziosa. Per il corpo che funziona, per il tempo che hai." },
+         { icon: "🏔️", title: "Stabilità", text: "Sii come una montagna: le nuvole passano, il vento soffia, ma la montagna resta." }],
       ];
 
       var q = quotes[dayOfYear % quotes.length];
-      document.getElementById("daily-quote").innerHTML =
-        '<div class="quote">"' + q.text + '"</div><div class="author">— ' + q.author + '</div>';
+      document.getElementById("daily-quote").innerHTML = '<div class="quote">"' + q.text + '"</div><div class="author">— ' + q.author + '</div>';
 
       var todayFocus = focusAreas[dayOfYear % focusAreas.length];
       document.getElementById("daily-focus").innerHTML = todayFocus.map(function(f) {
@@ -444,9 +573,7 @@ if (!isAuthorized) {
         if (!voiceEnabled || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
         window.speechSynthesis.cancel();
         var u = new SpeechSynthesisUtterance(text);
-        u.lang = "it-IT";
-        u.rate = 0.85;
-        u.pitch = 0.9;
+        u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
         var voices = window.speechSynthesis.getVoices();
         var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
         if (it.length > 0) u.voice = it[0];
@@ -461,54 +588,36 @@ if (!isAuthorized) {
         if (!voiceEnabled) window.speechSynthesis.cancel();
       });
 
-      // Wake Lock — keeps screen on during meditation
+      // Wake Lock
       var wakeLock = null;
       async function requestWakeLock() {
-        try {
-          if ('wakeLock' in navigator) {
-            wakeLock = await navigator.wakeLock.request('screen');
-          }
-        } catch (e) { /* not supported or denied */ }
+        try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
       }
-      function releaseWakeLock() {
-        if (wakeLock) { wakeLock.release(); wakeLock = null; }
-      }
-      document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible' && isRunning) requestWakeLock();
-      });
+      function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
+      document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible' && isRunning) requestWakeLock(); });
 
-      // Timer — uses real timestamps so it survives background throttling
-      var timerSeconds = 600;
-      var timerTotal = 600;
-      var timerInterval = null;
-      var isRunning = false;
-      var guidedStepIdx = 0;
-      var guidedTimeouts = [];
-      var timerEndTime = null;
-      var pausedRemaining = null;
+      // Timer
+      var timerSeconds = 600, timerTotal = 600;
+      var timerInterval = null, isRunning = false;
+      var guidedStepIdx = 0, guidedTimeouts = [];
+      var timerEndTime = null, pausedRemaining = null;
+      var CIRCUMFERENCE = 2 * Math.PI * 90;
 
-      function fmtTimer(s) {
-        var m = Math.floor(s / 60);
-        var sec = s % 60;
-        return (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec;
-      }
-
+      function fmtTimer(s) { var m = Math.floor(s/60); var sec = s%60; return (m<10?"0":"")+m+":"+(sec<10?"0":"")+sec; }
       function updateDisplay() {
         document.getElementById("timer-display").textContent = fmtTimer(timerSeconds);
+        var progress = timerTotal > 0 ? timerSeconds / timerTotal : 1;
+        document.getElementById("timer-ring").setAttribute("stroke-dashoffset", String(CIRCUMFERENCE * (1 - progress)));
       }
 
-      function parseDuration(dur) {
-        var match = dur.match(/(\d+)/);
-        return match ? parseInt(match[1]) * 60 : 0;
-      }
+      function parseDuration(dur) { var m = dur.match(/(\d+)/); return m ? parseInt(m[1]) * 60 : 0; }
 
       function buildGuidedSchedule(totalSec) {
         var steps = sess.steps;
         var totalDeclared = 0;
         steps.forEach(function(s) { totalDeclared += parseDuration(s.dur); });
         var scale = totalDeclared > 0 ? totalSec / totalDeclared : 1;
-        var schedule = [];
-        var elapsed = 0;
+        var schedule = [], elapsed = 0;
         steps.forEach(function(s, i) {
           var stepSec = Math.round(parseDuration(s.dur) * scale);
           if (stepSec === 0 && i < steps.length - 1) stepSec = Math.round(totalSec / steps.length);
@@ -521,94 +630,66 @@ if (!isAuthorized) {
       function startGuidedVoice() {
         var schedule = buildGuidedSchedule(timerTotal);
         guidedTimeouts = [];
-
         speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
-
         schedule.forEach(function(step) {
           var t = setTimeout(function() {
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
-            var remaining = timerTotal - step.at;
             speak(step.title + ". " + step.desc);
-
             var halfWay = Math.round(step.duration / 2);
             if (halfWay > 30 && step.idx < schedule.length - 1) {
-              var ht = setTimeout(function() {
-                if (isRunning) speak("Continua così. Resta presente.");
-              }, halfWay * 1000);
+              var ht = setTimeout(function() { if (isRunning) speak("Continua così. Resta presente."); }, halfWay * 1000);
               guidedTimeouts.push(ht);
             }
           }, step.at * 1000);
           guidedTimeouts.push(t);
         });
-
-        var halfTotal = Math.round(timerTotal / 2);
-        var ht2 = setTimeout(function() {
-          if (isRunning) speak("Metà sessione.");
-        }, halfTotal * 1000);
-        guidedTimeouts.push(ht2);
-
-        var lastMin = setTimeout(function() {
-          if (isRunning) speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
-        }, (timerTotal - 60) * 1000);
+        var lastMin = setTimeout(function() { if (isRunning) speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo."); }, (timerTotal - 60) * 1000);
         guidedTimeouts.push(lastMin);
       }
 
-      function clearGuidedVoice() {
-        guidedTimeouts.forEach(function(t) { clearTimeout(t); });
-        guidedTimeouts = [];
-        window.speechSynthesis.cancel();
-      }
+      function clearGuidedVoice() { guidedTimeouts.forEach(function(t) { clearTimeout(t); }); guidedTimeouts = []; window.speechSynthesis.cancel(); }
 
       document.getElementById("timer-presets").addEventListener("click", function(e) {
-        if (e.target.tagName !== "BUTTON") return;
-        if (isRunning) return;
+        if (e.target.tagName !== "BUTTON" || isRunning) return;
         var min = parseInt(e.target.dataset.min);
-        timerSeconds = min * 60;
-        timerTotal = timerSeconds;
+        timerSeconds = min * 60; timerTotal = timerSeconds;
         updateDisplay();
         document.querySelectorAll(".timer-presets button").forEach(function(b) { b.classList.remove("active"); });
         e.target.classList.add("active");
       });
 
       var breathPhases = ["Inspira...", "Trattieni...", "Espira...", "Pausa..."];
-      var breathIdx = 0;
-      var breathInterval = null;
+      var breathIdx = 0, breathInterval = null;
 
       function timerTick() {
         if (!isRunning || !timerEndTime) return;
-        var now = Date.now();
-        var remaining = Math.max(0, Math.round((timerEndTime - now) / 1000));
+        var remaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
         timerSeconds = remaining;
         updateDisplay();
         if (remaining <= 0) {
-          clearInterval(timerInterval);
-          clearInterval(breathInterval);
-          clearGuidedVoice();
-          releaseWakeLock();
-          isRunning = false;
-          timerEndTime = null;
+          clearInterval(timerInterval); clearInterval(breathInterval);
+          clearGuidedVoice(); releaseWakeLock();
+          isRunning = false; timerEndTime = null;
           var btn = document.getElementById("timer-start");
-          btn.textContent = "Inizia";
-          btn.className = "timer-btn start";
-          document.getElementById("breath-circle").classList.remove("active");
+          btn.textContent = "Inizia"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "Sessione completata";
           speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
+          autoSaveSession();
         }
+      }
+
+      function autoSaveSession() {
+        var durationMin = Math.round(timerTotal / 60);
+        saveSession(todayStr(), durationMin, sess.title, null);
       }
 
       document.getElementById("timer-start").addEventListener("click", function() {
         var btn = this;
         if (!isRunning) {
           isRunning = true;
-          btn.textContent = "Pausa";
-          btn.className = "timer-btn pause";
-          document.getElementById("breath-circle").classList.add("active");
-          breathIdx = 0;
-          document.getElementById("breath-label").textContent = breathPhases[0];
-
+          btn.textContent = "Pausa"; btn.className = "timer-btn pause";
           requestWakeLock();
-
           if (pausedRemaining != null) {
             timerEndTime = Date.now() + pausedRemaining * 1000;
             pausedRemaining = null;
@@ -616,118 +697,44 @@ if (!isAuthorized) {
             timerEndTime = Date.now() + timerSeconds * 1000;
             startGuidedVoice();
           }
-
+          breathIdx = 0;
+          document.getElementById("breath-label").textContent = breathPhases[0];
           breathInterval = setInterval(function() {
             breathIdx = (breathIdx + 1) % 4;
-            if (!window.speechSynthesis.speaking) {
-              document.getElementById("breath-label").textContent = breathPhases[breathIdx];
-            }
+            if (!window.speechSynthesis.speaking) document.getElementById("breath-label").textContent = breathPhases[breathIdx];
           }, 2000);
-
           timerInterval = setInterval(timerTick, 500);
         } else {
           isRunning = false;
           pausedRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
           timerEndTime = null;
-          clearInterval(timerInterval);
-          clearInterval(breathInterval);
-          clearGuidedVoice();
-          releaseWakeLock();
-          btn.textContent = "Riprendi";
-          btn.className = "timer-btn start";
-          document.getElementById("breath-circle").classList.remove("active");
+          clearInterval(timerInterval); clearInterval(breathInterval);
+          clearGuidedVoice(); releaseWakeLock();
+          btn.textContent = "Riprendi"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "In pausa";
         }
       });
 
       document.getElementById("timer-reset").addEventListener("click", function() {
-        isRunning = false;
-        timerEndTime = null;
-        pausedRemaining = null;
-        clearInterval(timerInterval);
-        clearInterval(breathInterval);
-        clearGuidedVoice();
-        releaseWakeLock();
+        isRunning = false; timerEndTime = null; pausedRemaining = null;
+        clearInterval(timerInterval); clearInterval(breathInterval);
+        clearGuidedVoice(); releaseWakeLock();
         var activePreset = document.querySelector(".timer-presets button.active");
         timerSeconds = activePreset ? parseInt(activePreset.dataset.min) * 60 : 600;
         timerTotal = timerSeconds;
         updateDisplay();
         document.getElementById("timer-start").textContent = "Inizia";
         document.getElementById("timer-start").className = "timer-btn start";
-        document.getElementById("breath-circle").classList.remove("active");
         document.getElementById("breath-label").textContent = "";
       });
 
-      // Preload voices
       if (window.speechSynthesis) {
         window.speechSynthesis.getVoices();
         window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
       }
 
-      // Streak tracking via localStorage
-      var STREAK_KEY = "vipassana_streak";
-      var streakData = JSON.parse(localStorage.getItem(STREAK_KEY) || '{"dates":[]}');
-
-      function todayStr() {
-        var d = new Date();
-        return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-      }
-
-      function calcStreak() {
-        var dates = streakData.dates.sort().reverse();
-        if (dates.length === 0) return 0;
-        var streak = 0;
-        var check = new Date();
-        var today = todayStr();
-        if (dates[0] !== today) {
-          var yesterday = new Date(check);
-          yesterday.setDate(yesterday.getDate() - 1);
-          var yStr = yesterday.getFullYear() + "-" + String(yesterday.getMonth()+1).padStart(2,"0") + "-" + String(yesterday.getDate()).padStart(2,"0");
-          if (dates[0] !== yStr) return 0;
-          check = yesterday;
-        }
-        for (var i = 0; i < dates.length; i++) {
-          var expected = new Date(check);
-          expected.setDate(expected.getDate() - i);
-          var eStr = expected.getFullYear() + "-" + String(expected.getMonth()+1).padStart(2,"0") + "-" + String(expected.getDate()).padStart(2,"0");
-          if (dates[i] === eStr) { streak++; } else { break; }
-        }
-        return streak;
-      }
-
-      function renderStreak() {
-        var streak = calcStreak();
-        document.getElementById("streak-num").textContent = streak;
-        var dots = "";
-        var today = todayStr();
-        var doneToday = streakData.dates.indexOf(today) !== -1;
-        for (var i = 6; i >= 0; i--) {
-          var d = new Date();
-          d.setDate(d.getDate() - i);
-          var ds = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-          var cls = "streak-dot";
-          if (streakData.dates.indexOf(ds) !== -1) cls += " done";
-          if (i === 0) cls += " today";
-          dots += '<div class="' + cls + '" title="' + ds + '"></div>';
-        }
-        document.getElementById("streak-dots").innerHTML = dots;
-        var btn = document.getElementById("done-btn");
-        if (doneToday) {
-          btn.textContent = "Fatto oggi ✓";
-          btn.classList.add("checked");
-        }
-      }
-
-      document.getElementById("done-btn").addEventListener("click", function() {
-        var today = todayStr();
-        if (streakData.dates.indexOf(today) === -1) {
-          streakData.dates.push(today);
-          localStorage.setItem(STREAK_KEY, JSON.stringify(streakData));
-        }
-        renderStreak();
-      });
-
-      renderStreak();
+      updateDisplay();
+      loadData();
     </script>
   </body>
 </html>
