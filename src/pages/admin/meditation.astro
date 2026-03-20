@@ -78,9 +78,10 @@ if (!isAuthorized) {
         height: 11px;
         border-radius: 2px;
         background: #1a1a1e;
-        cursor: default;
+        cursor: pointer;
         position: relative;
       }
+      .heatmap-cell.selected { outline: 2px solid #c9a84c; outline-offset: 1px; z-index: 1; }
       .heatmap-cell.l1 { background: rgba(155, 89, 182, 0.25); }
       .heatmap-cell.l2 { background: rgba(155, 89, 182, 0.45); }
       .heatmap-cell.l3 { background: rgba(155, 89, 182, 0.7); }
@@ -98,6 +99,84 @@ if (!isAuthorized) {
         width: 10px;
         height: 10px;
         border-radius: 2px;
+      }
+
+      .heatmap-detail {
+        display: none;
+        margin-top: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: #1a1a1e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        animation: fadeSlide 0.2s ease;
+      }
+      .heatmap-detail.visible { display: block; }
+      @keyframes fadeSlide {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .heatmap-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      .heatmap-detail-date {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.8rem;
+        color: #bb86fc;
+        font-weight: 600;
+      }
+      .heatmap-detail-close {
+        background: none;
+        border: none;
+        color: #555;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 0.2rem 0.4rem;
+        line-height: 1;
+      }
+      .heatmap-detail-close:hover { color: #e8e6e1; }
+      .heatmap-detail-empty {
+        color: #555;
+        font-size: 0.75rem;
+        font-style: italic;
+      }
+      .heatmap-detail-session {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.4rem 0;
+      }
+      .heatmap-detail-session + .heatmap-detail-session {
+        border-top: 1px solid #222;
+      }
+      .heatmap-detail-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #bb86fc;
+        flex-shrink: 0;
+      }
+      .heatmap-detail-type {
+        font-size: 0.78rem;
+        color: #e8e6e1;
+        flex: 1;
+      }
+      .heatmap-detail-min {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        color: #8a8a8e;
+        flex-shrink: 0;
+      }
+      .heatmap-detail-total {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        color: #c9a84c;
+        text-align: right;
+        margin-top: 0.4rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #333;
       }
 
       /* Streak bar */
@@ -260,6 +339,7 @@ if (!isAuthorized) {
         <div class="heatmap-legend-cell" style="background:#bb86fc"></div>
         <span>Di più</span>
       </div>
+      <div class="heatmap-detail" id="heatmap-detail"></div>
     </div>
 
     <div class="streak-bar">
@@ -454,10 +534,68 @@ if (!isAuthorized) {
             var n = dayData.sessions.length;
             title += " — " + dayData.total_min + " min (" + n + (n === 1 ? " sessione" : " sessioni") + ")";
           }
-          html += '<div class="' + cls + '" title="' + title + '"></div>';
+          html += '<div class="' + cls + '" data-date="' + ds + '" title="' + title + '"></div>';
           d.setDate(d.getDate() + 1);
         }
         grid.innerHTML = html;
+        bindHeatmapClicks(dateMap);
+      }
+
+      var selectedDate = null;
+
+      function bindHeatmapClicks(dateMap) {
+        var grid = document.getElementById("heatmap");
+        grid.addEventListener("click", function(e) {
+          var cell = e.target.closest(".heatmap-cell");
+          if (!cell) return;
+          var ds = cell.dataset.date;
+          if (!ds) return;
+
+          grid.querySelectorAll(".heatmap-cell.selected").forEach(function(c) { c.classList.remove("selected"); });
+
+          var detail = document.getElementById("heatmap-detail");
+          if (selectedDate === ds) {
+            selectedDate = null;
+            detail.classList.remove("visible");
+            return;
+          }
+
+          selectedDate = ds;
+          cell.classList.add("selected");
+
+          var parts = ds.split("-");
+          var dateLabel = parts[2] + "/" + parts[1] + "/" + parts[0];
+          var dayData = dateMap[ds];
+
+          var html = '<div class="heatmap-detail-header">';
+          html += '<span class="heatmap-detail-date">' + dateLabel + '</span>';
+          html += '<button class="heatmap-detail-close" id="heatmap-detail-close">&times;</button>';
+          html += '</div>';
+
+          if (!dayData || dayData.sessions.length === 0) {
+            html += '<div class="heatmap-detail-empty">Nessuna sessione</div>';
+          } else {
+            dayData.sessions.forEach(function(s) {
+              html += '<div class="heatmap-detail-session">';
+              html += '<div class="heatmap-detail-dot"></div>';
+              html += '<span class="heatmap-detail-type">' + (s.session_type || "Sessione") + '</span>';
+              html += '<span class="heatmap-detail-min">' + (s.duration_min || 0) + ' min</span>';
+              html += '</div>';
+            });
+            if (dayData.sessions.length > 1) {
+              html += '<div class="heatmap-detail-total">Totale: ' + dayData.total_min + ' min</div>';
+            }
+          }
+
+          detail.innerHTML = html;
+          detail.classList.add("visible");
+
+          document.getElementById("heatmap-detail-close").addEventListener("click", function() {
+            selectedDate = null;
+            detail.classList.remove("visible");
+            grid.querySelectorAll(".heatmap-cell.selected").forEach(function(c) { c.classList.remove("selected"); });
+          });
+        });
       }
 
       document.getElementById("done-btn").addEventListener("click", function() {
