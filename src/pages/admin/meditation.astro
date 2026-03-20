@@ -327,7 +327,16 @@ if (!isAuthorized) {
         return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
       }
 
-      // Fetch data from DB
+      function groupByDate(rows) {
+        var map = {};
+        rows.forEach(function(r) {
+          if (!map[r.date]) map[r.date] = { date: r.date, sessions: [], total_min: 0 };
+          map[r.date].sessions.push(r);
+          map[r.date].total_min += (r.duration_min || 0);
+        });
+        return map;
+      }
+
       async function loadData() {
         try {
           var res = await fetch(API_URL, { headers: AUTH_HEADER });
@@ -338,11 +347,11 @@ if (!isAuthorized) {
         renderAll();
       }
 
-      async function saveSession(date, durationMin, sessionType, note) {
+      async function saveSession(date, durationMin, sessionType) {
         await fetch(API_URL, {
           method: 'POST',
           headers: AUTH_HEADER,
-          body: JSON.stringify({ date: date, duration_min: durationMin, session_type: sessionType, note: note })
+          body: JSON.stringify({ date: date, duration_min: durationMin, session_type: sessionType })
         });
         await loadData();
       }
@@ -385,34 +394,33 @@ if (!isAuthorized) {
       }
 
       function renderAll() {
-        var dates = meditationData.map(function(r) { return r.date; });
-        var dateMap = {};
-        meditationData.forEach(function(r) { dateMap[r.date] = r; });
+        var dateMap = groupByDate(meditationData);
+        var uniqueDates = Object.keys(dateMap);
 
-        var streak = calcStreak(dates);
+        var streak = calcStreak(uniqueDates);
         document.getElementById("stat-streak").textContent = streak.current;
         document.getElementById("streak-num").textContent = streak.current;
         document.getElementById("streak-best").textContent = "Record: " + streak.best;
-        document.getElementById("stat-total").textContent = dates.length;
+        document.getElementById("stat-total").textContent = meditationData.length;
 
         var totalMin = meditationData.reduce(function(s, r) { return s + (r.duration_min || 0); }, 0);
         document.getElementById("stat-minutes").textContent = totalMin;
 
         var thisMonth = todayStr().substring(0, 7);
-        var monthCount = dates.filter(function(d) { return d.startsWith(thisMonth); }).length;
-        document.getElementById("stat-month").textContent = monthCount;
+        var monthSessions = meditationData.filter(function(r) { return r.date.startsWith(thisMonth); }).length;
+        document.getElementById("stat-month").textContent = monthSessions;
 
-        // Done button
         var btn = document.getElementById("done-btn");
-        if (dates.indexOf(todayStr()) !== -1) {
-          btn.textContent = "Fatto oggi ✓";
+        var todaySessions = dateMap[todayStr()];
+        if (todaySessions) {
+          var count = todaySessions.sessions.length;
+          btn.textContent = "Oggi: " + count + (count === 1 ? " sessione" : " sessioni") + " ✓";
           btn.classList.add("checked");
         } else {
           btn.textContent = "Segna come fatto oggi";
           btn.classList.remove("checked");
         }
 
-        // Heatmap
         renderHeatmap(dateMap);
       }
 
@@ -431,28 +439,31 @@ if (!isAuthorized) {
         var d = new Date(startDay);
         while (d <= today) {
           var ds = dateStr(d);
-          var entry = dateMap[ds];
+          var dayData = dateMap[ds];
           var cls = "heatmap-cell";
-          if (entry) {
-            var min = entry.duration_min || 0;
+          if (dayData) {
+            var min = dayData.total_min;
             if (min <= 5) cls += " l1";
-            else if (min <= 10) cls += " l2";
-            else if (min <= 20) cls += " l3";
+            else if (min <= 15) cls += " l2";
+            else if (min <= 30) cls += " l3";
             else cls += " l4";
           }
           if (ds === todayS) cls += " today";
           var title = ds;
-          if (entry) title += " — " + (entry.duration_min || 0) + " min" + (entry.session_type ? " (" + entry.session_type + ")" : "");
+          if (dayData) {
+            var n = dayData.sessions.length;
+            title += " — " + dayData.total_min + " min (" + n + (n === 1 ? " sessione" : " sessioni") + ")";
+          }
           html += '<div class="' + cls + '" title="' + title + '"></div>';
           d.setDate(d.getDate() + 1);
         }
         grid.innerHTML = html;
       }
 
-      // Done button - manual mark
       document.getElementById("done-btn").addEventListener("click", function() {
-        if (meditationData.some(function(r) { return r.date === todayStr(); })) return;
-        saveSession(todayStr(), 0, null, null);
+        var types = ["respirazione", "guidata", "silenziosa", "body scan", "camminata"];
+        var type = types[dayOfYear % types.length];
+        saveSession(todayStr(), 5, type);
       });
 
       // Quotes, focus, sessions — same as before
@@ -681,7 +692,7 @@ if (!isAuthorized) {
 
       function autoSaveSession() {
         var durationMin = Math.round(timerTotal / 60);
-        saveSession(todayStr(), durationMin, sess.title, null);
+        saveSession(todayStr(), durationMin, sess.title);
       }
 
       document.getElementById("timer-start").addEventListener("click", function() {
