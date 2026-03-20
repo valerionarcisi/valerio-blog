@@ -1,0 +1,369 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const recipes = [
+  {
+    name: "Pollo al Curry",
+    day: "Giovedì — Cena",
+    time: "40 min",
+    emoji: "🍛",
+    ingredients: [
+      "200g petto di pollo",
+      "3 cucchiaini olio EVO",
+      "1 cucchiaio colmo di curry",
+      "Succo di mezzo limone",
+      "Pepe e sale",
+      "Vino bianco secco (per sfumare)",
+      "Yogurt greco 0% bianco",
+      "1 cucchiaio di curry (per la salsa)",
+    ],
+    steps: [
+      "Tagliare il petto di pollo a cubetti",
+      "Versare il tutto in una ciotola, aggiungendo 3 cucchiaini di olio, 1 cucchiaio colmo di curry, il succo di mezzo limone, pepe e sale",
+      "Lasciare il pollo in macera almeno un'ora per farlo insaporire",
+      "Scaldare una padella e rosolare i bocconcini di pollo",
+      "Dopo aver rosolato il pollo, sfumare con il vino bianco secco e proseguire la cottura a fuoco dolce per circa 10-15 minuti",
+      "Nel frattempo, preparare la salsa di accompagnamento: mescolare lo yogurt greco 0% bianco con un cucchiaio di curry",
+      "Una volta pronto, rimuovere il coperchio dalla padella e far asciugare eventuale liquido in eccesso",
+      "Togliere la padella dal fuoco e distribuire la salsina di yogurt al curry direttamente sopra ai bocconcini di pollo",
+      "Chiudere con il coperchio per far scaldare la salsina ed insaporire i bocconcini",
+      "Servire subito",
+    ],
+    serve: "3 fette pane integrale o ai cereali (90g) / 6 gallette di riso / 6 fette wasa",
+  },
+  {
+    name: "Millefoglie di Zucchine",
+    day: "Martedì — Cena (opzione 2)",
+    time: "45 min",
+    emoji: "🥒",
+    ingredients: [
+      "Zucchine q.b.",
+      "100g mozzarella light (Galbani Santa Lucia o Granarolo) / 100g ricotta (Vallelata ricottina)",
+      "100g prosciutto cotto magro o fesa di tacchino",
+      "1 cucchiaio di parmigiano grattugiato",
+      "Olio d'oliva",
+      "Sale e pepe q.b.",
+    ],
+    steps: [
+      "Lavare accuratamente le zucchine, asciugarle e spuntarle",
+      "Tagliare a fettine sottilissime (2 mm di spessore) nel senso della lunghezza e affettare la mozzarella",
+      "In una teglia da forno formare uno strato con le fette di zucchina, accavallandole leggermente una di fianco all'altra",
+      "Sistemarvi sopra le fette di mozzarella light ed il prosciutto cotto magro",
+      "Ripetere questa sequenza per altre due volte, ripartendo sempre dalle zucchine, poi mozzarella, poi cotto magro",
+      "Terminare con uno strato finale di zucchine",
+      "Condire con un po' di olio, sale, pepe e una manciata di parmigiano grattugiato",
+      "Infornare a 220°C per circa 30 minuti, fino a quando in superficie si formerà una leggera crosticina",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa",
+  },
+  {
+    name: "Finocchi Gratinati",
+    day: "Venerdì — Cena (opzione 2)",
+    time: "50 min",
+    emoji: "🧄",
+    ingredients: [
+      "300g finocchi",
+      "60g pan grattato",
+      "1 cucchiaio di parmigiano grattugiato",
+      "1 cucchiaio di olio EVO",
+      "Sale a piacere",
+      "Spezie (rosmarino, timo, origano, aglio in polvere e basilico)",
+    ],
+    steps: [
+      "Tagliare i finocchi a fette in una ciotola",
+      "Aggiungere sale a piacere e spezie (rosmarino, timo, origano, aglio in polvere e basilico)",
+      "Aggiungere il parmigiano e il pangrattato e mescolare il tutto",
+      "Foderare una teglia con carta forno ed aggiungere i finocchi",
+      "Aggiungere 1 cucchiaio di olio EVO a crudo",
+      "Cuocere in forno ventilato a 190°C per 35-40 minuti",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa + 240g ceci in scatola ben sciacquati",
+  },
+  {
+    name: "Polpette di Broccoli",
+    day: "Sabato — Cena (opzione 2)",
+    time: "45 min",
+    emoji: "🥦",
+    ingredients: [
+      "500g circa di broccoli",
+      "40g pan grattato (o avena in eguale quantità)",
+      "1 cucchiaio di farina di ceci",
+      "1 spicchio di aglio tritato (o mezzo cucchiaino in polvere)",
+      "Prezzemolo ed erbe a piacere (maggiorana, origano, timo)",
+      "Senape (opzionale, se di gradimento)",
+      "Sale e pepe",
+      "1 cucchiaio di olio EVO",
+    ],
+    steps: [
+      "Cuocere circa 500g di broccoli al vapore o bolliti per 6-8 minuti, finché non sono teneri ma non acquosi",
+      "Scolare bene e tamponare con carta da cucina per togliere l'acqua in eccesso",
+      "Schiacciare con una forchetta o frullare a impulsi (deve restare una consistenza grossolana)",
+      "In una ciotola unire broccoli, pan grattato o avena, farina di ceci, senape se di gradimento, aglio, erbe, sale, pepe, olio",
+      "Mescolare fino ad ottenere un composto compatto e modellabile",
+      "Formare polpette o cotolette in base alla preferenza",
+      "Cuocere in forno a 190°C per 25-30 minuti girando a metà cottura, OPPURE in padella mettendo un cucchiaino di olio ulteriore per non farle attaccare e cuocendo 3-4 minuti per lato finché non sono dorate",
+    ],
+    serve: "3 fette pane integrale o ai cereali (90g) / 6 gallette di riso / 6 fette wasa",
+  },
+  {
+    name: "Piadina Integrale Fatta in Casa",
+    day: "Venerdì — Pranzo (opzione 2)",
+    time: "50 min",
+    emoji: "🫓",
+    ingredients: [
+      "100g farina di tipo 1 o 2 o integrale o di avena (o mix)",
+      "Acqua q.b. (meno di 100ml)",
+      "Olio EVO (quantità prevista dal piano)",
+      "1 cucchiaino di sale",
+    ],
+    steps: [
+      "Mettere la farina in una bacinella ed aggiungere pian piano l'acqua fino a che il composto diventa perfettamente modellabile",
+      "Aggiungere l'olio previsto dal piano e continuare a mescolare bene",
+      "Continuare a lavorare il composto con le mani, versandolo su un piano ben infarinato",
+      "Bisogna ottenere un panetto compatto e non troppo appiccicoso",
+      "Mettere il composto a riposo in frigorifero circa 30 minuti",
+      "Stendere l'impasto con un matterello sul piano ben infarinato dando il più possibile una forma circolare sottile",
+      "Scaldare la padella antiaderente unta con un filo d'olio ed adagiare delicatamente i dischi ottenuti dall'impasto",
+      "Cuocere circa 3 minuti per lato e disporre le piadine una sull'altra",
+    ],
+    serve: "Farcire con 100g fonte proteica (affettato magro, gamberetti, tonno al naturale) o crema di legumi + spezie/aromi + verdure di stagione o mezzo avocado + yogurt greco 0%",
+  },
+];
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Ricette</title>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0a0a0c;
+        color: #e8e6e1;
+        padding: 1rem;
+        min-height: 100vh;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      h2 {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        color: #e8e6e1;
+      }
+
+      .recipes-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .recipe-card {
+        background: #151518;
+        border: 1px solid #252528;
+        border-radius: 0.75rem;
+        overflow: hidden;
+      }
+
+      .recipe-header {
+        padding: 0.75rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        list-style: none;
+      }
+      .recipe-header::-webkit-details-marker { display: none; }
+
+      .recipe-emoji {
+        font-size: 1.3rem;
+      }
+
+      .recipe-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #e8e6e1;
+        flex: 1;
+      }
+
+      .recipe-meta {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .recipe-day {
+        font-size: 0.7rem;
+        color: #8a8a8e;
+      }
+
+      .recipe-time {
+        font-size: 0.7rem;
+        color: #c9a84c;
+        font-weight: 600;
+      }
+
+      .recipe-arrow {
+        color: #555;
+        font-size: 0.7rem;
+        transition: transform 0.2s;
+      }
+
+      details[open] .recipe-arrow {
+        transform: rotate(90deg);
+      }
+
+      details[open] .recipe-header {
+        border-bottom: 1px solid #252528;
+      }
+
+      .recipe-body {
+        padding: 1rem;
+      }
+
+      .recipe-section-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #c9a84c;
+        margin-bottom: 0.4rem;
+      }
+
+      .recipe-ingredients {
+        list-style: none;
+        margin-bottom: 1rem;
+        columns: 2;
+        column-gap: 1rem;
+      }
+
+      .recipe-ingredients li {
+        font-size: 0.78rem;
+        line-height: 1.5;
+        padding: 0.1rem 0 0.1rem 0.8rem;
+        position: relative;
+        color: #bbb;
+        break-inside: avoid;
+      }
+
+      .recipe-ingredients li::before {
+        content: "·";
+        position: absolute;
+        left: 0;
+        color: #555;
+        font-weight: 700;
+      }
+
+      .recipe-steps {
+        list-style: none;
+        counter-reset: step;
+        margin-bottom: 1rem;
+      }
+
+      .recipe-steps li {
+        counter-increment: step;
+        font-size: 0.78rem;
+        line-height: 1.5;
+        padding: 0.3rem 0 0.3rem 1.8rem;
+        position: relative;
+        color: #ccc;
+        border-bottom: 1px solid #1e1e22;
+      }
+
+      .recipe-steps li:last-child {
+        border-bottom: none;
+      }
+
+      .recipe-steps li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 0.3rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        background: rgba(201, 168, 76, 0.15);
+        color: #c9a84c;
+        border-radius: 50%;
+        font-size: 0.65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .recipe-serve {
+        font-size: 0.75rem;
+        color: #4ecdc4;
+        padding: 0.5rem 0.75rem;
+        background: rgba(78, 205, 196, 0.06);
+        border-radius: 6px;
+        border: 1px solid rgba(78, 205, 196, 0.12);
+      }
+
+      .recipe-serve strong {
+        color: #4ecdc4;
+        font-weight: 600;
+      }
+
+      @media (max-width: 500px) {
+        body { padding: 0.75rem; }
+        .recipe-ingredients { columns: 1; }
+        .recipe-meta { flex-direction: column; gap: 0.2rem; align-items: flex-end; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="recipes" token={token} />
+
+    <h2>Ricette del Piano Alimentare</h2>
+
+    <div class="recipes-grid">
+      {recipes.map((recipe) => (
+        <details class="recipe-card">
+          <summary class="recipe-header">
+            <span class="recipe-emoji">{recipe.emoji}</span>
+            <span class="recipe-title">{recipe.name}</span>
+            <div class="recipe-meta">
+              <span class="recipe-day">{recipe.day}</span>
+              <span class="recipe-time">{recipe.time}</span>
+            </div>
+            <span class="recipe-arrow">▸</span>
+          </summary>
+          <div class="recipe-body">
+            <div class="recipe-section-title">Ingredienti</div>
+            <ul class="recipe-ingredients">
+              {recipe.ingredients.map((ing) => (
+                <li>{ing}</li>
+              ))}
+            </ul>
+
+            <div class="recipe-section-title">Preparazione</div>
+            <ol class="recipe-steps">
+              {recipe.steps.map((step) => (
+                <li>{step}</li>
+              ))}
+            </ol>
+
+            <div class="recipe-serve">
+              <strong>Accompagna con:</strong> {recipe.serve}
+            </div>
+          </div>
+        </details>
+      ))}
+    </div>
+  </body>
+</html>

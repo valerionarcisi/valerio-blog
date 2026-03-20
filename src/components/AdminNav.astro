@@ -2,29 +2,66 @@
 import "./AdminNav.css";
 
 interface Props {
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes";
   token: string;
 }
 
 const { currentPage, token } = Astro.props;
 
-const links = [
-  { id: "analytics" as const, label: "Analytics", href: `/admin/analytics?token=${token}` },
-  { id: "comments" as const, label: "Comments", href: `/admin/comments?token=${token}` },
-  { id: "meal-plan" as const, label: "Meal Plan", href: `/admin/meal-plan?token=${token}` },
-  { id: "grocery" as const, label: "Spesa", href: `/admin/grocery?token=${token}` },
-  { id: "body-comp" as const, label: "Body Comp", href: `/admin/body-comp?token=${token}` },
-  { id: "meditation" as const, label: "Medita", href: `/admin/meditation?token=${token}` },
-] as const;
+const topLinks = [
+  { id: "analytics" as const, label: "Analytics", short: "Stats", href: `/admin/analytics?token=${token}` },
+  { id: "comments" as const, label: "Comments", short: "Msg", href: `/admin/comments?token=${token}` },
+];
+
+const dietaLinks = [
+  { id: "meal-plan" as const, label: "Meal Plan", short: "Menu", href: `/admin/meal-plan?token=${token}` },
+  { id: "body-comp" as const, label: "Body Comp", short: "Body", href: `/admin/body-comp?token=${token}` },
+  { id: "grocery" as const, label: "Spesa", short: "Spesa", href: `/admin/grocery?token=${token}` },
+  { id: "recipes" as const, label: "Ricette", short: "Chef", href: `/admin/recipes?token=${token}` },
+];
+
+const bottomLinks = [
+  { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation?token=${token}` },
+];
+
+const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
 ---
 
-<nav class="admin-nav">
-  {links.map((link) => (
-    <a
-      href={link.href}
-      class:list={["admin-nav-link", { active: currentPage === link.id }]}
-    >
-      {link.label}
-    </a>
-  ))}
-</nav>
+<aside class="admin-sidebar">
+  <div class="sidebar-section">
+    {topLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={["sidebar-link", { active: currentPage === link.id }]}
+      >
+        <span class="sidebar-label-full">{link.label}</span>
+        <span class="sidebar-label-short">{link.short}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-group-title">Dieta</div>
+    {dietaLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={["sidebar-link", "sidebar-link-sub", { active: currentPage === link.id }]}
+      >
+        <span class="sidebar-label-full">{link.label}</span>
+        <span class="sidebar-label-short">{link.short}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="sidebar-section">
+    {bottomLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={["sidebar-link", { active: currentPage === link.id }]}
+      >
+        <span class="sidebar-label-full">{link.label}</span>
+        <span class="sidebar-label-short">{link.short}</span>
+      </a>
+    ))}
+  </div>
+</aside>
