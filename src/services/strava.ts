@@ -129,12 +129,31 @@ const computeStats = (activities: StravaActivity[]): ActivityStats => {
   };
 };
 
+export interface DailyActivity {
+  type: string;
+  label: string;
+  color: string;
+  distance: number;
+  duration: number;
+  elapsedTime: number;
+  name: string;
+  elevation: number;
+  averageSpeed: number;
+  maxSpeed: number;
+  averageHeartrate?: number;
+  maxHeartrate?: number;
+  sufferScore?: number;
+  kudos: number;
+  url: string;
+}
+
 export interface DailyBreakdown {
   date: string;
   distance: number;
   duration: number;
   type: string;
   color: string;
+  activities: DailyActivity[];
 }
 
 export interface TypeDistribution {
@@ -178,7 +197,7 @@ const computeDailyBreakdown = (activities: StravaActivity[], numDays = 30): Dail
     );
 
     if (dayActivities.length === 0) {
-      days.push({ date: key, distance: 0, duration: 0, type: "", color: "#252528" });
+      days.push({ date: key, distance: 0, duration: 0, type: "", color: "#252528", activities: [] });
       continue;
     }
 
@@ -194,6 +213,23 @@ const computeDailyBreakdown = (activities: StravaActivity[], numDays = 30): Dail
       duration: totalDuration,
       type: primary.sport_type,
       color: activityColor(primary.sport_type),
+      activities: dayActivities.map((a) => ({
+        type: a.sport_type,
+        label: activityLabel(a.sport_type),
+        color: activityColor(a.sport_type),
+        distance: a.distance,
+        duration: a.moving_time,
+        elapsedTime: a.elapsed_time,
+        name: a.name,
+        elevation: a.total_elevation_gain,
+        averageSpeed: a.average_speed,
+        maxSpeed: a.max_speed,
+        averageHeartrate: a.average_heartrate,
+        maxHeartrate: a.max_heartrate,
+        sufferScore: a.suffer_score,
+        kudos: a.kudos_count,
+        url: `https://www.strava.com/activities/${a.id}`,
+      })),
     });
   }
 

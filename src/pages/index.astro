@@ -13,9 +13,7 @@ import Reel from "~/components/Reel.astro";
 import "./index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
 import { fetchRecentActivities, fetchFullStats } from "~/services/strava";
-import ActivityList from "~/components/ActivityList.astro";
 import StravaSummary from "~/components/StravaSummary.astro";
-import RunWeeklyChart from "~/components/RunWeeklyChart.astro";
 import ActivityDonut from "~/components/ActivityDonut.astro";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
@@ -155,12 +153,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             </div>
           )}
         </div>
-        <div class="strava-chart-full" id="strava-charts">
-          {fullStats && (
-            <RunWeeklyChart weeks={fullStats.weeklyRunStats} />
-          )}
-        </div>
-        <ActivityList activities={lastActivities} />
+        <div class="strava-chart-full" id="strava-charts"></div>
       </section>
       <section>
         <Title title="Ultimi articoli" />
@@ -182,6 +175,35 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
       </section>
     </main>
     <Footer />
+    <style is:inline>
+      .heatmap-detail{display:none;margin-top:.75rem;padding:.75rem 1rem;background:#1a1a1c;border:1px solid #333;border-radius:8px;animation:heatmapFade .2s ease}
+      .heatmap-detail.visible{display:block}
+      @keyframes heatmapFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+      .heatmap-detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
+      .heatmap-detail-date{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#fc4c02;font-weight:600}
+      .heatmap-detail-close{background:none;border:none;color:#555;cursor:pointer;font-size:1.2rem;padding:.2rem .4rem;line-height:1}
+      .heatmap-detail-close:hover{color:#e8e6e1}
+      .heatmap-detail-empty{color:#555;font-size:.75rem;font-style:italic}
+      .heatmap-detail-link{text-decoration:none;color:inherit;display:block;border-radius:6px;transition:background .15s;margin:0 -.4rem;padding:0 .4rem}
+      a.heatmap-detail-link:hover{background:rgba(252,76,2,.06)}
+      .heatmap-detail-session{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0}
+      .heatmap-detail-session+.heatmap-detail-session{border-top:1px solid #252528}
+      .heatmap-detail-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+      .heatmap-detail-info{display:flex;flex-direction:column;gap:.25rem;flex:1;min-width:0}
+      .heatmap-detail-type{font-size:.82rem;color:#e8e6e1;font-weight:600}
+      .heatmap-detail-meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .5rem}
+      .heatmap-detail-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;padding:.1rem .45rem;border-radius:10px;border:1px solid;text-transform:uppercase;letter-spacing:.03em}
+      .heatmap-detail-stat{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#bbb}
+      .heatmap-detail-stat+.heatmap-detail-stat::before{content:"·";margin-right:.35rem;color:#555}
+      .heatmap-detail-pace{color:#c9a84c;font-weight:600}
+      .heatmap-detail-elev{color:#44b783}
+      .heatmap-detail-hr{color:#e85d75}
+      .heatmap-detail-pause{color:#8a8a8e;font-style:italic}
+      .heatmap-detail-effort{color:#f39c12;font-weight:600}
+      .heatmap-detail-kudos{color:#fc4c02}
+      .heatmap-detail-total{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#c9a84c;text-align:right;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #333}
+      rect.selected{stroke:#c9a84c;stroke-width:1.5}
+    </style>
     <script is:inline>
       (function () {
         var REFRESH_MS = 15 * 60 * 1000;
@@ -222,19 +244,6 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             + '<p class="reel-date">' + date + "</p></div></div>";
         }
 
-        function renderActivity(a) {
-          var stats = "";
-          if (a.hasDistance) stats += "<span>" + a.formattedDistance + "</span>";
-          stats += "<span>" + a.formattedDuration + "</span>";
-          if (a.formattedPace) stats += '<span class="pace">' + a.formattedPace + "</span>";
-          if (a.formattedElevation) stats += "<span>" + a.formattedElevation + "</span>";
-          return '<a class="activity-row" href="' + a.url + '" target="_blank" rel="noopener noreferrer">'
-            + '<span class="activity-dot" style="background:' + a.color + '"></span>'
-            + '<span class="activity-name">' + a.name + "</span>"
-            + '<span class="activity-stats">' + stats + "</span>"
-            + '<span class="activity-date">' + a.formattedDate + "</span></a>";
-        }
-
         function renderSummaryRow(s, badge) {
           var html = '<div class="summary-row">'
             + '<span class="summary-badge">' + badge + "</span>"
@@ -247,111 +256,6 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
           return html;
         }
 
-        function fmtPace(secPerKm) {
-          var m = Math.floor(secPerKm / 60);
-          var s = Math.round(secPerKm % 60);
-          return m + ":" + (s < 10 ? "0" : "") + s + " /km";
-        }
-
-        function renderLineChart(weeks) {
-          var hasData = false;
-          for (var i = 0; i < weeks.length; i++) { if (weeks[i].runs > 0) hasData = true; }
-          if (!hasData) return '<div class="RunWeeklyChart"><div class="chart-empty">Nessuna corsa recente</div></div>';
-
-          var svgW = 700, svgH = 160, padX = 40, padY = 24, padBottom = 28;
-          var chartW = svgW - padX * 2, chartH = svgH - padY - padBottom;
-          var distances = [], paces = [];
-          for (var i = 0; i < weeks.length; i++) {
-            distances.push(weeks[i].distance / 1000);
-            if (weeks[i].pace > 0) paces.push(weeks[i].pace);
-          }
-          var maxDist = Math.max.apply(null, distances.concat([1]));
-          var minPace = paces.length > 0 ? Math.min.apply(null, paces) - 15 : 240;
-          var maxPace = paces.length > 0 ? Math.max.apply(null, paces) + 15 : 420;
-          var xStep = weeks.length > 1 ? chartW / (weeks.length - 1) : chartW;
-
-          var bestIdx = 0;
-          for (var i = 1; i < distances.length; i++) { if (distances[i] > distances[bestIdx]) bestIdx = i; }
-
-          var distPts = [], pacePts = [];
-          for (var i = 0; i < weeks.length; i++) {
-            var x = padX + i * xStep;
-            var dy = padY + chartH - (distances[i] / maxDist) * chartH;
-            distPts.push({ x: x, y: dy, v: distances[i] });
-            if (weeks[i].pace > 0) {
-              var norm = (maxPace - weeks[i].pace) / (maxPace - minPace);
-              var py = padY + chartH - norm * chartH;
-              pacePts.push({ x: x, y: py, v: weeks[i].pace });
-            }
-          }
-
-          var distLine = "", distArea = "", paceLine = "";
-          for (var i = 0; i < distPts.length; i++) {
-            distLine += (i === 0 ? "M" : "L") + distPts[i].x + "," + distPts[i].y + " ";
-          }
-          distArea = distLine + "L" + distPts[distPts.length - 1].x + "," + (padY + chartH) + " L" + distPts[0].x + "," + (padY + chartH) + " Z";
-          for (var i = 0; i < pacePts.length; i++) {
-            paceLine += (i === 0 ? "M" : "L") + pacePts[i].x + "," + pacePts[i].y + " ";
-          }
-
-          var svg = "";
-          var gridPcts = [0.25, 0.5, 0.75];
-          for (var g = 0; g < gridPcts.length; g++) {
-            var gy = padY + chartH - chartH * gridPcts[g];
-            svg += '<line x1="' + padX + '" y1="' + gy + '" x2="' + (svgW - padX) + '" y2="' + gy + '" stroke="#252528" stroke-width="0.5" stroke-dasharray="3,4"/>';
-          }
-          svg += '<line x1="' + padX + '" y1="' + (padY + chartH) + '" x2="' + (svgW - padX) + '" y2="' + (padY + chartH) + '" stroke="#333" stroke-width="0.5"/>';
-
-          var distYVals = [0, maxDist / 2, maxDist];
-          for (var i = 0; i < distYVals.length; i++) {
-            var ly = padY + chartH - (distYVals[i] / maxDist) * chartH;
-            svg += '<text x="' + (padX - 4) + '" y="' + (ly + 2) + '" text-anchor="end" fill="#fc4c02" font-size="7" font-family="JetBrains Mono, monospace" opacity="0.6">' + distYVals[i].toFixed(0) + "</text>";
-          }
-          var paceYVals = [minPace, (minPace + maxPace) / 2, maxPace];
-          for (var i = 0; i < paceYVals.length; i++) {
-            var ly = padY + chartH - ((maxPace - paceYVals[i]) / (maxPace - minPace)) * chartH;
-            var pm = Math.floor(paceYVals[i] / 60);
-            var ps = Math.round(paceYVals[i] % 60);
-            svg += '<text x="' + (svgW - padX + 4) + '" y="' + (ly + 2) + '" text-anchor="start" fill="#c8a000" font-size="7" font-family="JetBrains Mono, monospace" opacity="0.6">' + pm + ":" + (ps < 10 ? "0" : "") + ps + "</text>";
-          }
-
-          svg += '<path d="' + distArea + '" fill="#fc4c02" opacity="0.08"/>';
-          svg += '<path d="' + distLine + '" fill="none" stroke="#fc4c02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
-          if (pacePts.length > 1) {
-            svg += '<path d="' + paceLine + '" fill="none" stroke="#c8a000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4,3"/>';
-          }
-
-          for (var i = 0; i < distPts.length; i++) {
-            var isBest = i === bestIdx && distances[bestIdx] > 0;
-            var elev = weeks[i].elevation > 0 ? " ↑" + Math.round(weeks[i].elevation) + "m" : "";
-            var tip = weeks[i].weekLabel + ": " + distPts[i].v.toFixed(1) + " km — " + weeks[i].runs + " corse" + elev;
-            if (isBest) svg += '<circle cx="' + distPts[i].x + '" cy="' + distPts[i].y + '" r="9" fill="#fc4c02" opacity="0.12"/>';
-            svg += '<g><circle cx="' + distPts[i].x + '" cy="' + distPts[i].y + '" r="' + (isBest ? 5 : 3.5) + '" fill="' + (isBest ? "#ff6b2b" : "#fc4c02") + '" stroke="#151518" stroke-width="' + (isBest ? 2 : 1.5) + '"/>';
-            svg += '<title>' + tip + "</title></g>";
-          }
-          for (var i = 0; i < weeks.length; i++) {
-            if (weeks[i].runs > 0) {
-              svg += '<text x="' + distPts[i].x + '" y="' + (distPts[i].y - 8) + '" text-anchor="middle" fill="#8a8a8e" font-size="6" font-family="JetBrains Mono, monospace">' + weeks[i].runs + "x</text>";
-            }
-          }
-          for (var i = 0; i < pacePts.length; i++) {
-            svg += '<g><circle cx="' + pacePts[i].x + '" cy="' + pacePts[i].y + '" r="2.5" fill="#c8a000" stroke="#151518" stroke-width="1"/>';
-            svg += '<title>' + fmtPace(pacePts[i].v) + "</title></g>";
-          }
-
-          for (var i = 0; i < weeks.length; i++) {
-            var x = padX + i * xStep;
-            svg += '<text x="' + x + '" y="' + (svgH - 6) + '" text-anchor="middle" fill="#8a8a8e" font-size="6.5" font-family="JetBrains Mono, monospace">' + weeks[i].weekLabel + "</text>";
-          }
-
-          var header = '<div class="chart-header"><span class="chart-title">Corsa settimanale</span>'
-            + '<div class="chart-legend"><span class="legend-item"><span class="legend-line dist"></span>km</span>'
-            + '<span class="legend-item"><span class="legend-line pace"></span>pace</span>'
-            + '<span class="legend-item"><span class="legend-label-nx">3x</span>corse</span>'
-            + '<span class="legend-item"><span class="legend-dot-best"></span>best</span></div></div>';
-
-          return '<div class="RunWeeklyChart">' + header + '<svg viewBox="0 0 ' + svgW + " " + svgH + '" role="img">' + svg + "</svg></div>";
-        }
 
         function renderHeatmap(days) {
           if (!days || days.length === 0) return '<div class="RunWeeklyChart"><div class="chart-empty">Nessuna attività recente</div></div>';
@@ -413,7 +317,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
               var distKm = (day.distance / 1000).toFixed(1);
               var tip = day.duration > 0 ? dateLabel + ": " + distKm + " km — " + durMin + " min" : dateLabel + ": riposo";
 
-              svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="' + fill + '" opacity="' + opacity + '" data-tip="' + tip.replace(/"/g, '&quot;') + '" style="cursor:pointer"><title>' + tip + '</title></rect>';
+              svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="' + fill + '" opacity="' + opacity + '" data-date="' + day.date + '" style="cursor:pointer"><title>' + tip + '</title></rect>';
 
               if (r === 0) {
                 var dd = new Date(day.date + "T12:00:00");
@@ -439,32 +343,118 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             + '<span class="legend-item" style="font-size:0.65rem;color:#8a8a8e;font-family:JetBrains Mono,monospace">' + activeDays + '/' + totalDays + ' giorni attivi</span></div>';
 
           var svgTag = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" role="img" aria-label="Activity heatmap" style="width:100%;min-width:' + svgW + 'px;display:block">' + svg + '</svg>';
-          return '<div class="RunWeeklyChart">' + header + '<div class="heatmap-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">' + svgTag + '</div></div>';
+          return '<div class="RunWeeklyChart">' + header + '<div class="heatmap-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">' + svgTag + '</div><div class="heatmap-detail" id="strava-heatmap-detail"></div></div>';
         }
 
-        function initHeatmapTooltip(container) {
-          var tip = document.createElement('div');
-          tip.style.cssText = 'position:absolute;background:#1a1a1c;border:1px solid #333;color:#e8e6e1;font-size:0.72rem;font-family:JetBrains Mono,monospace;padding:0.4rem 0.6rem;border-radius:4px;pointer-events:none;z-index:20;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:none;';
-          container.style.position = 'relative';
-          container.appendChild(tip);
+        var heatmapDayMap = {};
+        var selectedHeatmapDate = null;
 
+        function buildDayMap(days) {
+          heatmapDayMap = {};
+          for (var i = 0; i < days.length; i++) {
+            heatmapDayMap[days[i].date] = days[i];
+          }
+        }
+
+        function fmtDist(m) { return m >= 1000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m) + ' m'; }
+        function fmtDur(s) { var h = Math.floor(s / 3600); var m = Math.floor((s % 3600) / 60); return h > 0 ? h + 'h ' + m + 'min' : m + ' min'; }
+        function fmtPaceFromSpeed(speed, type) {
+          if (!speed || speed === 0 || type === 'WeightTraining' || type === 'Workout') return '';
+          var secPerKm = 1000 / speed;
+          var m = Math.floor(secPerKm / 60);
+          var s = Math.round(secPerKm % 60);
+          return m + ':' + (s < 10 ? '0' : '') + s + ' /km';
+        }
+
+        function initHeatmapDetail(container) {
           container.addEventListener('click', function(e) {
-            var rect = e.target.closest('rect[data-tip]');
-            if (!rect) { tip.style.display = 'none'; return; }
-            var text = rect.getAttribute('data-tip');
-            tip.textContent = text;
-            tip.style.display = 'block';
-            var contRect = container.getBoundingClientRect();
-            var cellRect = rect.getBoundingClientRect();
-            var x = cellRect.left - contRect.left + cellRect.width / 2;
-            var y = cellRect.top - contRect.top - 4;
-            var tipW = tip.offsetWidth;
-            tip.style.left = Math.max(0, Math.min(x - tipW / 2, contRect.width - tipW)) + 'px';
-            tip.style.top = (y - tip.offsetHeight) + 'px';
-          });
+            var rect = e.target.closest('rect[data-date]');
+            var detail = document.getElementById('strava-heatmap-detail');
+            if (!detail) return;
 
-          document.addEventListener('click', function(e) {
-            if (!container.contains(e.target)) tip.style.display = 'none';
+            if (!rect) {
+              if (!e.target.closest('.heatmap-detail')) {
+                selectedHeatmapDate = null;
+                detail.classList.remove('visible');
+                container.querySelectorAll('rect.selected').forEach(function(r) { r.classList.remove('selected'); });
+              }
+              return;
+            }
+
+            var ds = rect.getAttribute('data-date');
+
+            container.querySelectorAll('rect.selected').forEach(function(r) { r.classList.remove('selected'); });
+
+            if (selectedHeatmapDate === ds) {
+              selectedHeatmapDate = null;
+              detail.classList.remove('visible');
+              return;
+            }
+
+            selectedHeatmapDate = ds;
+            rect.classList.add('selected');
+
+            var dayData = heatmapDayMap[ds];
+            var parts = ds.split('-');
+            var dateLabel = parts[2] + '/' + parts[1] + '/' + parts[0];
+
+            var html = '<div class="heatmap-detail-header">'
+              + '<span class="heatmap-detail-date">' + dateLabel + '</span>'
+              + '<button class="heatmap-detail-close" onclick="document.getElementById(\'strava-heatmap-detail\').classList.remove(\'visible\');document.querySelectorAll(\'rect.selected\').forEach(function(r){r.classList.remove(\'selected\')});">&times;</button>'
+              + '</div>';
+
+            if (!dayData || dayData.duration === 0) {
+              html += '<div class="heatmap-detail-empty">Giorno di riposo 😴</div>';
+            } else if (dayData.activities && dayData.activities.length > 0) {
+              for (var i = 0; i < dayData.activities.length; i++) {
+                var a = dayData.activities[i];
+                var linkOpen = a.url ? '<a href="' + a.url + '" target="_blank" rel="noopener noreferrer" class="heatmap-detail-link">' : '<div class="heatmap-detail-link">';
+                var linkClose = a.url ? '</a>' : '</div>';
+                html += linkOpen;
+                html += '<div class="heatmap-detail-session">';
+                html += '<div class="heatmap-detail-dot" style="background:' + a.color + '"></div>';
+                html += '<div class="heatmap-detail-info">';
+                html += '<span class="heatmap-detail-type">' + (a.name || a.label) + '</span>';
+                var row1 = '<span class="heatmap-detail-badge" style="background:' + a.color + '22;color:' + a.color + ';border-color:' + a.color + '44">' + a.label + '</span>';
+                if (a.distance > 0) row1 += '<span class="heatmap-detail-stat">' + fmtDist(a.distance) + '</span>';
+                row1 += '<span class="heatmap-detail-stat">' + fmtDur(a.duration) + '</span>';
+                var pace = fmtPaceFromSpeed(a.averageSpeed, a.type);
+                if (pace) row1 += '<span class="heatmap-detail-stat heatmap-detail-pace">' + pace + '</span>';
+                if (a.elevation > 0) row1 += '<span class="heatmap-detail-stat heatmap-detail-elev">&uarr;' + Math.round(a.elevation) + 'm</span>';
+                html += '<div class="heatmap-detail-meta-row">' + row1 + '</div>';
+
+                var row2 = '';
+                if (a.averageHeartrate) {
+                  row2 += '<span class="heatmap-detail-stat heatmap-detail-hr">&hearts; ' + Math.round(a.averageHeartrate) + ' avg';
+                  if (a.maxHeartrate) row2 += ' / ' + Math.round(a.maxHeartrate) + ' max';
+                  row2 += '</span>';
+                }
+                if (a.maxSpeed && a.type !== 'WeightTraining' && a.type !== 'Workout') {
+                  var maxPace = fmtPaceFromSpeed(a.maxSpeed, a.type);
+                  if (maxPace) row2 += '<span class="heatmap-detail-stat">max ' + maxPace + '</span>';
+                }
+                if (a.elapsedTime && a.elapsedTime > a.duration + 60) {
+                  var pauseSec = a.elapsedTime - a.duration;
+                  row2 += '<span class="heatmap-detail-stat heatmap-detail-pause">pausa ' + fmtDur(pauseSec) + '</span>';
+                }
+                if (a.sufferScore) row2 += '<span class="heatmap-detail-stat heatmap-detail-effort">effort ' + a.sufferScore + '</span>';
+                if (a.kudos > 0) row2 += '<span class="heatmap-detail-stat heatmap-detail-kudos">&hearts; ' + a.kudos + ' kudos</span>';
+                if (row2) html += '<div class="heatmap-detail-meta-row">' + row2 + '</div>';
+                html += '</div></div>';
+                html += linkClose;
+              }
+              if (dayData.activities.length > 1) {
+                html += '<div class="heatmap-detail-total">Totale: ' + fmtDist(dayData.distance) + ' · ' + fmtDur(dayData.duration) + '</div>';
+              }
+            } else {
+              html += '<div class="heatmap-detail-session">';
+              html += '<div class="heatmap-detail-dot" style="background:' + dayData.color + '"></div>';
+              html += '<span class="heatmap-detail-type">' + fmtDist(dayData.distance) + ' — ' + fmtDur(dayData.duration) + '</span>';
+              html += '</div>';
+            }
+
+            detail.innerHTML = html;
+            detail.classList.add('visible');
           });
         }
 
@@ -527,13 +517,11 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             .then(function (data) {
               if (data.error) return;
               var section = document.getElementById("strava-section");
-              var reel = document.getElementById("strava-reel");
               var summary = document.getElementById("strava-summary");
               var charts = document.getElementById("strava-charts");
               var donutEl = document.getElementById("strava-donut");
               if (section && data.activities && data.activities.length > 0) {
                 section.style.display = "";
-                if (reel) reel.innerHTML = data.activities.map(renderActivity).join("");
                 if (summary && data.stats) {
                   summary.innerHTML = '<div class="StravaSummary">'
                     + renderSummaryRow(data.stats.weekly, "7d")
@@ -548,7 +536,8 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
                   var heatDays = data.yearlyBreakdown || data.dailyBreakdown;
                   if (heatDays) {
                     charts.innerHTML = renderHeatmap(heatDays);
-                    initHeatmapTooltip(charts);
+                    buildDayMap(heatDays);
+                    initHeatmapDetail(charts);
                     var scrollWrap = charts.querySelector('.heatmap-scroll');
                     if (scrollWrap) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
                   }
