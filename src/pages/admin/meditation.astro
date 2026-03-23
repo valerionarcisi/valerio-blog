@@ -962,16 +962,27 @@ const quotesJson = JSON.stringify(allQuotes);
 
       // Voice
       var voiceEnabled = true;
+      var cachedVoice = null;
+      function loadVoice() {
+        var voices = window.speechSynthesis.getVoices();
+        var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
+        if (it.length > 0) cachedVoice = it[0];
+      }
+      if (window.speechSynthesis) {
+        loadVoice();
+        window.speechSynthesis.onvoiceschanged = loadVoice;
+      }
+
       function speak(text, onEnd) {
         if (!voiceEnabled || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
         window.speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
-        var voices = window.speechSynthesis.getVoices();
-        var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
-        if (it.length > 0) u.voice = it[0];
-        if (onEnd) u.onend = onEnd;
-        window.speechSynthesis.speak(u);
+        setTimeout(function() {
+          var u = new SpeechSynthesisUtterance(text);
+          u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
+          if (cachedVoice) u.voice = cachedVoice;
+          if (onEnd) u.onend = onEnd;
+          window.speechSynthesis.speak(u);
+        }, 100);
       }
 
       document.getElementById("voice-toggle").addEventListener("click", function() {
@@ -1118,7 +1129,7 @@ const quotesJson = JSON.stringify(allQuotes);
           } else {
             timerEndTime = Date.now() + timerSeconds * 1000;
             playBell(1);
-            startGuidedVoice();
+            setTimeout(function() { startGuidedVoice(); }, 3000);
           }
           breathIdx = 0;
           document.getElementById("breath-label").textContent = breathPhases[0];
@@ -1152,11 +1163,6 @@ const quotesJson = JSON.stringify(allQuotes);
         hideGuide();
         document.getElementById("breath-label").textContent = "";
       });
-
-      if (window.speechSynthesis) {
-        window.speechSynthesis.getVoices();
-        window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
-      }
 
       updateDisplay();
       loadData();
