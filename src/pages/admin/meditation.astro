@@ -908,6 +908,41 @@ const quotesJson = JSON.stringify(allQuotes);
           return '<div class="step"><div class="step-num">' + (i + 1) + '</div><div class="step-content"><div class="step-title">' + s.t + '</div><div class="step-desc">' + s.d + '</div><span class="step-duration">' + s.dur + '</span></div></div>';
         }).join("");
 
+      // Tibetan bell via AudioContext
+      var audioCtx = null;
+      function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        return audioCtx;
+      }
+
+      function playBell(count) {
+        count = count || 1;
+        var delay = 0;
+        for (var i = 0; i < count; i++) {
+          (function(d) {
+            setTimeout(function() {
+              var ctx = getAudioCtx();
+              var osc = ctx.createOscillator();
+              var gain = ctx.createGain();
+              var osc2 = ctx.createOscillator();
+              var gain2 = ctx.createGain();
+              osc.type = "sine"; osc.frequency.value = 528;
+              osc2.type = "sine"; osc2.frequency.value = 396;
+              gain.gain.setValueAtTime(0.4, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
+              gain2.gain.setValueAtTime(0.2, ctx.currentTime);
+              gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.5);
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc2.connect(gain2); gain2.connect(ctx.destination);
+              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 4);
+              osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 3.5);
+            }, d);
+          })(delay);
+          delay += 2500;
+        }
+      }
+
       // Voice
       var voiceEnabled = true;
       function speak(text, onEnd) {
@@ -1015,7 +1050,10 @@ const quotesJson = JSON.stringify(allQuotes);
           var btn = document.getElementById("timer-start");
           btn.textContent = "Inizia"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "Sessione completata";
-          speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
+          playBell(3);
+          setTimeout(function() {
+            speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
+          }, 8000);
           autoSaveSession();
         }
       }
@@ -1036,6 +1074,7 @@ const quotesJson = JSON.stringify(allQuotes);
             pausedRemaining = null;
           } else {
             timerEndTime = Date.now() + timerSeconds * 1000;
+            playBell(1);
             startGuidedVoice();
           }
           breathIdx = 0;
