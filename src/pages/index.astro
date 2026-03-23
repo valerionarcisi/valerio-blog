@@ -176,6 +176,12 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
     </main>
     <Footer />
     <style is:inline>
+      .RunWeeklyChart{flex:1;min-width:0}
+      .RunWeeklyChart .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:0 4px}
+      .RunWeeklyChart .chart-title{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#8a8a8e;text-transform:uppercase;letter-spacing:.05em}
+      .RunWeeklyChart .legend-item{display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#8a8a8e}
+      .RunWeeklyChart svg{width:100%;height:auto;display:block}
+      .RunWeeklyChart .chart-empty{color:#8a8a8e;font-size:.8rem;text-align:center;padding:2rem 0}
       .heatmap-detail{display:none;margin-top:.75rem;padding:.75rem 1rem;background:#1a1a1c;border:1px solid #333;border-radius:8px;animation:heatmapFade .2s ease}
       .heatmap-detail.visible{display:block}
       @keyframes heatmapFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
@@ -203,6 +209,9 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
       .heatmap-detail-kudos{color:#fc4c02}
       .heatmap-detail-total{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#c9a84c;text-align:right;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #333}
       rect.selected{stroke:#c9a84c;stroke-width:1.5}
+      @media(max-width:768px){
+        .RunWeeklyChart .chart-header{flex-direction:column;align-items:flex-start;gap:.25rem}
+      }
     </style>
     <script is:inline>
       (function () {
@@ -283,9 +292,11 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
           }
 
           var cols = weeks.length;
-          var targetW = 700;
+          var containerEl = document.getElementById('strava-charts');
+          var targetW = containerEl ? Math.min(700, containerEl.clientWidth - 16) : 700;
+          if (targetW < 200) targetW = 700;
           var cellSize = Math.floor((targetW - labelW) / cols - cellGap);
-          cellSize = Math.max(8, Math.min(cellSize, 14));
+          cellSize = Math.max(6, Math.min(cellSize, 14));
           var svgW = labelW + cols * (cellSize + cellGap);
           var svgH = 7 * (cellSize + cellGap) + 20;
 
@@ -425,7 +436,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
 
                 var row2 = '';
                 if (a.averageHeartrate) {
-                  row2 += '<span class="heatmap-detail-stat heatmap-detail-hr">&hearts; ' + Math.round(a.averageHeartrate) + ' avg';
+                  row2 += '<span class="heatmap-detail-stat heatmap-detail-hr">&hearts; ' + Math.round(a.averageHeartrate) + ' media';
                   if (a.maxHeartrate) row2 += ' / ' + Math.round(a.maxHeartrate) + ' max';
                   row2 += '</span>';
                 }
@@ -437,7 +448,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
                   var pauseSec = a.elapsedTime - a.duration;
                   row2 += '<span class="heatmap-detail-stat heatmap-detail-pause">pausa ' + fmtDur(pauseSec) + '</span>';
                 }
-                if (a.sufferScore) row2 += '<span class="heatmap-detail-stat heatmap-detail-effort">effort ' + a.sufferScore + '</span>';
+                if (a.sufferScore) row2 += '<span class="heatmap-detail-stat heatmap-detail-effort">sforzo ' + a.sufferScore + '</span>';
                 if (a.kudos > 0) row2 += '<span class="heatmap-detail-stat heatmap-detail-kudos">&hearts; ' + a.kudos + ' kudos</span>';
                 if (row2) html += '<div class="heatmap-detail-meta-row">' + row2 + '</div>';
                 html += '</div></div>';
