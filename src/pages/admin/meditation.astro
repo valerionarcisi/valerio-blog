@@ -960,6 +960,28 @@ const quotesJson = JSON.stringify(allQuotes);
         }
       }
 
+      function playChime() {
+        var ctx = getAudioCtx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine"; osc.frequency.value = 880;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1.5);
+      }
+
+      function playLowChime() {
+        var ctx = getAudioCtx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine"; osc.frequency.value = 440;
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1);
+      }
+
       // Voice
       var voiceEnabled = true;
       var cachedVoice = null;
@@ -1051,15 +1073,18 @@ const quotesJson = JSON.stringify(allQuotes);
         speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
         schedule.forEach(function(step) {
           var t = setTimeout(function() {
+            if (!isRunning) return;
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
             showGuide(step.idx + 1, totalSteps, step.title, step.desc, step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "");
+            playChime();
             speak(step.title + ". " + step.desc);
             var halfWay = Math.round(step.duration / 2);
             if (halfWay > 30 && step.idx < schedule.length - 1) {
               var ht = setTimeout(function() {
                 if (isRunning) {
                   document.getElementById("guide-hint").textContent = "Continua così. Resta presente.";
+                  playLowChime();
                   speak("Continua così. Resta presente.");
                 }
               }, halfWay * 1000);
@@ -1071,6 +1096,7 @@ const quotesJson = JSON.stringify(allQuotes);
         var lastMin = setTimeout(function() {
           if (isRunning) {
             document.getElementById("guide-hint").textContent = "Un minuto alla fine...";
+            playChime();
             speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
           }
         }, Math.max(0, timerTotal - 60) * 1000);
