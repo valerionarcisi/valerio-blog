@@ -251,6 +251,14 @@ const quotesJson = JSON.stringify(allQuotes);
       .timer-display { font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; color: #e8e6e1; letter-spacing: 0.05em; }
       .timer-label { font-size: 0.7rem; color: #8a8a8e; }
       .breath-label { text-align: center; font-size: 0.85rem; color: #bb86fc; min-height: 1.4em; margin: 0.5rem 0; }
+
+      .active-guide { display: none; background: linear-gradient(135deg, rgba(155,89,182,0.12), rgba(201,168,76,0.08)); border: 1px solid rgba(155,89,182,0.3); border-radius: 12px; padding: 1.2rem; margin: 1rem 0; text-align: center; animation: guideIn 0.5s ease; }
+      .active-guide.visible { display: block; }
+      .active-guide .guide-step-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #c9a84c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+      .active-guide .guide-title { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.4rem; color: #bb86fc; margin-bottom: 0.5rem; }
+      .active-guide .guide-desc { font-size: 1rem; color: #c8c6c1; line-height: 1.6; }
+      .active-guide .guide-hint { font-size: 0.8rem; color: #8a8a8e; margin-top: 0.8rem; font-style: italic; }
+      @keyframes guideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .timer-presets { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
       .timer-presets button {
         padding: 0.5rem 0.9rem;
@@ -411,6 +419,9 @@ const quotesJson = JSON.stringify(allQuotes);
         .heatmap-detail-min { font-size: 0.82rem; }
         .heatmap-detail-date { font-size: 0.9rem; }
         .breath-label { font-size: 0.95rem; }
+        .active-guide .guide-title { font-size: 1.3rem; }
+        .active-guide .guide-desc { font-size: 1.05rem; }
+        .active-guide .guide-hint { font-size: 0.9rem; }
         .journey-phase-name { font-size: 1.05rem; }
         .journey-phase-desc { font-size: 0.95rem; }
         .journey-suggestion { font-size: 0.92rem; }
@@ -480,6 +491,12 @@ const quotesJson = JSON.stringify(allQuotes);
         </div>
       </div>
       <div class="breath-label" id="breath-label"></div>
+      <div class="active-guide" id="active-guide">
+        <div class="guide-step-num" id="guide-step-num"></div>
+        <div class="guide-title" id="guide-title"></div>
+        <div class="guide-desc" id="guide-desc"></div>
+        <div class="guide-hint" id="guide-hint"></div>
+      </div>
       <div class="timer-presets" id="timer-presets">
         <button data-min="5">5 min</button>
         <button data-min="10" class="active">10 min</button>
@@ -1003,24 +1020,49 @@ const quotesJson = JSON.stringify(allQuotes);
         return schedule;
       }
 
+      function showGuide(stepNum, total, title, desc, hint) {
+        var g = document.getElementById("active-guide");
+        g.classList.add("visible");
+        document.getElementById("guide-step-num").textContent = "Passo " + stepNum + " di " + total;
+        document.getElementById("guide-title").textContent = title;
+        document.getElementById("guide-desc").textContent = desc;
+        document.getElementById("guide-hint").textContent = hint || "";
+        g.style.animation = "none"; g.offsetHeight; g.style.animation = "guideIn 0.5s ease";
+      }
+
+      function hideGuide() { document.getElementById("active-guide").classList.remove("visible"); }
+
       function startGuidedVoice() {
         var schedule = buildGuidedSchedule(timerTotal);
+        var totalSteps = schedule.length;
         guidedTimeouts = [];
+        showGuide(0, totalSteps, sess.title, "Trova una posizione comoda e chiudi gli occhi. Lascia andare le tensioni.", "Respira naturalmente...");
         speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
         schedule.forEach(function(step) {
           var t = setTimeout(function() {
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
+            showGuide(step.idx + 1, totalSteps, step.title, step.desc, step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "");
             speak(step.title + ". " + step.desc);
             var halfWay = Math.round(step.duration / 2);
             if (halfWay > 30 && step.idx < schedule.length - 1) {
-              var ht = setTimeout(function() { if (isRunning) speak("Continua così. Resta presente."); }, halfWay * 1000);
+              var ht = setTimeout(function() {
+                if (isRunning) {
+                  document.getElementById("guide-hint").textContent = "Continua così. Resta presente.";
+                  speak("Continua così. Resta presente.");
+                }
+              }, halfWay * 1000);
               guidedTimeouts.push(ht);
             }
           }, step.at * 1000);
           guidedTimeouts.push(t);
         });
-        var lastMin = setTimeout(function() { if (isRunning) speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo."); }, (timerTotal - 60) * 1000);
+        var lastMin = setTimeout(function() {
+          if (isRunning) {
+            document.getElementById("guide-hint").textContent = "Un minuto alla fine...";
+            speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
+          }
+        }, Math.max(0, timerTotal - 60) * 1000);
         guidedTimeouts.push(lastMin);
       }
 
@@ -1050,6 +1092,7 @@ const quotesJson = JSON.stringify(allQuotes);
           var btn = document.getElementById("timer-start");
           btn.textContent = "Inizia"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "Sessione completata";
+          showGuide("✓", "", "Sessione completata", "Apri lentamente gli occhi. Grazie per aver praticato.", "Namaste 🙏");
           playBell(3);
           setTimeout(function() {
             speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
@@ -1092,6 +1135,7 @@ const quotesJson = JSON.stringify(allQuotes);
           clearGuidedVoice(); releaseWakeLock();
           btn.textContent = "Riprendi"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "In pausa";
+          document.getElementById("guide-hint").textContent = "In pausa — premi Riprendi quando sei pronto";
         }
       });
 
@@ -1105,6 +1149,7 @@ const quotesJson = JSON.stringify(allQuotes);
         updateDisplay();
         document.getElementById("timer-start").textContent = "Inizia";
         document.getElementById("timer-start").className = "timer-btn start";
+        hideGuide();
         document.getElementById("breath-label").textContent = "";
       });
 
