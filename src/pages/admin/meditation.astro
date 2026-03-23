@@ -1,6 +1,7 @@
 ---
 import { timeSafeEqual } from "~/lib/auth";
 import AdminNav from "~/components/AdminNav.astro";
+import { quotes as allQuotes } from "~/data/meditation-quotes.js";
 
 export const prerender = false;
 
@@ -10,6 +11,8 @@ const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.AD
 if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
 }
+
+const quotesJson = JSON.stringify(allQuotes);
 ---
 
 <!doctype html>
@@ -299,12 +302,119 @@ if (!isAuthorized) {
 
       .loading-msg { text-align: center; color: #555; font-size: 0.8rem; padding: 2rem; }
 
+      /* Journey section */
+      .journey-section {
+        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
+        border: 1px solid rgba(155, 89, 182, 0.2);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .journey-title {
+        font-family: 'Staatliches', Impact, sans-serif;
+        color: #c9a84c;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        margin-bottom: 0.8rem;
+      }
+      .journey-phase {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      .journey-icon {
+        font-size: 1.8rem;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .journey-phase-name {
+        font-weight: 700;
+        color: #bb86fc;
+        font-size: 0.95rem;
+        margin-bottom: 0.2rem;
+      }
+      .journey-phase-desc {
+        color: #aaa;
+        font-size: 0.85rem;
+        line-height: 1.5;
+      }
+      .journey-progress {
+        display: flex;
+        gap: 3px;
+        margin-top: 1rem;
+      }
+      .journey-progress-dot {
+        height: 4px;
+        border-radius: 2px;
+        flex: 1;
+        background: #222;
+        transition: background 0.3s;
+      }
+      .journey-progress-dot.filled { background: #bb86fc; }
+      .journey-progress-dot.current { background: #c9a84c; }
+      .journey-month-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.6rem;
+        color: #555;
+        margin-top: 0.3rem;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .journey-suggestion {
+        background: rgba(155, 89, 182, 0.08);
+        border: 1px solid rgba(155, 89, 182, 0.15);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-top: 1rem;
+        font-size: 0.82rem;
+        color: #ccc;
+        line-height: 1.5;
+      }
+      .journey-suggestion strong { color: #bb86fc; }
+      .journey-tip {
+        background: rgba(201, 168, 76, 0.08);
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin-top: 0.6rem;
+        font-size: 0.8rem;
+        color: #c9a84c;
+        line-height: 1.5;
+      }
+
       @media (max-width: 700px) {
         .focus-grid { grid-template-columns: 1fr; }
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
         .timer-display { font-size: 2.2rem; }
-        body { padding: 1rem; }
+        body { padding: 1rem; font-size: 1.05rem; }
         .heatmap-cell { width: 9px; height: 9px; }
+        h1 { font-size: 2rem; }
+        .subtitle { font-size: 0.95rem; }
+        .stat-value { font-size: 1.6rem; }
+        .stat-label { font-size: 0.75rem; }
+        .streak-num { font-size: 1.8rem; }
+        .streak-text { font-size: 0.85rem; }
+        .today-status { font-size: 0.85rem; }
+        .meditation-hero .quote { font-size: 1.2rem; }
+        .meditation-hero .author { font-size: 0.85rem; }
+        .focus-card .fc-title { font-size: 0.9rem; }
+        .focus-card .fc-text { font-size: 0.88rem; }
+        .timer-presets button { font-size: 0.9rem; }
+        .timer-btn { font-size: 1rem; padding: 0.8rem 2rem; }
+        .session-card h2 { font-size: 1.2rem; }
+        .step-title { font-size: 1rem; }
+        .step-desc { font-size: 0.92rem; }
+        .day-badge { font-size: 0.85rem; }
+        .heatmap-title { font-size: 0.8rem; }
+        .heatmap-detail-type { font-size: 0.88rem; }
+        .heatmap-detail-min { font-size: 0.82rem; }
+        .heatmap-detail-date { font-size: 0.9rem; }
+        .breath-label { font-size: 0.95rem; }
+        .journey-phase-name { font-size: 1.05rem; }
+        .journey-phase-desc { font-size: 0.95rem; }
+        .journey-suggestion { font-size: 0.92rem; }
+        .journey-tip { font-size: 0.9rem; }
       }
     </style>
   </head>
@@ -320,6 +430,11 @@ if (!isAuthorized) {
       <div class="stat-box"><div class="stat-value" id="stat-total">-</div><div class="stat-label">Sessioni</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-minutes">-</div><div class="stat-label">Min totali</div></div>
       <div class="stat-box"><div class="stat-value" id="stat-month">-</div><div class="stat-label">Questo mese</div></div>
+    </div>
+
+    <div class="journey-section" id="journey-section">
+      <div class="journey-title">Il tuo percorso</div>
+      <div id="journey-content"><div class="loading-msg">Caricamento percorso...</div></div>
     </div>
 
     <div class="heatmap-section">
@@ -382,9 +497,10 @@ if (!isAuthorized) {
 
     <div class="session-card" id="daily-session"></div>
 
-    <script is:inline define:vars={{ token }}>
+    <script is:inline define:vars={{ token, quotesJson }}>
       var API_URL = '/api/admin/meditation';
       var AUTH_HEADER = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      var allQuotes = JSON.parse(quotesJson);
       var meditationData = [];
 
       var now = new Date();
@@ -498,6 +614,123 @@ if (!isAuthorized) {
         }
 
         renderHeatmap(dateMap);
+        renderJourney(uniqueDates);
+      }
+
+      // Adaptive journey plan
+      var phases = [
+        { name: "Fondamenta", icon: "🌱", months: [0,1,2], minDur: 5, maxDur: 10,
+          desc: "Costruisci l'abitudine. L'obiettivo non è meditare perfettamente, ma meditare ogni giorno. Anche 5 minuti contano.",
+          weights: { "Anapana": 70, "Body Scan": 20, "Camminata": 10 },
+          spiritual: "Stai piantando il seme. La consapevolezza del respiro (Anapana) è la base di tutto il percorso Vipassana. Goenka insegna che senza questa padronanza, le pratiche successive non hanno fondamento." },
+        { name: "Consolidamento", icon: "🌿", months: [3,4,5], minDur: 10, maxDur: 15,
+          desc: "Allunghi le sessioni e inizi a esplorare il corpo. La mente diventa più stabile, i pensieri ti disturbano meno.",
+          weights: { "Anapana": 40, "Body Scan": 30, "Camminata": 15, "Pensieri": 15 },
+          spiritual: "Il seme germoglia. Inizi a notare pattern mentali ricorrenti. Il Body Scan ti insegna che il corpo parla una lingua che la mente razionale ignora. Ascoltalo." },
+        { name: "Espansione", icon: "🌳", months: [6,7,8], minDur: 15, maxDur: 20,
+          desc: "Introduci la Vipassana vera: osservazione profonda delle sensazioni. L'equanimità inizia a diventare naturale.",
+          weights: { "Anapana": 25, "Body Scan": 25, "Vipassana": 25, "Camminata": 15, "Pensieri": 10 },
+          spiritual: "L'albero cresce. Vipassana significa 'vedere le cose come realmente sono'. Scopri Anicca (impermanenza): ogni sensazione sorge e passa. Questa comprensione trasforma il rapporto con il dolore e il piacere." },
+        { name: "Approfondimento", icon: "🌲", months: [9,10,11], minDur: 15, maxDur: 25,
+          desc: "Sessioni più lunghe, pratiche più profonde. La Metta (amorevole gentilezza) bilancia l'intensità della Vipassana.",
+          weights: { "Anapana": 15, "Body Scan": 15, "Vipassana": 30, "Metta": 20, "Pensieri": 10, "Suono": 10 },
+          spiritual: "Radici profonde. L'equanimità non è indifferenza — è amore senza attaccamento. La Metta ti insegna a estendere gentilezza prima a te stesso, poi al mondo. Goenka dice: 'Senza metta, vipassana diventa arida'." },
+        { name: "Maturità", icon: "🏔️", months: [12,13,14,15,16,17], minDur: 20, maxDur: 30,
+          desc: "La pratica si stabilizza. Ogni tipo di meditazione diventa accessibile. Puoi guidare la tua sessione in base a ciò che senti.",
+          weights: { "Anapana": 15, "Body Scan": 15, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 5 },
+          spiritual: "La montagna. La pratica non è più qualcosa che 'fai' — diventa parte di chi sei. Il confine tra meditazione formale e vita quotidiana si assottiglia. Ogni momento diventa un'opportunità di consapevolezza." },
+        { name: "Integrazione", icon: "🌊", months: [18,19,20,21,22,23], minDur: 20, maxDur: 30,
+          desc: "Pratichi con naturalezza. Puoi sostenere sessioni lunghe e doppi sit (mattina + sera). La consapevolezza permea la giornata.",
+          weights: { "Anapana": 10, "Body Scan": 15, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 10 },
+          spiritual: "L'oceano. Come l'oceano è calmo nelle profondità anche quando la superficie è agitata, tu mantieni equanimità anche nelle tempeste della vita. Considera un ritiro Vipassana di 10 giorni per approfondire." },
+        { name: "Maestria", icon: "✨", months: [24], minDur: 30, maxDur: 45,
+          desc: "La pratica è matura. Sei il tuo stesso maestro. Puoi esplorare sessioni lunghe, silenzio profondo, equanimità in ogni circostanza.",
+          weights: { "Anapana": 10, "Body Scan": 10, "Vipassana": 30, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 10 },
+          spiritual: "La luce. Il percorso non ha fine — ogni sessione è sia inizio che completamento. Puoi insegnare agli altri attraverso il tuo esempio. La pratica quotidiana è il dono più grande che puoi fare a te stesso e al mondo." },
+      ];
+
+      function getMonthsOfPractice(dates) {
+        if (dates.length === 0) return 0;
+        var sorted = dates.slice().sort();
+        var first = new Date(sorted[0]);
+        var now = new Date();
+        var months = (now.getFullYear() - first.getFullYear()) * 12 + (now.getMonth() - first.getMonth());
+        var consistency = dates.length / Math.max(1, Math.round((now - first) / 86400000));
+        if (consistency < 0.3) months = Math.floor(months * consistency / 0.3);
+        return Math.max(0, months);
+      }
+
+      function getCurrentPhase(months) {
+        for (var i = phases.length - 1; i >= 0; i--) {
+          var p = phases[i];
+          var lastMonth = p.months[p.months.length - 1];
+          if (i === phases.length - 1 && months >= p.months[0]) return i;
+          if (months >= p.months[0] && months <= lastMonth) return i;
+        }
+        return 0;
+      }
+
+      function getSuggestedSession(phaseIdx) {
+        var p = phases[phaseIdx];
+        var w = p.weights;
+        var sessionMap = {
+          "Anapana": 0, "Body Scan": 1, "Metta": 2,
+          "Vipassana": 3, "Camminata": 4, "Pensieri": 5, "Suono": 6
+        };
+        var pool = [];
+        Object.keys(w).forEach(function(k) {
+          for (var i = 0; i < w[k]; i++) pool.push(sessionMap[k] !== undefined ? sessionMap[k] : 0);
+        });
+        return pool[dayOfYear % pool.length];
+      }
+
+      function renderJourney(uniqueDates) {
+        var months = getMonthsOfPractice(uniqueDates);
+        var phaseIdx = getCurrentPhase(months);
+        var phase = phases[phaseIdx];
+
+        var totalMonths = 24;
+        var progressDots = '';
+        for (var i = 0; i < totalMonths; i++) {
+          var cls = 'journey-progress-dot';
+          if (i < months) cls += ' filled';
+          if (i === months) cls += ' current';
+          progressDots += '<div class="' + cls + '"></div>';
+        }
+
+        var html = '';
+        html += '<div class="journey-phase">';
+        html += '<div class="journey-icon">' + phase.icon + '</div>';
+        html += '<div>';
+        html += '<div class="journey-phase-name">Fase ' + (phaseIdx + 1) + ' di ' + phases.length + ': ' + phase.name + '</div>';
+        html += '<div class="journey-phase-desc">' + phase.desc + '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        html += '<div class="journey-progress">' + progressDots + '</div>';
+        html += '<div class="journey-month-label"><span>Inizio</span><span>Mese ' + months + '</span><span>24+</span></div>';
+
+        html += '<div class="journey-suggestion">';
+        html += '<strong>Oggi:</strong> ' + sess.title + '<br>';
+        html += '<strong>Durata consigliata:</strong> ' + phase.minDur + '–' + phase.maxDur + ' minuti<br>';
+        var weightsList = Object.keys(phase.weights).map(function(k) { return k + ' ' + phase.weights[k] + '%'; }).join(' · ');
+        html += '<strong>Mix del periodo:</strong> ' + weightsList;
+        html += '</div>';
+
+        html += '<div class="journey-tip">' + phase.spiritual + '</div>';
+
+        document.getElementById("journey-content").innerHTML = html;
+
+        // Override session based on adaptive plan
+        var suggestedIdx = getSuggestedSession(phaseIdx);
+        if (suggestedIdx < sessions.length && suggestedIdx !== (dayOfYear % sessions.length)) {
+          sess = sessions[suggestedIdx];
+          document.getElementById("daily-session").innerHTML =
+            '<h2>' + sess.title + '</h2>' +
+            sess.steps.map(function(s, i) {
+              return '<div class="step"><div class="step-num">' + (i + 1) + '</div><div class="step-content"><div class="step-title">' + s.t + '</div><div class="step-desc">' + s.d + '</div><span class="step-duration">' + s.dur + '</span></div></div>';
+            }).join("");
+        }
       }
 
       function renderHeatmap(dateMap) {
@@ -595,40 +828,8 @@ if (!isAuthorized) {
       }
 
 
-      // Quotes, focus, sessions — same as before
-      var quotes = [
-        { text: "Tutto ciò che sorge, passa. Questa è la legge della natura.", author: "S.N. Goenka" },
-        { text: "La mente è il nostro strumento più potente. Impara ad osservarla e diventerai libero.", author: "S.N. Goenka" },
-        { text: "Non cercare di cambiare nulla. Osserva semplicemente le cose così come sono.", author: "S.N. Goenka" },
-        { text: "Anicca — impermanenza. Nulla dura per sempre: né il piacere, né il dolore.", author: "Tradizione Vipassana" },
-        { text: "La vera saggezza nasce dall'esperienza diretta, non dalla teoria.", author: "S.N. Goenka" },
-        { text: "Sii consapevole di ogni respiro. In quel momento, sei completamente vivo.", author: "Thich Nhat Hanh" },
-        { text: "Il dolore è inevitabile. La sofferenza è una scelta.", author: "Tradizione buddhista" },
-        { text: "Non sei i tuoi pensieri. Sei lo spazio in cui i pensieri appaiono.", author: "Eckhart Tolle" },
-        { text: "La pace viene da dentro. Non cercarla fuori.", author: "Buddha" },
-        { text: "Ogni sensazione che osservi senza reagire ti rende più libero.", author: "S.N. Goenka" },
-        { text: "La pazienza è la più alta forma di disciplina.", author: "Buddha" },
-        { text: "Chi guarda fuori, sogna. Chi guarda dentro, si sveglia.", author: "Carl Jung" },
-        { text: "Il momento presente è l'unico momento reale. Il passato è memoria, il futuro immaginazione.", author: "Tradizione Vipassana" },
-        { text: "Meditare non è fuggire dalla realtà, è vedere la realtà per la prima volta.", author: "S.N. Goenka" },
-        { text: "Il silenzio non è vuoto. È pieno di risposte.", author: "Tradizione contemplativa" },
-        { text: "Equanimità: osservare piacere e dolore con lo stesso distacco. Questo è il cammino.", author: "S.N. Goenka" },
-        { text: "Un momento di consapevolezza può cambiare un'intera giornata.", author: "Buddha" },
-        { text: "La mente è come l'acqua: quando è agitata è difficile vedere. Quando è calma, tutto diventa chiaro.", author: "Prasad Mahes" },
-        { text: "Non reagire. Osserva e lascia andare.", author: "S.N. Goenka" },
-        { text: "La meditazione non è un esercizio mattutino. È uno stile di vita.", author: "Tradizione Vipassana" },
-        { text: "Stai seduto. Osserva il respiro. Questo è sufficiente.", author: "Ajahn Chah" },
-        { text: "Non c'è nulla da raggiungere. C'è solo da lasciar cadere.", author: "Tradizione Zen" },
-        { text: "La consapevolezza è il sentiero verso l'immortalità.", author: "Dhammapada" },
-        { text: "Respira. Lascia andare. Questo momento è l'unico che hai.", author: "Tradizione Vipassana" },
-        { text: "La reazione crea legami. L'osservazione crea libertà.", author: "S.N. Goenka" },
-        { text: "Ogni respiro è un'opportunità per ricominciare.", author: "Tradizione mindfulness" },
-        { text: "La sofferenza nasce dall'attaccamento.", author: "Buddha" },
-        { text: "Sii l'osservatore dei tuoi pensieri, non la loro vittima.", author: "Buddha" },
-        { text: "Il corpo sa quello che la mente nega. Ascoltalo.", author: "Tradizione Vipassana" },
-        { text: "Medita non per diventare bravo a meditare. Medita per diventare bravo a vivere.", author: "Tradizione contemporanea" },
-        { text: "Ogni cellula del tuo corpo ascolta ogni pensiero che hai.", author: "Tradizione Vipassana" },
-      ];
+      // Quotes from external file (365 total, one per day of the year)
+      var quotes = allQuotes;
 
       var sessions = [
         { title: "Anapana — Consapevolezza del respiro", steps: [
@@ -692,7 +893,7 @@ if (!isAuthorized) {
          { icon: "🏔️", title: "Stabilità", text: "Sii come una montagna: le nuvole passano, il vento soffia, ma la montagna resta." }],
       ];
 
-      var q = quotes[dayOfYear % quotes.length];
+      var q = quotes[dayOfYear % 365];
       document.getElementById("daily-quote").innerHTML = '<div class="quote">"' + q.text + '"</div><div class="author">— ' + q.author + '</div>';
 
       var todayFocus = focusAreas[dayOfYear % focusAreas.length];
