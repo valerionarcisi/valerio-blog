@@ -985,26 +985,56 @@ const quotesJson = JSON.stringify(allQuotes);
       // Voice
       var voiceEnabled = true;
       var cachedVoice = null;
+      var voiceRetries = 0;
       function loadVoice() {
-        var voices = window.speechSynthesis.getVoices();
+        var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
         var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
-        if (it.length > 0) cachedVoice = it[0];
+        if (it.length > 0) {
+          cachedVoice = it[0];
+        } else if (voiceRetries < 10) {
+          voiceRetries++;
+          setTimeout(loadVoice, 500);
+        }
       }
       if (window.speechSynthesis) {
         loadVoice();
         window.speechSynthesis.onvoiceschanged = loadVoice;
       }
 
+      // Chrome bug: speech synthesis stops after ~15s unless we periodically poke it
+      var speechKeepAlive = null;
+      function startSpeechKeepAlive() {
+        stopSpeechKeepAlive();
+        speechKeepAlive = setInterval(function() {
+          if (window.speechSynthesis && window.speechSynthesis.speaking) {
+            window.speechSynthesis.pause();
+            window.speechSynthesis.resume();
+          }
+        }, 10000);
+      }
+      function stopSpeechKeepAlive() {
+        if (speechKeepAlive) { clearInterval(speechKeepAlive); speechKeepAlive = null; }
+      }
+
       function speak(text, onEnd) {
         if (!voiceEnabled || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
         window.speechSynthesis.cancel();
+        stopSpeechKeepAlive();
+        // Retry voice loading if not found yet
+        if (!cachedVoice) loadVoice();
         setTimeout(function() {
           var u = new SpeechSynthesisUtterance(text);
           u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
           if (cachedVoice) u.voice = cachedVoice;
-          if (onEnd) u.onend = onEnd;
+          if (onEnd) {
+            u.onend = function() { stopSpeechKeepAlive(); onEnd(); };
+          } else {
+            u.onend = function() { stopSpeechKeepAlive(); };
+          }
+          u.onerror = function() { stopSpeechKeepAlive(); if (onEnd) onEnd(); };
           window.speechSynthesis.speak(u);
-        }, 100);
+          startSpeechKeepAlive();
+        }, 250);
       }
 
       document.getElementById("voice-toggle").addEventListener("click", function() {
@@ -1020,7 +1050,12 @@ const quotesJson = JSON.stringify(allQuotes);
         try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
       }
       function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
-      document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible' && isRunning) requestWakeLock(); });
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible' && isRunning) {
+          requestWakeLock();
+          if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+      });
 
       // Timer
       var timerSeconds = 600, timerTotal = 600;
@@ -1103,7 +1138,7 @@ const quotesJson = JSON.stringify(allQuotes);
         guidedTimeouts.push(lastMin);
       }
 
-      function clearGuidedVoice() { guidedTimeouts.forEach(function(t) { clearTimeout(t); }); guidedTimeouts = []; window.speechSynthesis.cancel(); }
+      function clearGuidedVoice() { guidedTimeouts.forEach(function(t) { clearTimeout(t); }); guidedTimeouts = []; window.speechSynthesis.cancel(); stopSpeechKeepAlive(); }
 
       document.getElementById("timer-presets").addEventListener("click", function(e) {
         if (e.target.tagName !== "BUTTON" || isRunning) return;
@@ -1146,6 +1181,14 @@ const quotesJson = JSON.stringify(allQuotes);
       document.getElementById("timer-start").addEventListener("click", function() {
         var btn = this;
         if (!isRunning) {
+          // Ensure AudioContext is created and resumed on user gesture (required by mobile browsers)
+          getAudioCtx();
+          // Warm up speech synthesis on user gesture (required by iOS/Android)
+          if (window.speechSynthesis && voiceEnabled) {
+            var warmup = new SpeechSynthesisUtterance("");
+            warmup.volume = 0;
+            window.speechSynthesis.speak(warmup);
+          }
           isRunning = true;
           btn.textContent = "Pausa"; btn.className = "timer-btn pause";
           requestWakeLock();
