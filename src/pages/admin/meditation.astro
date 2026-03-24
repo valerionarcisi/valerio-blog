@@ -994,6 +994,9 @@ const quotesJson = JSON.stringify(allQuotes);
         } else if (voiceRetries < 10) {
           voiceRetries++;
           setTimeout(loadVoice, 500);
+        } else if (voices.length > 0) {
+          // No Italian voice found — use default voice as fallback so speech still works
+          cachedVoice = voices[0];
         }
       }
       if (window.speechSynthesis) {
