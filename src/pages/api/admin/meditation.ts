@@ -1,12 +1,25 @@
 import type { APIRoute } from "astro";
 import { verifyBearerToken } from "~/lib/auth";
 import getDb from "~/lib/turso";
+import { parseSessionInput, parseDeleteId } from "~/lib/meditation";
+
+const JSON_HEADERS = { "Content-Type": "application/json" } as const;
+
+function jsonOk(data: unknown, status = 200): Response {
+  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
+}
+
+function jsonErr(message: string, status: number): Response {
+  return new Response(JSON.stringify({ error: message }), { status, headers: JSON_HEADERS });
+}
 
 function isAuthorized(request: Request): boolean {
   return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
 }
 
+let tableReady = false;
 async function ensureTable() {
+  if (tableReady) return;
   const db = getDb();
   await db.execute(`
     CREATE TABLE IF NOT EXISTS meditation_sessions (
@@ -20,77 +33,57 @@ async function ensureTable() {
   await db.execute(
     `CREATE INDEX IF NOT EXISTS idx_meditation_date ON meditation_sessions(date)`,
   );
+  tableReady = true;
 }
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
+  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
   await ensureTable();
 
   const result = await getDb().execute(
     "SELECT id, date, duration_min, session_type, created_at FROM meditation_sessions WHERE date >= date('now', '-365 days') ORDER BY date ASC, id ASC",
   );
 
-  return new Response(JSON.stringify(result.rows), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonOk(result.rows);
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) {
-    return new Response("Unauthorized", { status: 401 });
+  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonErr("Invalid JSON body", 400);
   }
 
-  const body = await request.json();
-  const { date, duration_min, session_type } = body;
-
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return new Response(
-      JSON.stringify({ error: "Valid date (YYYY-MM-DD) required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
-  }
+  const parsed = parseSessionInput(body);
+  if (!parsed.ok) return jsonErr(parsed.error, 400);
 
   await ensureTable();
+  const { date, duration_min, session_type } = parsed.value;
 
   const result = await getDb().execute({
     sql: `INSERT INTO meditation_sessions (date, duration_min, session_type, created_at) VALUES (?, ?, ?, datetime('now'))`,
-    args: [date, duration_min ?? 0, session_type ?? null],
+    args: [date, duration_min, session_type],
   });
 
-  return new Response(
-    JSON.stringify({ ok: true, id: Number(result.lastInsertRowid) }),
-    { status: 201, headers: { "Content-Type": "application/json" } },
-  );
+  return jsonOk({ ok: true, id: Number(result.lastInsertRowid) }, 201);
 };
 
 export const DELETE: APIRoute = async ({ request, url }) => {
-  if (!isAuthorized(request)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
 
-  const id = url.searchParams.get("id");
-  if (!id) {
-    return new Response(
-      JSON.stringify({ error: "id param required" }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
-    );
-  }
+  const parsed = parseDeleteId(url.searchParams.get("id"));
+  if (!parsed.ok) return jsonErr(parsed.error, 400);
 
   await ensureTable();
-
   await getDb().execute({
     sql: "DELETE FROM meditation_sessions WHERE id = ?",
-    args: [Number(id)],
+    args: [parsed.value],
   });
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonOk({ ok: true });
 };

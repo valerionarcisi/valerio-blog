@@ -1,6 +1,81 @@
+// ═══════════════════════════════════════════════════════════════
+// Result pattern — rende esplicito successo/fallimento
+// ═══════════════════════════════════════════════════════════════
+export type Result<T, E = string> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+export function ok<T>(value: T): Result<T, never> {
+  return { ok: true, value };
+}
+
+export function err<E = string>(error: E): Result<never, E> {
+  return { ok: false, error };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Validazione input API
+// ═══════════════════════════════════════════════════════════════
+export interface SessionInput {
+  date: string;
+  duration_min: number;
+  session_type: string | null;
+}
+
+const MAX_SESSION_TYPE_LENGTH = 200;
+const MAX_DURATION_MIN = 480;
+
+export function parseSessionInput(body: unknown): Result<SessionInput> {
+  if (!body || typeof body !== "object") return err("Body must be an object");
+
+  const { date, duration_min, session_type } = body as Record<string, unknown>;
+
+  if (!isValidDate(date)) return err("Valid date (YYYY-MM-DD) required");
+
+  const durationClamped = clampInt(duration_min, 0, MAX_DURATION_MIN, 0);
+
+  const sessionTypeSafe =
+    typeof session_type === "string"
+      ? session_type.slice(0, MAX_SESSION_TYPE_LENGTH)
+      : null;
+
+  return ok({ date, duration_min: durationClamped, session_type: sessionTypeSafe });
+}
+
+export function parseDeleteId(idParam: string | null): Result<number> {
+  if (!idParam) return err("id param required");
+  const id = Number(idParam);
+  if (!Number.isFinite(id) || id <= 0) return err("Valid positive id required");
+  return ok(Math.floor(id));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Parsing e utilità
+// ═══════════════════════════════════════════════════════════════
 export function parseDuration(dur: string): number {
+  if (!dur) return 0;
   const m = dur.match(/(\d+)/);
   return m ? parseInt(m[1]) * 60 : 0;
+}
+
+export function isValidDate(d: unknown): d is string {
+  return typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
+}
+
+export function isFinitePositive(n: unknown): n is number {
+  return typeof n === "number" && Number.isFinite(n) && n > 0;
+}
+
+export function clampInt(
+  val: unknown,
+  min: number,
+  max: number,
+  fallback: number,
+): number {
+  if (val === null || val === undefined) return fallback;
+  const n = typeof val === "number" ? val : Number(val);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(n)));
 }
 
 export interface Step {
@@ -21,6 +96,7 @@ export function buildGuidedSchedule(
   steps: Step[],
   totalSec: number,
 ): ScheduleEntry[] {
+  if (steps.length === 0 || totalSec <= 0) return [];
   let totalDeclared = 0;
   steps.forEach((s) => {
     totalDeclared += parseDuration(s.dur);
@@ -30,8 +106,7 @@ export function buildGuidedSchedule(
   let elapsed = 0;
   steps.forEach((s, i) => {
     let stepSec = Math.round(parseDuration(s.dur) * scale);
-    if (stepSec === 0 && i < steps.length - 1)
-      stepSec = Math.round(totalSec / steps.length);
+    if (stepSec === 0) stepSec = Math.round(totalSec / steps.length);
     schedule.push({
       at: elapsed,
       title: s.t,
@@ -50,6 +125,9 @@ export function generateWavDataUri(
   volume: number,
   decayAt: number,
 ): string {
+  if (durationSec <= 0 || freq <= 0 || volume <= 0) {
+    return "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+  }
   const sr = 22050;
   const n = Math.floor(sr * durationSec);
   const buf = new ArrayBuffer(44 + n * 2);
@@ -72,10 +150,11 @@ export function generateWavDataUri(
   v.setUint32(40, n * 2, true);
   const ds = Math.floor(sr * (decayAt || 0));
   for (let i = 0; i < n; i++) {
+    const denominator = n - ds;
     const env =
-      i < ds
+      i < ds || denominator === 0
         ? volume
-        : volume * Math.exp((-3 * (i - ds)) / (n - ds));
+        : volume * Math.exp((-3 * (i - ds)) / denominator);
     const val = Math.sin((2 * Math.PI * freq * i) / sr) * env;
     v.setInt16(
       44 + i * 2,
@@ -128,6 +207,7 @@ export function getSuggestedSessionIndex(
   dayOfYear: number,
   sessionMap: Record<string, number>,
 ): number {
+  if (phaseIdx < 0 || phaseIdx >= phases.length) return 0;
   const p = phases[phaseIdx];
   const w = p.weights;
   const pool: number[] = [];
@@ -135,5 +215,6 @@ export function getSuggestedSessionIndex(
     const idx = sessionMap[k] !== undefined ? sessionMap[k] : 0;
     for (let i = 0; i < w[k]; i++) pool.push(idx);
   });
-  return pool[dayOfYear % pool.length];
+  if (pool.length === 0) return 0;
+  return pool[Math.abs(dayOfYear) % pool.length];
 }
