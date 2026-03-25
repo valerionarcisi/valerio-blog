@@ -440,6 +440,8 @@ Questa tabella — con i contratti esatti dell'API, i response body, i codici di
 
 I trade-off sono altrettanto importanti: capire cosa **non** fa il sistema è parte del design. "Nessuna notifica push" non è una mancanza — è una scelta consapevole. La motivazione viene dalla streak, non dal telefono che rompe le scatole.
 
+Il file completo è su GitHub: [docs/meditation-spec.md](https://github.com/valerionarcisi/valerio-blog/blob/main/docs/meditation-spec.md)
+
 Questo cambia il mestiere. Non scrivo meno codice — scrivo più specifiche, più test, più decisioni architetturali documentate. Il codice è diventato l'artefatto meno importante del progetto.
 
 ## La domanda scomoda

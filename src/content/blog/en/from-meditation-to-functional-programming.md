@@ -440,6 +440,8 @@ This table — with exact API contracts, response bodies, error codes — is the
 
 The trade-offs are equally important: understanding what the system **doesn't** do is part of the design. "No push notifications" isn't a missing feature — it's a conscious choice. Motivation comes from the streak, not from your phone nagging you.
 
+The full file is on GitHub: [docs/meditation-spec.md](https://github.com/valerionarcisi/valerio-blog/blob/main/docs/meditation-spec.md)
+
 This changes the craft. I don't write less code — I write more specifications, more tests, more documented architectural decisions. Code has become the least important artifact of the project.
 
 ## The uncomfortable question
