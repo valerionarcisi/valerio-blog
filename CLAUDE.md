@@ -109,3 +109,7 @@ When making significant changes (new features, architectural decisions, design c
 - How it works (architecture, data flow)
 - Setup instructions if new env vars or services are needed
 - Keep it concise but complete enough for a future developer (or future you) to understand the reasoning
+
+## Specs
+
+Le spec di ogni feature si trovano in `docs/{feature-name}-spec.md`. Alla fine di ogni feature (nuova o modificata), **aggiorna sempre la spec corrispondente** in `docs/`. Se la spec non esiste, creala. Se esiste, aggiornala con le modifiche fatte.
