@@ -977,9 +977,9 @@ const quotesJson = JSON.stringify(allQuotes);
               var gain2 = ctx.createGain();
               osc.type = "sine"; osc.frequency.value = 528;
               osc2.type = "sine"; osc2.frequency.value = 396;
-              gain.gain.setValueAtTime(0.4, ctx.currentTime);
+              gain.gain.setValueAtTime(0.7, ctx.currentTime);
               gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
-              gain2.gain.setValueAtTime(0.2, ctx.currentTime);
+              gain2.gain.setValueAtTime(0.4, ctx.currentTime);
               gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.5);
               osc.connect(gain); gain.connect(ctx.destination);
               osc2.connect(gain2); gain2.connect(ctx.destination);
@@ -996,7 +996,7 @@ const quotesJson = JSON.stringify(allQuotes);
         var osc = ctx.createOscillator();
         var gain = ctx.createGain();
         osc.type = "sine"; osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.setValueAtTime(0.35, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1.5);
@@ -1007,13 +1007,14 @@ const quotesJson = JSON.stringify(allQuotes);
         var osc = ctx.createOscillator();
         var gain = ctx.createGain();
         osc.type = "sine"; osc.frequency.value = 440;
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
         osc.connect(gain); gain.connect(ctx.destination);
         osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1);
       }
 
-      function playStepChimes(count) {
+      function playStepChimes(count, onDone) {
+        var totalDuration = count * 500;
         for (var i = 0; i < count; i++) {
           (function(delay) {
             setTimeout(function() {
@@ -1021,13 +1022,14 @@ const quotesJson = JSON.stringify(allQuotes);
               var osc = ctx.createOscillator();
               var gain = ctx.createGain();
               osc.type = "sine"; osc.frequency.value = 780;
-              gain.gain.setValueAtTime(0.2, ctx.currentTime);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+              gain.gain.setValueAtTime(0.5, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
               osc.connect(gain); gain.connect(ctx.destination);
-              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.6);
+              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.8);
             }, delay);
           })(i * 500);
         }
+        if (onDone) setTimeout(onDone, totalDuration + 300);
       }
 
       // Voice
@@ -1174,15 +1176,16 @@ const quotesJson = JSON.stringify(allQuotes);
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
             showGuide(step.idx + 1, totalSteps, step.title, step.desc, step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "");
-            playStepChimes(step.idx + 1);
-            speak(step.title + ". " + step.desc);
+            playStepChimes(step.idx + 1, function() {
+              if (isRunning) speak(step.title + ". " + step.desc);
+            });
             var halfWay = Math.round(step.duration / 2);
             if (halfWay > 30 && step.idx < schedule.length - 1) {
               var ht = setTimeout(function() {
                 if (isRunning) {
                   document.getElementById("guide-hint").textContent = "Continua così. Resta presente.";
                   playLowChime();
-                  speak("Continua così. Resta presente.");
+                  setTimeout(function() { if (isRunning) speak("Continua così. Resta presente."); }, 1200);
                 }
               }, halfWay * 1000);
               guidedTimeouts.push(ht);
@@ -1193,8 +1196,9 @@ const quotesJson = JSON.stringify(allQuotes);
         var lastMin = setTimeout(function() {
           if (isRunning) {
             document.getElementById("guide-hint").textContent = "Un minuto alla fine...";
-            playStepChimes(2);
-            speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
+            playStepChimes(2, function() {
+              if (isRunning) speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
+            });
           }
         }, Math.max(0, timerTotal - 60) * 1000);
         guidedTimeouts.push(lastMin);
