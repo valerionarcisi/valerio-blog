@@ -1,58 +1,98 @@
-# Valerio Narcisi's Blog
+# valerionarcisi.me
 
-Welcome to the repository for my personal blog! This project is built using the **Astro** framework, focusing on a modern, content-first approach to web development. It's designed to be fast, accessible, and easy to maintain.
+Personal blog and portfolio — web developer, director, screenwriter.
 
----
-
-### Features
-
-- **Astro Framework**: A modern static site builder that provides excellent performance and a great developer experience.
-- **Hygraph CMS**: All blog content is managed through a headless Hygraph CMS, providing a flexible and powerful GraphQL API.
-- **Netlify Deployment**: Configured for continuous deployment on Netlify, automatically building and deploying new changes pushed to the `main` branch.
-- **pnpm Package Manager**: The project uses `pnpm` for fast, space-efficient dependency management, as specified in the `netlify.toml` and `package.json` files.
-- **ESLint and Prettier**: Maintain code quality and consistent formatting with pre-configured ESLint and Prettier.
-- **TypeScript Support**: Enjoy type safety and autocompletion throughout the project with a robust TypeScript configuration.
+Built with **Astro 5**, deployed on **Netlify**, content in Markdown.
 
 ---
 
-### Hygraph as a CMS
+## Stack
 
-This project uses **Hygraph** (formerly GraphCMS) as its content management system. As a headless CMS, Hygraph provides a low-code interface for managing content, which is then delivered to this Astro site via a **GraphQL API**.
-
-The main benefit of this approach is the complete separation of content from presentation. This allows for a flexible and dynamic publishing workflow, where content can be created and updated independently of the website's codebase. During the build process, Astro fetches all the necessary content from Hygraph to generate the static pages.
+| Layer | Choice |
+|---|---|
+| Framework | Astro 5 (SSG + Netlify serverless functions) |
+| Language | TypeScript strict |
+| Package manager | pnpm |
+| Styling | Plain CSS, co-located per component |
+| Database | Turso (SQLite edge) — comments + meditation |
+| Deployment | Netlify (auto-deploy on push to `main`) |
+| i18n | Italian (default, no prefix) + English (`/en/`) |
 
 ---
 
-### Getting Started
+## Architecture
 
-To get a local copy up and running, follow these simple steps.
+### Content
+- Blog posts and films live in `src/content/` as Markdown files, organized by locale (`it/`, `en/`)
+- External data fetched at build time: **Letterboxd** (movies), **Last.FM** (music), **Strava** (sport)
 
-#### Prerequisites
+### API Endpoints
+All endpoints use a `Result<T, E>` pattern — no exceptions, no silent failures. Every handler is a pipeline:
 
-You'll need to have Node.js and `pnpm` installed on your machine.
+```
+parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
+```
 
-- **Node.js**: Make sure you have a recent version (e.g., 18 or later).
-- **pnpm**: If you don't have it, you can install it via npm:
-  ```bash
-  npm install -g pnpm
-  ```
+- `GET/POST /api/comments` — public comments
+- `GET/PATCH /api/admin/comments` — moderation (Bearer token)
+- `GET/POST/DELETE /api/admin/meditation` — meditation session tracking
 
-#### Installation
+### Functional core (`src/lib/`)
+- `result.ts` — `Result<T,E>`, `pipe()`, `andThen()`, `jsonOk()`, `jsonErr()`, `parseJsonBody()`
+- `meditation.ts` — `parseSessionInput()`, `parseDeleteId()`
+- `auth.ts` — `verifyBearerToken()`
+- `turso.ts` — singleton Turso client
 
-1.  Clone the repository:
-    ```bash
-    git clone [https://github.com/jey-y/portfolio_n.git](https://github.com/jey-y/portfolio_n.git)
-    cd portfolio_n
-    ```
-2.  Install the project dependencies using pnpm:
-    ```bash
-    pnpm install
-    ```
+---
 
-#### Development Server
+## Admin
 
-Run the development server to see your changes in real-time. This command will start the server and open the project in your browser.
+Private pages under `/admin/` (protected by `ADMIN_TOKEN`):
+
+- `/admin/meditation` — Vipassana timer, heatmap, adaptive annual plan, streak
+- `/admin/meal-plan` — weekly meal plan
+- `/admin/body-comp` — BIA body composition tracking
+- `/admin/grocery` — shopping list from meal plan
+- `/admin/recipes` — recipes with dosages
+- `/admin/comments` — comment moderation
+
+---
+
+## Setup
 
 ```bash
+pnpm install
+cp .env.example .env  # fill in the vars below
 pnpm dev
 ```
+
+### Environment variables
+
+```
+TMDB_API_KEY
+LASTFM_API_KEY
+TURSO_DATABASE_URL
+TURSO_AUTH_TOKEN
+ADMIN_TOKEN
+STRAVA_CLIENT_ID
+STRAVA_CLIENT_SECRET
+STRAVA_REFRESH_TOKEN
+```
+
+---
+
+## Commands
+
+```bash
+pnpm dev      # dev server
+pnpm build    # type-check + build
+pnpm preview  # preview production build
+pnpm lint     # ESLint
+pnpm format   # Prettier
+```
+
+---
+
+## Specs
+
+Feature specs are in `docs/`. Each feature has its own `{feature}-spec.md`.
