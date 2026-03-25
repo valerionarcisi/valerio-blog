@@ -755,30 +755,19 @@ const quotesJson = JSON.stringify(allQuotes);
             }).join("");
         }
 
-        // Voice: auto-off after training period, with tip
+        // Voice: auto-off after training period
         practiceDays = uniqueDates.length;
-        var voiceToggle = document.getElementById("voice-toggle");
-        var voiceTip = document.getElementById("voice-tip");
         var userOverride = localStorage.getItem("meditation-voice-override");
-
         if (userOverride !== null) {
-          voiceEnabled = userOverride === "on";
+          VoiceEngine.setEnabled(userOverride === "on");
         } else if (practiceDays >= VOICE_TRAINING_DAYS) {
-          voiceEnabled = false;
+          VoiceEngine.setEnabled(false);
         }
 
-        voiceToggle.textContent = voiceEnabled ? "Voce ON" : "Voce OFF";
-        voiceToggle.classList.toggle("active", voiceEnabled);
-
-        if (practiceDays >= VOICE_TRAINING_DAYS && voiceEnabled) {
-          voiceTip.textContent = "Hai " + practiceDays + " giorni di pratica — prova oggi senza voce, solo con i campanelli";
-        } else if (practiceDays >= VOICE_TRAINING_DAYS && !voiceEnabled) {
-          voiceTip.textContent = "Modalità silenziosa — i campanelli ti guidano tra gli step";
-        } else if (practiceDays >= Math.round(VOICE_TRAINING_DAYS * 0.7)) {
-          voiceTip.textContent = "Ancora " + (VOICE_TRAINING_DAYS - practiceDays) + " giorni, poi proverai a meditare in silenzio";
-        } else {
-          voiceTip.textContent = "";
-        }
+        var voiceToggle = document.getElementById("voice-toggle");
+        voiceToggle.textContent = VoiceEngine.isEnabled() ? "Voce ON" : "Voce OFF";
+        voiceToggle.classList.toggle("active", VoiceEngine.isEnabled());
+        updateVoiceTip();
       }
 
       function renderHeatmap(dateMap) {
@@ -956,156 +945,200 @@ const quotesJson = JSON.stringify(allQuotes);
           return '<div class="step"><div class="step-num">' + (i + 1) + '</div><div class="step-content"><div class="step-title">' + s.t + '</div><div class="step-desc">' + s.d + '</div><span class="step-duration">' + s.dur + '</span></div></div>';
         }).join("");
 
-      // Tibetan bell via AudioContext
-      var audioCtx = null;
-      function getAudioCtx() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === "suspended") audioCtx.resume();
-        return audioCtx;
-      }
-
-      function playBell(count) {
-        count = count || 1;
-        var delay = 0;
-        for (var i = 0; i < count; i++) {
-          (function(d) {
-            setTimeout(function() {
-              var ctx = getAudioCtx();
-              var osc = ctx.createOscillator();
-              var gain = ctx.createGain();
-              var osc2 = ctx.createOscillator();
-              var gain2 = ctx.createGain();
-              osc.type = "sine"; osc.frequency.value = 528;
-              osc2.type = "sine"; osc2.frequency.value = 396;
-              gain.gain.setValueAtTime(0.7, ctx.currentTime);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 4);
-              gain2.gain.setValueAtTime(0.4, ctx.currentTime);
-              gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.5);
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc2.connect(gain2); gain2.connect(ctx.destination);
-              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 4);
-              osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 3.5);
-            }, d);
-          })(delay);
-          delay += 2500;
+      // ═══════════════════════════════════════════════════════════════
+      // AUDIO ENGINE — genera toni WAV come data URI (funziona ovunque)
+      // ═══════════════════════════════════════════════════════════════
+      var AudioEngine = (function() {
+        function generateWavDataUri(freq, durationSec, volume, decayAt) {
+          var sr = 22050, n = Math.floor(sr * durationSec);
+          var buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+          function w(o, s) { for (var i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+          w(0,"RIFF"); v.setUint32(4, 36 + n*2, true); w(8,"WAVE"); w(12,"fmt ");
+          v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+          v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+          w(36,"data"); v.setUint32(40, n*2, true);
+          var ds = Math.floor(sr * (decayAt || 0));
+          for (var i = 0; i < n; i++) {
+            var env = i < ds ? volume : volume * Math.exp(-3 * (i - ds) / (n - ds));
+            var val = Math.sin(2 * Math.PI * freq * i / sr) * env;
+            v.setInt16(44 + i*2, Math.max(-32768, Math.min(32767, Math.floor(val * 32767))), true);
+          }
+          var bytes = new Uint8Array(buf), bin = '';
+          for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+          return 'data:audio/wav;base64,' + btoa(bin);
         }
-      }
 
-      function playChime() {
-        var ctx = getAudioCtx();
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = "sine"; osc.frequency.value = 880;
-        gain.gain.setValueAtTime(0.35, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1.5);
-      }
+        var sounds = {
+          bell:      generateWavDataUri(528, 3,   0.8, 0.1),
+          stepChime: generateWavDataUri(780, 0.7, 0.7, 0.05),
+          lowChime:  generateWavDataUri(440, 0.8, 0.5, 0.05)
+        };
 
-      function playLowChime() {
-        var ctx = getAudioCtx();
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = "sine"; osc.frequency.value = 440;
-        gain.gain.setValueAtTime(0.25, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
-        osc.connect(gain); gain.connect(ctx.destination);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1);
-      }
+        var unlocked = false;
 
-      function playStepChimes(count, onDone) {
-        var totalDuration = count * 500;
-        for (var i = 0; i < count; i++) {
-          (function(delay) {
-            setTimeout(function() {
-              var ctx = getAudioCtx();
-              var osc = ctx.createOscillator();
-              var gain = ctx.createGain();
-              osc.type = "sine"; osc.frequency.value = 780;
-              gain.gain.setValueAtTime(0.5, ctx.currentTime);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-              osc.connect(gain); gain.connect(ctx.destination);
-              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.8);
-            }, delay);
-          })(i * 500);
+        function unlock() {
+          if (unlocked) return;
+          var a = new Audio(sounds.stepChime);
+          a.volume = 0.01;
+          a.play().then(function() { unlocked = true; }).catch(function() {});
         }
-        if (onDone) setTimeout(onDone, totalDuration + 300);
-      }
 
-      // Voice
-      var voiceEnabled = true;
+        function play(name, onDone) {
+          var uri = sounds[name];
+          if (!uri) { if (onDone) onDone(); return; }
+          var a = new Audio(uri);
+          a.play().catch(function(e) { console.warn('Audio play failed:', name, e); });
+          if (onDone) a.addEventListener('ended', onDone);
+        }
+
+        function playRepeated(name, count, intervalMs, onDone) {
+          var i = 0;
+          function next() {
+            if (i >= count) { if (onDone) setTimeout(onDone, 200); return; }
+            play(name); i++;
+            if (i < count) setTimeout(next, intervalMs);
+            else if (onDone) setTimeout(onDone, intervalMs);
+          }
+          next();
+        }
+
+        return { unlock: unlock, play: play, playRepeated: playRepeated, sounds: sounds };
+      })();
+
+      // ═══════════════════════════════════════════════════════════════
+      // VOICE ENGINE — speechSynthesis con retry, keepalive, fallback
+      // ═══════════════════════════════════════════════════════════════
+      var VoiceEngine = (function() {
+        var enabled = true, cachedVoice = null, retries = 0, keepAlive = null;
+
+        function loadVoice() {
+          if (!window.speechSynthesis) return;
+          var voices = window.speechSynthesis.getVoices();
+          var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
+          if (it.length > 0) cachedVoice = it[0];
+          else if (retries < 10) { retries++; setTimeout(loadVoice, 500); }
+          else if (voices.length > 0) cachedVoice = voices[0];
+        }
+
+        if (window.speechSynthesis) {
+          loadVoice();
+          window.speechSynthesis.onvoiceschanged = loadVoice;
+        }
+
+        function startKeepAlive() {
+          stopKeepAlive();
+          keepAlive = setInterval(function() {
+            if (window.speechSynthesis && window.speechSynthesis.speaking) {
+              window.speechSynthesis.pause();
+              window.speechSynthesis.resume();
+            }
+          }, 10000);
+        }
+
+        function stopKeepAlive() {
+          if (keepAlive) { clearInterval(keepAlive); keepAlive = null; }
+        }
+
+        function speak(text, onEnd) {
+          if (!enabled || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
+          window.speechSynthesis.cancel();
+          stopKeepAlive();
+          if (!cachedVoice) loadVoice();
+          setTimeout(function() {
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
+            if (cachedVoice) u.voice = cachedVoice;
+            u.onend = function() { stopKeepAlive(); if (onEnd) onEnd(); };
+            u.onerror = function() { stopKeepAlive(); if (onEnd) onEnd(); };
+            window.speechSynthesis.speak(u);
+            startKeepAlive();
+          }, 250);
+        }
+
+        function cancel() {
+          if (window.speechSynthesis) window.speechSynthesis.cancel();
+          stopKeepAlive();
+        }
+
+        function warmup() {
+          if (!window.speechSynthesis || !enabled) return;
+          var u = new SpeechSynthesisUtterance("");
+          u.volume = 0;
+          window.speechSynthesis.speak(u);
+        }
+
+        function setEnabled(val) { enabled = val; if (!val) cancel(); }
+        function isEnabled() { return enabled; }
+
+        return { speak: speak, cancel: cancel, warmup: warmup, setEnabled: setEnabled, isEnabled: isEnabled };
+      })();
+
+      // ═══════════════════════════════════════════════════════════════
+      // GUIDE — unico punto per segnalare transizioni (chime + voce)
+      // ═══════════════════════════════════════════════════════════════
+      var Guide = (function() {
+        var timeouts = [];
+
+        function signal(soundName, soundCount, text, uiUpdate) {
+          if (uiUpdate) uiUpdate();
+          AudioEngine.playRepeated(soundName, soundCount, 500, function() {
+            if (text) VoiceEngine.speak(text);
+          });
+        }
+
+        function showPanel(stepNum, total, title, desc, hint) {
+          var g = document.getElementById("active-guide");
+          g.classList.add("visible");
+          document.getElementById("guide-step-num").textContent = "Passo " + stepNum + " di " + total;
+          document.getElementById("guide-title").textContent = title;
+          document.getElementById("guide-desc").textContent = desc;
+          document.getElementById("guide-hint").textContent = hint || "";
+          g.style.animation = "none"; g.offsetHeight; g.style.animation = "guideIn 0.5s ease";
+        }
+
+        function hidePanel() { document.getElementById("active-guide").classList.remove("visible"); }
+
+        function setHint(text) { document.getElementById("guide-hint").textContent = text; }
+
+        function schedule(fn, delayMs) {
+          var t = setTimeout(fn, delayMs);
+          timeouts.push(t);
+          return t;
+        }
+
+        function clearAll() {
+          timeouts.forEach(function(t) { clearTimeout(t); });
+          timeouts = [];
+          VoiceEngine.cancel();
+        }
+
+        return { signal: signal, showPanel: showPanel, hidePanel: hidePanel, setHint: setHint, schedule: schedule, clearAll: clearAll };
+      })();
+
       var practiceDays = 0;
       var VOICE_TRAINING_DAYS = 30;
-      var cachedVoice = null;
-      var voiceRetries = 0;
-      function loadVoice() {
-        var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-        var it = voices.filter(function(v) { return v.lang.startsWith("it"); });
-        if (it.length > 0) {
-          cachedVoice = it[0];
-        } else if (voiceRetries < 10) {
-          voiceRetries++;
-          setTimeout(loadVoice, 500);
-        } else if (voices.length > 0) {
-          // No Italian voice found — use default voice as fallback so speech still works
-          cachedVoice = voices[0];
+
+      function updateVoiceTip() {
+        var tip = document.getElementById("voice-tip");
+        var on = VoiceEngine.isEnabled();
+        if (practiceDays >= VOICE_TRAINING_DAYS && on) {
+          tip.textContent = "Hai " + practiceDays + " giorni di pratica — prova oggi senza voce, solo con i campanelli";
+        } else if (practiceDays >= VOICE_TRAINING_DAYS && !on) {
+          tip.textContent = "Modalità silenziosa — i campanelli ti guidano tra gli step";
+        } else if (practiceDays >= Math.round(VOICE_TRAINING_DAYS * 0.7)) {
+          tip.textContent = "Ancora " + (VOICE_TRAINING_DAYS - practiceDays) + " giorni, poi proverai a meditare in silenzio";
+        } else {
+          tip.textContent = "";
         }
-      }
-      if (window.speechSynthesis) {
-        loadVoice();
-        window.speechSynthesis.onvoiceschanged = loadVoice;
-      }
-
-      // Chrome bug: speech synthesis stops after ~15s unless we periodically poke it
-      var speechKeepAlive = null;
-      function startSpeechKeepAlive() {
-        stopSpeechKeepAlive();
-        speechKeepAlive = setInterval(function() {
-          if (window.speechSynthesis && window.speechSynthesis.speaking) {
-            window.speechSynthesis.pause();
-            window.speechSynthesis.resume();
-          }
-        }, 10000);
-      }
-      function stopSpeechKeepAlive() {
-        if (speechKeepAlive) { clearInterval(speechKeepAlive); speechKeepAlive = null; }
-      }
-
-      function speak(text, onEnd) {
-        if (!voiceEnabled || !window.speechSynthesis) { if (onEnd) onEnd(); return; }
-        window.speechSynthesis.cancel();
-        stopSpeechKeepAlive();
-        // Retry voice loading if not found yet
-        if (!cachedVoice) loadVoice();
-        setTimeout(function() {
-          var u = new SpeechSynthesisUtterance(text);
-          u.lang = "it-IT"; u.rate = 0.85; u.pitch = 0.9;
-          if (cachedVoice) u.voice = cachedVoice;
-          if (onEnd) {
-            u.onend = function() { stopSpeechKeepAlive(); onEnd(); };
-          } else {
-            u.onend = function() { stopSpeechKeepAlive(); };
-          }
-          u.onerror = function() { stopSpeechKeepAlive(); if (onEnd) onEnd(); };
-          window.speechSynthesis.speak(u);
-          startSpeechKeepAlive();
-        }, 250);
       }
 
       document.getElementById("voice-toggle").addEventListener("click", function() {
-        voiceEnabled = !voiceEnabled;
-        this.textContent = voiceEnabled ? "Voce ON" : "Voce OFF";
-        this.classList.toggle("active", voiceEnabled);
-        if (!voiceEnabled) window.speechSynthesis.cancel();
-        localStorage.setItem("meditation-voice-override", voiceEnabled ? "on" : "off");
-        var voiceTip = document.getElementById("voice-tip");
-        if (practiceDays >= VOICE_TRAINING_DAYS && voiceEnabled) {
-          voiceTip.textContent = "Hai " + practiceDays + " giorni di pratica — prova oggi senza voce, solo con i campanelli";
-        } else if (practiceDays >= VOICE_TRAINING_DAYS && !voiceEnabled) {
-          voiceTip.textContent = "Modalità silenziosa — i campanelli ti guidano tra gli step";
-        } else {
-          voiceTip.textContent = "";
-        }
+        var nowOn = !VoiceEngine.isEnabled();
+        VoiceEngine.setEnabled(nowOn);
+        this.textContent = nowOn ? "Voce ON" : "Voce OFF";
+        this.classList.toggle("active", nowOn);
+        localStorage.setItem("meditation-voice-override", nowOn ? "on" : "off");
+        updateVoiceTip();
       });
 
       // Wake Lock
@@ -1115,10 +1148,7 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       function releaseWakeLock() { if (wakeLock) { wakeLock.release(); wakeLock = null; } }
       document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible' && isRunning) {
-          requestWakeLock();
-          if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        }
+        if (document.visibilityState === 'visible' && isRunning) requestWakeLock();
       });
 
       // Timer
@@ -1152,59 +1182,43 @@ const quotesJson = JSON.stringify(allQuotes);
         return schedule;
       }
 
-      function showGuide(stepNum, total, title, desc, hint) {
-        var g = document.getElementById("active-guide");
-        g.classList.add("visible");
-        document.getElementById("guide-step-num").textContent = "Passo " + stepNum + " di " + total;
-        document.getElementById("guide-title").textContent = title;
-        document.getElementById("guide-desc").textContent = desc;
-        document.getElementById("guide-hint").textContent = hint || "";
-        g.style.animation = "none"; g.offsetHeight; g.style.animation = "guideIn 0.5s ease";
-      }
 
-      function hideGuide() { document.getElementById("active-guide").classList.remove("visible"); }
-
-      function startGuidedVoice() {
+      function startGuidedSession() {
         var schedule = buildGuidedSchedule(timerTotal);
         var totalSteps = schedule.length;
-        guidedTimeouts = [];
-        showGuide(0, totalSteps, sess.title, "Trova una posizione comoda e chiudi gli occhi. Lascia andare le tensioni.", "Respira naturalmente...");
-        speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
+
+        Guide.showPanel(0, totalSteps, sess.title,
+          "Trova una posizione comoda e chiudi gli occhi. Lascia andare le tensioni.",
+          "Respira naturalmente...");
+        VoiceEngine.speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
+
         schedule.forEach(function(step) {
-          var t = setTimeout(function() {
+          Guide.schedule(function() {
             if (!isRunning) return;
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
-            showGuide(step.idx + 1, totalSteps, step.title, step.desc, step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "");
-            playStepChimes(step.idx + 1, function() {
-              if (isRunning) speak(step.title + ". " + step.desc);
-            });
-            var halfWay = Math.round(step.duration / 2);
-            if (halfWay > 30 && step.idx < schedule.length - 1) {
-              var ht = setTimeout(function() {
-                if (isRunning) {
-                  document.getElementById("guide-hint").textContent = "Continua così. Resta presente.";
-                  playLowChime();
-                  setTimeout(function() { if (isRunning) speak("Continua così. Resta presente."); }, 1200);
-                }
-              }, halfWay * 1000);
-              guidedTimeouts.push(ht);
+            var hint = step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "";
+            Guide.showPanel(step.idx + 1, totalSteps, step.title, step.desc, hint);
+            Guide.signal("stepChime", step.idx + 1, step.title + ". " + step.desc);
+
+            if (step.duration > 60 && step.idx < schedule.length - 1) {
+              Guide.schedule(function() {
+                if (!isRunning) return;
+                Guide.signal("lowChime", 1, "Continua così. Resta presente.", function() {
+                  Guide.setHint("Continua così. Resta presente.");
+                });
+              }, Math.round(step.duration / 2) * 1000);
             }
           }, step.at * 1000);
-          guidedTimeouts.push(t);
         });
-        var lastMin = setTimeout(function() {
-          if (isRunning) {
-            document.getElementById("guide-hint").textContent = "Un minuto alla fine...";
-            playStepChimes(2, function() {
-              if (isRunning) speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
-            });
-          }
-        }, Math.max(0, timerTotal - 60) * 1000);
-        guidedTimeouts.push(lastMin);
-      }
 
-      function clearGuidedVoice() { guidedTimeouts.forEach(function(t) { clearTimeout(t); }); guidedTimeouts = []; window.speechSynthesis.cancel(); stopSpeechKeepAlive(); }
+        Guide.schedule(function() {
+          if (!isRunning) return;
+          Guide.signal("stepChime", 2, "Un minuto alla fine. Porta la consapevolezza a tutto il corpo.", function() {
+            Guide.setHint("Un minuto alla fine...");
+          });
+        }, Math.max(0, timerTotal - 60) * 1000);
+      }
 
       document.getElementById("timer-presets").addEventListener("click", function(e) {
         if (e.target.tagName !== "BUTTON" || isRunning) return;
@@ -1225,16 +1239,15 @@ const quotesJson = JSON.stringify(allQuotes);
         updateDisplay();
         if (remaining <= 0) {
           clearInterval(timerInterval); clearInterval(breathInterval);
-          clearGuidedVoice(); releaseWakeLock();
+          Guide.clearAll(); releaseWakeLock();
           isRunning = false; timerEndTime = null;
           var btn = document.getElementById("timer-start");
           btn.textContent = "Inizia"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "Sessione completata";
-          showGuide("✓", "", "Sessione completata", "Apri lentamente gli occhi. Grazie per aver praticato.", "Namaste 🙏");
-          playBell(3);
-          setTimeout(function() {
-            speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
-          }, 8000);
+          Guide.showPanel("✓", "", "Sessione completata", "Apri lentamente gli occhi. Grazie per aver praticato.", "Namaste 🙏");
+          AudioEngine.playRepeated("bell", 3, 2500, function() {
+            VoiceEngine.speak("La sessione è terminata. Apri lentamente gli occhi. Grazie per aver praticato.");
+          });
           autoSaveSession();
         }
       }
@@ -1247,14 +1260,8 @@ const quotesJson = JSON.stringify(allQuotes);
       document.getElementById("timer-start").addEventListener("click", function() {
         var btn = this;
         if (!isRunning) {
-          // Ensure AudioContext is created and resumed on user gesture (required by mobile browsers)
-          getAudioCtx();
-          // Warm up speech synthesis on user gesture (required by iOS/Android)
-          if (window.speechSynthesis && voiceEnabled) {
-            var warmup = new SpeechSynthesisUtterance("");
-            warmup.volume = 0;
-            window.speechSynthesis.speak(warmup);
-          }
+          AudioEngine.unlock();
+          VoiceEngine.warmup();
           isRunning = true;
           btn.textContent = "Pausa"; btn.className = "timer-btn pause";
           requestWakeLock();
@@ -1263,14 +1270,17 @@ const quotesJson = JSON.stringify(allQuotes);
             pausedRemaining = null;
           } else {
             timerEndTime = Date.now() + timerSeconds * 1000;
-            playBell(1);
-            setTimeout(function() { startGuidedVoice(); }, 3000);
+            AudioEngine.playRepeated("bell", 1, 0, function() {
+              setTimeout(function() { startGuidedSession(); }, 2000);
+            });
           }
           breathIdx = 0;
           document.getElementById("breath-label").textContent = breathPhases[0];
           breathInterval = setInterval(function() {
             breathIdx = (breathIdx + 1) % 4;
-            if (!window.speechSynthesis.speaking) document.getElementById("breath-label").textContent = breathPhases[breathIdx];
+            if (!window.speechSynthesis || !window.speechSynthesis.speaking) {
+              document.getElementById("breath-label").textContent = breathPhases[breathIdx];
+            }
           }, 2000);
           timerInterval = setInterval(timerTick, 500);
         } else {
@@ -1278,24 +1288,24 @@ const quotesJson = JSON.stringify(allQuotes);
           pausedRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
           timerEndTime = null;
           clearInterval(timerInterval); clearInterval(breathInterval);
-          clearGuidedVoice(); releaseWakeLock();
+          Guide.clearAll(); releaseWakeLock();
           btn.textContent = "Riprendi"; btn.className = "timer-btn start";
           document.getElementById("breath-label").textContent = "In pausa";
-          document.getElementById("guide-hint").textContent = "In pausa — premi Riprendi quando sei pronto";
+          Guide.setHint("In pausa — premi Riprendi quando sei pronto");
         }
       });
 
       document.getElementById("timer-reset").addEventListener("click", function() {
         isRunning = false; timerEndTime = null; pausedRemaining = null;
         clearInterval(timerInterval); clearInterval(breathInterval);
-        clearGuidedVoice(); releaseWakeLock();
+        Guide.clearAll(); releaseWakeLock();
         var activePreset = document.querySelector(".timer-presets button.active");
         timerSeconds = activePreset ? parseInt(activePreset.dataset.min) * 60 : 600;
         timerTotal = timerSeconds;
         updateDisplay();
         document.getElementById("timer-start").textContent = "Inizia";
         document.getElementById("timer-start").className = "timer-btn start";
-        hideGuide();
+        Guide.hidePanel();
         document.getElementById("breath-label").textContent = "";
       });
 
