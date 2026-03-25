@@ -408,6 +408,38 @@ Ma la scelta di usare `Result` invece di try/catch? Quella è stata mia. La deci
 
 Le specs sono il vero artefatto del mio lavoro. Nel repository ci sono file come `docs/meditation-spec.md` e `docs/comments-spec.md` che descrivono cosa deve fare ogni componente, quali sono i vincoli, come devono interagire le parti. Il codice è un'implementazione delle specs — e quell'implementazione la può fare l'AI, un altro sviluppatore, o io stesso tra sei mesi.
 
+Ecco un frammento reale di `docs/meditation-spec.md`:
+
+```markdown
+## API Endpoints
+
+### POST `/api/admin/meditation`
+
+| Aspetto        | Dettaglio                                                               |
+|----------------|-------------------------------------------------------------------------|
+| Autenticazione | Bearer token                                                            |
+| Request body   | `{ date: "YYYY-MM-DD", duration_min?: number, session_type?: string }` |
+| Validazione    | `date` obbligatorio, deve corrispondere a `/^\d{4}-\d{2}-\d{2}$/`     |
+| Logica         | INSERT nella tabella con `created_at = datetime('now')`                |
+| Response 201   | `{ ok: true, id: <number> }`                                           |
+| Response 400   | `{ error: "Valid date (YYYY-MM-DD) required" }`                        |
+| Response 401   | `"Unauthorized"`                                                        |
+
+## Limiti e trade-off
+
+- **Single-user**: il sistema è progettato per un solo utente. Non c'è gestione multi-utente
+- **DELETE non esposta nella UI**: l'endpoint DELETE esiste nell'API ma non c'è un pulsante
+  nella UI per cancellare sessioni
+- **365 citazioni hardcoded**: le citazioni sono in un file JS statico, non nel database.
+  Per aggiungerne o modificarne serve un deploy
+- **Nessuna notifica push**: non ci sono reminder per meditare. La motivazione è affidata
+  alla streak e all'abitudine
+```
+
+Questa tabella — con i contratti esatti dell'API, i response body, i codici di errore — è il documento che ho scritto io. Da qui l'AI ha generato l'endpoint che avete visto nelle sezioni precedenti. I sei unhappy path gestiti? Tutti documentati qui, prima che esistesse una riga di codice.
+
+I trade-off sono altrettanto importanti: capire cosa **non** fa il sistema è parte del design. "Nessuna notifica push" non è una mancanza — è una scelta consapevole. La motivazione viene dalla streak, non dal telefono che rompe le scatole.
+
 Questo cambia il mestiere. Non scrivo meno codice — scrivo più specifiche, più test, più decisioni architetturali documentate. Il codice è diventato l'artefatto meno importante del progetto.
 
 ## La domanda scomoda

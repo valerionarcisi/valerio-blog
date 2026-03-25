@@ -408,6 +408,38 @@ But the choice to use `Result` instead of try/catch? That was mine. The decision
 
 The specs are the real artifact of my work. In the repository there are files like `docs/meditation-spec.md` and `docs/comments-spec.md` that describe what each component should do, what the constraints are, how the parts should interact. The code is an implementation of the specs — and that implementation can be done by the AI, another developer, or me in six months.
 
+Here's a real excerpt from `docs/meditation-spec.md`:
+
+```markdown
+## API Endpoints
+
+### POST `/api/admin/meditation`
+
+| Aspect         | Detail                                                                  |
+|----------------|-------------------------------------------------------------------------|
+| Auth           | Bearer token                                                            |
+| Request body   | `{ date: "YYYY-MM-DD", duration_min?: number, session_type?: string }` |
+| Validation     | `date` required, must match `/^\d{4}-\d{2}-\d{2}$/`                   |
+| Logic          | INSERT into table with `created_at = datetime('now')`                  |
+| Response 201   | `{ ok: true, id: <number> }`                                           |
+| Response 400   | `{ error: "Valid date (YYYY-MM-DD) required" }`                        |
+| Response 401   | `"Unauthorized"`                                                        |
+
+## Trade-offs
+
+- **Single-user**: the system is designed for one user only. No multi-user support
+- **DELETE not exposed in UI**: the DELETE endpoint exists in the API but there's no button
+  in the UI to delete sessions
+- **365 quotes hardcoded**: quotes live in a static JS file, not the database.
+  Adding or changing them requires a deploy
+- **No push notifications**: no reminders to meditate. Motivation comes from
+  the streak, not from phone interruptions
+```
+
+This table — with exact API contracts, response bodies, error codes — is the document I wrote. From this, the AI generated the endpoint you saw in the previous sections. The six unhappy paths that are handled? All documented here, before a single line of code existed.
+
+The trade-offs are equally important: understanding what the system **doesn't** do is part of the design. "No push notifications" isn't a missing feature — it's a conscious choice. Motivation comes from the streak, not from your phone nagging you.
+
 This changes the craft. I don't write less code — I write more specifications, more tests, more documented architectural decisions. Code has become the least important artifact of the project.
 
 ## The uncomfortable question
