@@ -291,6 +291,7 @@ const quotesJson = JSON.stringify(allQuotes);
       .timer-btn.reset:hover { background: #444; color: #e8e6e1; }
       .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.8rem; }
       .timer-btn.voice.active { background: rgba(155,89,182,0.2); color: #bb86fc; border: 1px solid rgba(155,89,182,0.3); }
+      .voice-tip { text-align: center; font-size: 0.75rem; color: #8a8a8e; margin-top: 0.5rem; font-style: italic; min-height: 1.2em; }
 
       /* Session card */
       .session-card {
@@ -510,6 +511,7 @@ const quotesJson = JSON.stringify(allQuotes);
         <button class="timer-btn reset" id="timer-reset">Reset</button>
         <button class="timer-btn voice active" id="voice-toggle">Voce ON</button>
       </div>
+      <div class="voice-tip" id="voice-tip"></div>
     </div>
 
     <div class="session-card" id="daily-session"></div>
@@ -634,36 +636,40 @@ const quotesJson = JSON.stringify(allQuotes);
         renderJourney(uniqueDates);
       }
 
-      // Adaptive journey plan
+      // Adaptive journey plan — shorter phases for faster variety
       var phases = [
-        { name: "Fondamenta", icon: "🌱", months: [0,1,2], minDur: 5, maxDur: 10,
+        { name: "Fondamenta", icon: "🌱", months: [0,1], minDur: 5, maxDur: 10,
           desc: "Costruisci l'abitudine. L'obiettivo non è meditare perfettamente, ma meditare ogni giorno. Anche 5 minuti contano.",
-          weights: { "Anapana": 70, "Body Scan": 20, "Camminata": 10 },
+          weights: { "Anapana": 75, "Body Scan": 15, "Camminata": 10 },
           spiritual: "Stai piantando il seme. La consapevolezza del respiro (Anapana) è la base di tutto il percorso Vipassana. Goenka insegna che senza questa padronanza, le pratiche successive non hanno fondamento." },
-        { name: "Consolidamento", icon: "🌿", months: [3,4,5], minDur: 10, maxDur: 15,
-          desc: "Allunghi le sessioni e inizi a esplorare il corpo. La mente diventa più stabile, i pensieri ti disturbano meno.",
-          weights: { "Anapana": 40, "Body Scan": 30, "Camminata": 15, "Pensieri": 15 },
+        { name: "Corpo", icon: "🌿", months: [2,3], minDur: 10, maxDur: 15,
+          desc: "Il respiro è stabile. Ora esplori il corpo: il Body Scan ti insegna ad ascoltare le sensazioni senza reagire.",
+          weights: { "Anapana": 30, "Body Scan": 40, "Camminata": 15, "Pensieri": 15 },
           spiritual: "Il seme germoglia. Inizi a notare pattern mentali ricorrenti. Il Body Scan ti insegna che il corpo parla una lingua che la mente razionale ignora. Ascoltalo." },
-        { name: "Espansione", icon: "🌳", months: [6,7,8], minDur: 15, maxDur: 20,
-          desc: "Introduci la Vipassana vera: osservazione profonda delle sensazioni. L'equanimità inizia a diventare naturale.",
-          weights: { "Anapana": 25, "Body Scan": 25, "Vipassana": 25, "Camminata": 15, "Pensieri": 10 },
+        { name: "Gentilezza", icon: "💛", months: [4,5], minDur: 10, maxDur: 20,
+          desc: "Introduci la Metta: amorevole gentilezza verso te stesso e gli altri. Scioglie le resistenze e prepara il terreno per Vipassana.",
+          weights: { "Anapana": 20, "Body Scan": 20, "Metta": 30, "Camminata": 15, "Pensieri": 15 },
+          spiritual: "Il cuore si apre. La gentilezza verso te stesso non è debolezza — è il coraggio di accettarti così come sei. Goenka dice: 'Senza metta, vipassana diventa arida'." },
+        { name: "Visione", icon: "🌳", months: [6,7,8], minDur: 15, maxDur: 20,
+          desc: "Vipassana vera: osservazione profonda delle sensazioni. L'equanimità inizia a diventare naturale.",
+          weights: { "Anapana": 15, "Body Scan": 15, "Vipassana": 30, "Metta": 15, "Camminata": 10, "Pensieri": 10, "Suono": 5 },
           spiritual: "L'albero cresce. Vipassana significa 'vedere le cose come realmente sono'. Scopri Anicca (impermanenza): ogni sensazione sorge e passa. Questa comprensione trasforma il rapporto con il dolore e il piacere." },
-        { name: "Approfondimento", icon: "🌲", months: [9,10,11], minDur: 15, maxDur: 25,
-          desc: "Sessioni più lunghe, pratiche più profonde. La Metta (amorevole gentilezza) bilancia l'intensità della Vipassana.",
-          weights: { "Anapana": 15, "Body Scan": 15, "Vipassana": 30, "Metta": 20, "Pensieri": 10, "Suono": 10 },
-          spiritual: "Radici profonde. L'equanimità non è indifferenza — è amore senza attaccamento. La Metta ti insegna a estendere gentilezza prima a te stesso, poi al mondo. Goenka dice: 'Senza metta, vipassana diventa arida'." },
+        { name: "Profondità", icon: "🌲", months: [9,10,11], minDur: 15, maxDur: 25,
+          desc: "Sessioni più lunghe, pratiche più profonde. Alterni tutte le tecniche con naturalezza.",
+          weights: { "Anapana": 10, "Body Scan": 15, "Vipassana": 25, "Metta": 20, "Pensieri": 10, "Suono": 10, "Camminata": 10 },
+          spiritual: "Radici profonde. L'equanimità non è indifferenza — è amore senza attaccamento. Il confine tra meditazione e vita quotidiana inizia ad assottigliarsi." },
         { name: "Maturità", icon: "🏔️", months: [12,13,14,15,16,17], minDur: 20, maxDur: 30,
-          desc: "La pratica si stabilizza. Ogni tipo di meditazione diventa accessibile. Puoi guidare la tua sessione in base a ciò che senti.",
-          weights: { "Anapana": 15, "Body Scan": 15, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 5 },
-          spiritual: "La montagna. La pratica non è più qualcosa che 'fai' — diventa parte di chi sei. Il confine tra meditazione formale e vita quotidiana si assottiglia. Ogni momento diventa un'opportunità di consapevolezza." },
+          desc: "La pratica si stabilizza. Ogni tipo di meditazione è accessibile. Puoi guidare la sessione in base a ciò che senti.",
+          weights: { "Anapana": 10, "Body Scan": 10, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 15 },
+          spiritual: "La montagna. La pratica non è più qualcosa che 'fai' — diventa parte di chi sei. Ogni momento è un'opportunità di consapevolezza. Considera un ritiro Vipassana di 10 giorni." },
         { name: "Integrazione", icon: "🌊", months: [18,19,20,21,22,23], minDur: 20, maxDur: 30,
           desc: "Pratichi con naturalezza. Puoi sostenere sessioni lunghe e doppi sit (mattina + sera). La consapevolezza permea la giornata.",
-          weights: { "Anapana": 10, "Body Scan": 15, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 10 },
-          spiritual: "L'oceano. Come l'oceano è calmo nelle profondità anche quando la superficie è agitata, tu mantieni equanimità anche nelle tempeste della vita. Considera un ritiro Vipassana di 10 giorni per approfondire." },
+          weights: { "Anapana": 10, "Body Scan": 10, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 15 },
+          spiritual: "L'oceano. Come l'oceano è calmo nelle profondità anche quando la superficie è agitata, tu mantieni equanimità anche nelle tempeste della vita." },
         { name: "Maestria", icon: "✨", months: [24], minDur: 30, maxDur: 45,
           desc: "La pratica è matura. Sei il tuo stesso maestro. Puoi esplorare sessioni lunghe, silenzio profondo, equanimità in ogni circostanza.",
-          weights: { "Anapana": 10, "Body Scan": 10, "Vipassana": 30, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 10 },
-          spiritual: "La luce. Il percorso non ha fine — ogni sessione è sia inizio che completamento. Puoi insegnare agli altri attraverso il tuo esempio. La pratica quotidiana è il dono più grande che puoi fare a te stesso e al mondo." },
+          weights: { "Anapana": 10, "Body Scan": 10, "Vipassana": 25, "Metta": 20, "Camminata": 10, "Pensieri": 10, "Suono": 15 },
+          spiritual: "La luce. Il percorso non ha fine — ogni sessione è sia inizio che completamento. La pratica quotidiana è il dono più grande che puoi fare a te stesso e al mondo." },
       ];
 
       function getMonthsOfPractice(dates) {
@@ -747,6 +753,31 @@ const quotesJson = JSON.stringify(allQuotes);
             sess.steps.map(function(s, i) {
               return '<div class="step"><div class="step-num">' + (i + 1) + '</div><div class="step-content"><div class="step-title">' + s.t + '</div><div class="step-desc">' + s.d + '</div><span class="step-duration">' + s.dur + '</span></div></div>';
             }).join("");
+        }
+
+        // Voice: auto-off after training period, with tip
+        practiceDays = uniqueDates.length;
+        var voiceToggle = document.getElementById("voice-toggle");
+        var voiceTip = document.getElementById("voice-tip");
+        var userOverride = localStorage.getItem("meditation-voice-override");
+
+        if (userOverride !== null) {
+          voiceEnabled = userOverride === "on";
+        } else if (practiceDays >= VOICE_TRAINING_DAYS) {
+          voiceEnabled = false;
+        }
+
+        voiceToggle.textContent = voiceEnabled ? "Voce ON" : "Voce OFF";
+        voiceToggle.classList.toggle("active", voiceEnabled);
+
+        if (practiceDays >= VOICE_TRAINING_DAYS && voiceEnabled) {
+          voiceTip.textContent = "Hai " + practiceDays + " giorni di pratica — prova oggi senza voce, solo con i campanelli";
+        } else if (practiceDays >= VOICE_TRAINING_DAYS && !voiceEnabled) {
+          voiceTip.textContent = "Modalità silenziosa — i campanelli ti guidano tra gli step";
+        } else if (practiceDays >= Math.round(VOICE_TRAINING_DAYS * 0.7)) {
+          voiceTip.textContent = "Ancora " + (VOICE_TRAINING_DAYS - practiceDays) + " giorni, poi proverai a meditare in silenzio";
+        } else {
+          voiceTip.textContent = "";
         }
       }
 
@@ -984,6 +1015,8 @@ const quotesJson = JSON.stringify(allQuotes);
 
       // Voice
       var voiceEnabled = true;
+      var practiceDays = 0;
+      var VOICE_TRAINING_DAYS = 30;
       var cachedVoice = null;
       var voiceRetries = 0;
       function loadVoice() {
@@ -1045,6 +1078,15 @@ const quotesJson = JSON.stringify(allQuotes);
         this.textContent = voiceEnabled ? "Voce ON" : "Voce OFF";
         this.classList.toggle("active", voiceEnabled);
         if (!voiceEnabled) window.speechSynthesis.cancel();
+        localStorage.setItem("meditation-voice-override", voiceEnabled ? "on" : "off");
+        var voiceTip = document.getElementById("voice-tip");
+        if (practiceDays >= VOICE_TRAINING_DAYS && voiceEnabled) {
+          voiceTip.textContent = "Hai " + practiceDays + " giorni di pratica — prova oggi senza voce, solo con i campanelli";
+        } else if (practiceDays >= VOICE_TRAINING_DAYS && !voiceEnabled) {
+          voiceTip.textContent = "Modalità silenziosa — i campanelli ti guidano tra gli step";
+        } else {
+          voiceTip.textContent = "";
+        }
       });
 
       // Wake Lock
