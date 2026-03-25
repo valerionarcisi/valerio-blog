@@ -1013,6 +1013,23 @@ const quotesJson = JSON.stringify(allQuotes);
         osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1);
       }
 
+      function playStepChimes(count) {
+        for (var i = 0; i < count; i++) {
+          (function(delay) {
+            setTimeout(function() {
+              var ctx = getAudioCtx();
+              var osc = ctx.createOscillator();
+              var gain = ctx.createGain();
+              osc.type = "sine"; osc.frequency.value = 780;
+              gain.gain.setValueAtTime(0.2, ctx.currentTime);
+              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+              osc.connect(gain); gain.connect(ctx.destination);
+              osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.6);
+            }, delay);
+          })(i * 500);
+        }
+      }
+
       // Voice
       var voiceEnabled = true;
       var practiceDays = 0;
@@ -1157,7 +1174,7 @@ const quotesJson = JSON.stringify(allQuotes);
             guidedStepIdx = step.idx;
             document.getElementById("breath-label").textContent = step.title;
             showGuide(step.idx + 1, totalSteps, step.title, step.desc, step.duration > 120 ? "Mantieni per " + Math.round(step.duration / 60) + " minuti" : "");
-            playChime();
+            playStepChimes(step.idx + 1);
             speak(step.title + ". " + step.desc);
             var halfWay = Math.round(step.duration / 2);
             if (halfWay > 30 && step.idx < schedule.length - 1) {
@@ -1176,7 +1193,7 @@ const quotesJson = JSON.stringify(allQuotes);
         var lastMin = setTimeout(function() {
           if (isRunning) {
             document.getElementById("guide-hint").textContent = "Un minuto alla fine...";
-            playChime();
+            playStepChimes(2);
             speak("Un minuto alla fine. Porta la consapevolezza a tutto il corpo.");
           }
         }, Math.max(0, timerTotal - 60) * 1000);
