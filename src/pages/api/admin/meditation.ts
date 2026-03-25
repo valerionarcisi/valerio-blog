@@ -2,16 +2,7 @@ import type { APIRoute } from "astro";
 import { verifyBearerToken } from "~/lib/auth";
 import getDb from "~/lib/turso";
 import { parseSessionInput, parseDeleteId } from "~/lib/meditation";
-
-const JSON_HEADERS = { "Content-Type": "application/json" } as const;
-
-function jsonOk(data: unknown, status = 200): Response {
-  return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
-}
-
-function jsonErr(message: string, status: number): Response {
-  return new Response(JSON.stringify({ error: message }), { status, headers: JSON_HEADERS });
-}
+import { jsonOk, jsonErr, parseJsonBody } from "~/lib/result";
 
 function isAuthorized(request: Request): boolean {
   return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
@@ -52,14 +43,10 @@ export const GET: APIRoute = async ({ request }) => {
 export const POST: APIRoute = async ({ request }) => {
   if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return jsonErr("Invalid JSON body", 400);
-  }
+  const bodyResult = await parseJsonBody(request);
+  if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 
-  const parsed = parseSessionInput(body);
+  const parsed = parseSessionInput(bodyResult.value);
   if (!parsed.ok) return jsonErr(parsed.error, 400);
 
   await ensureTable();

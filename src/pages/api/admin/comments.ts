@@ -1,6 +1,14 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
 import { verifyBearerToken } from "~/lib/auth";
+import {
+  type Result,
+  ok,
+  err,
+  jsonOk,
+  jsonErr,
+  parseJsonBody,
+} from "~/lib/result";
 
 export const prerender = false;
 
@@ -8,10 +16,30 @@ function isAuthorized(request: Request): boolean {
   return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
 }
 
+type CommentAction =
+  | { type: "approve"; id: number }
+  | { type: "delete"; id: number };
+
+function parseCommentAction(body: unknown): Result<CommentAction> {
+  if (!body || typeof body !== "object") return err("Invalid body");
+  const { id, action } = body as Record<string, unknown>;
+
+  if (typeof id !== "number" || !Number.isFinite(id) || id <= 0)
+    return err("Valid id required");
+
+  if (action === "approve") return ok({ type: "approve", id });
+  if (action === "delete") return ok({ type: "delete", id });
+
+  return err("Invalid action — expected 'approve' or 'delete'");
+}
+
+const ACTION_SQL: Record<string, string> = {
+  approve: "UPDATE comments SET approved = 1 WHERE id = ?",
+  delete: "DELETE FROM comments WHERE id = ?",
+};
+
 export const GET: APIRoute = async ({ request, url }) => {
-  if (!isAuthorized(request)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
 
   const status = url.searchParams.get("status") ?? "pending";
   const approvedValue = status === "approved" ? 1 : 0;
@@ -21,38 +49,22 @@ export const GET: APIRoute = async ({ request, url }) => {
     args: [approvedValue],
   });
 
-  return new Response(JSON.stringify(result.rows), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonOk(result.rows);
 };
 
 export const PATCH: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
 
-  const { id, action } = await request.json();
+  const bodyResult = await parseJsonBody(request);
+  if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 
-  if (action === "approve") {
-    await getDb().execute({
-      sql: "UPDATE comments SET approved = 1 WHERE id = ?",
-      args: [id],
-    });
-  } else if (action === "delete") {
-    await getDb().execute({
-      sql: "DELETE FROM comments WHERE id = ?",
-      args: [id],
-    });
-  } else {
-    return new Response(JSON.stringify({ error: "Invalid action" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const parsed = parseCommentAction(bodyResult.value);
+  if (!parsed.ok) return jsonErr(parsed.error, 400);
 
-  return new Response(JSON.stringify({ ok: true }), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
+  await getDb().execute({
+    sql: ACTION_SQL[parsed.value.type],
+    args: [parsed.value.id],
   });
+
+  return jsonOk({ ok: true });
 };

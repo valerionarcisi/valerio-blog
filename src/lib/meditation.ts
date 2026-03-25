@@ -1,20 +1,16 @@
-// ═══════════════════════════════════════════════════════════════
-// Result pattern — rende esplicito successo/fallimento
-// ═══════════════════════════════════════════════════════════════
-export type Result<T, E = string> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+import {
+  type Result,
+  ok,
+  err,
+  isValidDate,
+  clampInt,
+} from "./result";
 
-export function ok<T>(value: T): Result<T, never> {
-  return { ok: true, value };
-}
-
-export function err<E = string>(error: E): Result<never, E> {
-  return { ok: false, error };
-}
+export { ok, err, isValidDate, clampInt };
+export type { Result };
 
 // ═══════════════════════════════════════════════════════════════
-// Validazione input API
+// Validazione input API meditazione
 // ═══════════════════════════════════════════════════════════════
 export interface SessionInput {
   date: string;
@@ -58,24 +54,8 @@ export function parseDuration(dur: string): number {
   return m ? parseInt(m[1]) * 60 : 0;
 }
 
-export function isValidDate(d: unknown): d is string {
-  return typeof d === "string" && /^\d{4}-\d{2}-\d{2}$/.test(d);
-}
-
 export function isFinitePositive(n: unknown): n is number {
   return typeof n === "number" && Number.isFinite(n) && n > 0;
-}
-
-export function clampInt(
-  val: unknown,
-  min: number,
-  max: number,
-  fallback: number,
-): number {
-  if (val === null || val === undefined) return fallback;
-  const n = typeof val === "number" ? val : Number(val);
-  if (!Number.isFinite(n)) return fallback;
-  return Math.max(min, Math.min(max, Math.round(n)));
 }
 
 export interface Step {

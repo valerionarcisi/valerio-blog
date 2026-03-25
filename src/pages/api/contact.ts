@@ -1,9 +1,18 @@
 import type { APIRoute } from "astro";
 import { sendContactEmail } from "~/lib/email";
+import {
+  type Result,
+  ok,
+  err,
+  jsonOk,
+  jsonErr,
+  isNonEmptyString,
+  isValidEmail,
+  parseJsonBody,
+} from "~/lib/result";
 
 export const prerender = false;
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ALLOWED_ORIGINS = [
   "https://valerionarcisi.me",
   "https://www.valerionarcisi.me",
@@ -20,85 +29,55 @@ function isRateLimited(ip: string): boolean {
   const timestamps = rateLimit.get(ip) ?? [];
   const recent = timestamps.filter((t) => now - t < RATE_WINDOW_MS);
   rateLimit.set(ip, recent);
-
   if (recent.length >= RATE_MAX_REQUESTS) return true;
-
   recent.push(now);
   rateLimit.set(ip, recent);
   return false;
 }
 
+interface ContactInput {
+  name: string;
+  email: string;
+  message: string;
+}
+
+function parseContactInput(body: unknown): Result<ContactInput | "honeypot"> {
+  if (!body || typeof body !== "object") return err("Invalid body");
+  const { name, email, message, website } = body as Record<string, unknown>;
+
+  if (website) return ok("honeypot" as const);
+
+  if (!isNonEmptyString(name) || name.length > 100) return err("Invalid name");
+  if (!isValidEmail(email)) return err("Invalid email");
+  if (!isNonEmptyString(message) || message.length > 5000)
+    return err("Message too long");
+
+  return ok({
+    name: name.trim(),
+    email: email.trim(),
+    message: message.trim(),
+  });
+}
+
 export const POST: APIRoute = async ({ request }) => {
   const origin = request.headers.get("origin") ?? "";
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-    });
-  }
+  if (!ALLOWED_ORIGINS.includes(origin)) return jsonErr("Forbidden", 403);
 
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     "unknown";
+  if (isRateLimited(ip)) return jsonErr("Too many requests", 429);
 
-  if (isRateLimited(ip)) {
-    return new Response(JSON.stringify({ error: "Too many requests" }), {
-      status: 429,
-    });
-  }
+  const bodyResult = await parseJsonBody(request);
+  if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 
-  const body = await request.json().catch(() => null);
-  if (!body) {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
-    });
-  }
+  const parsed = parseContactInput(bodyResult.value);
+  if (!parsed.ok) return jsonErr(parsed.error, 400);
+  if (parsed.value === "honeypot") return jsonOk({ ok: true });
 
-  const { name, email, message, website } = body;
+  const sent = await sendContactEmail(parsed.value);
+  if (!sent) return jsonErr("Failed to send", 500);
 
-  if (website) {
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
-  }
-
-  if (!name || !email || !message) {
-    return new Response(JSON.stringify({ error: "All fields are required" }), {
-      status: 400,
-    });
-  }
-
-  if (typeof name !== "string" || name.length > 100) {
-    return new Response(JSON.stringify({ error: "Invalid name" }), {
-      status: 400,
-    });
-  }
-
-  if (
-    typeof email !== "string" ||
-    email.length > 254 ||
-    !EMAIL_RE.test(email)
-  ) {
-    return new Response(JSON.stringify({ error: "Invalid email" }), {
-      status: 400,
-    });
-  }
-
-  if (typeof message !== "string" || message.length > 5000) {
-    return new Response(JSON.stringify({ error: "Message too long" }), {
-      status: 400,
-    });
-  }
-
-  const sent = await sendContactEmail({
-    name: name.trim(),
-    email: email.trim(),
-    message: message.trim(),
-  });
-
-  if (!sent) {
-    return new Response(JSON.stringify({ error: "Failed to send" }), {
-      status: 500,
-    });
-  }
-
-  return new Response(JSON.stringify({ ok: true }), { status: 200 });
+  return jsonOk({ ok: true });
 };

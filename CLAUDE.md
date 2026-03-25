@@ -65,6 +65,9 @@ public/
 - **Content collections**: Astro 5 glob loader. Slugs derived from filenames. Locale from directory
 - **Images**: Blog covers may be external URLs. Film images in `public/img/{film-name}/`
 - **Server endpoints**: Use `export const prerender = false` on API routes. Turso client via `getDb()` from `~/lib/turso`
+- **Result pattern**: Tutti gli endpoint API usano `Result<T, E>` da `~/lib/result` per rendere espliciti successo/fallimento. Parsing input con funzioni `parse*()` che ritornano `Result`. Risposte via `jsonOk()` / `jsonErr()`
+- **Pipe**: `pipe()` da `~/lib/result` per comporre trasformazioni in modo leggibile. `andThen()` per concatenare operazioni su `Result`
+- **Validazione**: Guardie di tipo condivise in `~/lib/result` (`isValidDate`, `isNonEmptyString`, `isValidEmail`, `clampInt`, `parseJsonBody`). Niente Zod — zero dipendenze, validazione plain TypeScript
 
 ## Commands
 
