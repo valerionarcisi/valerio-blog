@@ -36,7 +36,7 @@ const quotesJson = JSON.stringify(allQuotes);
         color: #bb86fc;
         padding: 0.3rem 0.8rem;
         border-radius: 20px;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         font-family: 'JetBrains Mono', monospace;
         margin-bottom: 1.5rem;
       }
@@ -56,7 +56,7 @@ const quotesJson = JSON.stringify(allQuotes);
         text-align: center;
       }
       .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #bb86fc; }
-      .stat-label { font-size: 0.65rem; color: #8a8a8e; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .stat-label { font-size: 0.78rem; color: #8a8a8e; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
       /* Heatmap */
       .heatmap-section {
@@ -67,7 +67,7 @@ const quotesJson = JSON.stringify(allQuotes);
         margin-bottom: 1.5rem;
         overflow-x: auto;
       }
-      .heatmap-title { font-size: 0.7rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+      .heatmap-title { font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
       .heatmap-grid {
         display: grid;
         grid-template-rows: repeat(7, 1fr);
@@ -126,7 +126,7 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .heatmap-detail-date {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         color: #bb86fc;
         font-weight: 600;
       }
@@ -142,7 +142,7 @@ const quotesJson = JSON.stringify(allQuotes);
       .heatmap-detail-close:hover { color: #e8e6e1; }
       .heatmap-detail-empty {
         color: #555;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         font-style: italic;
       }
       .heatmap-detail-session {
@@ -168,13 +168,13 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .heatmap-detail-min {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.72rem;
+        font-size: 0.82rem;
         color: #8a8a8e;
         flex-shrink: 0;
       }
       .heatmap-detail-total {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.7rem;
+        font-size: 0.82rem;
         color: #c9a84c;
         text-align: right;
         margin-top: 0.4rem;
@@ -197,11 +197,11 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .streak-info { display: flex; align-items: center; gap: 0.8rem; }
       .streak-num { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; color: #bb86fc; }
-      .streak-text { font-size: 0.75rem; color: #8a8a8e; }
-      .streak-best { font-size: 0.65rem; color: #555; }
+      .streak-text { font-size: 0.88rem; color: #8a8a8e; }
+      .streak-best { font-size: 0.78rem; color: #555; }
       .today-status {
         font-family: 'JetBrains Mono', monospace;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         color: #555;
         padding: 0.4rem 0.8rem;
         border-radius: 6px;
@@ -218,14 +218,14 @@ const quotesJson = JSON.stringify(allQuotes);
         text-align: center;
       }
       .meditation-hero .quote { font-size: 1.1rem; font-style: italic; color: #ccc; line-height: 1.6; max-width: 600px; margin: 0 auto 1rem; }
-      .meditation-hero .author { font-size: 0.75rem; color: #8a8a8e; }
+      .meditation-hero .author { font-size: 0.88rem; color: #8a8a8e; }
 
       /* Focus cards */
       .focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
       .focus-card { background: #141416; border: 1px solid #222; border-radius: 8px; padding: 1.2rem; }
       .focus-card:hover { border-color: rgba(155,89,182,0.4); }
       .focus-card .fc-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
-      .focus-card .fc-title { font-size: 0.8rem; color: #bb86fc; font-weight: 600; margin-bottom: 0.3rem; }
+      .focus-card .fc-title { font-size: 0.9rem; color: #bb86fc; font-weight: 600; margin-bottom: 0.3rem; }
       .focus-card .fc-text { font-size: 0.78rem; color: #aaa; line-height: 1.5; }
 
       /* Timer */
@@ -249,15 +249,15 @@ const quotesJson = JSON.stringify(allQuotes);
         text-align: center;
       }
       .timer-display { font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; color: #e8e6e1; letter-spacing: 0.05em; }
-      .timer-label { font-size: 0.7rem; color: #8a8a8e; }
+      .timer-label { font-size: 0.82rem; color: #8a8a8e; }
       .breath-label { text-align: center; font-size: 0.85rem; color: #bb86fc; min-height: 1.4em; margin: 0.5rem 0; }
 
       .active-guide { display: none; background: linear-gradient(135deg, rgba(155,89,182,0.12), rgba(201,168,76,0.08)); border: 1px solid rgba(155,89,182,0.3); border-radius: 12px; padding: 1.2rem; margin: 1rem 0; text-align: center; animation: guideIn 0.5s ease; }
       .active-guide.visible { display: block; }
-      .active-guide .guide-step-num { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #c9a84c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+      .active-guide .guide-step-num { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #c9a84c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
       .active-guide .guide-title { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.4rem; color: #bb86fc; margin-bottom: 0.5rem; }
       .active-guide .guide-desc { font-size: 1rem; color: #c8c6c1; line-height: 1.6; }
-      .active-guide .guide-hint { font-size: 0.8rem; color: #8a8a8e; margin-top: 0.8rem; font-style: italic; }
+      .active-guide .guide-hint { font-size: 0.9rem; color: #8a8a8e; margin-top: 0.8rem; font-style: italic; }
       @keyframes guideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .timer-presets { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
       .timer-presets button {
@@ -267,7 +267,7 @@ const quotesJson = JSON.stringify(allQuotes);
         color: #8a8a8e;
         cursor: pointer;
         border-radius: 4px;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         transition: all 0.2s;
         min-height: 44px;
       }
@@ -289,9 +289,9 @@ const quotesJson = JSON.stringify(allQuotes);
       .timer-btn.pause { background: #f39c12; color: #0a0a0c; }
       .timer-btn.reset { background: #333; color: #8a8a8e; }
       .timer-btn.reset:hover { background: #444; color: #e8e6e1; }
-      .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.8rem; }
+      .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.9rem; }
       .timer-btn.voice.active { background: rgba(155,89,182,0.2); color: #bb86fc; border: 1px solid rgba(155,89,182,0.3); }
-      .voice-tip { text-align: center; font-size: 0.75rem; color: #8a8a8e; margin-top: 0.5rem; font-style: italic; min-height: 1.2em; }
+      .voice-tip { text-align: center; font-size: 0.88rem; color: #8a8a8e; margin-top: 0.5rem; font-style: italic; min-height: 1.2em; }
 
       /* Session card */
       .session-card {
@@ -303,13 +303,13 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .session-card h2 { font-family: 'Staatliches', Impact, sans-serif; color: #bb86fc; font-size: 1.1rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
       .session-card .step { display: flex; gap: 1rem; margin-bottom: 1.2rem; align-items: flex-start; }
-      .step-num { flex-shrink: 0; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: rgba(155, 89, 182, 0.15); color: #bb86fc; font-size: 0.75rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+      .step-num { flex-shrink: 0; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: rgba(155, 89, 182, 0.15); color: #bb86fc; font-size: 0.88rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
       .step-content { flex: 1; }
       .step-title { font-weight: 600; color: #e8e6e1; font-size: 0.9rem; margin-bottom: 0.2rem; }
       .step-desc { color: #aaa; font-size: 0.82rem; line-height: 1.5; }
-      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.65rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.3rem; }
+      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.3rem; }
 
-      .loading-msg { text-align: center; color: #555; font-size: 0.8rem; padding: 2rem; }
+      .loading-msg { text-align: center; color: #555; font-size: 0.9rem; padding: 2rem; }
 
       /* Journey section */
       .journey-section {
@@ -387,7 +387,7 @@ const quotesJson = JSON.stringify(allQuotes);
         border-radius: 8px;
         padding: 0.8rem 1rem;
         margin-top: 0.6rem;
-        font-size: 0.8rem;
+        font-size: 0.9rem;
         color: #c9a84c;
         line-height: 1.5;
       }
@@ -396,7 +396,7 @@ const quotesJson = JSON.stringify(allQuotes);
       .journey-roadmap { margin-top: 1rem; }
       .journey-roadmap-toggle {
         cursor: pointer;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         color: #666;
         letter-spacing: 0.04em;
         text-transform: uppercase;
@@ -411,13 +411,13 @@ const quotesJson = JSON.stringify(allQuotes);
       .journey-roadmap-table table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.75rem;
+        font-size: 0.88rem;
         color: #aaa;
       }
       .journey-roadmap-table th {
         text-align: left;
         color: #555;
-        font-size: 0.65rem;
+        font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         padding: 0.4rem 0.6rem;

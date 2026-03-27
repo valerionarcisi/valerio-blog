@@ -49,7 +49,7 @@ const sources = rawData.sources;
         position: relative;
       }
       .stat-card:hover { border-color: #c9a84c; }
-      .stat-card .label { font-size: 0.7rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+      .stat-card .label { font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
       .info-icon { display: inline-block; width: 14px; height: 14px; line-height: 14px; text-align: center; border-radius: 50%; background: rgba(255,255,255,0.06); color: #8a8a8e; font-size: 0.55rem; cursor: help; vertical-align: middle; margin-left: 0.2rem; }
       .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 260px; z-index: 10; line-height: 1.4; text-align: left; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
       .stat-card:hover .tooltip { display: block; }
@@ -57,7 +57,7 @@ const sources = rawData.sources;
       .chart-tooltip { display: none; position: absolute; top: 0.3rem; right: 0.5rem; background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 280px; z-index: 10; line-height: 1.4; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
       .chart-card:hover .chart-tooltip { display: block; }
       .stat-card .value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: #e8e6e1; font-weight: 700; }
-      .stat-card .delta { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.2rem; }
+      .stat-card .delta { font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.2rem; }
       .delta.pos { color: #2ecc71; }
       .delta.neg { color: #e74c3c; }
       .delta.neutral { color: #8a8a8e; }
@@ -75,7 +75,7 @@ const sources = rawData.sources;
         padding: 1rem;
       }
       .chart-card.full { grid-column: 1 / -1; }
-      .chart-card h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .chart-card h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
       .chart-wrap { position: relative; width: 100%; }
       .chart-wrap canvas { width: 100% !important; }
 
@@ -94,14 +94,14 @@ const sources = rawData.sources;
         flex-direction: column;
         align-items: center;
       }
-      .donut-card h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .donut-card h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
       .donut-wrap { position: relative; width: 220px; height: 220px; }
       .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
       .donut-center .big { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #e8e6e1; }
-      .donut-center .sub { font-size: 0.65rem; color: #8a8a8e; }
+      .donut-center .sub { font-size: 0.78rem; color: #8a8a8e; }
 
       .source-legend {
-        display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; font-size: 0.75rem; color: #8a8a8e;
+        display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; font-size: 0.88rem; color: #8a8a8e;
       }
       .source-legend span { display: flex; align-items: center; gap: 0.3rem; }
       .source-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
@@ -116,8 +116,8 @@ const sources = rawData.sources;
         overflow-x: auto;
         margin-bottom: 2rem;
       }
-      .data-table-wrap h3 { font-size: 0.8rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
-      table { width: 100%; border-collapse: collapse; font-size: 0.75rem; font-family: 'JetBrains Mono', monospace; }
+      .data-table-wrap h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; }
       thead th { color: #8a8a8e; text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #333; white-space: nowrap; font-weight: 500; }
       tbody td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #1a1a1c; color: #e8e6e1; white-space: nowrap; }
       tbody tr:hover { background: rgba(201, 168, 76, 0.04); }
@@ -140,7 +140,7 @@ const sources = rawData.sources;
       }
       .tip-card:hover { border-color: #c9a84c; }
       .tip-card .tip-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
-      .tip-card .tip-cat { font-size: 0.65rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+      .tip-card .tip-cat { font-size: 0.78rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
       .tip-card .tip-text { font-size: 0.82rem; color: #e8e6e1; line-height: 1.5; }
       .tip-card.wellness { border-left: 3px solid #2ecc71; }
       .tip-card.consistency { border-left: 3px solid #f39c12; }

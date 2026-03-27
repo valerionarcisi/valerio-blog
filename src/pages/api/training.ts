@@ -4,8 +4,8 @@ import { fetchTrainingContext, fetchFullStats } from "~/services/strava";
 
 export const prerender = false;
 
-const LAT = 45.464;
-const LON = 9.190;
+const LAT = 43.256;
+const LON = 13.760;
 
 async function fetchWeekendWeather() {
   try {
