@@ -392,6 +392,48 @@ const quotesJson = JSON.stringify(allQuotes);
         line-height: 1.5;
       }
 
+      /* Roadmap table */
+      .journey-roadmap { margin-top: 1rem; }
+      .journey-roadmap-toggle {
+        cursor: pointer;
+        font-size: 0.75rem;
+        color: #666;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.4rem 0;
+        list-style: none;
+        user-select: none;
+      }
+      .journey-roadmap-toggle::-webkit-details-marker { display: none; }
+      .journey-roadmap-toggle::before { content: "▶ "; font-size: 0.6rem; }
+      details[open] .journey-roadmap-toggle::before { content: "▼ "; }
+      .journey-roadmap-table { overflow-x: auto; margin-top: 0.6rem; }
+      .journey-roadmap-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.75rem;
+        color: #aaa;
+      }
+      .journey-roadmap-table th {
+        text-align: left;
+        color: #555;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.4rem 0.6rem;
+        border-bottom: 1px solid #222;
+      }
+      .journey-roadmap-table td {
+        padding: 0.5rem 0.6rem;
+        border-bottom: 1px solid #1a1a1e;
+        vertical-align: top;
+        line-height: 1.4;
+      }
+      .journey-roadmap-table td:last-child { color: #888; font-style: italic; }
+      .roadmap-current td { color: #e8e6e1; background: rgba(155, 89, 182, 0.06); }
+      .roadmap-current td:first-child { border-left: 2px solid #bb86fc; }
+      .roadmap-icon { font-size: 0.9rem; }
+
       @media (max-width: 700px) {
         .focus-grid { grid-template-columns: 1fr; }
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -742,6 +784,38 @@ const quotesJson = JSON.stringify(allQuotes);
         html += '</div>';
 
         html += '<div class="journey-tip">' + phase.spiritual + '</div>';
+
+        // Full path table (collapsible)
+        html += '<details class="journey-roadmap">';
+        html += '<summary class="journey-roadmap-toggle">Il percorso completo — 24 mesi</summary>';
+        html += '<div class="journey-roadmap-table">';
+        html += '<table>';
+        html += '<thead><tr><th>Fase</th><th>Durata</th><th>Focus</th><th>Sessione</th><th>Perché</th></tr></thead>';
+        html += '<tbody>';
+        var phaseDescriptions = [
+          { dur: "0-1 mese", focus: "Anapana 75%", session: "5-10 min", why: "Costruisci l'abitudine. Il respiro è l'ancora. Senza questa base le pratiche successive non reggono." },
+          { dur: "2-3 mesi", focus: "Body Scan 40%", session: "10-15 min", why: "Il corpo parla una lingua che la mente ignora. Imparare ad ascoltarlo senza reagire è la seconda competenza fondamentale." },
+          { dur: "4-5 mesi", focus: "Metta 30%", session: "10-20 min", why: "Senza gentilezza verso te stesso, Vipassana diventa arida. La Metta scioglie le resistenze e prepara il cuore." },
+          { dur: "6-8 mesi", focus: "Vipassana 30%", session: "15-20 min", why: "Vipassana: vedi le cose come sono. Ogni sensazione sorge e passa — questa comprensione cambia il rapporto con dolore e piacere." },
+          { dur: "9-11 mesi", focus: "Vipassana 25%", session: "15-25 min", why: "Sessioni più lunghe. L'equanimità diventa naturale. Il confine tra meditazione e vita quotidiana si assottiglia." },
+          { dur: "12-17 mesi", focus: "Equilibrio", session: "20-30 min", why: "La pratica si stabilizza. Scegli la tecnica in base a quello che senti. Considera un ritiro Vipassana di 10 giorni." },
+          { dur: "18-23 mesi", focus: "Integrazione", session: "20-30 min", why: "La consapevolezza permea la giornata. Doppi sit (mattina + sera). La meditazione non è più qualcosa che fai — è ciò che sei." },
+          { dur: "24+ mesi", focus: "Maestria", session: "30-45 min", why: "Ogni sessione è sia inizio che completamento. Sei il tuo stesso maestro." },
+        ];
+        phases.forEach(function(p, i) {
+          var d = phaseDescriptions[i] || {};
+          var isCurrent = i === phaseIdx;
+          html += '<tr class="' + (isCurrent ? 'roadmap-current' : '') + '">';
+          html += '<td><span class="roadmap-icon">' + p.icon + '</span> <strong>' + p.name + '</strong></td>';
+          html += '<td>' + (d.dur || '') + '</td>';
+          html += '<td>' + (d.focus || '') + '</td>';
+          html += '<td>' + (d.session || '') + '</td>';
+          html += '<td>' + (d.why || '') + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+        html += '</div>';
+        html += '</details>';
 
         document.getElementById("journey-content").innerHTML = html;
 
