@@ -96,6 +96,7 @@ CREATE TABLE pageviews (
   utm_campaign  TEXT,
   utm_content   TEXT,
   is_unique     INTEGER NOT NULL DEFAULT 0,  -- 1 = unique visit
+  visitor_hash  TEXT,                    -- SHA-256(date:hostname:ip:ua) — daily rotating, no IP salvato
   time_on_page  INTEGER,                -- secondi (aggiornato via beacon)
   scroll_depth  INTEGER,                -- percentuale 0-100 (aggiornato via beacon)
   browser       TEXT,
@@ -108,6 +109,10 @@ CREATE TABLE pageviews (
   language      TEXT,
   country       TEXT,                    -- derivato da timezone
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE bot_hashes (
+  hash  TEXT PRIMARY KEY               -- visitor_hash flaggato come bot
 );
 
 CREATE INDEX idx_pv_created   ON pageviews(created_at);
@@ -179,7 +184,10 @@ Riceve un pageview dal tracking script.
 
 **Rate limiting:** max 1 pageview/secondo per IP (in-memory, non persistente). L'IP non viene salvato.
 
-**Bot filtering:** rifiuta se `user_agent` contiene pattern noti (bot, crawler, spider).
+**Bot filtering — 3 livelli:**
+1. **UA-based (ingestion)**: `isbot@5.1.35` — blocca bot/crawler/spider noti prima che la visita venga salvata. UA vuoto → bloccato.
+2. **Behavioral (automatico post-ingestion)**: se lo stesso `visitor_hash` fa ≥2 visite in 7 giorni con zero engagement (time_on_page ≤5s e scroll_depth = 0), viene auto-inserito in `bot_hashes`.
+3. **Manuale (admin)**: dalla dashboard è possibile flaggare singoli visitatori o fare bulk-flag di tutti i suspect del periodo. I flaggati finiscono in `bot_hashes` e vengono esclusi da tutte le query di stats.
 
 ### `GET /api/stats`
 
@@ -188,7 +196,7 @@ Restituisce dati aggregati per la dashboard. Protetto da Bearer token (`ANALYTIC
 **Query params:**
 | Param | Default | Note |
 |-------|---------|------|
-| `period` | `30d` | `today`, `7d`, `30d`, `90d`, `12m`, `custom` |
+| `period` | `today` | `today`, `7d`, `30d`, `90d`, `12m`, `custom` |
 | `from` | - | ISO date, per `custom` |
 | `to` | - | ISO date, per `custom` |
 | `pathname` | - | Filtra per pagina specifica |
@@ -281,7 +289,12 @@ Script JS leggero (~2KB minificato) da caricare inline su ogni pagina.
 
 ## Dashboard (`/admin/analytics`)
 
-Pagina Astro SSR, protetta da token (`?token=ANALYTICS_ADMIN_TOKEN`), stessa logica di `/admin/comments`.
+Pagina Astro SSR, protetta da token (`?token=ADMIN_TOKEN`), stessa logica di `/admin/comments`.
+
+### Comportamento default
+
+- **Periodo iniziale**: sempre `today` all'apertura (nessun ripristino da localStorage)
+- I pulsanti periodo cambiano la vista ma non vengono ricordati al prossimo accesso
 
 ### Layout
 
@@ -291,7 +304,7 @@ Pagina Astro SSR, protetta da token (`?token=ANALYTICS_ADMIN_TOKEN`), stessa log
 +----------------------------------------------------------+
 |                                                          |
 |  [Pageviews: 3,420]  [Visitors: 1,890]  [Avg Time: 42s] |
-|  [Scroll: 65%]       [Bounce: 45.2%]                    |
+|  [Scroll: 65%]       [Bounce: 45.2%]    [Suspected Bots] |
 |                                                          |
 |  ┌──────────────────────────────────────────────┐        |
 |  │  📈 Line chart: pageviews + visitors / tempo  │        |
@@ -353,7 +366,7 @@ Pagina Astro SSR, protetta da token (`?token=ANALYTICS_ADMIN_TOKEN`), stessa log
 ## Env vars
 
 ```
-ANALYTICS_ADMIN_TOKEN=<openssl rand -hex 32>
+ADMIN_TOKEN=<openssl rand -hex 32>
 ```
 
 Riutilizza `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN` gia configurati.
