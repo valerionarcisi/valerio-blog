@@ -1,0 +1,465 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
+if (!isAuthorized) return new Response("Unauthorized", { status: 401 });
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Allenamento</title>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
+
+      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.25rem; }
+      .subtitle { color: #8a8a8e; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+      .section {
+        background: #141416;
+        border: 1px solid #222;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+      }
+      .section-title {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #555;
+        margin-bottom: 1rem;
+      }
+
+      /* Week header */
+      .week-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .week-stat { text-align: center; }
+      .week-stat-val { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #fc4c02; }
+      .week-stat-val.gym { color: #a855f7; }
+      .week-stat-label { font-size: 0.65rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.15rem; }
+
+      .load-bar-wrap { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+      .load-bar-bg { flex: 1; height: 4px; background: #222; border-radius: 2px; }
+      .load-bar-fill { height: 4px; border-radius: 2px; transition: width 0.5s; }
+      .load-badge { font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px; white-space: nowrap; }
+      .load-light  { background: rgba(46,204,113,0.15); color: #2ecc71; }
+      .load-normal { background: rgba(252,76,2,0.12); color: #fc4c02; }
+      .load-heavy  { background: rgba(231,76,60,0.15); color: #e74c3c; }
+
+      /* Suggestion card */
+      .suggestion-card {
+        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
+        border: 1px solid rgba(252,76,2,0.25);
+        border-radius: 14px;
+        padding: 1.5rem;
+        margin-bottom: 1.25rem;
+      }
+      .suggestion-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #fc4c02; margin-bottom: 0.5rem; }
+      .suggestion-day { font-size: 0.8rem; color: #8a8a8e; margin-bottom: 0.4rem; }
+      .suggestion-km { font-family: 'Staatliches', Impact, sans-serif; font-size: 3rem; color: #e8e6e1; line-height: 1; margin-bottom: 0.25rem; }
+      .suggestion-km span { font-size: 1.4rem; color: #8a8a8e; }
+      .suggestion-type { font-size: 0.95rem; color: #c9a84c; font-weight: 600; margin-bottom: 0.6rem; }
+      .suggestion-pace { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #8a8a8e; margin-bottom: 0.8rem; }
+      .suggestion-weather { display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: #8a8a8e; margin-bottom: 0.8rem; }
+      .suggestion-reason { font-size: 0.85rem; color: #ccc; line-height: 1.6; border-top: 1px solid #222; padding-top: 0.8rem; font-style: italic; }
+
+      /* Weekly chart */
+      .chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 80px; margin-bottom: 0.5rem; }
+      .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .chart-bar { width: 100%; border-radius: 3px 3px 0 0; background: #333; transition: background 0.2s; min-height: 2px; }
+      .chart-bar.current { background: #fc4c02; }
+      .chart-label { font-size: 0.5rem; color: #555; text-align: center; white-space: nowrap; overflow: hidden; }
+      .chart-km { font-size: 0.55rem; color: #8a8a8e; }
+
+      /* Goal tracker */
+      .goal-row { display: flex; align-items: center; gap: 1rem; }
+      .goal-pace { font-family: 'JetBrains Mono', monospace; font-size: 2rem; font-weight: 700; color: #bb86fc; }
+      .goal-info { flex: 1; }
+      .goal-target { font-size: 0.75rem; color: #8a8a8e; margin-bottom: 0.3rem; }
+      .goal-delta { font-size: 0.85rem; color: #c9a84c; font-weight: 600; }
+      .goal-bar-bg { height: 6px; background: #222; border-radius: 3px; margin-top: 0.5rem; }
+      .goal-bar-fill { height: 6px; background: linear-gradient(90deg, #bb86fc, #c9a84c); border-radius: 3px; }
+
+      /* Activity list */
+      .activity-list { display: flex; flex-direction: column; gap: 0.5rem; }
+      .activity-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: 8px;
+        background: #0f0f11;
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.15s;
+        border: 1px solid transparent;
+      }
+      .activity-row:hover { background: #1a1a1e; border-color: #333; }
+      .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+      .activity-name { flex: 1; font-size: 0.88rem; color: #e8e6e1; }
+      .activity-meta { display: flex; gap: 0.6rem; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #8a8a8e; }
+      .activity-meta .pace { color: #c9a84c; }
+      .activity-date { font-size: 0.72rem; color: #555; white-space: nowrap; }
+
+      .loading { text-align: center; color: #555; padding: 3rem; font-size: 0.9rem; }
+
+      @media (max-width: 768px) {
+        body { padding: 1rem; font-size: 1.05rem; }
+        .week-stats { grid-template-columns: repeat(2, 1fr); }
+        .suggestion-km { font-size: 2.2rem; }
+        .chart-label { display: none; }
+        h1 { font-size: 2rem; }
+        .goal-pace { font-size: 1.6rem; }
+        .activity-meta { flex-wrap: wrap; gap: 0.4rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="training" token={token} />
+
+    <h1>Allenamento</h1>
+    <p class="subtitle">Monitoraggio settimanale e suggerimento smart per il weekend</p>
+
+    <div id="content">
+      <div class="loading">Carico dati Strava...</div>
+    </div>
+
+    <script is:inline define:vars={{ token }}>
+      const API = '/api/training';
+
+      function fmtPace(speedMs) {
+        if (!speedMs || speedMs === 0) return '';
+        const minKm = 1000 / 60 / speedMs;
+        const m = Math.floor(minKm);
+        const s = Math.round((minKm - m) * 60);
+        return m + ':' + String(s).padStart(2, '0') + '/km';
+      }
+      function fmtDist(m) { return (m / 1000).toFixed(1) + ' km'; }
+      function fmtDate(iso) {
+        const d = new Date(iso);
+        return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+      }
+      function secToMin(s) { const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); return h > 0 ? h+'h '+m+'m' : m+'m'; }
+      function weatherIcon(code) {
+        if (code <= 1) return '☀️';
+        if (code <= 3) return '⛅';
+        if (code <= 48) return '🌫️';
+        if (code <= 67) return '🌧️';
+        if (code <= 77) return '🌨️';
+        if (code <= 82) return '🌦️';
+        return '⛈️';
+      }
+
+      function computeReadiness(data) {
+        const { currentWeekActivities, last4WeeklyKm, weekendLongRuns, last12WeeklyElevation } = data;
+
+        const weekRuns = currentWeekActivities.filter(a => a.sportType === 'Run');
+        const weekKm = weekRuns.reduce((s, a) => s + a.distance, 0) / 1000;
+        const weekElev = currentWeekActivities.reduce((s, a) => s + a.elevation, 0);
+        const hasGym = currentWeekActivities.some(a => a.sportType === 'WeightTraining');
+        const avgKm4w = last4WeeklyKm.reduce((s, v) => s + v, 0) / Math.max(1, last4WeeklyKm.length);
+
+        const recentLongs = weekendLongRuns.slice(-8);
+        const lastLong = recentLongs[recentLongs.length - 1];
+        const longestRecent = recentLongs.reduce((max, r) => Math.max(max, r.distanceM), 0) / 1000;
+        const avgLong4w = recentLongs.slice(-4).reduce((s, r) => s + r.distanceM, 0) / Math.max(1, Math.min(4, recentLongs.length)) / 1000;
+
+        // Average HR across last 4 long runs
+        const longs4 = recentLongs.slice(-4).filter(r => r.averageHeartrate);
+        const hrAvg4w = longs4.length > 0 ? longs4.reduce((s, r) => s + r.averageHeartrate, 0) / longs4.length : 150;
+        const hrLastLong = lastLong?.averageHeartrate ?? hrAvg4w;
+
+        // Average pace across last 4 long runs
+        const paceAvg4w = recentLongs.slice(-4).reduce((s, r) => {
+          return r.distanceM > 0 ? s + (r.movingTime / (r.distanceM / 1000)) : s;
+        }, 0) / Math.max(1, Math.min(4, recentLongs.length));
+        const paceLastLong = lastLong && lastLong.distanceM > 0
+          ? lastLong.movingTime / (lastLong.distanceM / 1000) : paceAvg4w;
+
+        // Days since last hilly run (>100m elevation)
+        const hillyRuns = weekendLongRuns.filter(r => r.elevation > 100);
+        const lastHilly = hillyRuns[hillyRuns.length - 1];
+        const daysSinceHilly = lastHilly
+          ? Math.floor((Date.now() - new Date(lastHilly.date).getTime()) / 86400000)
+          : 999;
+
+        // Readiness score
+        let readiness = 50;
+        if (avgKm4w > 0) {
+          const loadRatio = weekKm / avgKm4w;
+          if (loadRatio < 0.6) readiness += 20;
+          else if (loadRatio < 0.9) readiness += 10;
+          else if (loadRatio > 1.2) readiness -= 15;
+          else if (loadRatio > 1.0) readiness -= 5;
+        }
+        if (hrLastLong < hrAvg4w - 5) readiness += 15;
+        else if (hrLastLong > hrAvg4w + 10) readiness -= 15;
+        if (paceLastLong < paceAvg4w - 10) readiness += 10;
+        if (hasGym && weekRuns.length >= 3) readiness -= 10;
+        if (weekRuns.length >= 4) readiness -= 10;
+
+        // Target distance
+        let targetKm;
+        if (readiness >= 80) targetKm = Math.min(longestRecent + 3, longestRecent * 1.12);
+        else if (readiness >= 60) targetKm = longestRecent * 1.05;
+        else if (readiness >= 40) targetKm = avgLong4w || longestRecent;
+        else targetKm = (avgLong4w || longestRecent) * 0.75;
+        targetKm = Math.max(10, Math.round(targetKm));
+
+        // Consecutive easy weeks (no tempo suggestion in last 3)
+        const weeksConsecEasy = Math.min(data._weeksConsecEasy ?? 0, 10);
+
+        // Workout type
+        let type, paceHint, reason;
+        if (readiness < 35) {
+          type = 'recovery';
+          targetKm = Math.round(Math.min(targetKm * 0.75, 14));
+          paceHint = addSecToPace(paceAvg4w, 30);
+          reason = 'Settimana intensa. Il corpo chiede recupero — corsa leggera per mantenere il ritmo senza accumulare fatica.';
+        } else if (weekKm < 10 && weekRuns.length === 0) {
+          type = 'easy';
+          paceHint = addSecToPace(paceAvg4w, 15);
+          reason = 'Settimana ferma. Esci per riattivare le gambe, senza pressione.';
+        } else if (daysSinceHilly > 21 && weekElev < 50 && readiness >= 55) {
+          type = 'hilly';
+          paceHint = addSecToPace(paceAvg4w, 25) + ' (con dislivello)';
+          reason = 'Non fai un collinare da oltre 3 settimane. Il lavoro in salita rafforza la muscolatura e migliora l\'efficienza. Cerca un percorso con 150-250m di dislivello.';
+        } else if (weeksConsecEasy >= 3) {
+          type = 'fartlek';
+          paceHint = fmtPaceFromSec(paceAvg4w) + ' — ultimi ' + Math.round(targetKm * 0.25) + 'km a ' + addSecToPace(paceAvg4w, -25);
+          reason = 'Tre settimane facili consecutive. È il momento di inserire un segmento a ritmo più sostenuto — ti avvicina all\'obiettivo 4:40-4:50/km.';
+        } else {
+          type = 'long_easy';
+          paceHint = addSecToPace(paceAvg4w, 5);
+          reason = readiness >= 70
+            ? 'Settimana ben gestita, gambe fresche. Puoi spingere sulla distanza — vai con fiducia.'
+            : 'Settimana nella media. Corsa lunga standard, ascolta il corpo.';
+        }
+
+        return { readiness, targetKm, type, paceHint, reason, weekKm, weekRuns: weekRuns.length,
+          hasGym, avgKm4w, weekElev, daysSinceHilly, longestRecent, avgLong4w, hrAvg4w, hrLastLong };
+      }
+
+      function addSecToPace(secPerKm, delta) {
+        return fmtPaceFromSec(secPerKm + delta);
+      }
+      function fmtPaceFromSec(sec) {
+        if (!sec || sec <= 0) return '5:30/km';
+        const m = Math.floor(sec / 60);
+        const s = Math.round(sec % 60);
+        return m + ':' + String(s).padStart(2, '0') + '/km';
+      }
+
+      function typeLabel(type) {
+        return { recovery: 'Recovery — ritmo facile', easy: 'Corsa facile', hilly: 'Collinare', fartlek: 'Long run con fartlek', long_easy: 'Long run' }[type] || 'Long run';
+      }
+
+      function loadClass(ratio) {
+        if (ratio < 0.7) return 'light';
+        if (ratio < 1.15) return 'normal';
+        return 'heavy';
+      }
+      function loadLabel(ratio) {
+        if (ratio < 0.7) return 'Settimana leggera';
+        if (ratio < 1.15) return 'Nella media';
+        return 'Settimana intensa';
+      }
+
+      function getWeekendWeather(weather) {
+        if (!weather) return null;
+        const today = new Date();
+        const days = [];
+        for (let i = 0; i <= 6; i++) {
+          const d = new Date(today);
+          d.setDate(d.getDate() + i);
+          const dow = d.getDay();
+          if (dow === 6 || dow === 0) {
+            const key = d.toISOString().slice(0, 10);
+            if (weather[key]) days.push({ date: key, dow, ...weather[key] });
+          }
+        }
+        // Prefer the day with less rain
+        days.sort((a, b) => a.rain - b.rain);
+        return days[0] ?? null;
+      }
+
+      function buildContent(data) {
+        const { currentWeekActivities, weeklyRunStats, weather } = data;
+        const ctx = computeReadiness(data);
+
+        // Find weeks consec easy (rough: last 3 weeks had no fartlek suggestion recorded)
+        data._weeksConsecEasy = 3; // default; real tracking would need DB
+
+        const loadRatio = ctx.avgKm4w > 0 ? ctx.weekKm / ctx.avgKm4w : 0.8;
+        const lc = loadClass(loadRatio);
+        const barW = Math.min(100, Math.round(loadRatio * 80));
+        const barColor = lc === 'light' ? '#2ecc71' : lc === 'normal' ? '#fc4c02' : '#e74c3c';
+
+        const bestWeather = getWeekendWeather(weather);
+        const suggestDay = bestWeather
+          ? (bestWeather.dow === 6 ? 'Sabato' : 'Domenica')
+          : 'Weekend';
+        const weatherLine = bestWeather
+          ? weatherIcon(bestWeather.code) + ' ' + Math.round(bestWeather.temp) + '°C · pioggia ' + bestWeather.rain + '%'
+          : '';
+
+        // Adjust for heat
+        let adjustedKm = ctx.targetKm;
+        let adjustedPace = ctx.paceHint;
+        if (bestWeather && bestWeather.temp > 22) {
+          adjustedKm = Math.max(10, adjustedKm - 2);
+          adjustedPace += ' (caldo — idratati)';
+        }
+
+        // Current pace from last 4 weekend long runs
+        const recentLongs = (data.weekendLongRuns || []).slice(-4);
+        const currentPaceSec = recentLongs.length > 0
+          ? recentLongs.reduce((s, r) => s + (r.distanceM > 0 ? r.movingTime / (r.distanceM / 1000) : 0), 0) / recentLongs.length
+          : 0;
+        const targetPaceSec = 4 * 60 + 45; // 4:45
+        const deltaSec = currentPaceSec > 0 ? Math.round(currentPaceSec - targetPaceSec) : null;
+        const progressPct = deltaSec !== null
+          ? Math.max(0, Math.min(100, Math.round((1 - deltaSec / 90) * 100)))
+          : 20;
+
+        // Weekly chart
+        const weeks = (weeklyRunStats || []).slice(-12);
+        const maxKm = Math.max(...weeks.map(w => w.distance / 1000), 1);
+        const chartHtml = weeks.map((w, i) => {
+          const km = w.distance / 1000;
+          const h = Math.round((km / maxKm) * 100);
+          const isCurrent = i === weeks.length - 1;
+          return `<div class="chart-bar-wrap">
+            <div class="chart-km" style="font-size:0.5rem;color:#555">${km > 0 ? km.toFixed(0) : ''}</div>
+            <div class="chart-bar${isCurrent ? ' current' : ''}" style="height:${h}%"></div>
+            <div class="chart-label">${w.weekLabel}</div>
+          </div>`;
+        }).join('');
+
+        // Activity list (last 10)
+        const allRecent = (data.weekendLongRuns || []).slice(-5)
+          .concat(currentWeekActivities.slice(0, 5))
+          .sort((a, b) => new Date(b.date || b.start_date).getTime() - new Date(a.date || a.start_date).getTime())
+          .slice(0, 10);
+
+        // Use yearlyBreakdown for recent activities
+        const recentActs = [];
+        if (data.weeklyRunStats) {
+          // Pull last 10 activities from currentWeekActivities + context
+          currentWeekActivities.slice(0, 5).forEach(a => recentActs.push(a));
+        }
+
+        const actHtml = currentWeekActivities.slice(0, 8).map(a => {
+          const color = a.sportType === 'Run' ? '#fc4c02' : a.sportType === 'WeightTraining' ? '#a855f7' : '#8a8a8e';
+          const pace = a.sportType === 'Run' ? fmtPace(a.averageSpeed) : '';
+          const km = a.distance > 0 ? fmtDist(a.distance) : '';
+          const elev = a.elevation > 10 ? ' ↑' + Math.round(a.elevation) + 'm' : '';
+          return `<a href="${a.url}" target="_blank" rel="noopener" class="activity-row">
+            <div class="activity-dot" style="background:${color}"></div>
+            <div class="activity-name">${a.name}</div>
+            <div class="activity-meta">
+              ${km ? '<span>' + km + '</span>' : ''}
+              ${pace ? '<span class="pace">' + pace + '</span>' : ''}
+              ${elev ? '<span>' + elev + '</span>' : ''}
+              <span>${secToMin(a.movingTime)}</span>
+            </div>
+            <div class="activity-date">${fmtDate(a.date)}</div>
+          </a>`;
+        }).join('');
+
+        return `
+          <div class="section">
+            <div class="section-title">Questa settimana</div>
+            <div class="week-stats">
+              <div class="week-stat">
+                <div class="week-stat-val">${ctx.weekKm.toFixed(1)}</div>
+                <div class="week-stat-label">km</div>
+              </div>
+              <div class="week-stat">
+                <div class="week-stat-val">${ctx.weekRuns}</div>
+                <div class="week-stat-label">corse</div>
+              </div>
+              <div class="week-stat">
+                <div class="week-stat-val">${Math.round(ctx.weekElev)}</div>
+                <div class="week-stat-label">m dislivello</div>
+              </div>
+              <div class="week-stat">
+                <div class="week-stat-val gym">${ctx.hasGym ? '1' : '0'}</div>
+                <div class="week-stat-label">palestra</div>
+              </div>
+            </div>
+            <div class="load-bar-wrap">
+              <div class="load-bar-bg">
+                <div class="load-bar-fill" style="width:${barW}%;background:${barColor}"></div>
+              </div>
+              <span class="load-badge load-${lc}">${loadLabel(loadRatio)}</span>
+            </div>
+          </div>
+
+          <div class="suggestion-card">
+            <div class="suggestion-label">🎯 Suggerimento weekend</div>
+            <div class="suggestion-day">${suggestDay}</div>
+            <div class="suggestion-km">${adjustedKm}<span> km</span></div>
+            <div class="suggestion-type">${typeLabel(ctx.type)}</div>
+            <div class="suggestion-pace">${adjustedPace}</div>
+            ${weatherLine ? `<div class="suggestion-weather">${weatherLine}</div>` : ''}
+            <div class="suggestion-reason">${ctx.reason}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Andamento 12 settimane</div>
+            <div class="chart-bars">${chartHtml}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Obiettivo gara — 4:40–4:50 /km</div>
+            <div class="goal-row">
+              <div class="goal-pace">${currentPaceSec > 0 ? fmtPaceFromSec(currentPaceSec) : '—'}</div>
+              <div class="goal-info">
+                <div class="goal-target">Target: 4:40–4:50 /km</div>
+                <div class="goal-delta">${deltaSec !== null ? (deltaSec > 0 ? '-' + deltaSec + ' sec al traguardo' : '🎯 Obiettivo raggiunto!') : ''}</div>
+                <div class="goal-bar-bg">
+                  <div class="goal-bar-fill" style="width:${progressPct}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${currentWeekActivities.length > 0 ? `
+          <div class="section">
+            <div class="section-title">Questa settimana — attività</div>
+            <div class="activity-list">${actHtml}</div>
+          </div>` : ''}
+        `;
+      }
+
+      async function load() {
+        try {
+          const res = await fetch(API, {
+            headers: { Authorization: 'Bearer ' + token }
+          });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          document.getElementById('content').innerHTML = buildContent(data);
+        } catch (e) {
+          document.getElementById('content').innerHTML = '<div class="loading" style="color:#e74c3c">Errore caricamento dati: ' + e.message + '</div>';
+        }
+      }
+
+      load();
+    </script>
+  </body>
+</html>

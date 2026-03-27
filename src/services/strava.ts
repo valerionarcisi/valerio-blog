@@ -308,6 +308,101 @@ const computeWeeklyRunStats = (activities: StravaActivity[], weeks: number): Wee
   return result;
 };
 
+export interface WeekendLongRun {
+  date: string;
+  distanceM: number;
+  movingTime: number;
+  elevation: number;
+  averageHeartrate?: number;
+  averageSpeed: number;
+}
+
+export interface TrainingContext {
+  currentWeekActivities: NormalizedActivity[];
+  last4WeeklyKm: number[];
+  weekendLongRuns: WeekendLongRun[];
+  last12WeeklyElevation: number[];
+}
+
+export const fetchTrainingContext = async (): Promise<TrainingContext> => {
+  const accessToken = await refreshAccessToken();
+  const now = Date.now();
+  const twelveWeeksAgo = Math.floor((now - 84 * 86400000) / 1000);
+
+  const allActivities: StravaActivity[] = [];
+  let page = 1;
+  while (true) {
+    const response = await fetch(
+      `${API_URL}/athlete/activities?after=${twelveWeeksAgo}&per_page=200&page=${page}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    if (!response.ok) throw new Error(`Strava error: ${response.status}`);
+    const batch: StravaActivity[] = await response.json();
+    allActivities.push(...batch);
+    if (batch.length < 200) break;
+    page++;
+  }
+
+  const today = new Date();
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+  monday.setHours(0, 0, 0, 0);
+
+  const currentWeekActivities = allActivities
+    .filter((a) => new Date(a.start_date) >= monday)
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      type: a.sport_type,
+      sportType: a.sport_type,
+      date: a.start_date,
+      distance: a.distance,
+      movingTime: a.moving_time,
+      elevation: a.total_elevation_gain,
+      averageSpeed: a.average_speed,
+      averageHeartrate: a.average_heartrate,
+      kudos: a.kudos_count,
+      url: `https://www.strava.com/activities/${a.id}`,
+    }));
+
+  const last4WeeklyKm: number[] = [];
+  const last12WeeklyElevation: number[] = [];
+  for (let w = 1; w <= 12; w++) {
+    const wEnd = new Date(monday);
+    wEnd.setDate(wEnd.getDate() - (w - 1) * 7 - 1);
+    wEnd.setHours(23, 59, 59, 999);
+    const wStart = new Date(wEnd);
+    wStart.setDate(wStart.getDate() - 6);
+    wStart.setHours(0, 0, 0, 0);
+    const acts = allActivities.filter((a) => {
+      const d = new Date(a.start_date);
+      return d >= wStart && d <= wEnd;
+    });
+    const km = acts.filter((a) => a.distance > 0).reduce((s, a) => s + a.distance, 0) / 1000;
+    const elev = acts.reduce((s, a) => s + a.total_elevation_gain, 0);
+    if (w <= 4) last4WeeklyKm.push(km);
+    last12WeeklyElevation.push(elev);
+  }
+
+  const weekendLongRuns: WeekendLongRun[] = allActivities
+    .filter((a) => {
+      const d = new Date(a.start_date);
+      const dow = d.getDay();
+      return (dow === 0 || dow === 6) && a.sport_type === "Run" && a.distance >= 10000;
+    })
+    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+    .map((a) => ({
+      date: a.start_date.slice(0, 10),
+      distanceM: a.distance,
+      movingTime: a.moving_time,
+      elevation: a.total_elevation_gain,
+      averageHeartrate: a.average_heartrate,
+      averageSpeed: a.average_speed,
+    }));
+
+  return { currentWeekActivities, last4WeeklyKm, weekendLongRuns, last12WeeklyElevation };
+};
+
 export const fetchActivityStats = async (): Promise<PeriodStats> => {
   const { periodStats } = await fetchFullStats();
   return periodStats;

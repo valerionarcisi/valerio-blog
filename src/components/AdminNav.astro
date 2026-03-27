@@ -2,7 +2,7 @@
 import "./AdminNav.css";
 
 interface Props {
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training";
   token: string;
 }
 
@@ -22,6 +22,7 @@ const dietaLinks = [
 
 const bottomLinks = [
   { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation?token=${token}` },
+  { id: "training" as const, label: "Training", short: "Run", href: `/admin/training?token=${token}` },
 ];
 
 const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
