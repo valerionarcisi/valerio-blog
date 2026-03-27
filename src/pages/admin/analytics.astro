@@ -1015,23 +1015,9 @@ if (!isAuthorized) {
 
       var todayStr = dateStr(new Date());
       document.getElementById("date-to").value = todayStr;
-      document.getElementById("date-from").value = dateStr(new Date(Date.now() - 30 * 86400000));
+      document.getElementById("date-from").value = todayStr;
 
-      var saved = loadSavedPeriod();
-      if (saved && saved.period) {
-        currentPeriod = saved.period;
-        if (saved.from && saved.to) {
-          currentFrom = saved.from;
-          currentTo = saved.to;
-          document.getElementById("date-from").value = saved.from;
-          document.getElementById("date-to").value = saved.to;
-          loadData("custom&from=" + saved.from + "&to=" + saved.to);
-        } else {
-          loadData(saved.period);
-        }
-      } else {
-        loadData("30d");
-      }
+      loadData("today");
 
       loadLive();
       setInterval(loadLive, 30000);
