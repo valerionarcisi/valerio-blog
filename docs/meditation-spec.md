@@ -135,7 +135,9 @@ Sistema a 8 fasi progressive su 24 mesi, ognuna con:
 - **Pesi** per tipo di sessione (es. fase 1: 75% Anapana, 15% Body Scan, 10% Camminata)
 - **Testo spirituale** con insegnamenti Vipassana
 
-La fase corrente e' calcolata in base ai mesi di pratica effettivi, corretti per la consistenza (se la frequenza e' < 30%, i mesi vengono ridotti proporzionalmente). Una barra di progresso a 24 dot mostra l'avanzamento. La sessione giornaliera suggerita deriva dai pesi della fase corrente, indicizzata deterministicamente dal giorno dell'anno.
+La fase corrente e' calcolata in base ai mesi di pratica effettivi, corretti per la consistenza (se la frequenza e' < 30%, i mesi vengono ridotti proporzionalmente). Una barra di progresso a 24 dot mostra l'avanzamento. La sessione giornaliera suggerita deriva dai pesi della fase corrente, indicizzata con `(dayOfYear * 13) % pool.length` (moltiplicatore primo per distribuire i giorni consecutivi in punti diversi del pool pesato ed evitare ripetizioni di settimane intere dello stesso tipo).
+
+In fondo alla sezione Journey e' presente un accordion **"Il percorso completo — 24 mesi"** che mostra una tabella con tutte le 8 fasi: durata, focus, durata sessione consigliata, e spiegazione del "perché". La riga della fase corrente e' evidenziata con bordo viola.
 
 ### Timer
 
@@ -145,7 +147,8 @@ Timer circolare SVG con anello di progresso e display digitale `MM:SS`.
 - **Controlli**: Inizia/Pausa/Riprendi, Reset, Voce ON/OFF
 - **Breath label**: ciclo testuale di 4 fasi (Inspira, Trattieni, Espira, Pausa) ogni 2 secondi
 - **Guida attiva**: pannello che mostra lo step corrente della sessione con titolo, descrizione e hint
-- **Scheduling guidato**: gli step della sessione vengono distribuiti proporzionalmente sulla durata scelta, con transizioni annunciate da chime e voce
+- **Scheduling guidato**: gli step della sessione vengono distribuiti proporzionalmente sulla durata scelta, con transizioni annunciate da chime e voce. La funzione `scheduleGuide(elapsedSec)` accetta un offset: al resume dalla pausa, riprende solo gli step non ancora avvenuti (calcola `delay = step.at - elapsedSec` e salta i negativi)
+- **Pausa/Riprendi**: al click su Pausa, `pausedRemaining` salva i secondi rimasti e `Guide.clearAll()` cancella i timeout. Al Riprendi, `elapsedSec = timerTotal - pausedRemaining` viene passato a `resumeGuidedSession()` che rischedula voce e campane dal punto esatto
 - **Auto-save**: al termine del timer, la sessione viene salvata automaticamente via POST API
 - **Wake Lock**: richiede `navigator.wakeLock` per impedire lo spegnimento dello schermo durante la meditazione
 
@@ -161,7 +164,7 @@ Ogni tipo di sessione ha 4 step strutturati con titolo, descrizione e durata:
 6. **Osservazione dei pensieri** — etichettare e lasciar andare
 7. **Suono e silenzio** — ascolto aperto e suono interno
 
-La sessione del giorno e' selezionata con `dayOfYear % sessions.length`, poi eventualmente sovrascritta dal sistema journey/fasi.
+La sessione del giorno e' selezionata inizialmente con `dayOfYear % sessions.length`, poi sovrascritta dal sistema journey/fasi tramite `getSuggestedSession(phaseIdx)` che usa il pool pesato con moltiplicatore primo.
 
 ### Citazione e focus giornalieri
 
