@@ -29,7 +29,17 @@ const bottomLinks = [
 const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
 ---
 
-<aside class="admin-sidebar">
+<!-- Hamburger button (mobile only) -->
+<button class="admin-hamburger" id="admin-hamburger" aria-label="Menu">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<!-- Backdrop -->
+<div class="admin-backdrop" id="admin-backdrop"></div>
+
+<aside class="admin-sidebar" id="admin-sidebar">
   <div class="sidebar-section">
     {topLinks.map((link) => (
       <a
@@ -67,3 +77,34 @@ const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
     ))}
   </div>
 </aside>
+
+<script>
+  const btn = document.getElementById('admin-hamburger');
+  const sidebar = document.getElementById('admin-sidebar');
+  const backdrop = document.getElementById('admin-backdrop');
+
+  function openMenu() {
+    sidebar?.classList.add('open');
+    btn?.classList.add('open');
+    backdrop?.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    sidebar?.classList.remove('open');
+    btn?.classList.remove('open');
+    backdrop?.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  btn?.addEventListener('click', () => {
+    sidebar?.classList.contains('open') ? closeMenu() : openMenu();
+  });
+  backdrop?.addEventListener('click', closeMenu);
+
+  // Close on link tap (mobile navigation)
+  sidebar?.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeMenu();
+    });
+  });
+</script>
