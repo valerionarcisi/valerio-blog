@@ -1,0 +1,948 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import AdminNav from "~/components/AdminNav.astro";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized =
+  token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
+if (!isAuthorized) return new Response("Unauthorized", { status: 401 });
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Workout Casa</title>
+    <style is:global>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
+
+      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.25rem; }
+      .subtitle { color: #8a8a8e; font-size: 0.9rem; margin-bottom: 1.5rem; }
+
+      /* ---- SELECT SCREEN ---- */
+      .workout-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+      .workout-card {
+        background: #141416; border: 1px solid #222; border-radius: 14px;
+        padding: 1.2rem; cursor: pointer; transition: all 0.2s; position: relative;
+      }
+      .workout-card:hover { border-color: #444; background: #1a1a1e; }
+      .workout-card.suggested { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.04); }
+      .suggested-badge { position: absolute; top: 0.6rem; right: 0.6rem; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; background: rgba(201,168,76,0.15); color: #c9a84c; padding: 0.15rem 0.4rem; border-radius: 4px; }
+      .card-name { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.5rem; color: #e8e6e1; margin-bottom: 0.2rem; }
+      .card-sub { font-size: 0.8rem; color: #8a8a8e; margin-bottom: 0.5rem; }
+      .card-focus { font-size: 0.82rem; color: #c9a84c; margin-bottom: 0.6rem; }
+      .card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+      .card-tag { font-size: 0.72rem; background: #0f0f11; border: 1px solid #333; border-radius: 4px; padding: 0.15rem 0.4rem; color: #8a8a8e; }
+      .card-last { font-size: 0.72rem; color: #555; margin-top: 0.5rem; }
+      .card-last.recent { color: #2ecc71; }
+
+      /* ---- HISTORY ---- */
+      .history-section { margin-top: 1.5rem; }
+      .section-title { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+      .history-row { display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 0; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 0.85rem; }
+      .history-row:last-child { border-bottom: none; }
+      .history-name { flex: 1; color: #e8e6e1; }
+      .history-date { color: #555; font-size: 0.78rem; }
+      .history-rpe { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #c9a84c; }
+      .rpe-bar { display: flex; gap: 2px; }
+      .rpe-dot { width: 6px; height: 6px; border-radius: 50%; background: #222; }
+      .rpe-dot.filled { background: #c9a84c; }
+
+      /* ---- SESSION OVERLAY ---- */
+      .session-overlay {
+        display: none; position: fixed; inset: 0; z-index: 100;
+        background: #0a0a0c; overflow-y: auto; padding: 1.5rem;
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+      }
+      .session-overlay.active { display: flex; flex-direction: column; }
+
+      .session-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+      .session-title { flex: 1; }
+      .session-workout-name { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.5rem; color: #c9a84c; }
+      .session-phase-label { font-size: 0.82rem; color: #8a8a8e; }
+      .btn-stop { background: none; border: 1px solid #333; border-radius: 8px; padding: 0.4rem 0.75rem; color: #555; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+      .btn-stop:hover { border-color: #e74c3c; color: #e74c3c; }
+
+      /* Block progress */
+      .block-progress { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+      .block-pip { flex: 1; height: 4px; border-radius: 2px; background: #222; transition: background 0.3s; }
+      .block-pip.done { background: #2ecc71; }
+      .block-pip.active { background: #c9a84c; }
+
+      /* Timer */
+      .timer-wrap { text-align: center; margin-bottom: 1.5rem; }
+      .timer-phase { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.15em; color: #555; margin-bottom: 0.5rem; }
+      .timer-display {
+        font-family: 'JetBrains Mono', monospace; font-size: 5rem; font-weight: 700;
+        color: #e8e6e1; line-height: 1;
+        transition: color 0.3s;
+      }
+      .timer-display.amrap { color: #fc4c02; }
+      .timer-display.emom { color: #4ecdc4; }
+      .timer-display.rest { color: #2ecc71; }
+      .timer-display.warmup { color: #bb86fc; }
+      .timer-display.warning { color: #e74c3c !important; }
+      .timer-sub { font-size: 0.85rem; color: #8a8a8e; margin-top: 0.4rem; }
+
+      /* AMRAP round counter */
+      .round-counter { display: flex; align-items: center; justify-content: center; gap: 1.5rem; margin-bottom: 1.25rem; }
+      .round-info { text-align: center; }
+      .round-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #555; }
+      .round-num { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; color: #fc4c02; }
+      .btn-round { background: rgba(252,76,2,0.12); border: 1px solid rgba(252,76,2,0.4); border-radius: 12px; padding: 0.6rem 1.2rem; color: #fc4c02; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+      .btn-round:hover { background: rgba(252,76,2,0.25); }
+      .btn-round:active { transform: scale(0.96); }
+
+      /* Exercise list */
+      .exercise-list { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.25rem; }
+      .exercise-item {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.7rem 0.9rem; border-radius: 10px;
+        background: #0f0f11; border: 1px solid transparent;
+        transition: all 0.2s;
+      }
+      .exercise-item.active { background: rgba(201,168,76,0.08); border-color: rgba(201,168,76,0.3); }
+      .exercise-item.rest-ex { background: rgba(46,204,113,0.06); border-color: rgba(46,204,113,0.2); }
+      .ex-num { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: #555; width: 1.2rem; flex-shrink: 0; }
+      .ex-name { flex: 1; font-size: 0.92rem; color: #ccc; }
+      .exercise-item.active .ex-name { color: #e8e6e1; font-weight: 600; }
+      .ex-reps { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #c9a84c; flex-shrink: 0; }
+      .ex-cue { font-size: 0.75rem; color: #555; font-style: italic; margin-top: 0.2rem; }
+
+      /* EMOM current */
+      .emom-current { text-align: center; margin-bottom: 1.25rem; }
+      .emom-minute-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #4ecdc4; margin-bottom: 0.3rem; }
+      .emom-exercise-name { font-size: 1.5rem; font-weight: 700; color: #e8e6e1; margin-bottom: 0.25rem; }
+      .emom-cue { font-size: 0.85rem; color: #8a8a8e; font-style: italic; margin-bottom: 0.5rem; }
+      .emom-next { font-size: 0.78rem; color: #555; }
+      .emom-next span { color: #8a8a8e; }
+      .emom-progress { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; margin-top: 0.6rem; }
+      .emom-pip { width: 8px; height: 8px; border-radius: 50%; background: #222; }
+      .emom-pip.done { background: #4ecdc4; }
+      .emom-pip.active { background: #e8e6e1; }
+
+      /* Warmup */
+      .warmup-wrap { text-align: center; margin-bottom: 1.25rem; }
+      .warmup-progress { font-size: 0.78rem; color: #555; margin-bottom: 0.4rem; }
+      .warmup-ex { font-size: 1.4rem; font-weight: 700; color: #e8e6e1; margin-bottom: 0.3rem; }
+      .warmup-cue { font-size: 0.88rem; color: #8a8a8e; font-style: italic; margin-bottom: 0.8rem; }
+      .warmup-dots { display: flex; gap: 4px; justify-content: center; }
+      .w-dot { width: 8px; height: 8px; border-radius: 50%; background: #222; }
+      .w-dot.done { background: #bb86fc; }
+      .w-dot.active { background: #e8e6e1; }
+
+      /* Controls */
+      .session-controls { display: flex; gap: 0.75rem; justify-content: center; margin-top: auto; padding-top: 1rem; }
+      .btn-main { flex: 1; max-width: 200px; padding: 0.85rem 1.5rem; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; }
+      .btn-pause { background: rgba(255,255,255,0.08); color: #e8e6e1; border: 1px solid #333 !important; border-radius: 12px !important; }
+      .btn-pause:hover { background: rgba(255,255,255,0.15); }
+      .btn-skip { background: rgba(78,205,196,0.1); color: #4ecdc4; border: 1px solid rgba(78,205,196,0.3) !important; border-radius: 12px !important; }
+
+      /* Feedback overlay */
+      .feedback-wrap { flex: 1; display: flex; flex-direction: column; gap: 1.5rem; }
+      .feedback-title { font-family: 'Staatliches', Impact, sans-serif; font-size: 2rem; color: #c9a84c; text-align: center; }
+      .feedback-sub { font-size: 0.9rem; color: #8a8a8e; text-align: center; margin-top: -1rem; }
+      .rpe-section label { display: block; font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+      .rpe-buttons { display: flex; gap: 0.4rem; }
+      .rpe-btn { flex: 1; padding: 0.6rem 0; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #141416; border: 1px solid #333; color: #8a8a8e; }
+      .rpe-btn:hover { border-color: #555; color: #e8e6e1; }
+      .rpe-btn.selected { background: rgba(201,168,76,0.15); border-color: #c9a84c; color: #c9a84c; }
+      .note-section { display: flex; flex-direction: column; gap: 0.5rem; }
+      .note-section label { font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.1em; }
+      .note-section textarea { background: #141416; border: 1px solid #333; border-radius: 8px; padding: 0.75rem; color: #e8e6e1; font-size: 0.9rem; font-family: inherit; resize: none; height: 80px; }
+      .note-section textarea:focus { outline: none; border-color: #555; }
+      .btn-save { padding: 1rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; background: #c9a84c; color: #0a0a0c; border: none; transition: opacity 0.2s; }
+      .btn-save:hover { opacity: 0.85; }
+      .btn-skip-feedback { background: none; border: none; color: #555; font-size: 0.85rem; cursor: pointer; text-align: center; padding: 0.5rem; }
+      .btn-skip-feedback:hover { color: #8a8a8e; }
+
+      @media (max-width: 768px) {
+        .workout-grid { grid-template-columns: 1fr; }
+        .timer-display { font-size: 4rem; }
+        h1 { font-size: 2rem; }
+        .session-overlay { padding: 1rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="workout" token={token} />
+
+    <!-- SELECT SCREEN -->
+    <div id="select-screen">
+      <h1>Workout Casa</h1>
+      <p class="subtitle">Allenamenti TRX + Kettlebell per quando non puoi uscire</p>
+
+      <div class="workout-grid" id="workout-grid">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="history-section">
+        <div class="section-title">Sessioni recenti</div>
+        <div id="history-list">
+          <div style="color:#555;font-size:0.85rem;padding:0.5rem 0">Nessuna sessione ancora — inizia il tuo primo workout!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SESSION OVERLAY -->
+    <div class="session-overlay" id="session-overlay">
+      <!-- Header -->
+      <div class="session-header">
+        <div class="session-title">
+          <div class="session-workout-name" id="s-workout-name">Workout A</div>
+          <div class="session-phase-label" id="s-phase-label">Riscaldamento</div>
+        </div>
+        <button class="btn-stop" onclick="stopSession()">✕ Interrompi</button>
+      </div>
+
+      <!-- Block progress -->
+      <div class="block-progress" id="block-progress"></div>
+
+      <!-- Timer -->
+      <div class="timer-wrap">
+        <div class="timer-phase" id="timer-phase">WARM UP</div>
+        <div class="timer-display warmup" id="timer-display">0:30</div>
+        <div class="timer-sub" id="timer-sub">Esercizio 1 di 10</div>
+      </div>
+
+      <!-- Warmup view -->
+      <div id="warmup-view">
+        <div class="warmup-wrap">
+          <div class="warmup-progress" id="warmup-progress">1 / 10</div>
+          <div class="warmup-ex" id="warmup-ex-name">—</div>
+          <div class="warmup-cue" id="warmup-ex-cue">—</div>
+          <div class="warmup-dots" id="warmup-dots"></div>
+        </div>
+      </div>
+
+      <!-- AMRAP view -->
+      <div id="amrap-view" style="display:none">
+        <div class="round-counter">
+          <div class="round-info">
+            <div class="round-label">Round blocco</div>
+            <div class="round-num" id="amrap-sub-round">1/3</div>
+          </div>
+          <button class="btn-round" onclick="completeRound()">✓ Round completato</button>
+          <div class="round-info">
+            <div class="round-label">Round fatti</div>
+            <div class="round-num" id="amrap-done-rounds">0</div>
+          </div>
+        </div>
+        <div class="exercise-list" id="amrap-exercises"></div>
+      </div>
+
+      <!-- Rest view -->
+      <div id="rest-view" style="display:none">
+        <div style="text-align:center;padding:1rem 0">
+          <div style="font-size:2rem;margin-bottom:0.5rem">😮‍💨</div>
+          <div style="font-size:1.1rem;color:#2ecc71;font-weight:600">Riposo</div>
+          <div style="font-size:0.85rem;color:#555;margin-top:0.4rem" id="rest-label">Round 1 completato</div>
+        </div>
+      </div>
+
+      <!-- EMOM view -->
+      <div id="emom-view" style="display:none">
+        <div class="emom-current">
+          <div class="emom-minute-label" id="emom-minute-label">Minuto 1/20</div>
+          <div class="emom-exercise-name" id="emom-ex-name">—</div>
+          <div class="emom-cue" id="emom-ex-cue">—</div>
+          <div class="emom-next" id="emom-next">Dopo: <span>—</span></div>
+          <div class="emom-progress" id="emom-pips"></div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="session-controls">
+        <button class="btn-main btn-pause" id="btn-pause" onclick="togglePause()">⏸ Pausa</button>
+        <button class="btn-main btn-skip" id="btn-skip" onclick="skipPhase()" style="display:none">⏭ Salta</button>
+      </div>
+    </div>
+
+    <!-- FEEDBACK OVERLAY -->
+    <div class="session-overlay" id="feedback-overlay">
+      <div class="feedback-wrap">
+        <div>
+          <div class="feedback-title">💪 Fatto!</div>
+          <div class="feedback-sub" id="feedback-duration">Durata: —</div>
+        </div>
+        <div class="rpe-section">
+          <label>Com'è andata? (1 = troppo facile, 10 = al limite)</label>
+          <div class="rpe-buttons" id="rpe-buttons">
+            <!-- 1–10 populated by JS -->
+          </div>
+        </div>
+        <div class="note-section">
+          <label>Note rapide (opzionale)</label>
+          <textarea id="feedback-note" placeholder="es. ho fatto 4 round sull AMRAP, gambe pesanti..."></textarea>
+        </div>
+        <button class="btn-save" onclick="saveFeedback()">Salva sessione</button>
+        <button class="btn-skip-feedback" onclick="skipFeedback()">Salta</button>
+      </div>
+    </div>
+
+    <script is:inline define:vars={{ token }}>
+    (function () {
+      const API = '/api/admin/workout-sessions';
+      const HEADERS = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      const WARMUP = [
+        { name: 'Jumping jack leggeri', sec: 30, cue: 'Gambe morbide, braccia aperte' },
+        { name: 'Rotazioni spalle', sec: 30, cue: 'Cerchi ampi, avanti poi indietro' },
+        { name: 'Hip circles', sec: 30, cue: 'Bacino in circolo lento, respira' },
+        { name: 'Leg swings', sec: 30, cue: 'Tieniti a un appoggio, gamba che oscilla' },
+        { name: 'Squat a corpo libero', sec: 30, cue: 'Scendi piano, talloni a terra' },
+        { name: 'Affondi laterali alternati', sec: 30, cue: 'Piede piatto, stendi la gamba libera' },
+        { name: 'Rotazione busto', sec: 30, cue: 'Braccia aperte, rotazione lenta' },
+        { name: 'Plank isometrico', sec: 30, cue: 'Corpo rigido, respira con il diaframma' },
+        { name: 'Mountain climber lenti', sec: 30, cue: 'Ginocchio verso il petto, alternato' },
+        { name: 'Intrarotazione spalle', sec: 30, cue: 'Ruota le braccia verso l interno' },
+      ];
+      const WORKOUTS = [
+        {
+          id: 'workout-a', name: 'Workout A', subtitle: 'Kbl · TRX · Bastone',
+          focus: 'Full body — forza + cardio', estimatedMin: 55,
+          equipment: ['Kettlebell', 'TRX', 'Bastone'],
+          blocks: [
+            { type: 'amrap', label: 'AMRAP #1', rounds: 3, secPerRound: 480, restSec: 120,
+              exercises: [
+                { name: 'Rematore dx kettlebell', reps: 12, cue: 'Schiena dritta, gomito indietro' },
+                { name: 'Rematore sx kettlebell', reps: 12, cue: 'Stesso lato, schiena ferma' },
+                { name: 'Overhead squat con bastone', reps: 12, cue: 'Bastone sopra la testa, scendi lento' },
+                { name: 'Piegamenti laterali kbl', reps: '10+10', cue: 'Kbl su un lato, fletti lateralmente' },
+                { name: 'Crunch bike', reps: 20, cue: 'Gomito verso il ginocchio opposto' },
+              ]
+            },
+            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
+              exercises: [
+                { name: 'Rope jump', cue: 'Ritmo costante, polsi che girano' },
+                { name: 'Dip', cue: 'Scendi fino a 90 gradi, spalle basse' },
+                { name: 'Squat jump', cue: 'Esplodi verso l alto, atterra morbido' },
+                { name: 'Crunch inverso e spinta', cue: 'Bacino che si alza, gambe tese in su' },
+                { name: 'Rest', cue: 'Recupero attivo, respira', isRest: true },
+              ]
+            },
+            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Jumping jack frontale', reps: 20, cue: 'Braccia che si incrociano davanti' },
+                { name: 'Lunge jump affondi saltati', reps: 12, cue: 'Alterna le gambe in volo, morbido' },
+                { name: 'Push up TRX', reps: 12, cue: 'Piedi nei ganci, corpo rigido come un asse' },
+                { name: 'Swing kettlebell', reps: 12, cue: 'Potenza dai fianchi, non dalle braccia' },
+                { name: 'Mountain climber TRX', reps: 20, cue: 'Piedi nel TRX, ginocchia al petto' },
+              ]
+            },
+          ]
+        },
+        {
+          id: 'workout-b', name: 'Workout B', subtitle: 'Gambe · Core · TRX',
+          focus: 'Gambe + core', estimatedMin: 55,
+          equipment: ['Kettlebell', 'TRX'],
+          blocks: [
+            { type: 'amrap', label: 'AMRAP #1', rounds: 3, secPerRound: 480, restSec: 120,
+              exercises: [
+                { name: 'Stacco rumeno unilaterale dx', reps: 10, cue: 'Gamba sinistra ferma, kbl verso il piede' },
+                { name: 'Stacco rumeno unilaterale sx', reps: 10, cue: 'Gamba destra ferma, schiena piatta' },
+                { name: 'Step up 10 dx più 10 sx', reps: '10+10', cue: 'Tallone del piede che sale, spingi da lì' },
+                { name: 'Mountain climber', reps: 20, cue: 'Venti totali, alternati veloci' },
+                { name: 'Calf raises con kbl', reps: '10+10', cue: 'Lento in salita e in discesa' },
+              ]
+            },
+            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
+              exercises: [
+                { name: 'Body row TRX gomiti larghi', cue: 'Petto verso le maniglie, non il mento' },
+                { name: 'V kup', cue: 'Gambe e busto si alzano insieme, core che tira' },
+                { name: 'Rest', cue: 'Recupero, respira profondo', isRest: true },
+              ]
+            },
+            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Jumping jack', reps: 20, cue: 'Ritmo costante' },
+                { name: 'Curl TRX', reps: 12, cue: 'Gomiti fissi alti, bicipiti che chiudono' },
+                { name: 'Push press kettlebell', reps: 20, cue: 'Leggera spinta di gambe, poi spingi il kbl' },
+                { name: 'Stacchi laterali verticali a terra', reps: 12, cue: 'Gamba laterale che si alza, bacino fermo' },
+                { name: 'Plank touch spalle', reps: '10+10', cue: 'Bacino fermo mentre tocchi la spalla opposta' },
+              ]
+            },
+          ]
+        },
+        {
+          id: 'workout-c', name: 'Workout C', subtitle: 'Petto · Kbl · Core',
+          focus: 'Petto + total body', estimatedMin: 50,
+          equipment: ['Kettlebell', 'TRX'],
+          blocks: [
+            { type: 'amrap', label: 'AMRAP #1', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Burpees', reps: 6, cue: 'Esplosivo in salita, piatto in discesa' },
+                { name: 'Chest press kbl presa a martello', reps: 12, cue: 'Sdraiato, kbl verso il cielo, scendi lento' },
+                { name: 'Leg curl TRX', reps: 12, cue: 'Talloni nei ganci, bacino alto, piega le ginocchia' },
+                { name: 'Crunch bike', reps: 12, cue: 'Gomito verso il ginocchio opposto' },
+              ]
+            },
+            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
+              exercises: [
+                { name: 'Affondi in avanti 8 per lato', cue: 'Ginocchio che quasi tocca terra' },
+                { name: 'Shoulder press kettlebell', cue: 'Spingi sopra la testa, core stabile' },
+                { name: 'Push up a terra', cue: 'Petto che sfiora il pavimento, corpo rigido' },
+                { name: 'Rest', cue: 'Recupero', isRest: true },
+              ]
+            },
+            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Diamond push up', reps: 11, cue: 'Mani vicine a formare un diamante, tricipiti' },
+                { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, non scendono mai' },
+                { name: 'Sit up', reps: 12, cue: 'Schiena che scende lenta, non cadere' },
+              ]
+            },
+          ]
+        },
+        {
+          id: 'workout-d', name: 'Workout D', subtitle: 'TRX Full Body',
+          focus: 'Full body — stabilità', estimatedMin: 55,
+          equipment: ['Kettlebell', 'TRX'],
+          blocks: [
+            { type: 'amrap', label: 'AMRAP #1', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Rematore Y TRX', reps: 12, cue: 'Braccia a Y in alto, non a croce, apri il petto' },
+                { name: 'Affondi TRX alternati', reps: 12, cue: 'Piede posteriore nel gancio, scendi lento' },
+                { name: 'Affondi direzionali TRX', reps: 12, cue: 'Varia la direzione, frontale laterale diagonale' },
+                { name: 'Press kettlebell variato', reps: 12, cue: 'In piedi poi a terra, stessa posizione del kbl' },
+              ]
+            },
+            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
+              exercises: [
+                { name: 'Pistol squat TRX 8 per lato', cue: 'Usa il TRX per bilanciare, scendi lento quanto riesci' },
+                { name: 'Body row TRX', cue: 'Corpo rigido, tira il petto alle maniglie' },
+                { name: 'Rest', cue: 'Recupero', isRest: true },
+              ]
+            },
+            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
+              exercises: [
+                { name: 'Push up a terra', reps: 12, cue: 'Corpo rigido, petto al pavimento' },
+                { name: 'Body row TRX', reps: 12, cue: 'Gomiti verso i fianchi, non alti' },
+                { name: 'Estensioni sopra la testa kbl', reps: 12, cue: 'Gomiti fissi, estendi solo l avambraccio' },
+                { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, bicipiti che chiudono' },
+                { name: 'Crunch inverso a terra', reps: 12, cue: 'Bacino che si stacca, gambe su verticali' },
+              ]
+            },
+          ]
+        },
+      ];
+
+      // ── Voice ────────────────────────────────────────────────────────────
+      var _speaking = false;
+      var _voiceQueue = [];
+      function speak(text, priority) {
+        if (!window.speechSynthesis) return;
+        if (priority) { window.speechSynthesis.cancel(); _voiceQueue = []; }
+        _voiceQueue.push(text);
+        _drainVoice();
+      }
+      function _drainVoice() {
+        if (_speaking || _voiceQueue.length === 0) return;
+        _speaking = true;
+        var u = new SpeechSynthesisUtterance(_voiceQueue.shift());
+        u.lang = 'it-IT'; u.rate = 1.0; u.pitch = 1.0;
+        var voices = window.speechSynthesis.getVoices();
+        var itVoice = voices.find(function(v) { return v.lang.startsWith('it'); });
+        if (itVoice) u.voice = itVoice;
+        u.onend = function() { _speaking = false; _drainVoice(); };
+        u.onerror = function() { _speaking = false; _drainVoice(); };
+        window.speechSynthesis.speak(u);
+      }
+      if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = function() {};
+
+      // ── Session state ────────────────────────────────────────────────────
+      var S = {
+        phase: 'warmup',   // warmup | amrap | rest | emom | interblock | done_block
+        workout: null,
+        blockIdx: 0,
+        subRound: 1,
+        timer: 0,
+        emomMinute: 0,
+        amrapRounds: {},   // key: blockIdx + '-' + subRound → rounds completed
+        warmupIdx: 0,
+        paused: false,
+        startTime: null,
+        totalElapsed: 0,
+        rpe: 7,
+        note: '',
+        intervalId: null,
+        wakeLock: null,
+      };
+
+      // ── Wake lock ────────────────────────────────────────────────────────
+      async function acquireWakeLock() {
+        try {
+          if (navigator.wakeLock) S.wakeLock = await navigator.wakeLock.request('screen');
+        } catch (e) {}
+      }
+      function releaseWakeLock() {
+        if (S.wakeLock) { S.wakeLock.release().catch(function(){}); S.wakeLock = null; }
+      }
+
+      // ── Timer tick ───────────────────────────────────────────────────────
+      function tick() {
+        if (S.paused) return;
+        S.totalElapsed++;
+        S.timer = Math.max(0, S.timer - 1);
+        checkVoiceCues();
+        renderTimer();
+        if (S.timer <= 0) {
+          setTimeout(advancePhase, 300);
+        }
+      }
+
+      function checkVoiceCues() {
+        var t = S.timer;
+        var b = S.workout.blocks[S.blockIdx];
+
+        if (S.phase === 'amrap') {
+          var half = Math.floor(b.secPerRound / 2);
+          if (t === half) speak('Metà tempo. Continua!');
+          if (t === 30) speak('Trenta secondi. Finisci il round!', true);
+          if (t === 10) speak('Dieci secondi.');
+          if (t === 3) speak('Tre.');
+          if (t === 2) speak('Due.');
+          if (t === 1) speak('Uno.');
+        }
+        if (S.phase === 'rest') {
+          if (t === 30) speak('Trenta secondi al via.');
+          if (t === 10) speak('Dieci secondi.');
+          if (t === 3) speak('Tre, due, uno.');
+        }
+        if (S.phase === 'emom') {
+          // minute boundary: handled in advancePhase
+        }
+        if (S.phase === 'warmup') {
+          if (t === 5) speak('Cinque.');
+          if (t === 3) speak('Tre.');
+        }
+      }
+
+      function advancePhase() {
+        var w = S.workout;
+        var b = w.blocks[S.blockIdx];
+
+        if (S.phase === 'warmup') {
+          S.warmupIdx++;
+          if (S.warmupIdx >= WARMUP.length) {
+            speak('Riscaldamento completato. ' + w.name + '. Inizia tra tre, due, uno.', true);
+            S.phase = 'interblock';
+            S.timer = 4;
+          } else {
+            startWarmupExercise();
+          }
+          return;
+        }
+
+        if (S.phase === 'interblock') {
+          startBlock(S.blockIdx);
+          return;
+        }
+
+        if (S.phase === 'amrap') {
+          speak('Stop! ' + (S.subRound < b.rounds ? 'Riposati per due minuti.' : 'Blocco completato. Ottimo!'), true);
+          S.phase = 'rest';
+          S.timer = b.restSec;
+          renderRest();
+          return;
+        }
+
+        if (S.phase === 'rest') {
+          if (S.subRound < b.rounds) {
+            S.subRound++;
+            startAMRAP(b);
+          } else {
+            goNextBlock();
+          }
+          return;
+        }
+
+        if (S.phase === 'emom') {
+          S.emomMinute++;
+          var totalMinutes = Math.floor(b.totalSec / 60);
+          if (S.emomMinute >= totalMinutes) {
+            speak('EMOM completato. Ottimo lavoro!', true);
+            goNextBlock();
+          } else {
+            startEMOMMinute(b);
+          }
+          return;
+        }
+      }
+
+      function goNextBlock() {
+        S.blockIdx++;
+        if (S.blockIdx >= S.workout.blocks.length) {
+          endSession();
+          return;
+        }
+        speak('Blocco completato. Pausa trenta secondi.', true);
+        S.phase = 'interblock';
+        S.timer = 30;
+        renderInterBlock();
+      }
+
+      // ── Start helpers ────────────────────────────────────────────────────
+      function startWorkout(workoutId) {
+        var w = WORKOUTS.find(function(x) { return x.id === workoutId; });
+        if (!w) return;
+        S.workout = w;
+        S.blockIdx = 0; S.subRound = 1; S.emomMinute = 0; S.warmupIdx = 0;
+        S.amrapRounds = {}; S.totalElapsed = 0; S.paused = false;
+        S.startTime = Date.now();
+        acquireWakeLock();
+        document.getElementById('select-screen').style.display = 'none';
+        document.getElementById('s-workout-name').textContent = w.name;
+        renderBlockProgress();
+        speak('Partiamo con il riscaldamento. Dieci esercizi da trenta secondi.', true);
+        startWarmupExercise();
+        if (S.intervalId) clearInterval(S.intervalId);
+        S.intervalId = setInterval(tick, 1000);
+        document.getElementById('session-overlay').classList.add('active');
+        document.getElementById('btn-skip').style.display = 'inline-flex';
+      }
+
+      function startWarmupExercise() {
+        S.phase = 'warmup';
+        var ex = WARMUP[S.warmupIdx];
+        S.timer = ex.sec;
+        speak(ex.name + '. ' + ex.cue);
+        renderWarmup();
+      }
+
+      function startBlock(blockIdx) {
+        var b = S.workout.blocks[blockIdx];
+        S.blockIdx = blockIdx; S.subRound = 1; S.emomMinute = 0;
+        if (b.type === 'amrap') startAMRAP(b);
+        else startEMOM(b);
+      }
+
+      function startAMRAP(b) {
+        S.phase = 'amrap';
+        S.timer = b.secPerRound;
+        var names = b.exercises.map(function(e) { return e.name + (e.reps ? ' ' + e.reps + ' ripetizioni' : ''); });
+        var intro = b.label + '. Hai ' + Math.floor(b.secPerRound / 60) + ' minuti per fare più round possibili. Esercizi: ' + names.join(', ') + '. Via!';
+        speak(intro, true);
+        renderAMRAP(b);
+      }
+
+      function startEMOM(b) {
+        S.phase = 'emom';
+        S.emomMinute = 0;
+        var totalMin = Math.floor(b.totalSec / 60);
+        speak(b.label + '. ' + totalMin + ' minuti. Ogni minuto cambi esercizio.', true);
+        setTimeout(function() { startEMOMMinute(b); }, 1500);
+      }
+
+      function startEMOMMinute(b) {
+        S.timer = 60;
+        var idx = S.emomMinute % b.exercises.length;
+        var ex = b.exercises[idx];
+        var totalMin = Math.floor(b.totalSec / 60);
+        var label = 'Minuto ' + (S.emomMinute + 1) + ': ' + ex.name + '. ' + (ex.isRest ? 'Recupero.' : 'Via!');
+        speak(label, true);
+        renderEMOM(b);
+      }
+
+      // ── Render functions ─────────────────────────────────────────────────
+      function fmtTime(sec) {
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        return m + ':' + String(s).padStart(2, '0');
+      }
+
+      function renderTimer() {
+        var el = document.getElementById('timer-display');
+        var sub = document.getElementById('timer-sub');
+        el.textContent = fmtTime(S.timer);
+        el.className = 'timer-display';
+        if (S.phase === 'amrap') { el.classList.add('amrap'); if (S.timer <= 30) el.classList.add('warning'); }
+        else if (S.phase === 'emom') el.classList.add('emom');
+        else if (S.phase === 'rest' || S.phase === 'interblock') el.classList.add('rest');
+        else el.classList.add('warmup');
+
+        if (S.phase === 'amrap') {
+          var b = S.workout.blocks[S.blockIdx];
+          document.getElementById('timer-phase').textContent = b.label.toUpperCase();
+          sub.textContent = 'Sub-round ' + S.subRound + ' di ' + b.rounds;
+          document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + b.rounds;
+        } else if (S.phase === 'emom') {
+          var b2 = S.workout.blocks[S.blockIdx];
+          var totalMin = Math.floor(b2.totalSec / 60);
+          document.getElementById('timer-phase').textContent = 'EMOM';
+          sub.textContent = 'Minuto ' + (S.emomMinute + 1) + ' di ' + totalMin;
+          document.getElementById('emom-minute-label').textContent = 'Minuto ' + (S.emomMinute + 1) + '/' + totalMin;
+        } else if (S.phase === 'rest') {
+          document.getElementById('timer-phase').textContent = 'RIPOSO';
+          sub.textContent = 'Prossimo: sub-round ' + S.subRound + ' di ' + S.workout.blocks[S.blockIdx].rounds;
+        } else if (S.phase === 'warmup') {
+          document.getElementById('timer-phase').textContent = 'WARM UP';
+          sub.textContent = 'Esercizio ' + (S.warmupIdx + 1) + ' di ' + WARMUP.length;
+        } else {
+          document.getElementById('timer-phase').textContent = 'TRANSIZIONE';
+          sub.textContent = '';
+        }
+      }
+
+      function renderBlockProgress() {
+        var w = S.workout;
+        var html = w.blocks.map(function(b, i) {
+          var cls = i < S.blockIdx ? 'done' : i === S.blockIdx ? 'active' : '';
+          return '<div class="block-pip ' + cls + '" title="' + b.label + '"></div>';
+        }).join('');
+        document.getElementById('block-progress').innerHTML = html;
+      }
+
+      function renderWarmup() {
+        var ex = WARMUP[S.warmupIdx];
+        document.getElementById('warmup-ex-name').textContent = ex.name;
+        document.getElementById('warmup-ex-cue').textContent = ex.cue;
+        document.getElementById('warmup-progress').textContent = (S.warmupIdx + 1) + ' / ' + WARMUP.length;
+        var dots = WARMUP.map(function(_, i) {
+          var c = i < S.warmupIdx ? 'done' : i === S.warmupIdx ? 'active' : '';
+          return '<div class="w-dot ' + c + '"></div>';
+        }).join('');
+        document.getElementById('warmup-dots').innerHTML = dots;
+        showView('warmup');
+        document.getElementById('s-phase-label').textContent = 'Riscaldamento';
+      }
+
+      function renderAMRAP(b) {
+        showView('amrap');
+        document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + b.rounds;
+        var key = S.blockIdx + '-' + S.subRound;
+        document.getElementById('amrap-done-rounds').textContent = S.amrapRounds[key] || 0;
+        var html = b.exercises.map(function(ex, i) {
+          return '<div class="exercise-item"><span class="ex-num">' + (i+1) + '</span>' +
+            '<div style="flex:1"><div class="ex-name">' + ex.name + '</div>' +
+            '<div class="ex-cue">' + ex.cue + '</div></div>' +
+            (ex.reps ? '<span class="ex-reps">' + ex.reps + '</span>' : '') + '</div>';
+        }).join('');
+        document.getElementById('amrap-exercises').innerHTML = html;
+        document.getElementById('s-phase-label').textContent = b.label + ' — Sub-round ' + S.subRound + '/' + b.rounds;
+        renderBlockProgress();
+      }
+
+      function renderRest() {
+        showView('rest');
+        var b = S.workout.blocks[S.blockIdx];
+        document.getElementById('rest-label').textContent = 'Sub-round ' + (S.subRound) + ' completato — ne mancano ' + (b.rounds - S.subRound);
+        document.getElementById('s-phase-label').textContent = 'Riposo ' + fmtTime(b.restSec);
+      }
+
+      function renderEMOM(b) {
+        showView('emom');
+        var idx = S.emomMinute % b.exercises.length;
+        var ex = b.exercises[idx];
+        var nextIdx = (S.emomMinute + 1) % b.exercises.length;
+        var nextEx = b.exercises[nextIdx];
+        document.getElementById('emom-ex-name').textContent = ex.name;
+        document.getElementById('emom-ex-cue').textContent = ex.cue;
+        document.getElementById('emom-next').innerHTML = 'Dopo: <span>' + nextEx.name + '</span>';
+        document.getElementById('emom-ex-name').style.color = ex.isRest ? '#2ecc71' : '#e8e6e1';
+        var totalMin = Math.floor(b.totalSec / 60);
+        var pips = '';
+        for (var i = 0; i < totalMin; i++) {
+          var c = i < S.emomMinute ? 'done' : i === S.emomMinute ? 'active' : '';
+          pips += '<div class="emom-pip ' + c + '"></div>';
+        }
+        document.getElementById('emom-pips').innerHTML = pips;
+        document.getElementById('s-phase-label').textContent = b.label;
+        renderBlockProgress();
+      }
+
+      function renderInterBlock() {
+        showView('warmup');
+        document.getElementById('warmup-ex-name').textContent = 'Transizione';
+        document.getElementById('warmup-ex-cue').textContent = S.blockIdx < S.workout.blocks.length ? 'Prossimo: ' + S.workout.blocks[S.blockIdx].label : 'Ultimo blocco completato!';
+        document.getElementById('warmup-progress').textContent = '';
+        document.getElementById('warmup-dots').innerHTML = '';
+        document.getElementById('s-phase-label').textContent = 'Pausa inter-blocco';
+      }
+
+      function showView(v) {
+        ['warmup', 'amrap', 'rest', 'emom'].forEach(function(name) {
+          document.getElementById(name + '-view').style.display = name === v ? '' : 'none';
+        });
+      }
+
+      // ── Controls ──────────────────────────────────────────────────────────
+      window.togglePause = function() {
+        S.paused = !S.paused;
+        var btn = document.getElementById('btn-pause');
+        if (S.paused) {
+          window.speechSynthesis && window.speechSynthesis.cancel();
+          btn.textContent = '▶ Riprendi';
+        } else {
+          speak('Riprendi!');
+          btn.textContent = '⏸ Pausa';
+        }
+      };
+
+      window.skipPhase = function() {
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        S.timer = 0;
+        advancePhase();
+      };
+
+      window.completeRound = function() {
+        var key = S.blockIdx + '-' + S.subRound;
+        S.amrapRounds[key] = (S.amrapRounds[key] || 0) + 1;
+        document.getElementById('amrap-done-rounds').textContent = S.amrapRounds[key];
+        var n = S.amrapRounds[key];
+        speak(n === 1 ? 'Primo round!' : 'Round ' + n + '. Continua!');
+      };
+
+      window.stopSession = function() {
+        if (!confirm('Interrompere il workout?')) return;
+        if (S.intervalId) clearInterval(S.intervalId);
+        window.speechSynthesis && window.speechSynthesis.cancel();
+        releaseWakeLock();
+        document.getElementById('session-overlay').classList.remove('active');
+        document.getElementById('select-screen').style.display = '';
+      };
+
+      function endSession() {
+        if (S.intervalId) clearInterval(S.intervalId);
+        releaseWakeLock();
+        speak('Allenamento completato! Grande lavoro!', true);
+        document.getElementById('session-overlay').classList.remove('active');
+        var durSec = Math.round((Date.now() - S.startTime) / 1000);
+        var m = Math.floor(durSec / 60), s = durSec % 60;
+        document.getElementById('feedback-duration').textContent = 'Durata: ' + m + 'min ' + s + 'sec';
+        buildRpeBtns();
+        document.getElementById('feedback-overlay').classList.add('active');
+      }
+
+      function buildRpeBtns() {
+        var html = '';
+        for (var i = 1; i <= 10; i++) {
+          var sel = i === S.rpe ? ' selected' : '';
+          html += '<button class="rpe-btn' + sel + '" onclick="selectRpe(' + i + ')">' + i + '</button>';
+        }
+        document.getElementById('rpe-buttons').innerHTML = html;
+      }
+
+      window.selectRpe = function(n) {
+        S.rpe = n;
+        document.querySelectorAll('.rpe-btn').forEach(function(b, i) {
+          b.classList.toggle('selected', i + 1 === n);
+        });
+      };
+
+      window.saveFeedback = function() {
+        var note = document.getElementById('feedback-note').value;
+        var durSec = Math.round((Date.now() - S.startTime) / 1000);
+        fetch(API, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify({
+            workout_id: S.workout.id,
+            duration_sec: durSec,
+            rpe: S.rpe,
+            note: note,
+            amrap_rounds: S.amrapRounds,
+          }),
+        })
+          .then(function() { closeFeedback(); loadStats(); })
+          .catch(function() { closeFeedback(); });
+      };
+
+      window.skipFeedback = function() {
+        var durSec = Math.round((Date.now() - S.startTime) / 1000);
+        fetch(API, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify({ workout_id: S.workout.id, duration_sec: durSec }),
+        }).then(function() { loadStats(); }).catch(function(){});
+        closeFeedback();
+      };
+
+      function closeFeedback() {
+        document.getElementById('feedback-overlay').classList.remove('active');
+        document.getElementById('select-screen').style.display = '';
+      }
+
+      // ── Stats + cards ─────────────────────────────────────────────────────
+      function loadStats() {
+        fetch(API, { headers: HEADERS })
+          .then(function(r) { return r.json(); })
+          .then(function(d) { renderCards(d.stats); renderHistory(d.sessions); })
+          .catch(function() { renderCards(null); });
+      }
+
+      function renderCards(stats) {
+        var lastDone = (stats && stats.lastDoneByWorkout) || {};
+        var suggested = suggestWorkout(lastDone);
+        var html = WORKOUTS.map(function(w) {
+          var last = lastDone[w.id];
+          var lastStr = last ? fmtLastDone(last) : 'Mai fatto';
+          var isRecent = last && daysSince(last) <= 7;
+          var isSuggested = w.id === suggested;
+          return '<div class="workout-card' + (isSuggested ? ' suggested' : '') + '" onclick="startWorkout(\'' + w.id + '\')">' +
+            (isSuggested ? '<span class="suggested-badge">✦ Suggerito oggi</span>' : '') +
+            '<div class="card-name">' + w.name + '</div>' +
+            '<div class="card-sub">' + w.subtitle + '</div>' +
+            '<div class="card-focus">' + w.focus + '</div>' +
+            '<div class="card-meta">' + w.equipment.map(function(e) { return '<span class="card-tag">' + e + '</span>'; }).join('') +
+            '<span class="card-tag">~' + w.estimatedMin + 'min</span></div>' +
+            '<div class="card-last' + (isRecent ? ' recent' : '') + '">' + (isRecent ? '✓ ' : '') + lastStr + '</div>' +
+            '</div>';
+        }).join('');
+        document.getElementById('workout-grid').innerHTML = html;
+      }
+
+      function renderHistory(sessions) {
+        if (!sessions || sessions.length === 0) return;
+        var wMap = {};
+        WORKOUTS.forEach(function(w) { wMap[w.id] = w.name; });
+        var html = sessions.slice(0, 10).map(function(s) {
+          var d = new Date(s.completed_at);
+          var dateStr = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+          var rpeHtml = s.rpe ? '<div class="rpe-bar">' + Array.from({length:10}, function(_,i) {
+            return '<div class="rpe-dot' + (i < s.rpe ? ' filled' : '') + '"></div>';
+          }).join('') + '</div>' : '';
+          var dur = s.duration_sec ? Math.round(s.duration_sec / 60) + 'min' : '';
+          return '<div class="history-row">' +
+            '<div class="history-name">' + (wMap[s.workout_id] || s.workout_id) + '</div>' +
+            (dur ? '<span style="font-size:0.78rem;color:#555">' + dur + '</span>' : '') +
+            rpeHtml +
+            '<div class="history-date">' + dateStr + '</div>' +
+            '</div>';
+        }).join('');
+        document.getElementById('history-list').innerHTML = html;
+      }
+
+      function suggestWorkout(lastDone) {
+        var oldest = null, oldestId = null;
+        WORKOUTS.forEach(function(w) {
+          var last = lastDone[w.id];
+          if (!last) { oldestId = w.id; oldest = null; return; }
+          if (oldest === null || new Date(last) < new Date(oldest)) {
+            oldest = last; oldestId = w.id;
+          }
+        });
+        return oldestId || WORKOUTS[0].id;
+      }
+
+      function daysSince(isoStr) {
+        return Math.floor((Date.now() - new Date(isoStr).getTime()) / 86400000);
+      }
+
+      function fmtLastDone(isoStr) {
+        var d = daysSince(isoStr);
+        if (d === 0) return 'Fatto oggi';
+        if (d === 1) return 'Ieri';
+        return d + ' giorni fa';
+      }
+
+      window.startWorkout = startWorkout;
+      loadStats();
+    })();
+    </script>
+  </body>
+</html>

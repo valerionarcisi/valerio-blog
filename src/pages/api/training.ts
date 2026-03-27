@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { verifyBearerToken } from "~/lib/auth";
 import { fetchTrainingContext, fetchFullStats } from "~/services/strava";
+import getDb from "~/lib/turso";
 
 export const prerender = false;
 
@@ -30,11 +31,28 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  async function fetchHomeWorkoutsThisWeek(): Promise<number> {
+    try {
+      const db = getDb();
+      const weekStart = new Date();
+      weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
+      const weekStartStr = weekStart.toISOString().slice(0, 10);
+      const res = await db.execute({
+        sql: "SELECT COUNT(*) as n FROM workout_sessions WHERE completed_at >= ?",
+        args: [weekStartStr],
+      });
+      return Number(res.rows[0]?.n ?? 0);
+    } catch {
+      return 0;
+    }
+  }
+
   try {
-    const [training, fullStats, weather] = await Promise.all([
+    const [training, fullStats, weather, homeWorkouts] = await Promise.all([
       fetchTrainingContext(),
       fetchFullStats(),
       fetchWeekendWeather(),
+      fetchHomeWorkoutsThisWeek(),
     ]);
 
     return new Response(
@@ -45,6 +63,7 @@ export const GET: APIRoute = async ({ request }) => {
         last12WeeklyElevation: training.last12WeeklyElevation,
         weeklyRunStats: fullStats.weeklyRunStats,
         weather,
+        homeWorkoutsThisWeek: homeWorkouts,
       }),
       { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=900" } },
     );

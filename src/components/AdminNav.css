@@ -85,10 +85,10 @@ body:has(.admin-sidebar) {
     left: 0;
     width: 100%;
     height: auto;
-    /* 2-row grid: all items equal width */
+    /* 3-row grid: 3 columns × 3 rows */
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: auto auto;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto auto;
     padding: 0.4rem 0.5rem;
     padding-bottom: calc(0.4rem + env(safe-area-inset-bottom, 0));
     gap: 0.25rem;
