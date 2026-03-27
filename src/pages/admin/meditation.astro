@@ -704,7 +704,8 @@ const quotesJson = JSON.stringify(allQuotes);
         Object.keys(w).forEach(function(k) {
           for (var i = 0; i < w[k]; i++) pool.push(sessionMap[k] !== undefined ? sessionMap[k] : 0);
         });
-        return pool[dayOfYear % pool.length];
+        // Prime multiplier spreads consecutive days across the pool evenly
+        return pool[(dayOfYear * 13) % pool.length];
       }
 
       function renderJourney(uniqueDates) {
@@ -1183,16 +1184,23 @@ const quotesJson = JSON.stringify(allQuotes);
       }
 
 
-      function startGuidedSession() {
+      function startGuidedSession() { scheduleGuide(0); }
+      function resumeGuidedSession(elapsedSec) { scheduleGuide(elapsedSec); }
+
+      function scheduleGuide(elapsedSec) {
         var schedule = buildGuidedSchedule(timerTotal);
         var totalSteps = schedule.length;
 
-        Guide.showPanel(0, totalSteps, sess.title,
-          "Trova una posizione comoda e chiudi gli occhi. Lascia andare le tensioni.",
-          "Respira naturalmente...");
-        VoiceEngine.speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
+        if (elapsedSec === 0) {
+          Guide.showPanel(0, totalSteps, sess.title,
+            "Trova una posizione comoda e chiudi gli occhi. Lascia andare le tensioni.",
+            "Respira naturalmente...");
+          VoiceEngine.speak("Iniziamo la sessione di oggi. " + sess.title + ". Trova una posizione comoda e chiudi gli occhi.");
+        }
 
         schedule.forEach(function(step) {
+          var delay = step.at - elapsedSec;
+          if (delay < 0) return; // step already passed
           Guide.schedule(function() {
             if (!isRunning) return;
             guidedStepIdx = step.idx;
@@ -1209,15 +1217,18 @@ const quotesJson = JSON.stringify(allQuotes);
                 });
               }, Math.round(step.duration / 2) * 1000);
             }
-          }, step.at * 1000);
+          }, Math.max(0, delay) * 1000);
         });
 
-        Guide.schedule(function() {
-          if (!isRunning) return;
-          Guide.signal("stepChime", 2, "Un minuto alla fine. Porta la consapevolezza a tutto il corpo.", function() {
-            Guide.setHint("Un minuto alla fine...");
-          });
-        }, Math.max(0, timerTotal - 60) * 1000);
+        var delayFinal = (timerTotal - 60) - elapsedSec;
+        if (delayFinal > 0) {
+          Guide.schedule(function() {
+            if (!isRunning) return;
+            Guide.signal("stepChime", 2, "Un minuto alla fine. Porta la consapevolezza a tutto il corpo.", function() {
+              Guide.setHint("Un minuto alla fine...");
+            });
+          }, delayFinal * 1000);
+        }
       }
 
       document.getElementById("timer-presets").addEventListener("click", function(e) {
@@ -1266,8 +1277,10 @@ const quotesJson = JSON.stringify(allQuotes);
           btn.textContent = "Pausa"; btn.className = "timer-btn pause";
           requestWakeLock();
           if (pausedRemaining != null) {
+            var elapsedSec = timerTotal - pausedRemaining;
             timerEndTime = Date.now() + pausedRemaining * 1000;
             pausedRemaining = null;
+            resumeGuidedSession(elapsedSec);
           } else {
             timerEndTime = Date.now() + timerSeconds * 1000;
             AudioEngine.playRepeated("bell", 1, 0, function() {
