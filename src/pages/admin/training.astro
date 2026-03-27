@@ -236,9 +236,9 @@ if (!isAuthorized) return new Response("Unauthorized", { status: 401 });
         } else if (daysSinceHilly > 21 && weekElev < 50 && readiness >= 55) {
           type = 'hilly';
           // Suggest elevation based on readiness and recent hilly history
-          var hillyRuns = data.weekendLongRuns.filter(function(r) { return r.elevation > 100; });
-          var avgHillyElev = hillyRuns.length > 0
-            ? Math.round(hillyRuns.slice(-4).reduce(function(s, r) { return s + r.elevation; }, 0) / Math.min(4, hillyRuns.length))
+          var hillyHistory = data.weekendLongRuns.filter(function(r) { return r.elevation > 100; });
+          var avgHillyElev = hillyHistory.length > 0
+            ? Math.round(hillyHistory.slice(-4).reduce(function(s, r) { return s + r.elevation; }, 0) / Math.min(4, hillyHistory.length))
             : 180;
           var suggestedElev = readiness >= 70
             ? Math.round(avgHillyElev * 1.1 / 50) * 50
@@ -372,7 +372,7 @@ if (!isAuthorized) return new Response("Unauthorized", { status: 401 });
           currentWeekActivities.slice(0, 5).forEach(a => recentActs.push(a));
         }
 
-        const actHtml = currentWeekActivities.slice(0, 8).map(a => {
+        const actHtml = currentWeekActivities.slice().reverse().slice(0, 8).map(a => {
           const color = a.sportType === 'Run' ? '#fc4c02' : a.sportType === 'WeightTraining' ? '#a855f7' : '#8a8a8e';
           const pace = a.sportType === 'Run' ? fmtPace(a.averageSpeed) : '';
           const km = a.distance > 0 ? fmtDist(a.distance) : '';
