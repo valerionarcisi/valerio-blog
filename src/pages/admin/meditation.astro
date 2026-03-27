@@ -24,7 +24,7 @@ const quotesJson = JSON.stringify(allQuotes);
     <title>Meditazione Vipassana</title>
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
 
       h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
       .subtitle { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1.5rem; }
@@ -776,18 +776,7 @@ const quotesJson = JSON.stringify(allQuotes);
         html += '<div class="journey-progress">' + progressDots + '</div>';
         html += '<div class="journey-month-label"><span>Inizio</span><span>Mese ' + months + '</span><span>24+</span></div>';
 
-        html += '<div class="journey-suggestion">';
-        html += '<strong>Oggi:</strong> ' + sess.title + '<br>';
-        html += '<strong>Durata consigliata:</strong> ' + phase.minDur + '–' + phase.maxDur + ' minuti<br>';
-        var weightsList = Object.keys(phase.weights).map(function(k) { return k + ' ' + phase.weights[k] + '%'; }).join(' · ');
-        html += '<strong>Mix del periodo:</strong> ' + weightsList;
-        html += '</div>';
-
-        html += '<div class="journey-tip">' + phase.spiritual + '</div>';
-
-        // Full path table (collapsible)
-        html += '<details class="journey-roadmap">';
-        html += '<summary class="journey-roadmap-toggle">Il percorso completo — 24 mesi</summary>';
+        // Full path table (always visible)
         html += '<div class="journey-roadmap-table">';
         html += '<table>';
         html += '<thead><tr><th>Fase</th><th>Durata</th><th>Focus</th><th>Sessione</th><th>Perché</th></tr></thead>';
@@ -815,7 +804,6 @@ const quotesJson = JSON.stringify(allQuotes);
         });
         html += '</tbody></table>';
         html += '</div>';
-        html += '</details>';
 
         document.getElementById("journey-content").innerHTML = html;
 
