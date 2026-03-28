@@ -7,6 +7,7 @@ export const prerender = false;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const GET: APIRoute = async ({ url }) => {
+  try {
   const period = url.searchParams.get("period") || "30d";
   const customFrom = url.searchParams.get("from") || undefined;
   const customTo = url.searchParams.get("to") || undefined;
@@ -169,4 +170,10 @@ export const GET: APIRoute = async ({ url }) => {
       headers: { "Content-Type": "application/json" },
     },
   );
+  } catch (e: any) {
+    return new Response(
+      JSON.stringify({ error: e.message, stack: e.stack }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
 };
