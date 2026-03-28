@@ -8,7 +8,14 @@ const token = Astro.url.searchParams.get("token") ?? "";
 const isAuthorized = verifyAdminToken(token);
 
 if (!isAuthorized) {
-  return new Response("Unauthorized", { status: 401 });
+  const pe = process.env.ADMIN_TOKEN;
+  const me = import.meta.env.ADMIN_TOKEN;
+  const diag = [
+    `url=${token.length}`,
+    `proc=${pe ? pe.length : 'undef'}`,
+    `meta=${me ? me.length : 'undef'}`,
+  ].join(' ');
+  return new Response("Unauthorized " + diag, { status: 401 });
 }
 ---
 
