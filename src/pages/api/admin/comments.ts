@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyBearerToken } from "~/lib/auth";
+import { verifyAdminBearerToken } from "~/lib/auth";
 import {
   type Result,
   ok,
@@ -13,7 +13,7 @@ import {
 export const prerender = false;
 
 function isAuthorized(request: Request): boolean {
-  return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
+  return verifyAdminBearerToken(request);
 }
 
 type CommentAction =
