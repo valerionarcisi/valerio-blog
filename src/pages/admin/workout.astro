@@ -28,7 +28,7 @@ if (!isAuthorized) {
       .subtitle { color: #8a8a8e; font-size: 0.9rem; margin-bottom: 1.5rem; }
 
       /* ---- SELECT SCREEN ---- */
-      .workout-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+      .workout-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem; }
       .workout-card {
         background: #141416; border: 1px solid #222; border-radius: 14px;
         padding: 1.2rem; cursor: pointer; transition: all 0.2s; position: relative;
@@ -164,11 +164,64 @@ if (!isAuthorized) {
       .btn-skip-feedback { background: none; border: none; color: #555; font-size: 0.85rem; cursor: pointer; text-align: center; padding: 0.5rem; }
       .btn-skip-feedback:hover { color: #8a8a8e; }
 
+      /* ---- PREVIEW OVERLAY ---- */
+      .preview-overlay {
+        display: none; position: fixed; inset: 0; z-index: 99;
+        background: #0a0a0c; overflow-y: auto; padding: 1.5rem;
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0));
+      }
+      .preview-overlay.active { display: flex; flex-direction: column; }
+      .preview-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; }
+      .preview-title { flex: 1; }
+      .preview-workout-name { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.8rem; color: #c9a84c; }
+      .preview-focus { font-size: 0.88rem; color: #8a8a8e; margin-top: 0.15rem; }
+      .preview-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+      .preview-tag { font-size: 0.75rem; background: #141416; border: 1px solid #333; border-radius: 4px; padding: 0.2rem 0.5rem; color: #8a8a8e; }
+      .btn-back { background: none; border: 1px solid #333; border-radius: 8px; padding: 0.4rem 0.75rem; color: #555; cursor: pointer; font-size: 0.82rem; transition: all 0.2s; }
+      .btn-back:hover { border-color: #888; color: #e8e6e1; }
+
+      .preview-block { margin-bottom: 1.5rem; }
+      .preview-block-header {
+        font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+        text-transform: uppercase; letter-spacing: 0.1em;
+        padding: 0.5rem 0; margin-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .preview-block-header.amrap { color: #fc4c02; }
+      .preview-block-header.emom { color: #4ecdc4; }
+      .preview-block-detail { font-size: 0.72rem; color: #555; font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 0.5rem; }
+
+      .preview-table { width: 100%; border-collapse: collapse; }
+      .preview-table th {
+        text-align: left; font-size: 0.7rem; text-transform: uppercase;
+        letter-spacing: 0.08em; color: #555; padding: 0.35rem 0.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      .preview-table td {
+        padding: 0.45rem 0.5rem; font-size: 0.85rem; color: #ccc;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+      }
+      .preview-table tr:last-child td { border-bottom: none; }
+      .preview-table .ex-rest td { color: #2ecc71; font-style: italic; }
+      .preview-table .reps-col { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #c9a84c; text-align: center; white-space: nowrap; }
+      .preview-table .cue-col { font-size: 0.75rem; color: #666; font-style: italic; }
+
+      .preview-start-wrap { margin-top: auto; padding-top: 1.25rem; text-align: center; }
+      .btn-start {
+        width: 100%; max-width: 320px; padding: 1rem 2rem; border-radius: 14px;
+        font-size: 1.1rem; font-weight: 700; cursor: pointer; border: none;
+        background: #c9a84c; color: #0a0a0c; transition: opacity 0.2s;
+      }
+      .btn-start:hover { opacity: 0.85; }
+      .btn-start:active { transform: scale(0.97); }
+
       @media (max-width: 768px) {
-        .workout-grid { grid-template-columns: 1fr; }
+        .workout-grid { grid-template-columns: repeat(2, 1fr); }
         .timer-display { font-size: 4rem; }
         h1 { font-size: 2rem; }
         .session-overlay { padding: 1rem; }
+        .preview-overlay { padding: 1rem; }
+        .preview-table .cue-col { display: none; }
       }
     </style>
   </head>
@@ -189,6 +242,22 @@ if (!isAuthorized) {
         <div id="history-list">
           <div style="color:#555;font-size:0.85rem;padding:0.5rem 0">Nessuna sessione ancora — inizia il tuo primo workout!</div>
         </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW OVERLAY -->
+    <div class="preview-overlay" id="preview-overlay">
+      <div class="preview-header">
+        <div class="preview-title">
+          <div class="preview-workout-name" id="preview-name">Workout A</div>
+          <div class="preview-focus" id="preview-focus">Full body — forza + cardio</div>
+        </div>
+        <button class="btn-back" onclick="closePreview()">← Indietro</button>
+      </div>
+      <div class="preview-meta" id="preview-meta"></div>
+      <div id="preview-blocks"></div>
+      <div class="preview-start-wrap">
+        <button class="btn-start" id="btn-start-workout">▶ Inizia Workout</button>
       </div>
     </div>
 
@@ -227,7 +296,7 @@ if (!isAuthorized) {
       <div id="amrap-view" style="display:none">
         <div class="round-counter">
           <div class="round-info">
-            <div class="round-label">Round blocco</div>
+            <div class="round-label">Round</div>
             <div class="round-num" id="amrap-sub-round">1/3</div>
           </div>
           <button class="btn-round" onclick="completeRound()">✓ Round completato</button>
@@ -306,133 +375,81 @@ if (!isAuthorized) {
         { name: 'Intrarotazione spalle', sec: 30, cue: 'Ruota le braccia verso l interno' },
       ];
       const WORKOUTS = [
-        {
-          id: 'workout-a', name: 'Workout A', subtitle: 'Kbl · TRX · Bastone',
-          focus: 'Full body — forza + cardio', estimatedMin: 55,
-          equipment: ['Kettlebell', 'TRX', 'Bastone'],
-          blocks: [
-            { type: 'amrap', label: 'AMRAP #1', rounds: 3, secPerRound: 480, restSec: 120,
-              exercises: [
-                { name: 'Rematore dx kettlebell', reps: 12, cue: 'Schiena dritta, gomito indietro' },
-                { name: 'Rematore sx kettlebell', reps: 12, cue: 'Stesso lato, schiena ferma' },
-                { name: 'Overhead squat con bastone', reps: 12, cue: 'Bastone sopra la testa, scendi lento' },
-                { name: 'Piegamenti laterali kbl', reps: '10+10', cue: 'Kbl su un lato, fletti lateralmente' },
-                { name: 'Crunch bike', reps: 20, cue: 'Gomito verso il ginocchio opposto' },
-              ]
-            },
-            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
-              exercises: [
-                { name: 'Rope jump', cue: 'Ritmo costante, polsi che girano' },
-                { name: 'Dip', cue: 'Scendi fino a 90 gradi, spalle basse' },
-                { name: 'Squat jump', cue: 'Esplodi verso l alto, atterra morbido' },
-                { name: 'Crunch inverso e spinta', cue: 'Bacino che si alza, gambe tese in su' },
-                { name: 'Rest', cue: 'Recupero attivo, respira', isRest: true },
-              ]
-            },
-            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Jumping jack frontale', reps: 20, cue: 'Braccia che si incrociano davanti' },
-                { name: 'Lunge jump affondi saltati', reps: 12, cue: 'Alterna le gambe in volo, morbido' },
-                { name: 'Push up TRX', reps: 12, cue: 'Piedi nei ganci, corpo rigido come un asse' },
-                { name: 'Swing kettlebell', reps: 12, cue: 'Potenza dai fianchi, non dalle braccia' },
-                { name: 'Mountain climber TRX', reps: 20, cue: 'Piedi nel TRX, ginocchia al petto' },
-              ]
-            },
-          ]
-        },
-        {
-          id: 'workout-b', name: 'Workout B', subtitle: 'Gambe · Core · TRX',
-          focus: 'Gambe + core', estimatedMin: 55,
-          equipment: ['Kettlebell', 'TRX'],
-          blocks: [
-            { type: 'amrap', label: 'AMRAP #1', rounds: 3, secPerRound: 480, restSec: 120,
-              exercises: [
-                { name: 'Stacco rumeno unilaterale dx', reps: 10, cue: 'Gamba sinistra ferma, kbl verso il piede' },
-                { name: 'Stacco rumeno unilaterale sx', reps: 10, cue: 'Gamba destra ferma, schiena piatta' },
-                { name: 'Step up 10 dx più 10 sx', reps: '10+10', cue: 'Tallone del piede che sale, spingi da lì' },
-                { name: 'Mountain climber', reps: 20, cue: 'Venti totali, alternati veloci' },
-                { name: 'Calf raises con kbl', reps: '10+10', cue: 'Lento in salita e in discesa' },
-              ]
-            },
-            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
-              exercises: [
-                { name: 'Body row TRX gomiti larghi', cue: 'Petto verso le maniglie, non il mento' },
-                { name: 'V kup', cue: 'Gambe e busto si alzano insieme, core che tira' },
-                { name: 'Rest', cue: 'Recupero, respira profondo', isRest: true },
-              ]
-            },
-            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Jumping jack', reps: 20, cue: 'Ritmo costante' },
-                { name: 'Curl TRX', reps: 12, cue: 'Gomiti fissi alti, bicipiti che chiudono' },
-                { name: 'Push press kettlebell', reps: 20, cue: 'Leggera spinta di gambe, poi spingi il kbl' },
-                { name: 'Stacchi laterali verticali a terra', reps: 12, cue: 'Gamba laterale che si alza, bacino fermo' },
-                { name: 'Plank touch spalle', reps: '10+10', cue: 'Bacino fermo mentre tocchi la spalla opposta' },
-              ]
-            },
-          ]
-        },
-        {
-          id: 'workout-c', name: 'Workout C', subtitle: 'Petto · Kbl · Core',
-          focus: 'Petto + total body', estimatedMin: 50,
-          equipment: ['Kettlebell', 'TRX'],
-          blocks: [
-            { type: 'amrap', label: 'AMRAP #1', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Burpees', reps: 6, cue: 'Esplosivo in salita, piatto in discesa' },
-                { name: 'Chest press kbl presa a martello', reps: 12, cue: 'Sdraiato, kbl verso il cielo, scendi lento' },
-                { name: 'Leg curl TRX', reps: 12, cue: 'Talloni nei ganci, bacino alto, piega le ginocchia' },
-                { name: 'Crunch bike', reps: 12, cue: 'Gomito verso il ginocchio opposto' },
-              ]
-            },
-            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
-              exercises: [
-                { name: 'Affondi in avanti 8 per lato', cue: 'Ginocchio che quasi tocca terra' },
-                { name: 'Shoulder press kettlebell', cue: 'Spingi sopra la testa, core stabile' },
-                { name: 'Push up a terra', cue: 'Petto che sfiora il pavimento, corpo rigido' },
-                { name: 'Rest', cue: 'Recupero', isRest: true },
-              ]
-            },
-            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Diamond push up', reps: 11, cue: 'Mani vicine a formare un diamante, tricipiti' },
-                { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, non scendono mai' },
-                { name: 'Sit up', reps: 12, cue: 'Schiena che scende lenta, non cadere' },
-              ]
-            },
-          ]
-        },
-        {
-          id: 'workout-d', name: 'Workout D', subtitle: 'TRX Full Body',
-          focus: 'Full body — stabilità', estimatedMin: 55,
-          equipment: ['Kettlebell', 'TRX'],
-          blocks: [
-            { type: 'amrap', label: 'AMRAP #1', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Rematore Y TRX', reps: 12, cue: 'Braccia a Y in alto, non a croce, apri il petto' },
-                { name: 'Affondi TRX alternati', reps: 12, cue: 'Piede posteriore nel gancio, scendi lento' },
-                { name: 'Affondi direzionali TRX', reps: 12, cue: 'Varia la direzione, frontale laterale diagonale' },
-                { name: 'Press kettlebell variato', reps: 12, cue: 'In piedi poi a terra, stessa posizione del kbl' },
-              ]
-            },
-            { type: 'emom', label: 'EMOM 20:00', totalSec: 1200,
-              exercises: [
-                { name: 'Pistol squat TRX 8 per lato', cue: 'Usa il TRX per bilanciare, scendi lento quanto riesci' },
-                { name: 'Body row TRX', cue: 'Corpo rigido, tira il petto alle maniglie' },
-                { name: 'Rest', cue: 'Recupero', isRest: true },
-              ]
-            },
-            { type: 'amrap', label: 'AMRAP #2', rounds: 2, secPerRound: 720, restSec: 120,
-              exercises: [
-                { name: 'Push up a terra', reps: 12, cue: 'Corpo rigido, petto al pavimento' },
-                { name: 'Body row TRX', reps: 12, cue: 'Gomiti verso i fianchi, non alti' },
-                { name: 'Estensioni sopra la testa kbl', reps: 12, cue: 'Gomiti fissi, estendi solo l avambraccio' },
-                { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, bicipiti che chiudono' },
-                { name: 'Crunch inverso a terra', reps: 12, cue: 'Bacino che si stacca, gambe su verticali' },
-              ]
-            },
-          ]
-        },
+        { id: 'w01', name: 'AMRAP A1', subtitle: 'Rematore · Overhead · Core', equipment: ['Kettlebell', 'Bastone'], focus: 'Full body — forza', type: 'amrap', rounds: 3, secPerRound: 480, restSec: 120, exercises: [
+          { name: 'Rematore dx kettlebell', reps: 12, cue: 'Schiena dritta, gomito indietro' },
+          { name: 'Rematore sx kettlebell', reps: 12, cue: 'Stesso lato, schiena ferma' },
+          { name: 'Overhead squat con bastone', reps: 12, cue: 'Bastone sopra la testa, scendi lento' },
+          { name: 'Piegamenti laterali kbl', reps: '10+10', cue: 'Kbl su un lato, fletti lateralmente' },
+          { name: 'Crunch bike', reps: 20, cue: 'Gomito verso il ginocchio opposto' },
+        ]},
+        { id: 'w02', name: 'EMOM A2', subtitle: 'Cardio · Dip · Core', equipment: ['Corda'], focus: 'Cardio + core', type: 'emom', totalSec: 1200, exercises: [
+          { name: 'Rope jump', cue: 'Ritmo costante, polsi che girano' },
+          { name: 'Dip', cue: 'Scendi fino a 90 gradi, spalle basse' },
+          { name: 'Squat jump', cue: 'Esplodi verso l alto, atterraggi morbido' },
+          { name: 'Crunch inverso + spinta', cue: 'Bacino che si alza, gambe tese in su' },
+          { name: 'Rest', cue: 'Recupero attivo, respira', isRest: true },
+        ]},
+        { id: 'w03', name: 'AMRAP A3', subtitle: 'Jump · TRX · Swing', equipment: ['Kettlebell', 'TRX'], focus: 'Cardio + forza', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Jumping jack frontale', reps: 20, cue: 'Braccia che si incrociano davanti' },
+          { name: 'Lunge jump — affondi saltati', reps: 12, cue: 'Alterna le gambe in volo, morbido' },
+          { name: 'Push up TRX', reps: 12, cue: 'Piedi nei ganci, corpo rigido come un asse' },
+          { name: 'Swing kettlebell', reps: 12, cue: 'Potenza dai fianchi, non dalle braccia' },
+          { name: 'Mountain climber TRX', reps: 20, cue: 'Piedi nel TRX, ginocchia al petto' },
+        ]},
+        { id: 'w04', name: 'AMRAP B1', subtitle: 'Stacco · Step up · Polpacci', equipment: ['Kettlebell'], focus: 'Gambe + core', type: 'amrap', rounds: 3, secPerRound: 480, restSec: 120, exercises: [
+          { name: 'Stacco rumeno unilaterale dx', reps: 10, cue: 'Gamba sinistra ferma, kbl verso il piede' },
+          { name: 'Stacco rumeno unilaterale sx', reps: 10, cue: 'Gamba destra ferma, schiena piatta' },
+          { name: 'Step up 10 dx + 10 sx', reps: '10+10', cue: 'Tallone del piede che sale, spingi da li' },
+          { name: 'Mountain climber', reps: 20, cue: 'Venti totali, alternati veloci' },
+          { name: 'Calf raises con kbl', reps: '10+10', cue: 'Lento in salita e in discesa' },
+        ]},
+        { id: 'w05', name: 'EMOM B2', subtitle: 'Body row · V-kup', equipment: ['TRX'], focus: 'Schiena + core', type: 'emom', totalSec: 1200, exercises: [
+          { name: 'Body row TRX gomiti larghi', cue: 'Petto verso le maniglie, non il mento' },
+          { name: 'V-kup', cue: 'Gambe e busto si alzano insieme, core che tira' },
+          { name: 'Rest', cue: 'Recupero, respira profondo', isRest: true },
+        ]},
+        { id: 'w06', name: 'AMRAP B3', subtitle: 'Curl · Push press · Plank', equipment: ['Kettlebell', 'TRX'], focus: 'Braccia + core', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Jumping jack', reps: 20, cue: 'Ritmo costante' },
+          { name: 'Curl TRX', reps: 12, cue: 'Gomiti fissi alti, bicipiti che chiudono' },
+          { name: 'Push press kettlebell', reps: 20, cue: 'Leggera spinta di gambe, poi spingi il kbl' },
+          { name: 'Stacchi laterali verticali a terra', reps: 12, cue: 'Gamba laterale che si alza, bacino fermo' },
+          { name: 'Plank touch spalle', reps: '10+10', cue: 'Bacino fermo mentre tocchi la spalla opposta' },
+        ]},
+        { id: 'w07', name: 'AMRAP C1', subtitle: 'Burpees · Chest press · Leg curl', equipment: ['Kettlebell', 'TRX'], focus: 'Petto + total body', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Burpees', reps: 6, cue: 'Esplosivo in salita, piatto in discesa' },
+          { name: 'Chest press kbl presa a martello', reps: 12, cue: 'Sdraiato, kbl verso il cielo, scendi lento' },
+          { name: 'Leg curl TRX', reps: 12, cue: 'Talloni nei ganci, bacino alto, piega le ginocchia' },
+          { name: 'Crunch bike', reps: 12, cue: 'Gomito verso il ginocchio opposto' },
+        ]},
+        { id: 'w08', name: 'EMOM C2', subtitle: 'Affondi · Shoulder press · Push up', equipment: ['Kettlebell'], focus: 'Gambe + spalle', type: 'emom', totalSec: 1200, exercises: [
+          { name: 'Affondi in avanti 8+8', cue: 'Otto per lato, ginocchio che quasi tocca terra' },
+          { name: 'Shoulder press kettlebell', cue: 'Spinge sopra la testa, core stabile' },
+          { name: 'Push up a terra', cue: 'Petto che sfiora il pavimento, corpo rigido' },
+          { name: 'Rest', cue: 'Recupero', isRest: true },
+        ]},
+        { id: 'w09', name: 'AMRAP C3', subtitle: 'Diamond · Curl · Sit up', equipment: ['TRX'], focus: 'Braccia + core', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Diamond push up', reps: 11, cue: 'Mani vicine a formare un diamante, tricipiti' },
+          { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, non scendono mai' },
+          { name: 'Sit up', reps: 12, cue: 'Schiena che scende lenta, non cadere' },
+        ]},
+        { id: 'w10', name: 'AMRAP D1', subtitle: 'Rematore Y · Affondi · Press', equipment: ['Kettlebell', 'TRX'], focus: 'Full body — stabilita', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Rematore Y TRX', reps: 12, cue: 'Braccia a Y in alto, non a croce, apri il petto' },
+          { name: 'Affondi TRX alternati', reps: 12, cue: 'Piede posteriore nel gancio, scendi lento' },
+          { name: 'Affondi direzionali TRX', reps: 12, cue: 'Varia la direzione, frontale laterale diagonale' },
+          { name: 'Press kettlebell variato', reps: 12, cue: 'In piedi poi a terra, stessa posizione del kbl' },
+        ]},
+        { id: 'w11', name: 'EMOM D2', subtitle: 'Pistol squat · Body row', equipment: ['TRX'], focus: 'Gambe + schiena', type: 'emom', totalSec: 1200, exercises: [
+          { name: 'Pistol squat TRX 8 per lato', cue: 'Usa il TRX per bilanciare, scendi lento quanto riesci' },
+          { name: 'Body row TRX', cue: 'Corpo rigido, tira il petto alle maniglie' },
+          { name: 'Rest', cue: 'Recupero', isRest: true },
+        ]},
+        { id: 'w12', name: 'AMRAP D3', subtitle: 'Push up · Row · Estensioni · Curl', equipment: ['Kettlebell', 'TRX'], focus: 'Braccia + core', type: 'amrap', rounds: 2, secPerRound: 720, restSec: 120, exercises: [
+          { name: 'Push up a terra', reps: 12, cue: 'Corpo rigido, petto al pavimento' },
+          { name: 'Body row TRX', reps: 12, cue: 'Gomiti verso i fianchi, non alti' },
+          { name: 'Estensioni sopra la testa kbl', reps: 12, cue: 'Gomiti fissi, estendi solo l avambraccio' },
+          { name: 'Curl TRX', reps: 12, cue: 'Gomiti alti, bicipiti che chiudono' },
+          { name: 'Crunch inverso a terra', reps: 12, cue: 'Bacino che si stacca, gambe su verticali' },
+        ]},
       ];
 
       // ── Voice ────────────────────────────────────────────────────────────
@@ -460,13 +477,12 @@ if (!isAuthorized) {
 
       // ── Session state ────────────────────────────────────────────────────
       var S = {
-        phase: 'warmup',   // warmup | amrap | rest | emom | interblock | done_block
+        phase: 'warmup',   // warmup | amrap | rest | emom | interblock
         workout: null,
-        blockIdx: 0,
         subRound: 1,
         timer: 0,
         emomMinute: 0,
-        amrapRounds: {},   // key: blockIdx + '-' + subRound → rounds completed
+        amrapRounds: {},   // key: subRound → rounds completed
         warmupIdx: 0,
         paused: false,
         startTime: null,
@@ -501,10 +517,10 @@ if (!isAuthorized) {
 
       function checkVoiceCues() {
         var t = S.timer;
-        var b = S.workout.blocks[S.blockIdx];
+        var w = S.workout;
 
         if (S.phase === 'amrap') {
-          var half = Math.floor(b.secPerRound / 2);
+          var half = Math.floor(w.secPerRound / 2);
           if (t === half) speak('Metà tempo. Continua!');
           if (t === 30) speak('Trenta secondi. Finisci il round!', true);
           if (t === 10) speak('Dieci secondi.');
@@ -528,7 +544,6 @@ if (!isAuthorized) {
 
       function advancePhase() {
         var w = S.workout;
-        var b = w.blocks[S.blockIdx];
 
         if (S.phase === 'warmup') {
           S.warmupIdx++;
@@ -543,65 +558,106 @@ if (!isAuthorized) {
         }
 
         if (S.phase === 'interblock') {
-          startBlock(S.blockIdx);
+          startMainBlock();
           return;
         }
 
         if (S.phase === 'amrap') {
-          speak('Stop! ' + (S.subRound < b.rounds ? 'Riposati per due minuti.' : 'Blocco completato. Ottimo!'), true);
+          speak('Stop! ' + (S.subRound < w.rounds ? 'Riposati per due minuti.' : 'Workout completato. Ottimo!'), true);
           S.phase = 'rest';
-          S.timer = b.restSec;
+          S.timer = w.restSec;
           renderRest();
           return;
         }
 
         if (S.phase === 'rest') {
-          if (S.subRound < b.rounds) {
+          if (S.subRound < w.rounds) {
             S.subRound++;
-            startAMRAP(b);
+            startAMRAP(w);
           } else {
-            goNextBlock();
+            endSession();
           }
           return;
         }
 
         if (S.phase === 'emom') {
           S.emomMinute++;
-          var totalMinutes = Math.floor(b.totalSec / 60);
+          var totalMinutes = Math.floor(w.totalSec / 60);
           if (S.emomMinute >= totalMinutes) {
             speak('EMOM completato. Ottimo lavoro!', true);
-            goNextBlock();
+            endSession();
           } else {
-            startEMOMMinute(b);
+            startEMOMMinute(w);
           }
           return;
         }
       }
 
-      function goNextBlock() {
-        S.blockIdx++;
-        if (S.blockIdx >= S.workout.blocks.length) {
-          endSession();
-          return;
+      // ── Start helpers ────────────────────────────────────────────────────
+      // ── Preview ──────────────────────────────────────────────────────────
+      var _previewWorkoutId = null;
+
+      function showPreview(workoutId) {
+        var w = WORKOUTS.find(function(x) { return x.id === workoutId; });
+        if (!w) return;
+        _previewWorkoutId = workoutId;
+        document.getElementById('preview-name').textContent = w.name;
+        document.getElementById('preview-focus').textContent = w.focus;
+
+        var estMin = w.type === 'amrap' ? Math.ceil((w.rounds * w.secPerRound + (w.rounds - 1) * w.restSec) / 60) : Math.ceil(w.totalSec / 60);
+        var metaHtml = w.equipment.map(function(e) { return '<span class="preview-tag">' + e + '</span>'; }).join('') +
+          '<span class="preview-tag">' + w.type.toUpperCase() + '</span>' +
+          '<span class="preview-tag">~' + estMin + ' min</span>';
+        document.getElementById('preview-meta').innerHTML = metaHtml;
+
+        var headerCls = w.type;
+        var detail = '';
+        if (w.type === 'amrap') {
+          detail = w.rounds + ' round × ' + Math.floor(w.secPerRound / 60) + ' min · Rest ' + Math.floor(w.restSec / 60) + ' min';
+        } else {
+          detail = Math.floor(w.totalSec / 60) + ' min · 1 esercizio/min';
         }
-        speak('Blocco completato. Pausa trenta secondi.', true);
-        S.phase = 'interblock';
-        S.timer = 30;
-        renderInterBlock();
+        var rows = w.exercises.map(function(ex) {
+          var cls = ex.isRest ? ' class="ex-rest"' : '';
+          return '<tr' + cls + '>' +
+            '<td>' + ex.name + '</td>' +
+            '<td class="reps-col">' + (ex.reps || (ex.isRest ? '—' : 'EMOM')) + '</td>' +
+            '<td class="cue-col">' + (ex.cue || '') + '</td>' +
+            '</tr>';
+        }).join('');
+        var blocksHtml = '<div class="preview-block">' +
+          '<div class="preview-block-header ' + headerCls + '">' + w.type.toUpperCase() +
+          '<span class="preview-block-detail">' + detail + '</span></div>' +
+          '<table class="preview-table"><thead><tr><th>Esercizio</th><th>Reps</th><th>Cue</th></tr></thead>' +
+          '<tbody>' + rows + '</tbody></table></div>';
+        document.getElementById('preview-blocks').innerHTML = blocksHtml;
+
+        document.getElementById('select-screen').style.display = 'none';
+        document.getElementById('preview-overlay').classList.add('active');
       }
 
-      // ── Start helpers ────────────────────────────────────────────────────
+      window.closePreview = function() {
+        document.getElementById('preview-overlay').classList.remove('active');
+        document.getElementById('select-screen').style.display = '';
+        _previewWorkoutId = null;
+      };
+
+      document.getElementById('btn-start-workout').addEventListener('click', function() {
+        if (!_previewWorkoutId) return;
+        document.getElementById('preview-overlay').classList.remove('active');
+        startWorkout(_previewWorkoutId);
+      });
+
       function startWorkout(workoutId) {
         var w = WORKOUTS.find(function(x) { return x.id === workoutId; });
         if (!w) return;
         S.workout = w;
-        S.blockIdx = 0; S.subRound = 1; S.emomMinute = 0; S.warmupIdx = 0;
+        S.subRound = 1; S.emomMinute = 0; S.warmupIdx = 0;
         S.amrapRounds = {}; S.totalElapsed = 0; S.paused = false;
         S.startTime = Date.now();
         acquireWakeLock();
         document.getElementById('select-screen').style.display = 'none';
         document.getElementById('s-workout-name').textContent = w.name;
-        renderBlockProgress();
         speak('Partiamo con il riscaldamento. Dieci esercizi da trenta secondi.', true);
         startWarmupExercise();
         if (S.intervalId) clearInterval(S.intervalId);
@@ -618,38 +674,38 @@ if (!isAuthorized) {
         renderWarmup();
       }
 
-      function startBlock(blockIdx) {
-        var b = S.workout.blocks[blockIdx];
-        S.blockIdx = blockIdx; S.subRound = 1; S.emomMinute = 0;
-        if (b.type === 'amrap') startAMRAP(b);
-        else startEMOM(b);
+      function startMainBlock() {
+        var w = S.workout;
+        S.subRound = 1; S.emomMinute = 0;
+        if (w.type === 'amrap') startAMRAP(w);
+        else startEMOM(w);
       }
 
-      function startAMRAP(b) {
+      function startAMRAP(w) {
         S.phase = 'amrap';
-        S.timer = b.secPerRound;
-        var names = b.exercises.map(function(e) { return e.name + (e.reps ? ' ' + e.reps + ' ripetizioni' : ''); });
-        var intro = b.label + '. Hai ' + Math.floor(b.secPerRound / 60) + ' minuti per fare più round possibili. Esercizi: ' + names.join(', ') + '. Via!';
+        S.timer = w.secPerRound;
+        var names = w.exercises.map(function(e) { return e.name + (e.reps ? ' ' + e.reps + ' ripetizioni' : ''); });
+        var intro = w.name + '. Hai ' + Math.floor(w.secPerRound / 60) + ' minuti per fare più round possibili. Esercizi: ' + names.join(', ') + '. Via!';
         speak(intro, true);
-        renderAMRAP(b);
+        renderAMRAP(w);
       }
 
-      function startEMOM(b) {
+      function startEMOM(w) {
         S.phase = 'emom';
         S.emomMinute = 0;
-        var totalMin = Math.floor(b.totalSec / 60);
-        speak(b.label + '. ' + totalMin + ' minuti. Ogni minuto cambi esercizio.', true);
-        setTimeout(function() { startEMOMMinute(b); }, 1500);
+        var totalMin = Math.floor(w.totalSec / 60);
+        speak(w.name + '. ' + totalMin + ' minuti. Ogni minuto cambi esercizio.', true);
+        setTimeout(function() { startEMOMMinute(w); }, 1500);
       }
 
-      function startEMOMMinute(b) {
+      function startEMOMMinute(w) {
         S.timer = 60;
-        var idx = S.emomMinute % b.exercises.length;
-        var ex = b.exercises[idx];
-        var totalMin = Math.floor(b.totalSec / 60);
+        var idx = S.emomMinute % w.exercises.length;
+        var ex = w.exercises[idx];
+        var totalMin = Math.floor(w.totalSec / 60);
         var label = 'Minuto ' + (S.emomMinute + 1) + ': ' + ex.name + '. ' + (ex.isRest ? 'Recupero.' : 'Via!');
         speak(label, true);
-        renderEMOM(b);
+        renderEMOM(w);
       }
 
       // ── Render functions ─────────────────────────────────────────────────
@@ -670,19 +726,18 @@ if (!isAuthorized) {
         else el.classList.add('warmup');
 
         if (S.phase === 'amrap') {
-          var b = S.workout.blocks[S.blockIdx];
-          document.getElementById('timer-phase').textContent = b.label.toUpperCase();
-          sub.textContent = 'Sub-round ' + S.subRound + ' di ' + b.rounds;
-          document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + b.rounds;
+          var w2 = S.workout;
+          document.getElementById('timer-phase').textContent = 'AMRAP';
+          sub.textContent = 'Round ' + S.subRound + ' di ' + w2.rounds;
+          document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + w2.rounds;
         } else if (S.phase === 'emom') {
-          var b2 = S.workout.blocks[S.blockIdx];
-          var totalMin = Math.floor(b2.totalSec / 60);
+          var totalMin = Math.floor(S.workout.totalSec / 60);
           document.getElementById('timer-phase').textContent = 'EMOM';
           sub.textContent = 'Minuto ' + (S.emomMinute + 1) + ' di ' + totalMin;
           document.getElementById('emom-minute-label').textContent = 'Minuto ' + (S.emomMinute + 1) + '/' + totalMin;
         } else if (S.phase === 'rest') {
           document.getElementById('timer-phase').textContent = 'RIPOSO';
-          sub.textContent = 'Prossimo: sub-round ' + S.subRound + ' di ' + S.workout.blocks[S.blockIdx].rounds;
+          sub.textContent = 'Prossimo: round ' + (S.subRound + 1) + ' di ' + S.workout.rounds;
         } else if (S.phase === 'warmup') {
           document.getElementById('timer-phase').textContent = 'WARM UP';
           sub.textContent = 'Esercizio ' + (S.warmupIdx + 1) + ' di ' + WARMUP.length;
@@ -690,15 +745,6 @@ if (!isAuthorized) {
           document.getElementById('timer-phase').textContent = 'TRANSIZIONE';
           sub.textContent = '';
         }
-      }
-
-      function renderBlockProgress() {
-        var w = S.workout;
-        var html = w.blocks.map(function(b, i) {
-          var cls = i < S.blockIdx ? 'done' : i === S.blockIdx ? 'active' : '';
-          return '<div class="block-pip ' + cls + '" title="' + b.label + '"></div>';
-        }).join('');
-        document.getElementById('block-progress').innerHTML = html;
       }
 
       function renderWarmup() {
@@ -715,57 +761,55 @@ if (!isAuthorized) {
         document.getElementById('s-phase-label').textContent = 'Riscaldamento';
       }
 
-      function renderAMRAP(b) {
+      function renderAMRAP(w) {
         showView('amrap');
-        document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + b.rounds;
-        var key = S.blockIdx + '-' + S.subRound;
+        document.getElementById('amrap-sub-round').textContent = S.subRound + '/' + w.rounds;
+        var key = String(S.subRound);
         document.getElementById('amrap-done-rounds').textContent = S.amrapRounds[key] || 0;
-        var html = b.exercises.map(function(ex, i) {
+        var html = w.exercises.map(function(ex, i) {
           return '<div class="exercise-item"><span class="ex-num">' + (i+1) + '</span>' +
             '<div style="flex:1"><div class="ex-name">' + ex.name + '</div>' +
             '<div class="ex-cue">' + ex.cue + '</div></div>' +
             (ex.reps ? '<span class="ex-reps">' + ex.reps + '</span>' : '') + '</div>';
         }).join('');
         document.getElementById('amrap-exercises').innerHTML = html;
-        document.getElementById('s-phase-label').textContent = b.label + ' — Sub-round ' + S.subRound + '/' + b.rounds;
-        renderBlockProgress();
+        document.getElementById('s-phase-label').textContent = 'AMRAP — Round ' + S.subRound + '/' + w.rounds;
       }
 
       function renderRest() {
         showView('rest');
-        var b = S.workout.blocks[S.blockIdx];
-        document.getElementById('rest-label').textContent = 'Sub-round ' + (S.subRound) + ' completato — ne mancano ' + (b.rounds - S.subRound);
-        document.getElementById('s-phase-label').textContent = 'Riposo ' + fmtTime(b.restSec);
+        var w = S.workout;
+        document.getElementById('rest-label').textContent = 'Round ' + S.subRound + ' completato — ne mancano ' + (w.rounds - S.subRound);
+        document.getElementById('s-phase-label').textContent = 'Riposo ' + fmtTime(w.restSec);
       }
 
-      function renderEMOM(b) {
+      function renderEMOM(w) {
         showView('emom');
-        var idx = S.emomMinute % b.exercises.length;
-        var ex = b.exercises[idx];
-        var nextIdx = (S.emomMinute + 1) % b.exercises.length;
-        var nextEx = b.exercises[nextIdx];
+        var idx = S.emomMinute % w.exercises.length;
+        var ex = w.exercises[idx];
+        var nextIdx = (S.emomMinute + 1) % w.exercises.length;
+        var nextEx = w.exercises[nextIdx];
         document.getElementById('emom-ex-name').textContent = ex.name;
         document.getElementById('emom-ex-cue').textContent = ex.cue;
         document.getElementById('emom-next').innerHTML = 'Dopo: <span>' + nextEx.name + '</span>';
         document.getElementById('emom-ex-name').style.color = ex.isRest ? '#2ecc71' : '#e8e6e1';
-        var totalMin = Math.floor(b.totalSec / 60);
+        var totalMin = Math.floor(w.totalSec / 60);
         var pips = '';
         for (var i = 0; i < totalMin; i++) {
           var c = i < S.emomMinute ? 'done' : i === S.emomMinute ? 'active' : '';
           pips += '<div class="emom-pip ' + c + '"></div>';
         }
         document.getElementById('emom-pips').innerHTML = pips;
-        document.getElementById('s-phase-label').textContent = b.label;
-        renderBlockProgress();
+        document.getElementById('s-phase-label').textContent = w.name;
       }
 
       function renderInterBlock() {
         showView('warmup');
-        document.getElementById('warmup-ex-name').textContent = 'Transizione';
-        document.getElementById('warmup-ex-cue').textContent = S.blockIdx < S.workout.blocks.length ? 'Prossimo: ' + S.workout.blocks[S.blockIdx].label : 'Ultimo blocco completato!';
+        document.getElementById('warmup-ex-name').textContent = 'Preparati';
+        document.getElementById('warmup-ex-cue').textContent = S.workout.name + ' sta per iniziare';
         document.getElementById('warmup-progress').textContent = '';
         document.getElementById('warmup-dots').innerHTML = '';
-        document.getElementById('s-phase-label').textContent = 'Pausa inter-blocco';
+        document.getElementById('s-phase-label').textContent = 'Via!';
       }
 
       function showView(v) {
@@ -794,7 +838,7 @@ if (!isAuthorized) {
       };
 
       window.completeRound = function() {
-        var key = S.blockIdx + '-' + S.subRound;
+        var key = String(S.subRound);
         S.amrapRounds[key] = (S.amrapRounds[key] || 0) + 1;
         document.getElementById('amrap-done-rounds').textContent = S.amrapRounds[key];
         var n = S.amrapRounds[key];
@@ -887,13 +931,15 @@ if (!isAuthorized) {
           var lastStr = last ? fmtLastDone(last) : 'Mai fatto';
           var isRecent = last && daysSince(last) <= 7;
           var isSuggested = w.id === suggested;
-          return '<div class="workout-card' + (isSuggested ? ' suggested' : '') + '" onclick="startWorkout(\'' + w.id + '\')">' +
-            (isSuggested ? '<span class="suggested-badge">✦ Suggerito oggi</span>' : '') +
+          var estMin = w.type === 'amrap' ? Math.ceil((w.rounds * w.secPerRound + (w.rounds - 1) * w.restSec) / 60) : Math.ceil(w.totalSec / 60);
+          return '<div class="workout-card' + (isSuggested ? ' suggested' : '') + '" onclick="showPreview(\'' + w.id + '\')">' +
+            (isSuggested ? '<span class="suggested-badge">✦ Suggerito</span>' : '') +
             '<div class="card-name">' + w.name + '</div>' +
             '<div class="card-sub">' + w.subtitle + '</div>' +
             '<div class="card-focus">' + w.focus + '</div>' +
-            '<div class="card-meta">' + w.equipment.map(function(e) { return '<span class="card-tag">' + e + '</span>'; }).join('') +
-            '<span class="card-tag">~' + w.estimatedMin + 'min</span></div>' +
+            '<div class="card-meta">' +
+            '<span class="card-tag">' + w.type.toUpperCase() + '</span>' +
+            '<span class="card-tag">~' + estMin + 'min</span></div>' +
             '<div class="card-last' + (isRecent ? ' recent' : '') + '">' + (isRecent ? '✓ ' : '') + lastStr + '</div>' +
             '</div>';
         }).join('');
@@ -945,6 +991,7 @@ if (!isAuthorized) {
       }
 
       window.startWorkout = startWorkout;
+      window.showPreview = showPreview;
       loadStats();
     })();
     </script>
