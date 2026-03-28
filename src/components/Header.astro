@@ -54,4 +54,11 @@ const langSwitchHref = getLangSwitchHref(currentPath);
     menuToggle.classList.toggle("active");
     nav?.classList.toggle("active");
   });
+
+  nav?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      menuToggle?.classList.remove("active");
+      nav?.classList.remove("active");
+    });
+  });
 </script>
