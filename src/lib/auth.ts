@@ -16,15 +16,3 @@ export function verifyBearerToken(request: Request, envToken: string): boolean {
   if (!authHeader?.startsWith("Bearer ")) return false;
   return timeSafeEqual(authHeader.slice(7), envToken);
 }
-
-export function verifyAdminToken(token: string): boolean {
-  const adminToken = import.meta.env.ADMIN_TOKEN;
-  if (!adminToken) return false;
-  return timeSafeEqual(token, adminToken);
-}
-
-export function verifyAdminBearerToken(request: Request): boolean {
-  const adminToken = import.meta.env.ADMIN_TOKEN;
-  if (!adminToken) return false;
-  return verifyBearerToken(request, adminToken);
-}

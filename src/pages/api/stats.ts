@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyAdminBearerToken } from "~/lib/auth";
+import { verifyBearerToken } from "~/lib/auth";
 import { getDateRange } from "~/lib/date-range";
 
 export const prerender = false;
@@ -8,7 +8,7 @@ export const prerender = false;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const GET: APIRoute = async ({ request, url }) => {
-  if (!verifyAdminBearerToken(request)) {
+  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

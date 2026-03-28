@@ -1,12 +1,12 @@
 ---
-import { verifyAdminToken } from "~/lib/auth";
+import { timeSafeEqual } from "~/lib/auth";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
 
 const token = Astro.url.searchParams.get("token") ?? "";
 const isAuthorized =
-  verifyAdminToken(token);
+  token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
 if (!isAuthorized) return new Response("Unauthorized", { status: 401 });
 ---
 

@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
-import { verifyAdminBearerToken } from "~/lib/auth";
+import { verifyBearerToken } from "~/lib/auth";
 import getDb from "~/lib/turso";
 import { parseSessionInput, parseDeleteId } from "~/lib/meditation";
 import { jsonOk, jsonErr, parseJsonBody } from "~/lib/result";
 
 function isAuthorized(request: Request): boolean {
-  return verifyAdminBearerToken(request);
+  return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
 }
 
 let tableReady = false;

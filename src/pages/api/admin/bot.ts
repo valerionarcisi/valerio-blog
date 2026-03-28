@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyAdminBearerToken } from "~/lib/auth";
+import { verifyBearerToken } from "~/lib/auth";
 import {
   type Result,
   ok,
@@ -69,7 +69,7 @@ async function insertAndRecalc(
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!verifyAdminBearerToken(request))
+  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN))
     return jsonErr("Unauthorized", 401);
 
   const bodyResult = await parseJsonBody(request);

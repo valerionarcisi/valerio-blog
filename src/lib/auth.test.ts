@@ -1,5 +1,5 @@
-import { describe, test, expect, vi, afterEach } from "vitest";
-import { timeSafeEqual, verifyBearerToken, verifyAdminToken, verifyAdminBearerToken } from "./auth";
+import { describe, test, expect } from "vitest";
+import { timeSafeEqual, verifyBearerToken } from "./auth";
 
 describe("timeSafeEqual", () => {
   test("equal strings return true", () => {
@@ -51,53 +51,5 @@ describe("verifyBearerToken", () => {
     expect(verifyBearerToken(makeRequest("Basic my-token"), "my-token")).toBe(
       false,
     );
-  });
-});
-
-describe("verifyAdminToken", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  test("valid token returns true", () => {
-    vi.stubEnv("ADMIN_TOKEN", "my-secret");
-    expect(verifyAdminToken("my-secret")).toBe(true);
-  });
-
-  test("wrong token returns false", () => {
-    vi.stubEnv("ADMIN_TOKEN", "my-secret");
-    expect(verifyAdminToken("wrong")).toBe(false);
-  });
-
-  test("returns false when ADMIN_TOKEN not set", () => {
-    vi.stubEnv("ADMIN_TOKEN", "");
-    expect(verifyAdminToken("my-secret")).toBe(false);
-  });
-});
-
-describe("verifyAdminBearerToken", () => {
-  function makeRequest(authHeader?: string): Request {
-    const headers = new Headers();
-    if (authHeader) headers.set("Authorization", authHeader);
-    return new Request("https://example.com", { headers });
-  }
-
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  test("valid bearer token returns true", () => {
-    vi.stubEnv("ADMIN_TOKEN", "my-secret");
-    expect(verifyAdminBearerToken(makeRequest("Bearer my-secret"))).toBe(true);
-  });
-
-  test("wrong bearer token returns false", () => {
-    vi.stubEnv("ADMIN_TOKEN", "my-secret");
-    expect(verifyAdminBearerToken(makeRequest("Bearer wrong"))).toBe(false);
-  });
-
-  test("returns false when ADMIN_TOKEN not set", () => {
-    vi.stubEnv("ADMIN_TOKEN", "");
-    expect(verifyAdminBearerToken(makeRequest("Bearer my-secret"))).toBe(false);
   });
 });
