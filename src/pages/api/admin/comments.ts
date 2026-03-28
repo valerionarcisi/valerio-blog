@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { verifyBearerToken } from "~/lib/auth";
+import { env } from "~/lib/env";
 import getDb from "~/lib/turso";
 import {
   type Result,
@@ -33,7 +35,11 @@ const ACTION_SQL: Record<string, string> = {
   delete: "DELETE FROM comments WHERE id = ?",
 };
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
+  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  }
+
   const status = url.searchParams.get("status") ?? "pending";
   const approvedValue = status === "approved" ? 1 : 0;
 
@@ -46,6 +52,10 @@ export const GET: APIRoute = async ({ url }) => {
 };
 
 export const PATCH: APIRoute = async ({ request }) => {
+  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  }
+
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 

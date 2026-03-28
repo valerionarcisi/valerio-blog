@@ -1,7 +1,16 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 ---
 
 <!doctype html>
@@ -164,7 +173,7 @@ export const prerender = false;
     </style>
   </head>
   <body>
-    <AdminNav currentPage="workout" />
+    <AdminNav currentPage="workout" token={token} />
 
     <!-- SELECT SCREEN -->
     <div id="select-screen">
@@ -279,10 +288,11 @@ export const prerender = false;
       </div>
     </div>
 
-    <script is:inline>
+    <script is:inline define:vars={{ token }}>
     (function () {
+      const ADMIN_TOKEN = token;
       const API = '/api/admin/workout-sessions';
-      const HEADERS = { 'Content-Type': 'application/json' };
+      const HEADERS = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ADMIN_TOKEN };
       const WARMUP = [
         { name: 'Jumping jack leggeri', sec: 30, cue: 'Gambe morbide, braccia aperte' },
         { name: 'Rotazioni spalle', sec: 30, cue: 'Cerchi ampi, avanti poi indietro' },

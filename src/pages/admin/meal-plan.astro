@@ -1,8 +1,17 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import { days, snacks } from "~/data/meal-plan";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 
 const mealEmoji: Record<string, string> = {
   "Colazione": "🌅",
@@ -191,7 +200,7 @@ const mealEmoji: Record<string, string> = {
     </style>
   </head>
   <body>
-    <AdminNav currentPage="meal-plan" />
+    <AdminNav currentPage="meal-plan" token={token} />
 
     <div class="day-tabs" role="tablist">
       {days.map((day) => (

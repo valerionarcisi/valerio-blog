@@ -1,7 +1,16 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 ---
 
 <!doctype html>
@@ -123,7 +132,7 @@ export const prerender = false;
     </style>
   </head>
   <body>
-    <AdminNav currentPage="training" />
+    <AdminNav currentPage="training" token={token} />
 
     <h1>Allenamento</h1>
     <p class="subtitle">Monitoraggio settimanale e suggerimento smart per il weekend</p>
@@ -132,7 +141,8 @@ export const prerender = false;
       <div class="loading">Carico dati Strava...</div>
     </div>
 
-    <script is:inline>
+    <script is:inline define:vars={{ token }}>
+      const ADMIN_TOKEN = token;
       const API = '/api/training';
 
       function fmtPace(speedMs) {
@@ -453,7 +463,7 @@ export const prerender = false;
 
       async function load() {
         try {
-          const res = await fetch(API);
+          const res = await fetch(API, { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const data = await res.json();
           document.getElementById('content').innerHTML = buildContent(data);

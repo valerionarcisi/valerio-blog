@@ -1,7 +1,16 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 
 const groceryList = [
   {
@@ -236,7 +245,7 @@ const totalItems = groceryList.reduce((sum, s) => sum + s.items.length, 0);
     </style>
   </head>
   <body>
-    <AdminNav currentPage="grocery" />
+    <AdminNav currentPage="grocery" token={token} />
 
     <h2 style="font-size:1.1rem; margin-bottom:0.75rem; color:#e8e6e1;">
       Spesa Settimanale — Solo Pranzi e Cene

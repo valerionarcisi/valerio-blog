@@ -1,8 +1,17 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import rawData from "../../../data/body-comp/measurements.json";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 
 const measurements = rawData.measurements;
 const nutritionPlan = rawData.nutrition_plan;
@@ -151,7 +160,7 @@ const sources = rawData.sources;
     </style>
   </head>
   <body>
-    <AdminNav currentPage="body-comp" />
+    <AdminNav currentPage="body-comp" token={token} />
     <h1>Body Composition</h1>
 
     <div class="daily-tips" id="daily-tips"></div>

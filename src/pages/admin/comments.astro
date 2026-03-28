@@ -1,7 +1,16 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 ---
 
 <!doctype html>
@@ -36,7 +45,7 @@ export const prerender = false;
     </style>
   </head>
   <body>
-    <AdminNav currentPage="comments" />
+    <AdminNav currentPage="comments" token={token} />
     <h1>Comments</h1>
     <div class="tabs">
       <button class="active" data-status="pending">Pending</button>
@@ -58,7 +67,8 @@ export const prerender = false;
     </table>
     <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
 
-    <script is:inline>
+    <script is:inline define:vars={{ token }}>
+      var ADMIN_TOKEN = token;
       var currentStatus = "pending";
 
       function loadComments(status) {
@@ -67,7 +77,7 @@ export const prerender = false;
           btn.classList.toggle("active", btn.dataset.status === status);
         });
 
-        fetch("/api/admin/comments?status=" + status)
+        fetch("/api/admin/comments?status=" + status, { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } })
           .then(function (r) { return r.json(); })
           .then(function (comments) {
             var tbody = document.getElementById("comments-body");
@@ -103,6 +113,7 @@ export const prerender = false;
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            "Authorization": "Bearer " + ADMIN_TOKEN,
           },
           body: JSON.stringify({ id: id, action: action }),
         }).then(function () {

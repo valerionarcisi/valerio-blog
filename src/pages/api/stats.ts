@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { verifyBearerToken } from "~/lib/auth";
+import { env } from "~/lib/env";
 import getDb from "~/lib/turso";
 import { getDateRange } from "~/lib/date-range";
 
@@ -6,8 +8,11 @@ export const prerender = false;
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-export const GET: APIRoute = async ({ url }) => {
-  try {
+export const GET: APIRoute = async ({ url, request }) => {
+  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  }
+
   const period = url.searchParams.get("period") || "30d";
   const customFrom = url.searchParams.get("from") || undefined;
   const customTo = url.searchParams.get("to") || undefined;
@@ -170,10 +175,4 @@ export const GET: APIRoute = async ({ url }) => {
       headers: { "Content-Type": "application/json" },
     },
   );
-  } catch (e: any) {
-    return new Response(
-      JSON.stringify({ error: e.message, stack: e.stack }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
-  }
 };

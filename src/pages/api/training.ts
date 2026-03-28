@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { verifyBearerToken } from "~/lib/auth";
+import { env } from "~/lib/env";
 import { fetchTrainingContext, fetchFullStats } from "~/services/strava";
 import getDb from "~/lib/turso";
 
@@ -25,7 +27,11 @@ async function fetchWeekendWeather() {
   }
 }
 
-export const GET: APIRoute = async () => {
+export const GET: APIRoute = async ({ request }) => {
+  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
+  }
+
   async function fetchHomeWorkoutsThisWeek(): Promise<number> {
     try {
       const db = getDb();

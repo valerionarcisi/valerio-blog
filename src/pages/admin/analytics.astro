@@ -1,7 +1,16 @@
 ---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
 ---
 
 <!doctype html>
@@ -131,7 +140,7 @@ export const prerender = false;
     </style>
   </head>
   <body>
-    <AdminNav currentPage="analytics" />
+    <AdminNav currentPage="analytics" token={token} />
     <div class="header">
       <div class="header-left">
         <h1>Analytics</h1>
@@ -253,7 +262,9 @@ export const prerender = false;
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
     <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
     <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-    <script is:inline>
+    <script is:inline define:vars={{ token }}>
+      var ADMIN_TOKEN = token;
+      var AUTH_HEADERS = { "Authorization": "Bearer " + ADMIN_TOKEN };
       var chartInstance = null;
 
       function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
@@ -339,7 +350,7 @@ export const prerender = false;
         var row = btn.closest(".visitor-row");
         fetch("/api/admin/bot", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN },
           body: JSON.stringify({ hash: hash })
         })
         .then(function(r) {
@@ -367,7 +378,7 @@ export const prerender = false;
         btn.textContent = "Flagging...";
         fetch("/api/admin/bot", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN },
           body: JSON.stringify({ hashes: hashes })
         })
         .then(function(r) { return r.json(); })
@@ -805,7 +816,7 @@ export const prerender = false;
           b.classList.toggle("active", b.dataset.period === basePeriod);
         });
 
-        fetch("/api/stats?period=" + period)
+        fetch("/api/stats?period=" + period, { headers: AUTH_HEADERS })
 
         .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
         .then(function(d) {
@@ -942,7 +953,7 @@ export const prerender = false;
       }
 
       function loadLive() {
-        fetch("/api/stats/live")
+        fetch("/api/stats/live", { headers: AUTH_HEADERS })
         .then(function(r) { return r.json(); })
         .then(function(d) {
           document.getElementById("live-count").textContent = d.active;
@@ -980,7 +991,7 @@ export const prerender = false;
         btn.textContent = "Flagging...";
         fetch("/api/admin/bot", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN },
           body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo })
         })
         .then(function(r) { return r.json(); })
