@@ -17,12 +17,17 @@ export const GET: APIRoute = async () => {
 
   const importMeta: Record<string, string> = {};
   const processEnv: Record<string, string> = {};
+  // Use bracket notation to prevent Vite from statically replacing process.env
+  const env = globalThis["process"]?.["env"] ?? {};
   for (const key of keys) {
     const val = (import.meta as any).env?.[key];
     importMeta[key] = val ? `set (${val.length} chars)` : "NOT SET";
-    const pVal = process.env[key];
+    const pVal = env[key];
     processEnv[key] = pVal ? `set (${pVal.length} chars)` : "NOT SET";
   }
+
+  // Also list all available env var keys (not values) to see what's actually available
+  const allEnvKeys = Object.keys(env).sort();
 
   let dbTest = "not tested";
   try {
@@ -35,7 +40,7 @@ export const GET: APIRoute = async () => {
   }
 
   return new Response(
-    JSON.stringify({ importMeta, processEnv, dbTest }, null, 2),
+    JSON.stringify({ importMeta, processEnv, allEnvKeys, dbTest }, null, 2),
     {
       status: 200,
       headers: { "Content-Type": "application/json" },
