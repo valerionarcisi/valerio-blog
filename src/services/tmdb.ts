@@ -1,4 +1,6 @@
-export const API_KEY = import.meta.env.TMDB_API_KEY;
+import { env } from "~/lib/env";
+
+export const API_KEY = env("TMDB_API_KEY");
 export const IMAGES_URL = "https://image.tmdb.org/t/p/w500";
 export const BASE_URL = "https://api.themoviedb.org/";
 export const VERSION = "3";

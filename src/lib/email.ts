@@ -1,3 +1,5 @@
+import { env } from "~/lib/env";
+
 const RESEND_API = "https://api.resend.com/emails";
 const NOTIFY_TO = "valerio.narcisi@gmail.com";
 
@@ -11,10 +13,10 @@ interface CommentNotification {
 export async function notifyNewComment(
   comment: CommentNotification,
 ): Promise<void> {
-  const apiKey = import.meta.env.RESEND_API_KEY;
+  const apiKey = env("RESEND_API_KEY");
   if (!apiKey) return;
 
-  const adminUrl = `https://valerionarcisi.me/admin/comments?token=${import.meta.env.ADMIN_TOKEN}`;
+  const adminUrl = `https://valerionarcisi.me/admin/comments?token=${env("ADMIN_TOKEN")}`;
 
   try {
     await fetch(RESEND_API, {
@@ -55,7 +57,7 @@ interface ContactMessage {
 export async function sendContactEmail(
   contact: ContactMessage,
 ): Promise<boolean> {
-  const apiKey = import.meta.env.RESEND_API_KEY;
+  const apiKey = env("RESEND_API_KEY");
   if (!apiKey) return false;
 
   try {

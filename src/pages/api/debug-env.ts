@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "~/lib/env";
 
 export const prerender = false;
 
@@ -15,19 +16,11 @@ export const GET: APIRoute = async () => {
     "RESEND_API_KEY",
   ];
 
-  const importMeta: Record<string, string> = {};
-  const processEnv: Record<string, string> = {};
-  // Use bracket notation to prevent Vite from statically replacing process.env
-  const env = globalThis["process"]?.["env"] ?? {};
+  const result: Record<string, string> = {};
   for (const key of keys) {
-    const val = (import.meta as any).env?.[key];
-    importMeta[key] = val ? `set (${val.length} chars)` : "NOT SET";
-    const pVal = env[key];
-    processEnv[key] = pVal ? `set (${pVal.length} chars)` : "NOT SET";
+    const val = env(key);
+    result[key] = val ? `set (${val.length} chars)` : "NOT SET";
   }
-
-  // Also list all available env var keys (not values) to see what's actually available
-  const allEnvKeys = Object.keys(env).sort();
 
   let dbTest = "not tested";
   try {
@@ -40,7 +33,7 @@ export const GET: APIRoute = async () => {
   }
 
   return new Response(
-    JSON.stringify({ importMeta, processEnv, allEnvKeys, dbTest }, null, 2),
+    JSON.stringify({ env: result, dbTest }, null, 2),
     {
       status: 200,
       headers: { "Content-Type": "application/json" },

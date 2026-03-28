@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
+import { env } from "~/lib/env";
 
 export const prerender = false;
 
-const LASTFM_API_KEY = import.meta.env.LASTFM_API_KEY;
+const LASTFM_API_KEY = env("LASTFM_API_KEY");
 const LASTFM_USER = "valerionar";
 const PLACEHOLDER_IMAGE =
   "https://lastfm.freetls.fastly.net/i/u/34s/2a96cbd8b46e442fc41c2b86b821562f.png";

@@ -1,6 +1,7 @@
 import { z as zod } from "astro:content";
+import { env } from "~/lib/env";
 
-export const AUDIO_SCROBBLER_API_KEY = import.meta.env.LASTFM_API_KEY;
+export const AUDIO_SCROBBLER_API_KEY = env("LASTFM_API_KEY");
 export const AUDIO_SCROBBLER_USER = "valerionar";
 export const AUDIO_SCROBBLER_VERSION = "2.0";
 

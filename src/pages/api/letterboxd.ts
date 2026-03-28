@@ -1,9 +1,10 @@
 import type { APIRoute } from "astro";
 import { parseString } from "xml2js";
+import { env } from "~/lib/env";
 
 export const prerender = false;
 
-const TMDB_API_KEY = import.meta.env.TMDB_API_KEY;
+const TMDB_API_KEY = env("TMDB_API_KEY");
 
 const parseXml = (xml: string): Promise<any> =>
   new Promise((resolve, reject) => {

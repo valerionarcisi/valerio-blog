@@ -1,6 +1,8 @@
-const CLIENT_ID = import.meta.env.STRAVA_CLIENT_ID;
-const CLIENT_SECRET = import.meta.env.STRAVA_CLIENT_SECRET;
-const REFRESH_TOKEN = import.meta.env.STRAVA_REFRESH_TOKEN;
+import { env } from "~/lib/env";
+
+const CLIENT_ID = env("STRAVA_CLIENT_ID");
+const CLIENT_SECRET = env("STRAVA_CLIENT_SECRET");
+const REFRESH_TOKEN = env("STRAVA_REFRESH_TOKEN");
 
 const TOKEN_URL = "https://www.strava.com/oauth/token";
 const API_URL = "https://www.strava.com/api/v3";
