@@ -10,12 +10,16 @@ const isAuthorized = verifyAdminToken(token);
 if (!isAuthorized) {
   const pe = process.env.ADMIN_TOKEN;
   const me = import.meta.env.ADMIN_TOKEN;
+  const envKeys = Object.keys(process.env);
+  const adminKeys = envKeys.filter(k => k.includes('ADMIN') || k.includes('TOKEN') || k.includes('TURSO'));
   const diag = [
     `url=${token.length}`,
     `proc=${pe ? pe.length : 'undef'}`,
     `meta=${me ? me.length : 'undef'}`,
-  ].join(' ');
-  return new Response("Unauthorized " + diag, { status: 401 });
+    `total_env=${envKeys.length}`,
+    `matching=[${adminKeys.join(',')}]`,
+  ].join(' | ');
+  return new Response("Unauthorized\n" + diag, { status: 401 });
 }
 ---
 
