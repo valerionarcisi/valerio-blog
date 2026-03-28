@@ -2,7 +2,7 @@
   NPM_FLAGS = "--version"
   NETLIFY_USE_PNPM = "true"
 [build]
-  command = "pnpm build"
+  command = "env | grep -E '^(ADMIN_TOKEN|TURSO_|STRAVA_|TMDB_|LASTFM_|RESEND_)' > .env.build && mv .env.build .env && pnpm build"
   publish = "dist"
 [[headers]]
   for = "/*"
