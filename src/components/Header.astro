@@ -80,4 +80,11 @@ const langSwitchHref = getLangSwitchHref(currentPath);
       closeMenu();
     }
   });
+
+  nav?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => {
+      menuToggle?.classList.remove("active");
+      nav?.classList.remove("active");
+    });
+  });
 </script>
