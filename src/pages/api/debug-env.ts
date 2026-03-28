@@ -15,10 +15,13 @@ export const GET: APIRoute = async () => {
     "RESEND_API_KEY",
   ];
 
-  const result: Record<string, string> = {};
+  const importMeta: Record<string, string> = {};
+  const processEnv: Record<string, string> = {};
   for (const key of keys) {
     const val = (import.meta as any).env?.[key];
-    result[key] = val ? `set (${val.length} chars)` : "NOT SET";
+    importMeta[key] = val ? `set (${val.length} chars)` : "NOT SET";
+    const pVal = process.env[key];
+    processEnv[key] = pVal ? `set (${pVal.length} chars)` : "NOT SET";
   }
 
   let dbTest = "not tested";
@@ -32,7 +35,7 @@ export const GET: APIRoute = async () => {
   }
 
   return new Response(
-    JSON.stringify({ env: result, dbTest }, null, 2),
+    JSON.stringify({ importMeta, processEnv, dbTest }, null, 2),
     {
       status: 200,
       headers: { "Content-Type": "application/json" },
