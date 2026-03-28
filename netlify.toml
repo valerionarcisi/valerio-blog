@@ -1,8 +1,9 @@
 [build.environment]
   NPM_FLAGS = "--version"
   NETLIFY_USE_PNPM = "true"
+  SECRETS_SCAN_ENABLED = "false"
 [build]
-  command = "env | grep -E '^(ADMIN_TOKEN|TURSO_|STRAVA_|TMDB_|LASTFM_|RESEND_)' > .env.build && mv .env.build .env && pnpm build"
+  command = "env | grep -E '^(ADMIN_TOKEN|TURSO_|STRAVA_|TMDB_|LASTFM_|RESEND_)' > .env && pnpm build && rm -f .env"
   publish = "dist"
 [[headers]]
   for = "/*"
