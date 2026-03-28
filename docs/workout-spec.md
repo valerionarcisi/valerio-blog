@@ -6,68 +6,87 @@ Pagina admin `/admin/workout` che funge da **personal trainer digitale** per gli
 
 ## Workout disponibili
 
-| ID | Nome | Scheda originale | Focus |
-|---|---|---|---|
-| workout-a | Workout A | No data | Full body — forza + cardio |
-| workout-b | Workout B | 12/12/2024 | Gambe + core |
-| workout-c | Workout C | 02/07/2024 | Petto + total body |
-| workout-d | Workout D | 18/04/2024 | Full body — stabilità |
+Ogni workout è un **singolo blocco** (AMRAP o EMOM), non un macro-workout multi-blocco.
 
-Ogni workout ha 3 blocchi: AMRAP#1, EMOM 20:00, AMRAP#2.
+| ID | Nome | Tipo | Focus |
+|---|---|---|---|
+| w01 | AMRAP A1 | AMRAP 3×8min | Full body — forza |
+| w02 | EMOM A2 | EMOM 20min | Cardio + core |
+| w03 | AMRAP A3 | AMRAP 2×12min | Cardio + forza |
+| w04 | AMRAP B1 | AMRAP 3×8min | Gambe + core |
+| w05 | EMOM B2 | EMOM 20min | Schiena + core |
+| w06 | AMRAP B3 | AMRAP 2×12min | Braccia + core |
+| w07 | AMRAP C1 | AMRAP 2×12min | Petto + total body |
+| w08 | EMOM C2 | EMOM 20min | Gambe + spalle |
+| w09 | AMRAP C3 | AMRAP 2×12min | Braccia + core |
+| w10 | AMRAP D1 | AMRAP 2×12min | Full body — stabilita |
+| w11 | EMOM D2 | EMOM 20min | Gambe + schiena |
+| w12 | AMRAP D3 | AMRAP 2×12min | Braccia + core |
 
 ## Struttura dati (`src/data/workouts.js`)
 
+Ogni workout ha un singolo blocco (type, exercises) direttamente nell'oggetto — nessun array `blocks`.
+
 ```javascript
 {
-  id: 'workout-a',
-  name: 'Workout A',
-  subtitle: 'Kbl · TRX · Bastone',
-  date: null,                    // data scheda originale (ISO o null)
-  equipment: ['Kettlebell', 'TRX', 'Bastone'],
-  focus: 'Full body — forza + cardio',
-  estimatedMin: 55,
-  blocks: [
-    {
-      type: 'amrap',
-      label: 'AMRAP #1',
-      rounds: 3,                 // sub-round: 3 × 8 minuti con 2 min rest
-      secPerRound: 480,
-      restSec: 120,
-      exercises: [
-        { name: 'Rematore dx kettlebell', reps: 12, cue: '...' },
-        ...
-      ]
-    },
-    {
-      type: 'emom',
-      label: 'EMOM 20:00',
-      totalSec: 1200,            // 20 minuti
-      exercises: [
-        { name: 'Rope jump', cue: '...', isRest: false },
-        { name: 'Rest', cue: 'Recupero', isRest: true },
-      ]
-    },
-    { type: 'amrap', ... }       // AMRAP#2: 2 × 12 min
+  id: 'w01',
+  name: 'AMRAP A1',
+  subtitle: 'Rematore · Overhead · Core',
+  equipment: ['Kettlebell', 'Bastone'],
+  focus: 'Full body — forza',
+  type: 'amrap',              // 'amrap' | 'emom'
+  rounds: 3,                  // solo AMRAP: quanti round
+  secPerRound: 480,            // solo AMRAP: secondi per round
+  restSec: 120,                // solo AMRAP: secondi di rest tra round
+  exercises: [
+    { name: 'Rematore dx kettlebell', reps: 12, cue: '...' },
+    ...
+  ]
+}
+
+// EMOM
+{
+  id: 'w02',
+  name: 'EMOM A2',
+  type: 'emom',
+  totalSec: 1200,              // solo EMOM: durata totale
+  exercises: [
+    { name: 'Rope jump', cue: '...', isRest: false },
+    { name: 'Rest', cue: 'Recupero', isRest: true },
   ]
 }
 ```
 
 Warm-up condiviso: 10 esercizi × 30 secondi = 5 minuti dinamici (definito in `WARMUP_EXERCISES`).
 
-## Flusso sessione
+## Flusso UI
 
 ```
-select → warmup (10×30s) → interblock → block[0] → interblock → block[1] → interblock → block[2] → feedback → done
+griglia 12 card → click card → preview (tabella esercizi + dettagli) → click "Inizia Workout" → warmup → sessione → feedback → done
+```
+
+### Preview screen
+
+Mostra prima di partire:
+- Nome workout, focus, equipment, tipo (AMRAP/EMOM), durata stimata
+- Tabella esercizi con colonne: Esercizio, Reps, Cue
+- Bottone "▶ Inizia Workout" per partire
+- Bottone "← Indietro" per tornare alla griglia
+
+### Flusso sessione
+
+```
+warmup (10×30s) → interblock (4s countdown) → main block → feedback → done
 ```
 
 ### Fasi interne AMRAP
 ```
-amrap_active (secPerRound) → rest (restSec) → amrap_active → ... → goNextBlock
+amrap_active (secPerRound) → rest (restSec) → amrap_active → ... → endSession
 ```
 
 ### Fasi interne EMOM
 ```
-emomMinute=0 (60s) → emomMinute=1 → ... → emomMinute=totalSec/60-1 → goNextBlock
+emomMinute=0 (60s) → emomMinute=1 → ... → emomMinute=totalSec/60-1 → endSession
 ```
 
 ## Voce (Web Speech Synthesis — it-IT)
@@ -77,22 +96,22 @@ emomMinute=0 (60s) → emomMinute=1 → ... → emomMinute=totalSec/60-1 → goN
 | Warmup inizio | "Partiamo con il riscaldamento. Dieci esercizi da trenta secondi." |
 | Ogni esercizio warmup | "[nome]. [cue]" |
 | Warmup fine | "Riscaldamento completato. [workout.name]. Inizia tra tre, due, uno." |
-| AMRAP inizio | "[label]. Hai N minuti per fare più round possibili. Esercizi: [lista]. Via!" |
+| AMRAP inizio | "[name]. Hai N minuti per fare più round possibili. Esercizi: [lista]. Via!" |
 | AMRAP metà tempo | "Metà tempo. Continua!" |
 | AMRAP 30s | "Trenta secondi. Finisci il round!" |
-| AMRAP fine | "Stop! Riposati per due minuti." |
-| EMOM inizio | "[label]. N minuti. Ogni minuto cambi esercizio." |
+| AMRAP fine | "Stop! Workout completato. Ottimo!" |
+| EMOM inizio | "[name]. N minuti. Ogni minuto cambi esercizio." |
 | Ogni minuto EMOM | "Minuto N: [esercizio]. Via!" |
 | EMOM fine | "EMOM completato. Ottimo lavoro!" |
 | Fine sessione | "Allenamento completato! Grande lavoro!" |
 
 ## Contatore round AMRAP
 
-Pulsante "✓ Round completato" visibile durante la fase `amrap_active`. Ogni tap incrementa il contatore per `{ blockIdx, subRound }` corrente. Salvato in `amrap_rounds` (JSON) nel DB.
+Pulsante "✓ Round completato" visibile durante la fase `amrap_active`. Ogni tap incrementa il contatore per il `subRound` corrente. Salvato in `amrap_rounds` (JSON) nel DB.
 
 ## Suggerimento rotazione
 
-Algoritmo: workout con `last_done` più vecchia (o mai fatto) viene suggerito con badge "✦ Suggerito oggi".
+Algoritmo: workout con `last_done` più vecchia (o mai fatto) viene suggerito con badge "✦ Suggerito".
 
 ## Database — Turso
 
@@ -104,7 +123,7 @@ CREATE TABLE IF NOT EXISTS workout_sessions (
   duration_sec INTEGER,
   rpe          INTEGER,    -- 1-10 (Rate of Perceived Exertion)
   note         TEXT,       -- max 500 chars
-  amrap_rounds TEXT        -- JSON: {"0-1": 4, "2-1": 3}  → blockIdx-subRound → rounds
+  amrap_rounds TEXT        -- JSON: {"1": 4, "2": 3}  → subRound → rounds
 );
 ```
 
@@ -117,8 +136,8 @@ Protetto da Bearer token. Ritorna:
 {
   "sessions": [...],
   "stats": {
-    "lastDoneByWorkout": { "workout-a": "2026-03-25T...", ... },
-    "totalByWorkout": { "workout-a": 5, ... },
+    "lastDoneByWorkout": { "w01": "2026-03-25T...", ... },
+    "totalByWorkout": { "w01": 5, ... },
     "weekCount": 2
   }
 }
@@ -128,24 +147,24 @@ Protetto da Bearer token. Ritorna:
 
 ```json
 {
-  "workout_id": "workout-a",
-  "duration_sec": 3240,
+  "workout_id": "w01",
+  "duration_sec": 1620,
   "rpe": 7,
-  "note": "ho fatto 4 round sull AMRAP, gambe pesanti",
-  "amrap_rounds": { "0-1": 4, "0-2": 3, "2-1": 2 }
+  "note": "ho fatto 4 round, gambe pesanti",
+  "amrap_rounds": { "1": 4, "2": 3 }
 }
 ```
 
 ## Integrazione Training Readiness
 
-`GET /api/training` ora include `homeWorkoutsThisWeek: number` — conteggio sessioni nella settimana corrente. La logica readiness in `training.astro` può usare questo valore per aggiustare il punteggio (es. -10 se homeWorkoutsThisWeek >= 2).
+`GET /api/training` ora include `homeWorkoutsThisWeek: number` — conteggio sessioni nella settimana corrente.
 
 ## File
 
 | File | Ruolo |
 |---|---|
-| `src/data/workouts.js` | Definizione workout + warm-up |
-| `src/pages/admin/workout.astro` | Pagina SSR completa |
+| `src/data/workouts.js` | Definizione 12 workout + warm-up |
+| `src/pages/admin/workout.astro` | Pagina SSR completa (preview + sessione + feedback) |
 | `src/pages/api/admin/workout-sessions.ts` | CRUD sessioni |
 | `src/components/AdminNav.astro` | Aggiunto "workout" page type e "Casa" link |
 | `src/pages/api/training.ts` | Aggiunto `homeWorkoutsThisWeek` nella response |
