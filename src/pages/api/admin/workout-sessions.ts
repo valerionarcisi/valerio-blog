@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyBearerToken } from "~/lib/auth";
 import { parseJsonBody, jsonOk, jsonErr } from "~/lib/result";
 
 export const prerender = false;
@@ -20,10 +19,7 @@ async function ensureTable() {
   `);
 }
 
-export const GET: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN))
-    return jsonErr("Unauthorized", 401);
-
+export const GET: APIRoute = async () => {
   try {
     await ensureTable();
     const db = getDb();
@@ -71,9 +67,6 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN))
-    return jsonErr("Unauthorized", 401);
-
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 

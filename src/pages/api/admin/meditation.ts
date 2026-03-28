@@ -1,12 +1,7 @@
 import type { APIRoute } from "astro";
-import { verifyBearerToken } from "~/lib/auth";
 import getDb from "~/lib/turso";
 import { parseSessionInput, parseDeleteId } from "~/lib/meditation";
 import { jsonOk, jsonErr, parseJsonBody } from "~/lib/result";
-
-function isAuthorized(request: Request): boolean {
-  return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
-}
 
 let tableReady = false;
 async function ensureTable() {
@@ -29,8 +24,7 @@ async function ensureTable() {
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
+export const GET: APIRoute = async () => {
   await ensureTable();
 
   const result = await getDb().execute(
@@ -41,8 +35,6 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
-
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 
@@ -60,9 +52,7 @@ export const POST: APIRoute = async ({ request }) => {
   return jsonOk({ ok: true, id: Number(result.lastInsertRowid) }, 201);
 };
 
-export const DELETE: APIRoute = async ({ request, url }) => {
-  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
-
+export const DELETE: APIRoute = async ({ url }) => {
   const parsed = parseDeleteId(url.searchParams.get("id"));
   if (!parsed.ok) return jsonErr(parsed.error, 400);
 

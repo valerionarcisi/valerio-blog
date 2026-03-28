@@ -1,14 +1,9 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyBearerToken } from "~/lib/auth";
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, import.meta.env.ADMIN_TOKEN)) {
-    return new Response("Unauthorized", { status: 401 });
-  }
-
+export const GET: APIRoute = async () => {
   const result = await getDb().execute({
     sql: "SELECT COUNT(DISTINCT page_id) as active FROM pageviews WHERE created_at > datetime('now', '-5 minutes')",
     args: [],

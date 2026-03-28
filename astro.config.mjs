@@ -7,13 +7,6 @@ import netlify from "@astrojs/netlify";
 export default defineConfig({
   site: "https://valerionarcisi.me",
   adapter: netlify(),
-  vite: {
-    define: {
-      "import.meta.env.ADMIN_TOKEN": JSON.stringify(
-        process.env.ADMIN_TOKEN ?? "",
-      ),
-    },
-  },
   integrations: [
     sitemap({
       filter: (page) => !page.includes("/admin/") && !page.includes("/tag/"),

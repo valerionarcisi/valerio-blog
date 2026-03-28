@@ -3,27 +3,26 @@ import "./AdminNav.css";
 
 interface Props {
   currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout";
-  token: string;
 }
 
-const { currentPage, token } = Astro.props;
+const { currentPage } = Astro.props;
 
 const topLinks = [
-  { id: "analytics" as const, label: "Analytics", short: "Stats", href: `/admin/analytics?token=${token}` },
-  { id: "comments" as const, label: "Comments", short: "Msg", href: `/admin/comments?token=${token}` },
+  { id: "analytics" as const, label: "Analytics", short: "Stats", href: `/admin/analytics` },
+  { id: "comments" as const, label: "Comments", short: "Msg", href: `/admin/comments` },
 ];
 
 const dietaLinks = [
-  { id: "meal-plan" as const, label: "Meal Plan", short: "Menu", href: `/admin/meal-plan?token=${token}` },
-  { id: "body-comp" as const, label: "Body Comp", short: "Body", href: `/admin/body-comp?token=${token}` },
-  { id: "grocery" as const, label: "Spesa", short: "Spesa", href: `/admin/grocery?token=${token}` },
-  { id: "recipes" as const, label: "Ricette", short: "Chef", href: `/admin/recipes?token=${token}` },
+  { id: "meal-plan" as const, label: "Meal Plan", short: "Menu", href: `/admin/meal-plan` },
+  { id: "body-comp" as const, label: "Body Comp", short: "Body", href: `/admin/body-comp` },
+  { id: "grocery" as const, label: "Spesa", short: "Spesa", href: `/admin/grocery` },
+  { id: "recipes" as const, label: "Ricette", short: "Chef", href: `/admin/recipes` },
 ];
 
 const bottomLinks = [
-  { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation?token=${token}` },
-  { id: "training" as const, label: "Training", short: "Run", href: `/admin/training?token=${token}` },
-  { id: "workout" as const, label: "Workout Casa", short: "Casa", href: `/admin/workout?token=${token}` },
+  { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation` },
+  { id: "training" as const, label: "Training", short: "Run", href: `/admin/training` },
+  { id: "workout" as const, label: "Workout Casa", short: "Casa", href: `/admin/workout` },
 ];
 
 const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];

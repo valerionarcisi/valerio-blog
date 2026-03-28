@@ -1,15 +1,7 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
-
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
-
-if (!isAuthorized) {
-  return new Response("Unauthorized", { status: 401 });
-}
 
 const recipes = [
   {
@@ -365,7 +357,7 @@ const recipes = [
     </style>
   </head>
   <body>
-    <AdminNav currentPage="recipes" token={token} />
+    <AdminNav currentPage="recipes" />
 
     <h2>Ricette del Piano Alimentare</h2>
 

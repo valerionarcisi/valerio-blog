@@ -1,16 +1,8 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
 import AdminNav from "~/components/AdminNav.astro";
 import { quotes as allQuotes } from "~/data/meditation-quotes.js";
 
 export const prerender = false;
-
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
-
-if (!isAuthorized) {
-  return new Response("Unauthorized", { status: 401 });
-}
 
 const quotesJson = JSON.stringify(allQuotes);
 ---
@@ -473,7 +465,7 @@ const quotesJson = JSON.stringify(allQuotes);
     </style>
   </head>
   <body>
-    <AdminNav currentPage="meditation" token={token} />
+    <AdminNav currentPage="meditation" />
     <h1>Meditazione Vipassana</h1>
     <p class="subtitle">Pratica quotidiana di consapevolezza — osserva, non reagire</p>
 
@@ -558,9 +550,9 @@ const quotesJson = JSON.stringify(allQuotes);
 
     <div class="session-card" id="daily-session"></div>
 
-    <script is:inline define:vars={{ token, quotesJson }}>
+    <script is:inline define:vars={{ quotesJson }}>
       var API_URL = '/api/admin/meditation';
-      var AUTH_HEADER = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      var AUTH_HEADER = { 'Content-Type': 'application/json' };
       var allQuotes = JSON.parse(quotesJson);
       var meditationData = [];
 

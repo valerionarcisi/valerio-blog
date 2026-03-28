@@ -1,15 +1,7 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
 import AdminNav from "~/components/AdminNav.astro";
 
 export const prerender = false;
-
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, import.meta.env.ADMIN_TOKEN);
-
-if (!isAuthorized) {
-  return new Response("Unauthorized", { status: 401 });
-}
 ---
 
 <!doctype html>
@@ -44,7 +36,7 @@ if (!isAuthorized) {
     </style>
   </head>
   <body>
-    <AdminNav currentPage="comments" token={token} />
+    <AdminNav currentPage="comments" />
     <h1>Comments</h1>
     <div class="tabs">
       <button class="active" data-status="pending">Pending</button>
@@ -66,7 +58,7 @@ if (!isAuthorized) {
     </table>
     <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
 
-    <script is:inline define:vars={{ token }}>
+    <script is:inline>
       var currentStatus = "pending";
 
       function loadComments(status) {
@@ -75,9 +67,7 @@ if (!isAuthorized) {
           btn.classList.toggle("active", btn.dataset.status === status);
         });
 
-        fetch("/api/admin/comments?status=" + status, {
-          headers: { Authorization: "Bearer " + token },
-        })
+        fetch("/api/admin/comments?status=" + status)
           .then(function (r) { return r.json(); })
           .then(function (comments) {
             var tbody = document.getElementById("comments-body");
@@ -113,7 +103,6 @@ if (!isAuthorized) {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
           },
           body: JSON.stringify({ id: id, action: action }),
         }).then(function () {

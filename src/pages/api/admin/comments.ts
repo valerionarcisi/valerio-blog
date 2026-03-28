@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
-import { verifyBearerToken } from "~/lib/auth";
 import {
   type Result,
   ok,
@@ -11,10 +10,6 @@ import {
 } from "~/lib/result";
 
 export const prerender = false;
-
-function isAuthorized(request: Request): boolean {
-  return verifyBearerToken(request, import.meta.env.ADMIN_TOKEN);
-}
 
 type CommentAction =
   | { type: "approve"; id: number }
@@ -38,9 +33,7 @@ const ACTION_SQL: Record<string, string> = {
   delete: "DELETE FROM comments WHERE id = ?",
 };
 
-export const GET: APIRoute = async ({ request, url }) => {
-  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
-
+export const GET: APIRoute = async ({ url }) => {
   const status = url.searchParams.get("status") ?? "pending";
   const approvedValue = status === "approved" ? 1 : 0;
 
@@ -53,8 +46,6 @@ export const GET: APIRoute = async ({ request, url }) => {
 };
 
 export const PATCH: APIRoute = async ({ request }) => {
-  if (!isAuthorized(request)) return jsonErr("Unauthorized", 401);
-
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
 
