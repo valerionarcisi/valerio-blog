@@ -57,25 +57,22 @@ describe("verifyBearerToken", () => {
 describe("verifyAdminToken", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
-    delete process.env.ADMIN_TOKEN;
   });
 
-  test("valid token returns true when process.env matches", () => {
-    process.env.ADMIN_TOKEN = "my-secret";
+  test("valid token returns true", () => {
+    vi.stubEnv("ADMIN_TOKEN", "my-secret");
     expect(verifyAdminToken("my-secret")).toBe(true);
   });
 
   test("wrong token returns false", () => {
-    process.env.ADMIN_TOKEN = "my-secret";
+    vi.stubEnv("ADMIN_TOKEN", "my-secret");
     expect(verifyAdminToken("wrong")).toBe(false);
   });
 
   test("returns false when ADMIN_TOKEN not set", () => {
-    delete process.env.ADMIN_TOKEN;
     vi.stubEnv("ADMIN_TOKEN", "");
     expect(verifyAdminToken("my-secret")).toBe(false);
   });
-
 });
 
 describe("verifyAdminBearerToken", () => {
@@ -87,21 +84,19 @@ describe("verifyAdminBearerToken", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
-    delete process.env.ADMIN_TOKEN;
   });
 
   test("valid bearer token returns true", () => {
-    process.env.ADMIN_TOKEN = "my-secret";
+    vi.stubEnv("ADMIN_TOKEN", "my-secret");
     expect(verifyAdminBearerToken(makeRequest("Bearer my-secret"))).toBe(true);
   });
 
   test("wrong bearer token returns false", () => {
-    process.env.ADMIN_TOKEN = "my-secret";
+    vi.stubEnv("ADMIN_TOKEN", "my-secret");
     expect(verifyAdminBearerToken(makeRequest("Bearer wrong"))).toBe(false);
   });
 
   test("returns false when ADMIN_TOKEN not set", () => {
-    delete process.env.ADMIN_TOKEN;
     vi.stubEnv("ADMIN_TOKEN", "");
     expect(verifyAdminBearerToken(makeRequest("Bearer my-secret"))).toBe(false);
   });
