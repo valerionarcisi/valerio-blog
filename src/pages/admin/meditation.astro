@@ -393,6 +393,80 @@ const quotesJson = JSON.stringify(allQuotes);
         line-height: 1.5;
       }
 
+      /* Timeline */
+      .journey-timeline {
+        overflow-x: auto;
+        margin-top: 1.2rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.8rem;
+        -webkit-overflow-scrolling: touch;
+      }
+      .timeline-track {
+        display: flex;
+        align-items: stretch;
+        min-width: 800px;
+        position: relative;
+      }
+      .timeline-segment {
+        position: relative;
+        padding: 0.5rem 0.4rem 2rem;
+        border-bottom: 3px solid #333;
+        text-align: center;
+        transition: border-color 0.3s;
+      }
+      .timeline-segment.filled { border-bottom-color: #bb86fc; }
+      .timeline-segment.current { border-bottom-color: #c9a84c; }
+      .timeline-seg-icon { font-size: 1.1rem; line-height: 1; }
+      .timeline-seg-name {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: #888;
+        margin-top: 0.2rem;
+        white-space: nowrap;
+      }
+      .timeline-segment.filled .timeline-seg-name { color: #bb86fc; }
+      .timeline-segment.current .timeline-seg-name { color: #c9a84c; }
+      .timeline-seg-range {
+        font-size: 0.58rem;
+        color: #555;
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 0.15rem;
+        white-space: nowrap;
+      }
+      .timeline-milestone {
+        background: rgba(201, 168, 76, 0.1);
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        border-radius: 6px;
+        padding: 0.25rem 0.4rem;
+        margin-top: 0.35rem;
+        font-size: 0.58rem;
+        color: #c9a84c;
+        line-height: 1.4;
+        font-family: 'JetBrains Mono', monospace;
+      }
+      .timeline-milestone-label {
+        font-weight: 700;
+      }
+      .timeline-milestone-desc {
+        color: #888;
+        font-family: 'Merriweather', serif;
+        font-size: 0.55rem;
+      }
+      .timeline-you-marker {
+        position: absolute;
+        bottom: -1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #c9a84c;
+        color: #111;
+        font-size: 0.55rem;
+        font-weight: 700;
+        padding: 0.1rem 0.4rem;
+        border-radius: 8px;
+        white-space: nowrap;
+        font-family: 'JetBrains Mono', monospace;
+      }
+
       /* Roadmap table */
       .journey-roadmap { margin-top: 1rem; }
       .journey-roadmap-toggle {
@@ -466,6 +540,7 @@ const quotesJson = JSON.stringify(allQuotes);
         .active-guide .guide-title { font-size: 1.3rem; }
         .active-guide .guide-desc { font-size: 1.05rem; }
         .active-guide .guide-hint { font-size: 0.9rem; }
+        .timeline-track { min-width: 650px; }
         .journey-phase-name { font-size: 1.05rem; }
         .journey-phase-desc { font-size: 0.95rem; }
         .journey-suggestion { font-size: 0.92rem; }
@@ -480,32 +555,7 @@ const quotesJson = JSON.stringify(allQuotes);
 
     <div class="day-badge" id="day-badge"></div>
 
-    <div class="stats-grid" id="stats-grid">
-      <div class="stat-box"><div class="stat-value" id="stat-streak">-</div><div class="stat-label">Streak</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-total">-</div><div class="stat-label">Sessioni</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-minutes">-</div><div class="stat-label">Min totali</div></div>
-      <div class="stat-box"><div class="stat-value" id="stat-month">-</div><div class="stat-label">Questo mese</div></div>
-    </div>
-
-    <div class="journey-section" id="journey-section">
-      <div class="journey-title">Il tuo percorso</div>
-      <div id="journey-content"><div class="loading-msg">Caricamento percorso...</div></div>
-    </div>
-
-    <div class="heatmap-section">
-      <div class="heatmap-title">Ultimi 365 giorni</div>
-      <div class="heatmap-grid" id="heatmap"></div>
-      <div class="heatmap-legend">
-        <span>Meno</span>
-        <div class="heatmap-legend-cell" style="background:#1a1a1e"></div>
-        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.25)"></div>
-        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.45)"></div>
-        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.7)"></div>
-        <div class="heatmap-legend-cell" style="background:#bb86fc"></div>
-        <span>Di più</span>
-      </div>
-      <div class="heatmap-detail" id="heatmap-detail"></div>
-    </div>
+    <div class="meditation-hero" id="daily-quote"></div>
 
     <div class="streak-bar">
       <div class="streak-info">
@@ -517,10 +567,6 @@ const quotesJson = JSON.stringify(allQuotes);
       </div>
       <span class="today-status" id="today-status"></span>
     </div>
-
-    <div class="meditation-hero" id="daily-quote"></div>
-
-    <div class="focus-grid" id="daily-focus"></div>
 
     <div class="timer-section">
       <h2 style="font-family:'Staatliches',Impact,sans-serif;color:#bb86fc;font-size:1.1rem;letter-spacing:0.02em;margin-bottom:0.5rem;">Timer Meditazione</h2>
@@ -558,6 +604,35 @@ const quotesJson = JSON.stringify(allQuotes);
     </div>
 
     <div class="session-card" id="daily-session"></div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-box"><div class="stat-value" id="stat-streak">-</div><div class="stat-label">Streak</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-total">-</div><div class="stat-label">Sessioni</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-minutes">-</div><div class="stat-label">Min totali</div></div>
+      <div class="stat-box"><div class="stat-value" id="stat-month">-</div><div class="stat-label">Questo mese</div></div>
+    </div>
+
+    <div class="journey-section" id="journey-section">
+      <div class="journey-title">Il tuo percorso</div>
+      <div id="journey-content"><div class="loading-msg">Caricamento percorso...</div></div>
+    </div>
+
+    <div class="heatmap-section">
+      <div class="heatmap-title">Ultimi 365 giorni</div>
+      <div class="heatmap-grid" id="heatmap"></div>
+      <div class="heatmap-legend">
+        <span>Meno</span>
+        <div class="heatmap-legend-cell" style="background:#1a1a1e"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.25)"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.45)"></div>
+        <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.7)"></div>
+        <div class="heatmap-legend-cell" style="background:#bb86fc"></div>
+        <span>Di più</span>
+      </div>
+      <div class="heatmap-detail" id="heatmap-detail"></div>
+    </div>
+
+    <div class="focus-grid" id="daily-focus"></div>
 
     <script is:inline define:vars={{ quotesJson, token }}>
       var ADMIN_TOKEN = token;
@@ -776,7 +851,68 @@ const quotesJson = JSON.stringify(allQuotes);
         html += '</div>';
 
         html += '<div class="journey-progress">' + progressDots + '</div>';
-        html += '<div class="journey-month-label"><span>Inizio</span><span>Mese ' + months + '</span><span>24+</span></div>';
+        var monthsLabel = months === 0 ? 'Inizio' : 'Mese ' + months;
+        html += '<div class="journey-month-label"><span>Inizio</span><span>' + monthsLabel + '</span><span>24+</span></div>';
+
+        // Horizontal timeline
+        var firstDate = uniqueDates.length > 0 ? new Date(uniqueDates.slice().sort()[0]) : null;
+        var voiceOffMonth = firstDate ? Math.ceil(VOICE_TRAINING_DAYS / 30) : 1;
+        var voiceOffDate = null;
+        var voiceAlreadyOff = false;
+        if (firstDate) {
+          voiceOffDate = new Date(firstDate);
+          voiceOffDate.setDate(voiceOffDate.getDate() + VOICE_TRAINING_DAYS);
+          voiceAlreadyOff = new Date() >= voiceOffDate;
+        }
+        var fmtDate = function(d) { return d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: '2-digit' }); };
+        var fmtShort = function(d) { return d.toLocaleDateString('it-IT', { month: 'short', year: '2-digit' }); };
+
+        html += '<div class="journey-timeline"><div class="timeline-track">';
+        phases.forEach(function(p, i) {
+          var startM = p.months[0];
+          var endM = p.months[p.months.length - 1];
+          var span = endM - startM + 1;
+          var cls = 'timeline-segment';
+          if (i < phaseIdx) cls += ' filled';
+          if (i === phaseIdx) cls += ' current';
+
+          var rangeLabel = '';
+          if (firstDate) {
+            var sd = new Date(firstDate);
+            sd.setMonth(sd.getMonth() + startM);
+            var ed = new Date(firstDate);
+            ed.setMonth(ed.getMonth() + endM);
+            rangeLabel = fmtShort(sd) + ' — ' + fmtShort(ed);
+          } else {
+            rangeLabel = startM === endM ? 'Mese ' + startM : 'Mesi ' + startM + '-' + endM;
+          }
+
+          html += '<div class="timeline-segment ' + cls + '" style="flex:' + span + '">';
+          html += '<div class="timeline-seg-icon">' + p.icon + '</div>';
+          html += '<div class="timeline-seg-name">' + p.name + '</div>';
+          html += '<div class="timeline-seg-range">' + rangeLabel + '</div>';
+
+          if (startM <= voiceOffMonth && voiceOffMonth <= endM && voiceOffMonth > 0) {
+            var mlHtml = '<div class="timeline-milestone">';
+            if (voiceAlreadyOff) {
+              mlHtml += '<div class="timeline-milestone-label">🔕 Voce disattivata</div>';
+              mlHtml += '<div class="timeline-milestone-desc">Dal ' + fmtDate(voiceOffDate) + ' mediti senza guida vocale, solo campana</div>';
+            } else {
+              mlHtml += '<div class="timeline-milestone-label">🔔 Voce → solo campana</div>';
+              mlHtml += '<div class="timeline-milestone-desc">Dal ' + fmtDate(voiceOffDate) + ' (giorno ' + VOICE_TRAINING_DAYS + ') la guida vocale si spegne</div>';
+            }
+            mlHtml += '</div>';
+            html += mlHtml;
+          }
+
+          if (i === phaseIdx) {
+            var monthLabel = months === 0 ? 'Inizio' : 'Mese ' + months;
+            html += '<div class="timeline-you-marker">Sei qui — ' + monthLabel + '</div>';
+          }
+
+          html += '</div>';
+        });
+        html += '</div></div>';
 
         // Full path table (always visible)
         html += '<div class="journey-roadmap-table">';
