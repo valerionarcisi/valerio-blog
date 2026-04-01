@@ -763,15 +763,17 @@ if (!isAuthorized) {
 
         var from, to;
         if (currentFrom && currentTo) {
-          from = new Date(currentFrom + "T00:00:00");
-          to = new Date(currentTo + "T00:00:00");
+          from = new Date(currentFrom + "T12:00:00");
+          to = new Date(currentTo + "T12:00:00");
         } else {
           to = new Date();
-          from = new Date(Date.now() - (days - 1) * 86400000);
+          to.setHours(12, 0, 0, 0);
+          from = new Date(to);
+          from.setDate(from.getDate() - (days - 1));
         }
 
-        from = new Date(from.getTime() + shift * 86400000);
-        to = new Date(to.getTime() + shift * 86400000);
+        from.setDate(from.getDate() + shift);
+        to.setDate(to.getDate() + shift);
 
         var today = new Date();
         if (to > today) to = today;
@@ -798,8 +800,11 @@ if (!isAuthorized) {
         if (basePeriod !== "custom") {
           currentPeriod = basePeriod;
           var days = PERIOD_DAYS[basePeriod] || 30;
-          currentTo = dateStr(new Date());
-          currentFrom = dateStr(new Date(Date.now() - (days - 1) * 86400000));
+          var now = new Date();
+          currentTo = dateStr(now);
+          var fromD = new Date(now);
+          fromD.setDate(fromD.getDate() - (days - 1));
+          currentFrom = dateStr(fromD);
         } else {
           var match = period.match(/from=(\d{4}-\d{2}-\d{2}).*to=(\d{4}-\d{2}-\d{2})/);
           if (match) {
