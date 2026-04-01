@@ -139,21 +139,21 @@ describe("GET /api/stats", () => {
   });
 
   test("returns 401 without valid token", async () => {
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today", { token: "wrong" });
     const res = await GET({ url, request } as never);
     expect(res.status).toBe(401);
   });
 
   test("returns 400 for invalid from date", async () => {
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("custom", { from: "not-a-date" });
     const res = await GET({ url, request } as never);
     expect(res.status).toBe(400);
   });
 
   test("returns 400 for invalid to date", async () => {
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("custom", {
       from: "2026-03-01",
       to: "bad",
@@ -163,7 +163,7 @@ describe("GET /api/stats", () => {
   });
 
   test("returns empty summary when no data", async () => {
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     expect(res.status).toBe(200);
@@ -187,7 +187,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -201,7 +201,7 @@ describe("GET /api/stats", () => {
     await insertPageview({ created_at: "2026-03-05 08:30:00" });
     await insertPageview({ created_at: "2026-03-05 10:00:00" });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -217,7 +217,7 @@ describe("GET /api/stats", () => {
     await insertPageview({ created_at: "2026-03-04 10:00:00" });
     await insertPageview({ created_at: "2026-03-05 10:00:00" });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("7d");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -233,7 +233,7 @@ describe("GET /api/stats", () => {
     await insertPageview({ created_at: "2026-03-05 08:00:00" });
     await insertPageview({ created_at: "2026-03-05 14:00:00" });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
 
     const todayReq = makeRequest("today");
     const todayRes = await GET({ url: todayReq.url, request: todayReq.request } as never);
@@ -263,7 +263,7 @@ describe("GET /api/stats", () => {
       args: [botHash],
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -285,7 +285,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today", {
       pathname: "/blog/post-a",
     });
@@ -309,7 +309,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -335,7 +335,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -362,7 +362,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 09:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -390,7 +390,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -415,7 +415,7 @@ describe("GET /api/stats", () => {
       created_at: "2026-03-05 10:00:00",
     });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -430,7 +430,7 @@ describe("GET /api/stats", () => {
     await insertPageview({ created_at: "2026-03-04 23:59:59" });
     await insertPageview({ created_at: "2026-03-05 00:00:01" });
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
@@ -453,7 +453,7 @@ describe("GET /api/stats", () => {
       await insertPageview({ created_at: `${d} 14:00:00`, is_unique: 0 });
     }
 
-    const { GET } = await import("./stats");
+    const { GET } = await import("~/pages/api/stats");
 
     const weekReq = makeRequest("7d");
     const weekRes = await GET({ url: weekReq.url, request: weekReq.request } as never);
