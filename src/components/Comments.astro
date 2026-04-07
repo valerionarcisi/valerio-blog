@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import "./Comments.css";
 
 interface Props {
@@ -7,6 +8,11 @@ interface Props {
 }
 
 const { pageId, lang } = Astro.props;
+
+const HEART_OUTLINE_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" width="14" height="14" aria-hidden="true"><path d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5c-1.936 0-3.598 1.126-4.313 2.733c-.715-1.607-2.377-2.733-4.312-2.733C5.098 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12"/></svg>';
+const HEART_SOLID_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true"><path d="m11.645 20.91l-.007-.003l-.022-.012l-.082-.045q-.108-.06-.301-.173a25.2 25.2 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25C2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052A5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25c0 3.925-2.438 7.111-4.739 9.256a25 25 0 0 1-4.244 3.17a15 15 0 0 1-.383.219l-.022.012l-.007.004l-.003.001a.75.75 0 0 1-.704 0z"/></svg>';
 
 const labels = {
   it: {
@@ -54,15 +60,16 @@ const t = labels[lang];
   </div>
 
   <form class="Comments-form Comments-form--root">
-    <div class="Comments-field">
+    <p class="Comments-author-indicator" hidden></p>
+    <div class="Comments-field Comments-field--public">
       <label for="comment-name">{t.name} *</label>
-      <input type="text" id="comment-name" name="name" required maxlength="100" />
+      <input type="text" id="comment-name" name="name" maxlength="100" />
     </div>
-    <div class="Comments-field">
+    <div class="Comments-field Comments-field--public">
       <label for="comment-email">{t.email} *</label>
-      <input type="email" id="comment-email" name="email" required maxlength="254" />
+      <input type="email" id="comment-email" name="email" maxlength="254" />
     </div>
-    <div class="Comments-hp" aria-hidden="true">
+    <div class="Comments-hp Comments-field--public" aria-hidden="true">
       <label for="comment-website">Website</label>
       <input type="text" id="comment-website" name="website" tabindex="-1" autocomplete="off" />
     </div>
@@ -75,7 +82,7 @@ const t = labels[lang];
   </form>
 </section>
 
-<script is:inline define:vars={{ initialPageId: pageId, initialLang: lang }}>
+<script is:inline define:vars={{ initialPageId: pageId, initialLang: lang, HEART_OUTLINE_SVG, HEART_SOLID_SVG }}>
   (function () {
     var section = document.querySelector(".Comments");
     if (!section) return;
@@ -116,6 +123,24 @@ const t = labels[lang];
     };
     var t = labels[lang] || labels.en;
     var MAX_DEPTH = 4;
+    var authorToken = null;
+    try { authorToken = localStorage.getItem("vbAdminToken"); } catch (e) {}
+    var isAuthor = !!authorToken;
+    var AUTHOR_LABEL_IT = "Stai rispondendo come Valerio · Author";
+    var AUTHOR_LABEL_EN = "Posting as Valerio · Author";
+
+    function applyAuthorMode(form) {
+      if (!isAuthor) return;
+      var indicator = form.querySelector(".Comments-author-indicator");
+      if (indicator) {
+        indicator.hidden = false;
+        indicator.textContent = lang === "it" ? AUTHOR_LABEL_IT : AUTHOR_LABEL_EN;
+      }
+      form.querySelectorAll(".Comments-field--public").forEach(function (el) {
+        el.style.display = "none";
+        el.querySelectorAll("input").forEach(function (i) { i.required = false; });
+      });
+    }
 
     function escapeHtml(str) {
       var div = document.createElement("div");
@@ -147,6 +172,9 @@ const t = labels[lang];
       var liked = c.liked_by_me ? "is-active" : "";
       var pressed = c.liked_by_me ? "true" : "false";
       var visualDepth = depth > MAX_DEPTH ? MAX_DEPTH : depth;
+      var authorBadge = c.is_author
+        ? ' <span class="Comments-author-badge">Author</span>'
+        : "";
       var html =
         '<div class="Comments-item" data-id="' +
         c.id +
@@ -155,7 +183,9 @@ const t = labels[lang];
         '">' +
         '<div class="Comments-meta"><strong>' +
         escapeHtml(c.name) +
-        "</strong> " +
+        "</strong>" +
+        authorBadge +
+        " " +
         '<span class="Comments-date">' +
         t.on +
         " " +
@@ -172,7 +202,9 @@ const t = labels[lang];
         '" data-id="' +
         c.id +
         '">' +
-        '<span class="Comments-like-icon" aria-hidden="true">♥</span> ' +
+        '<span class="Comments-like-icon" aria-hidden="true">' +
+        (c.liked_by_me ? HEART_SOLID_SVG : HEART_OUTLINE_SVG) +
+        '</span> ' +
         '<span class="Comments-like-count">' +
         Number(c.likes_count || 0) +
         "</span>" +
@@ -239,6 +271,11 @@ const t = labels[lang];
                   data.count;
                 btn.classList.toggle("is-active", !!data.liked);
                 btn.setAttribute("aria-pressed", data.liked ? "true" : "false");
+                var iconWrap = btn.querySelector(".Comments-like-icon");
+                if (iconWrap)
+                  iconWrap.innerHTML = data.liked
+                    ? HEART_SOLID_SVG
+                    : HEART_OUTLINE_SVG;
               }
             })
             .catch(function () {})
@@ -259,6 +296,7 @@ const t = labels[lang];
           }
           slot.innerHTML = buildReplyForm(id);
           var form = slot.querySelector("form");
+          applyAuthorMode(form);
           form.addEventListener("submit", function (e) {
             handleSubmit(e, form, id);
           });
@@ -274,13 +312,14 @@ const t = labels[lang];
         '<form class="Comments-form Comments-form--reply" data-parent="' +
         parentId +
         '">' +
-        '<div class="Comments-field"><label>' +
+        '<p class="Comments-author-indicator" hidden></p>' +
+        '<div class="Comments-field Comments-field--public"><label>' +
         t.name +
-        ' *</label><input type="text" name="name" required maxlength="100" /></div>' +
-        '<div class="Comments-field"><label>' +
+        ' *</label><input type="text" name="name" maxlength="100" /></div>' +
+        '<div class="Comments-field Comments-field--public"><label>' +
         t.email +
-        ' *</label><input type="email" name="email" required maxlength="254" /></div>' +
-        '<div class="Comments-hp" aria-hidden="true"><label>Website</label><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>' +
+        ' *</label><input type="email" name="email" maxlength="254" /></div>' +
+        '<div class="Comments-hp Comments-field--public" aria-hidden="true"><label>Website</label><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>' +
         '<div class="Comments-field"><label>' +
         t.text +
         ' *</label><textarea name="text" required maxlength="5000" rows="3"></textarea></div>' +
@@ -300,28 +339,43 @@ const t = labels[lang];
     function handleSubmit(e, form, parentId) {
       e.preventDefault();
       var messageEl = form.querySelector(".Comments-message");
+      var textEl = form.querySelector('[name="text"]');
       var data = {
         pageId: pageId,
         lang: lang,
-        name: form.querySelector('[name="name"]').value,
-        email: form.querySelector('[name="email"]').value,
-        text: form.querySelector('[name="text"]').value,
-        website: form.querySelector('[name="website"]').value,
+        text: textEl ? textEl.value : "",
       };
+      if (!isAuthor) {
+        data.name = form.querySelector('[name="name"]').value;
+        data.email = form.querySelector('[name="email"]').value;
+        data.website = form.querySelector('[name="website"]').value;
+      }
       if (parentId != null) data.parentId = parentId;
       messageEl.textContent = "";
       messageEl.className = "Comments-message";
 
+      var headers = { "Content-Type": "application/json" };
+      if (isAuthor) headers["Authorization"] = "Bearer " + authorToken;
+
       fetch("/api/comments", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: headers,
         body: JSON.stringify(data),
       })
         .then(function (r) {
           if (!r.ok) throw new Error();
-          messageEl.textContent = t.success;
-          messageEl.classList.add("Comments-message--success");
-          form.reset();
+          if (isAuthor) {
+            form.reset();
+            var slot = form.parentElement && form.parentElement.classList.contains("Comments-reply-slot")
+              ? form.parentElement
+              : null;
+            if (slot) slot.innerHTML = "";
+            loadComments();
+          } else {
+            messageEl.textContent = t.success;
+            messageEl.classList.add("Comments-message--success");
+            form.reset();
+          }
         })
         .catch(function () {
           messageEl.textContent = t.error;
@@ -329,6 +383,7 @@ const t = labels[lang];
         });
     }
 
+    applyAuthorMode(rootForm);
     rootForm.addEventListener("submit", function (e) {
       handleSubmit(e, rootForm, null);
     });

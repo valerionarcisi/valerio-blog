@@ -1,10 +1,10 @@
 ---
-// Theme Toggle Component
+import { Icon } from "astro-icon/components";
 ---
 
 <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
-  <span class="sun-icon">☀️</span>
-  <span class="moon-icon">🌙</span>
+  <Icon name="heroicons:sun" class="sun-icon" size={20} is:inline />
+  <Icon name="heroicons:moon" class="moon-icon" size={20} is:inline />
 </button>
 
 <script>
@@ -84,14 +84,16 @@
   .sun-icon,
   .moon-icon {
     position: absolute;
-    font-size: 1.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-neutral);
     transition: opacity var(--transition-fast);
   }
-  
+
   .sun-icon {
     opacity: 1;
   }
-  
+
   .moon-icon {
     opacity: 0;
   }

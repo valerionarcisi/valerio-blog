@@ -37,6 +37,7 @@ async function seedDb() {
       likes_count       INTEGER NOT NULL DEFAULT 0,
       notified_approved INTEGER NOT NULL DEFAULT 0,
       lang              TEXT NOT NULL DEFAULT 'it',
+      is_author         INTEGER NOT NULL DEFAULT 0,
       created_at        TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS comment_likes (
@@ -262,6 +263,206 @@ describe("POST /api/comments", () => {
     });
     const res = await POST({ request } as never);
     expect(res.status).toBe(400);
+  });
+});
+
+describe("POST /api/comments — author auto-login", () => {
+  beforeEach(async () => {
+    db = createClient({ url: ":memory:" });
+    await seedDb();
+    emailMocks.notifyNewComment.mockClear();
+    emailMocks.notifyReplyToYourComment.mockClear();
+  });
+
+  function authorRequest(
+    body: Record<string, unknown>,
+    token = "test-token",
+  ): Request {
+    return new Request("https://example.com/api/comments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-forwarded-for": "1.2.3.4",
+        "user-agent": "Mozilla/5.0 Test",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+  }
+
+  test("with valid bearer token: comment is approved and is_author=1", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    const res = await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "io sono Valerio",
+        lang: "it",
+      }),
+    } as never);
+    expect(res.status).toBe(201);
+    const rows = await db.execute(
+      "SELECT name, email, approved, is_author, notified_approved FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows.length).toBe(1);
+    expect(rows.rows[0].name).toBe("Valerio");
+    expect(rows.rows[0].email).toBe("valerio.narcisi@gmail.com");
+    expect(rows.rows[0].approved).toBe(1);
+    expect(rows.rows[0].is_author).toBe(1);
+    expect(rows.rows[0].notified_approved).toBe(1);
+  });
+
+  test("ignores name/email in body and forces author identity", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "ciao",
+        lang: "it",
+        name: "Spoofed",
+        email: "spoof@example.com",
+      }),
+    } as never);
+    const rows = await db.execute(
+      "SELECT name, email FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows[0].name).toBe("Valerio");
+    expect(rows.rows[0].email).toBe("valerio.narcisi@gmail.com");
+  });
+
+  test("does not call notifyNewComment when posting as author", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "ciao",
+        lang: "it",
+      }),
+    } as never);
+    expect(emailMocks.notifyNewComment).not.toHaveBeenCalled();
+  });
+
+  test("with invalid bearer token: falls back to public flow (pending)", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    const res = await POST({
+      request: new Request("https://example.com/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "1.2.3.4",
+          "user-agent": "Test",
+          Authorization: "Bearer wrong-token",
+        },
+        body: JSON.stringify({
+          pageId: "post-1",
+          name: "Mario",
+          email: "mario@example.com",
+          text: "ciao",
+        }),
+      }),
+    } as never);
+    expect(res.status).toBe(201);
+    const rows = await db.execute(
+      "SELECT approved, is_author FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows[0].approved).toBe(0);
+    expect(rows.rows[0].is_author).toBe(0);
+  });
+
+  test("author reply to approved parent: stored approved + notifies parent author", async () => {
+    const parentId = await insertComment({
+      pageId: "post-1",
+      name: "Alice",
+      email: "alice@example.com",
+      text: "Original",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "grazie!",
+        lang: "it",
+        parentId,
+      }),
+    } as never);
+    const rows = await db.execute(
+      "SELECT parent_id, is_author, approved FROM comments WHERE name = 'Valerio'",
+    );
+    expect(Number(rows.rows[0].parent_id)).toBe(parentId);
+    expect(rows.rows[0].is_author).toBe(1);
+    expect(rows.rows[0].approved).toBe(1);
+    expect(emailMocks.notifyReplyToYourComment).toHaveBeenCalledOnce();
+    const call = emailMocks.notifyReplyToYourComment.mock.calls[0][0];
+    expect(call.parentEmail).toBe("alice@example.com");
+    expect(call.replyName).toBe("Valerio");
+  });
+
+  test("author reply to own parent (same email) does not self-notify", async () => {
+    const parentId = await insertComment({
+      pageId: "post-1",
+      name: "Valerio",
+      email: "valerio.narcisi@gmail.com",
+      text: "self",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "self reply",
+        lang: "it",
+        parentId,
+      }),
+    } as never);
+    expect(emailMocks.notifyReplyToYourComment).not.toHaveBeenCalled();
+  });
+
+  test("author reply to pending parent: rejected", async () => {
+    const parentId = await insertComment({
+      pageId: "post-1",
+      name: "Alice",
+      email: "alice@example.com",
+      text: "Pending",
+      approved: 0,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    const res = await POST({
+      request: authorRequest({
+        pageId: "post-1",
+        text: "reply",
+        lang: "it",
+        parentId,
+      }),
+    } as never);
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("GET /api/comments exposes is_author", () => {
+  beforeEach(async () => {
+    db = createClient({ url: ":memory:" });
+    await seedDb();
+  });
+
+  test("is_author=1 for author comments, 0 for others", async () => {
+    await db.execute({
+      sql: `INSERT INTO comments (page_id, name, email, text, approved, is_author)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+      args: ["post-1", "Valerio", "valerio.narcisi@gmail.com", "hi", 1, 1],
+    });
+    await db.execute({
+      sql: `INSERT INTO comments (page_id, name, email, text, approved)
+            VALUES (?, ?, ?, ?, ?)`,
+      args: ["post-1", "Mario", "mario@example.com", "ciao", 1],
+    });
+    const { GET } = await import("~/pages/api/comments");
+    const { url, request } = makeGet("post-1");
+    const res = await GET({ url, request } as never);
+    const data = (await res.json()) as Array<Record<string, unknown>>;
+    const valerio = data.find((c) => c.name === "Valerio");
+    const mario = data.find((c) => c.name === "Mario");
+    expect(Number(valerio?.is_author)).toBe(1);
+    expect(Number(mario?.is_author)).toBe(0);
   });
 });
 

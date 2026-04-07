@@ -140,7 +140,8 @@ const sources = rawData.sources;
         transition: border-color 0.3s;
       }
       .tip-card:hover { border-color: #c9a84c; }
-      .tip-card .tip-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+      .tip-card .tip-icon { color: #c9a84c; margin-bottom: 0.5rem; display: flex; align-items: center; }
+      .tip-card .tip-icon svg { width: 1.4rem; height: 1.4rem; }
       .tip-card .tip-cat { font-size: 0.78rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
       .tip-card .tip-text { font-size: 0.82rem; color: #e8e6e1; line-height: 1.5; }
       .tip-card.wellness { border-left: 3px solid #2ecc71; }
@@ -353,10 +354,13 @@ const sources = rawData.sources;
         var c = consistency[dayOfYear % consistency.length];
         var m = meditation[dayOfYear % meditation.length];
 
+        var TIP_LEAF = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M223.45 40.07a8 8 0 0 0-7.52-7.52C139.8 28.08 78.82 51 52.82 94a87.1 87.1 0 0 0-12.76 49c.57 15.92 5.21 32 13.79 47.85l-19.51 19.5a8 8 0 0 0 11.32 11.32l19.5-19.51C81 210.73 97.09 215.37 113 215.94q1.67.06 3.33.06A86.93 86.93 0 0 0 162 203.18c43-26 65.93-86.97 61.45-163.11m-69.7 149.43c-22.75 13.78-49.68 14-76.71.77l88.63-88.62a8 8 0 0 0-11.32-11.32L65.73 179c-13.19-27-13-54 .77-76.71c22.09-36.47 74.6-56.44 141.31-54.06c2.39 66.66-17.59 119.18-54.06 141.27"/></svg>';
+        var TIP_TARGET = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M221.87 83.16A104.1 104.1 0 1 1 195.67 49l22.67-22.68a8 8 0 0 1 11.32 11.32l-96 96a8 8 0 0 1-11.32-11.32l27.72-27.72a40 40 0 1 0 17.87 31.09a8 8 0 1 1 16-.9a56 56 0 1 1-22.38-41.65l22.75-22.75a87.88 87.88 0 1 0 23.13 29.67a8 8 0 0 1 14.44-6.9"/></svg>';
+        var TIP_LOTUS = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M245.83 121.63a15.53 15.53 0 0 0-9.52-7.33a73.5 73.5 0 0 0-22.17-2.22c4-19.85 1-35.55-2.06-44.86a16.15 16.15 0 0 0-18.79-10.88a85.5 85.5 0 0 0-28.55 12.12a94.6 94.6 0 0 0-27.11-33.25a16.05 16.05 0 0 0-19.26 0a94.5 94.5 0 0 0-27.11 33.25a85.5 85.5 0 0 0-28.55-12.12a16.15 16.15 0 0 0-18.79 10.88c-3 9.31-6 25-2.06 44.86a73.5 73.5 0 0 0-22.17 2.22a15.53 15.53 0 0 0-9.52 7.33a16 16 0 0 0-1.6 12.27c3.39 12.57 13.8 36.48 45.33 55.32S113.13 208 128.05 208s42.67 0 74-18.78c31.53-18.84 41.94-42.75 45.33-55.32a16 16 0 0 0-1.55-12.27M59.14 72.14a.2.2 0 0 1 .23-.15a70.4 70.4 0 0 1 25.81 11.67A118.7 118.7 0 0 0 80 119.17c0 18.74 3.77 34 9.11 46.28A123.6 123.6 0 0 1 69.57 140C51.55 108.62 55.3 84 59.14 72.14m3 103.35C35.47 159.57 26.82 140.05 24 129.7a59.8 59.8 0 0 1 22.5-1.17a129 129 0 0 0 9.15 19.41a142.3 142.3 0 0 0 34 39.56a115 115 0 0 1-27.55-12.01ZM128 190.4c-9.33-6.94-32-28.23-32-71.23C96 76.7 118.38 55.24 128 48c9.62 7.26 32 28.72 32 71.19c0 42.98-22.67 64.27-32 71.21m42.82-106.74A70.4 70.4 0 0 1 196.63 72a.2.2 0 0 1 .23.15c3.84 11.85 7.59 36.47-10.43 67.85a123.3 123.3 0 0 1-19.54 25.48c5.34-12.26 9.11-27.54 9.11-46.28a118.7 118.7 0 0 0-5.18-35.54M232 129.72c-2.77 10.25-11.4 29.81-38.09 45.77a115 115 0 0 1-27.55 12a142.3 142.3 0 0 0 34-39.56a129 129 0 0 0 9.15-19.41a59.7 59.7 0 0 1 22.49 1.19Z"/></svg>';
         document.getElementById("daily-tips").innerHTML =
-          '<div class="tip-card wellness"><div class="tip-icon">🌿</div><div class="tip-cat">Benessere</div><div class="tip-text">' + w + '</div></div>' +
-          '<div class="tip-card consistency"><div class="tip-icon">🎯</div><div class="tip-cat">Costanza</div><div class="tip-text">' + c + '</div></div>' +
-          '<div class="tip-card meditation"><div class="tip-icon">🧘</div><div class="tip-cat">Meditazione</div><div class="tip-text">' + m + '</div></div>';
+          '<div class="tip-card wellness"><div class="tip-icon">' + TIP_LEAF + '</div><div class="tip-cat">Benessere</div><div class="tip-text">' + w + '</div></div>' +
+          '<div class="tip-card consistency"><div class="tip-icon">' + TIP_TARGET + '</div><div class="tip-cat">Costanza</div><div class="tip-text">' + c + '</div></div>' +
+          '<div class="tip-card meditation"><div class="tip-icon">' + TIP_LOTUS + '</div><div class="tip-cat">Meditazione</div><div class="tip-text">' + m + '</div></div>';
       })();
 
       var M = measurements;

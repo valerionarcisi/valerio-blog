@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
@@ -17,7 +18,7 @@ const recipes = [
     name: "Pollo al Curry",
     day: "Giovedì — Cena",
     time: "40 min",
-    emoji: "🍛",
+    icon: "ph:cooking-pot",
     oil: "3 cucchiaini olio EVO (già nella marinata)",
     ingredients: [
       "200g petto di pollo",
@@ -47,7 +48,7 @@ const recipes = [
     name: "Millefoglie di Zucchine",
     day: "Martedì — Cena (opzione 2)",
     time: "45 min",
-    emoji: "🥒",
+    icon: "ph:plant",
     oil: "2 cucchiaini olio EVO a crudo",
     ingredients: [
       "Zucchine q.b.",
@@ -73,7 +74,7 @@ const recipes = [
     name: "Finocchi Gratinati",
     day: "Venerdì — Cena (opzione 2)",
     time: "50 min",
-    emoji: "🧄",
+    icon: "ph:plant",
     oil: "Nessun olio aggiuntivo (1 cucchiaio già nella ricetta)",
     ingredients: [
       "300g finocchi",
@@ -97,7 +98,7 @@ const recipes = [
     name: "Polpette di Broccoli",
     day: "Sabato — Cena (opzione 2)",
     time: "45 min",
-    emoji: "🥦",
+    icon: "ph:plant",
     oil: "3 cucchiaini olio EVO a crudo (1 cucchiaio già nella ricetta)",
     ingredients: [
       "250g broccoli",
@@ -124,7 +125,7 @@ const recipes = [
     name: "Piadina Integrale Fatta in Casa",
     day: "Venerdì — Pranzo (opzione 2)",
     time: "50 min",
-    emoji: "🫓",
+    icon: "ph:bread",
     oil: "3 cucchiaini olio EVO (nell'impasto)",
     ingredients: [
       "100g farina di avena o tipo 1 o tipo 2 o integrale (o mix)",
@@ -148,7 +149,7 @@ const recipes = [
     name: "Hamburger di Carne Magra",
     day: "Mercoledì — Cena (opzione 1)",
     time: "20 min",
-    emoji: "🍔",
+    icon: "ph:hamburger",
     oil: "3 cucchiaini olio EVO a crudo",
     ingredients: [
       "180g macinata magra o bianca magra",
@@ -217,8 +218,11 @@ const recipes = [
       }
       .recipe-header::-webkit-details-marker { display: none; }
 
-      .recipe-emoji {
-        font-size: 1.3rem;
+      .recipe-icon {
+        width: 1.4rem;
+        height: 1.4rem;
+        color: #c9a84c;
+        flex-shrink: 0;
       }
 
       .recipe-title {
@@ -374,7 +378,7 @@ const recipes = [
       {recipes.map((recipe) => (
         <details class="recipe-card">
           <summary class="recipe-header">
-            <span class="recipe-emoji">{recipe.emoji}</span>
+            <Icon name={recipe.icon} class="recipe-icon" size={20} is:inline />
             <span class="recipe-title">{recipe.name}</span>
             <div class="recipe-meta">
               <span class="recipe-day">{recipe.day}</span>

@@ -32,6 +32,7 @@ await addColumnIfMissing("comments", "parent_id", "INTEGER REFERENCES comments(i
 await addColumnIfMissing("comments", "likes_count", "INTEGER NOT NULL DEFAULT 0");
 await addColumnIfMissing("comments", "notified_approved", "INTEGER NOT NULL DEFAULT 0");
 await addColumnIfMissing("comments", "lang", "TEXT NOT NULL DEFAULT 'it'");
+await addColumnIfMissing("comments", "is_author", "INTEGER NOT NULL DEFAULT 0");
 
 await client.execute(`CREATE INDEX IF NOT EXISTS idx_comments_parent ON comments(parent_id)`);
 console.log("  ↳ idx_comments_parent ensured");
@@ -50,5 +51,22 @@ console.log("  ↳ comment_likes table ensured");
 await client.execute(`CREATE INDEX IF NOT EXISTS idx_comment_likes_comment ON comment_likes(comment_id)`);
 await client.execute(`CREATE INDEX IF NOT EXISTS idx_comment_likes_hash ON comment_likes(visitor_hash)`);
 console.log("  ↳ comment_likes indexes ensured");
+
+await client.execute(`
+  CREATE TABLE IF NOT EXISTS post_claps (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id      TEXT NOT NULL,
+    visitor_hash TEXT NOT NULL,
+    count        INTEGER NOT NULL DEFAULT 0,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(post_id, visitor_hash)
+  )
+`);
+console.log("  ↳ post_claps table ensured");
+
+await client.execute(`CREATE INDEX IF NOT EXISTS idx_post_claps_post ON post_claps(post_id)`);
+await client.execute(`CREATE INDEX IF NOT EXISTS idx_post_claps_hash ON post_claps(visitor_hash)`);
+console.log("  ↳ post_claps indexes ensured");
 
 console.log("Migration complete.");

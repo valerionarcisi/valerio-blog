@@ -177,8 +177,17 @@
 }
 
 .Comments-like-icon {
-  font-size: 1em;
+  display: inline-flex;
+  align-items: center;
   line-height: 1;
+}
+
+.Comments-like-icon svg {
+  display: block;
+}
+
+.Comments-like.is-active .Comments-like-icon svg {
+  fill: currentColor;
 }
 
 .Comments-reply-slot:empty {
@@ -214,4 +223,28 @@
 .Comments-cancel:hover {
   color: var(--color-tertiary);
   border-color: var(--color-tertiary);
+}
+
+/* ============================================
+   Author auto-login
+   ============================================ */
+.Comments-author-badge {
+  display: inline-block;
+  background: var(--color-tertiary);
+  color: #0a0a0c;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.7em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+.Comments-author-indicator {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  color: var(--color-tertiary);
+  margin: 0 0 var(--space-medium);
 }

@@ -1,0 +1,130 @@
+---
+import { Icon } from "astro-icon/components";
+import "./PostClaps.css";
+
+interface Props {
+  postId: string;
+  lang: "it" | "en";
+}
+
+const { postId, lang } = Astro.props;
+
+const labels = {
+  it: {
+    cta: "Applaudi questo post",
+    yours: "Hai applaudito {n} volte",
+    yoursOne: "Hai applaudito 1 volta",
+    capped: "Hai raggiunto il massimo (50)",
+  },
+  en: {
+    cta: "Clap for this post",
+    yours: "You clapped {n} times",
+    yoursOne: "You clapped once",
+    capped: "You reached the max (50)",
+  },
+};
+
+const t = labels[lang];
+---
+
+<section
+  class="PostClaps"
+  data-post-id={postId}
+  data-lang={lang}
+  data-label-yours={t.yours}
+  data-label-yours-one={t.yoursOne}
+  data-label-capped={t.capped}
+  aria-label={t.cta}
+>
+  <button type="button" class="PostClaps-button" aria-label={t.cta}>
+    <Icon name="ph:hands-clapping" class="PostClaps-icon" size={22} is:inline aria-hidden="true" />
+    <Icon name="ph:hands-clapping-fill" class="PostClaps-icon PostClaps-icon--solid" size={22} is:inline aria-hidden="true" />
+    <span class="PostClaps-total">0</span>
+  </button>
+  <p class="PostClaps-yours" hidden></p>
+</section>
+
+<script is:inline define:vars={{ initialPostId: postId, initialLang: lang }}>
+  (function () {
+    var section = document.querySelector(".PostClaps");
+    if (!section) return;
+
+    var postId = initialPostId;
+    var btn = section.querySelector(".PostClaps-button");
+    var iconEls = section.querySelectorAll(".PostClaps-icon");
+    var totalEl = section.querySelector(".PostClaps-total");
+    var yoursEl = section.querySelector(".PostClaps-yours");
+    var labelYours = section.dataset.labelYours;
+    var labelYoursOne = section.dataset.labelYoursOne;
+    var labelCapped = section.dataset.labelCapped;
+    var max = 50;
+    var mine = 0;
+    var total = 0;
+    var inflight = 0;
+
+    function render() {
+      totalEl.textContent = total;
+      btn.classList.toggle("is-capped", mine >= max);
+      btn.classList.toggle("is-active", mine > 0);
+      btn.setAttribute("aria-pressed", mine > 0 ? "true" : "false");
+      if (mine === 0) {
+        yoursEl.hidden = true;
+        yoursEl.textContent = "";
+      } else if (mine >= max) {
+        yoursEl.hidden = false;
+        yoursEl.textContent = labelCapped;
+      } else if (mine === 1) {
+        yoursEl.hidden = false;
+        yoursEl.textContent = labelYoursOne;
+      } else {
+        yoursEl.hidden = false;
+        yoursEl.textContent = labelYours.replace("{n}", String(mine));
+      }
+    }
+
+    function pulse() {
+      iconEls.forEach(function (el) {
+        el.classList.remove("is-pulsing");
+        void el.offsetWidth;
+        el.classList.add("is-pulsing");
+      });
+    }
+
+    fetch("/api/posts/claps?postId=" + encodeURIComponent(postId))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (typeof data.max === "number") max = data.max;
+        mine = Number(data.mine) || 0;
+        total = Number(data.total) || 0;
+        render();
+      })
+      .catch(function () {});
+
+    btn.addEventListener("click", function () {
+      if (mine >= max) return;
+      mine = Math.min(mine + 1, max);
+      total = total + 1;
+      render();
+      pulse();
+      inflight++;
+      fetch("/api/posts/claps", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: postId }),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          inflight--;
+          if (inflight === 0) {
+            mine = Number(data.mine) || mine;
+            total = Number(data.total) || total;
+            if (typeof data.max === "number") max = data.max;
+            render();
+          }
+        })
+        .catch(function () {
+          inflight--;
+        });
+    });
+  })();
+</script>

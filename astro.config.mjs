@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import sitemap from "@astrojs/sitemap";
 import netlify from "@astrojs/netlify";
+import icon from "astro-icon";
 
 const envKeys = [
   "ADMIN_TOKEN",
@@ -53,6 +54,7 @@ export default defineConfig({
   adapter: netlify(),
   vite: { define },
   integrations: [
+    icon(),
     sitemap({
       filter: (page) => !page.includes("/admin/") && !page.includes("/tag/"),
     }),

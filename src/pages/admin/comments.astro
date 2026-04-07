@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
@@ -45,6 +46,16 @@ if (!isAuthorized) {
       .reply-indicator { color: #c9a84c; font-size: 0.78rem; font-family: monospace; display: block; margin-bottom: 0.25rem; }
       .likes { color: #c9a84c; font-family: monospace; font-size: 0.85rem; white-space: nowrap; }
       .has-children { color: #e74c3c; font-size: 0.75rem; margin-left: 0.4rem; }
+      .author-badge { display: inline-block; background: #c9a84c; color: #0a0a0c; padding: 0.05rem 0.4rem; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; margin-left: 0.4rem; vertical-align: middle; }
+      .claps-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #222; }
+      .claps-section h2 { color: #c9a84c; font-size: 1.3rem; margin-bottom: 0.5rem; }
+      .claps-totals { color: #8a8a8e; font-size: 0.9rem; margin-bottom: 1.2rem; font-family: monospace; }
+      .claps-totals strong { color: #c9a84c; font-size: 1.1rem; }
+      .claps-table { width: 100%; }
+      .claps-table .clap-count { color: #c9a84c; font-family: monospace; font-weight: 700; text-align: right; white-space: nowrap; }
+      .claps-table .unique-count { color: #8a8a8e; font-family: monospace; font-size: 0.8rem; text-align: right; white-space: nowrap; }
+      .claps-icon { display: inline-block; width: 1.4rem; height: 1.4rem; vertical-align: middle; margin-right: 0.4rem; color: #c9a84c; }
+      .claps-icon svg { display: block; width: 100%; height: 100%; }
     </style>
   </head>
   <body>
@@ -71,8 +82,26 @@ if (!isAuthorized) {
     </table>
     <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
 
+    <section class="claps-section">
+      <h2><Icon name="ph:hands-clapping" class="claps-icon" size={22} is:inline />Claps recap</h2>
+      <p class="claps-totals" id="claps-totals">Loading…</p>
+      <table class="claps-table">
+        <thead>
+          <tr>
+            <th>Post</th>
+            <th class="clap-count">Claps</th>
+            <th class="unique-count">Visitors</th>
+            <th>Last clap</th>
+          </tr>
+        </thead>
+        <tbody id="claps-body"></tbody>
+      </table>
+      <p class="empty" id="claps-empty" style="display:none">No claps yet.</p>
+    </section>
+
     <script is:inline define:vars={{ token }}>
       var ADMIN_TOKEN = token;
+      try { localStorage.setItem("vbAdminToken", token); } catch (e) {}
       var currentStatus = "pending";
 
       function loadComments(status) {
@@ -110,9 +139,12 @@ if (!isAuthorized) {
               var childrenBadge = hasChildren
                 ? '<span class="has-children">+' + Number(c.children_count) + ' replies</span>'
                 : '';
+              var authorBadge = c.is_author
+                ? '<span class="author-badge">Author</span>'
+                : '';
               return '<tr>' +
                 '<td class="page-id">' + escapeHtml(c.page_id) + replyIndicator + '</td>' +
-                '<td>' + escapeHtml(c.name) + childrenBadge + '</td>' +
+                '<td>' + escapeHtml(c.name) + authorBadge + childrenBadge + '</td>' +
                 '<td class="email">' + escapeHtml(c.email) + '</td>' +
                 '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
                 '<td class="likes">♥ ' + Number(c.likes_count || 0) + '</td>' +
@@ -155,7 +187,45 @@ if (!isAuthorized) {
         });
       });
 
+      function loadClaps() {
+        fetch("/api/admin/claps", { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } })
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            var totalsEl = document.getElementById("claps-totals");
+            var tbody = document.getElementById("claps-body");
+            var emptyEl = document.getElementById("claps-empty");
+            var totals = data.totals || {};
+            var total = Number(totals.total || 0);
+            var posts = Number(totals.posts || 0);
+            var uniques = Number(totals.unique_clappers || 0);
+            totalsEl.innerHTML =
+              "<strong>" + total + "</strong> total claps · " +
+              "<strong>" + posts + "</strong> posts · " +
+              "<strong>" + uniques + "</strong> unique visitors";
+            var rows = data.per_post || [];
+            if (!rows.length) {
+              tbody.innerHTML = "";
+              emptyEl.style.display = "block";
+              return;
+            }
+            emptyEl.style.display = "none";
+            tbody.innerHTML = rows.map(function (r) {
+              var last = r.last_clap_at ? new Date(r.last_clap_at).toLocaleString("en-US") : "—";
+              return '<tr>' +
+                '<td class="page-id">' + escapeHtml(r.post_id) + '</td>' +
+                '<td class="clap-count">' + Number(r.total_claps) + '</td>' +
+                '<td class="unique-count">' + Number(r.unique_clappers) + '</td>' +
+                '<td>' + escapeHtml(last) + '</td>' +
+                '</tr>';
+            }).join("");
+          })
+          .catch(function () {
+            document.getElementById("claps-totals").textContent = "Failed to load claps.";
+          });
+      }
+
       loadComments("pending");
+      loadClaps();
     </script>
   </body>
 </html>

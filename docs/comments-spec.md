@@ -82,6 +82,20 @@ Solo i commenti **gia' approvati** possono ricevere reply. Un POST a un parent p
 
 Ogni commento approvato puo' ricevere like da visitatori anonimi. L'identita' del votante e' un hash SHA-256 a 16 caratteri esadecimali calcolato da `hostname + ip + user-agent` (vedi `generateStableVisitorHash` in `src/lib/analytics.ts`, variante senza data di `generateVisitorHash` per evitare che lo stesso utente possa ri-likare ogni giorno). Il bottone like e' un toggle: il primo click inserisce in `comment_likes`, il secondo cancella. Il `likes_count` viene ricalcolato dopo ogni operazione con `SELECT COUNT(*)` per garantire consistenza.
 
+## Auto-login Author
+
+Quando Valerio visita `/admin/comments?token=...`, il token viene salvato in `localStorage` (chiave `vbAdminToken`). Da quel momento il componente `Comments.astro` lo riconosce su qualsiasi blog post: nasconde i campi name/email del form, mostra "Stai rispondendo come Valerio · Author", e invia il commento con header `Authorization: Bearer <token>`.
+
+Lato server (`POST /api/comments`), se il bearer token corrisponde a `ADMIN_TOKEN` (verificato con `verifyBearerToken`), il flusso:
+1. Forza `name = "Valerio"`, `email = "valerio.narcisi@gmail.com"` (costanti in `src/lib/author.ts`) — i campi del body vengono ignorati: spoofing impossibile
+2. Inserisce con `approved = 1`, `is_author = 1`, `notified_approved = 1`
+3. **Salta** `notifyNewComment` (e' Valerio stesso)
+4. Se e' una reply a un parent diverso da Valerio, invia `notifyReplyToYourComment` al parent author
+
+`is_author` viene esposto sia nella GET pubblica che in quella admin, ed e' usato dal client per renderizzare un badge giallo "Author" accanto al nome.
+
+Multi-device: `localStorage` persiste su Safari iOS, Chrome Android, ecc. Una visita unica a `/admin/comments?token=...` per ogni device e' sufficiente — niente magic link extra.
+
 ## Notifiche email
 
 Quattro funzioni in `src/lib/email.ts`, tutte fire-and-forget e con graceful skip se manca `RESEND_API_KEY`:

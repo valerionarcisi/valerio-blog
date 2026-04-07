@@ -1,22 +1,24 @@
 ---
-// Blog Search Component
+import { Icon } from "astro-icon/components";
 ---
 
 <div class="search-container">
   <div class="search-input-wrapper">
-    <input 
-      type="text" 
-      id="blog-search" 
-      placeholder="Search posts..." 
+    <input
+      type="text"
+      id="blog-search"
+      placeholder="Search posts..."
       aria-label="Search blog posts"
       class="search-input"
     />
-    <span class="search-icon">🔍</span>
+    <Icon name="heroicons:magnifying-glass" class="search-icon" size={18} is:inline />
   </div>
   <div id="search-results" class="search-results" style="display: none;">
     <div class="results-header">
       <span id="results-count">0 results found</span>
-      <button id="clear-search" class="clear-button">✕</button>
+      <button id="clear-search" class="clear-button" aria-label="Clear search">
+        <Icon name="heroicons:x-mark" size={16} is:inline />
+      </button>
     </div>
     <div id="results-list" class="results-list"></div>
   </div>
@@ -187,7 +189,8 @@
     top: 50%;
     transform: translateY(-50%);
     color: var(--color-secondary);
-    font-size: var(--fontSize-small);
+    width: 1.1rem;
+    height: 1.1rem;
   }
 
   .search-results {
@@ -220,9 +223,11 @@
     border: none;
     color: var(--color-secondary);
     cursor: pointer;
-    font-size: var(--fontSize-small);
     padding: var(--space-small);
     border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     transition: all var(--transition-fast);
   }
 

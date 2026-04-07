@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
@@ -103,7 +104,8 @@ if (!isAuthorized) {
       .error { color: #e74c3c; padding: 1rem; background: rgba(231,76,60,0.1); border-radius: 4px; }
 
       .geo-section { background: #141416; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 1.2rem; margin-bottom: 2rem; position: relative; }
-      .geo-section h3 { font-size: 0.88rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #c9a84c; margin-bottom: 1rem; }
+      .geo-section h3 { font-size: 0.88rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #c9a84c; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.4rem; }
+      .section-icon { width: 1rem; height: 1rem; color: currentColor; }
       #world-map { height: 340px; border-radius: 6px; z-index: 1; }
       .map-legend { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.78rem; color: #666; }
       .map-legend-bar { width: 120px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, rgba(78,205,196,0.1), #4ecdc4); }
@@ -210,7 +212,7 @@ if (!isAuthorized) {
     </div>
 
     <div class="geo-section">
-      <h3>🌍 Geographic Distribution</h3>
+      <h3><Icon name="heroicons:globe-alt" class="section-icon" size={18} is:inline />Geographic Distribution</h3>
       <div id="world-map"></div>
       <div class="map-legend">
         <span>0</span>

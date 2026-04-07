@@ -33,9 +33,11 @@ All endpoints use a `Result<T, E>` pattern — no exceptions, no silent failures
 parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 ```
 
-- `GET/POST /api/comments` — public comments (supports nested replies via `parentId`)
+- `GET/POST /api/comments` — public comments (nested replies via `parentId`; author auto-login via Bearer token)
 - `POST /api/comments/like` — toggle like on a comment (visitor hash anti-double-vote)
+- `GET/POST /api/posts/claps` — Medium-style claps on blog posts (max 50 per visitor)
 - `GET/PATCH /api/admin/comments` — moderation (Bearer token), email notifications on approve/reject
+- `GET /api/admin/claps` — claps recap by post (Bearer token)
 - `GET/POST/DELETE /api/admin/meditation` — meditation session tracking
 
 ### Functional core (`src/lib/`)

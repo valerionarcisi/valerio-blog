@@ -415,7 +415,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
               + '</div>';
 
             if (!dayData || dayData.duration === 0) {
-              html += '<div class="heatmap-detail-empty">Giorno di riposo 😴</div>';
+              html += '<div class="heatmap-detail-empty">Giorno di riposo</div>';
             } else if (dayData.activities && dayData.activities.length > 0) {
               for (var i = 0; i < dayData.activities.length; i++) {
                 var a = dayData.activities[i];

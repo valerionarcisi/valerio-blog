@@ -13,12 +13,14 @@ if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
 }
 
-const mealEmoji: Record<string, string> = {
-  "Colazione": "🌅",
-  "Pranzo": "🍝",
-  "Cena": "🌙",
-  "Cena (libera)": "🍕",
-  "Spuntino": "🍎",
+import { Icon } from "astro-icon/components";
+
+const mealIconName: Record<string, string> = {
+  "Colazione": "ph:coffee",
+  "Pranzo": "ph:bowl-food",
+  "Cena": "ph:bowl-steam",
+  "Cena (libera)": "ph:pizza",
+  "Spuntino": "ph:carrot",
 };
 ---
 
@@ -93,7 +95,7 @@ const mealEmoji: Record<string, string> = {
         align-items: center;
         gap: 0.4rem;
       }
-      .meal-header .emoji { font-size: 1.1rem; }
+      .meal-header .meal-icon { width: 1.25rem; height: 1.25rem; color: #c9a84c; flex-shrink: 0; }
 
       .oil-badge {
         display: inline-block;
@@ -229,7 +231,7 @@ const mealEmoji: Record<string, string> = {
         </h2>
 
         {day.meals.map((meal) => {
-          const emoji = mealEmoji[meal.name] || "🍽️";
+          const iconName = mealIconName[meal.name] || "ph:fork-knife";
           const mainOption = meal.options[0];
           const altOptions = meal.options.slice(1);
           const altCount = altOptions.length;
@@ -237,7 +239,7 @@ const mealEmoji: Record<string, string> = {
           return (
             <div class="meal-card">
               <div class="meal-header">
-                <span class="emoji">{emoji}</span>
+                <Icon name={iconName} class="meal-icon" size={20} is:inline />
                 {meal.name}
                 {mainOption.oil && (
                   <span class:list={["oil-badge", { "no-oil": mainOption.oil.toLowerCase().includes("no") }]}>
@@ -290,7 +292,7 @@ const mealEmoji: Record<string, string> = {
       {snacks.map((section) => (
         <div class="meal-card snack-section">
           <div class="meal-header">
-            <span class="emoji">🍎</span>
+            <Icon name="ph:carrot" class="meal-icon" size={20} is:inline />
             {section.name}
           </div>
           <div>

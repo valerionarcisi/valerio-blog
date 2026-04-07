@@ -94,7 +94,7 @@ export const GET: APIRoute = async ({ url, request }) => {
 
   const result = await getDb().execute({
     sql: `SELECT c.id, c.page_id, c.name, c.email, c.text, c.approved, c.created_at,
-            c.parent_id, c.likes_count, c.lang,
+            c.parent_id, c.likes_count, c.lang, c.is_author,
             p.name AS parent_name,
             (SELECT COUNT(*) FROM comments k WHERE k.parent_id = c.id) AS children_count
           FROM comments c

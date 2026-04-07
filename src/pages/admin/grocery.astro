@@ -12,10 +12,12 @@ if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
 }
 
+import { Icon } from "astro-icon/components";
+
 const groceryList = [
   {
     category: "Pane e Carboidrati",
-    emoji: "🍞",
+    icon: "ph:bread",
     cost: 12,
     items: [
       "Pane integrale o ai cereali (per accompagnare pranzi e cene)",
@@ -30,7 +32,7 @@ const groceryList = [
   },
   {
     category: "Carne",
-    emoji: "🥩",
+    icon: "ph:cow",
     cost: 25,
     items: [
       "Petto di pollo (200g x2: curry gio + Dom/Lun/Mar opz)",
@@ -42,7 +44,7 @@ const groceryList = [
   },
   {
     category: "Pesce",
-    emoji: "🐟",
+    icon: "ph:fish",
     cost: 30,
     items: [
       "Tonno al naturale 80g (x8-10 scatolette: pranzi Lun/Mar/Gio/Ven/Sab + cena Mer)",
@@ -54,7 +56,7 @@ const groceryList = [
   },
   {
     category: "Uova e Latticini",
-    emoji: "🥚",
+    icon: "ph:egg",
     cost: 12,
     items: [
       "Uova (confezione da 6 — 3 uova Mar cena + 3 uova Gio pranzo opz 2)",
@@ -67,7 +69,7 @@ const groceryList = [
   },
   {
     category: "Legumi",
-    emoji: "🫘",
+    icon: "ph:grains",
     cost: 8,
     items: [
       "Ceci in scatola (x3: pranzo Lun/Sab opz 2 240g + cena Ven opz 2 240g)",
@@ -79,7 +81,7 @@ const groceryList = [
   },
   {
     category: "Verdura",
-    emoji: "🥬",
+    icon: "ph:plant",
     cost: 18,
     items: [
       "Verdure a foglia verde: lattuga, rucola, valeriana, indivia, iceberg (insalatone Mar/Mer/Dom)",
@@ -97,7 +99,7 @@ const groceryList = [
   },
   {
     category: "Condimenti",
-    emoji: "🫒",
+    icon: "ph:flower-tulip",
     cost: 6,
     note: "Molti durano più settimane",
     items: [
@@ -191,7 +193,7 @@ const totalItems = groceryList.reduce((sum, s) => sum + s.items.length, 0);
       .grocery-card[open] summary::before { content: "▾"; }
       .grocery-card[open] summary { border-bottom: 1px solid #252528; }
 
-      .grocery-card .emoji { font-size: 1rem; }
+      .grocery-card .grocery-icon { width: 1.15rem; height: 1.15rem; color: #c9a84c; flex-shrink: 0; }
       .grocery-count {
         font-size: 0.82rem;
         font-weight: 400;
@@ -264,7 +266,7 @@ const totalItems = groceryList.reduce((sum, s) => sum + s.items.length, 0);
       {groceryList.map((section) => (
         <details class="grocery-card">
           <summary>
-            <span class="emoji">{section.emoji}</span>
+            <Icon name={section.icon} class="grocery-icon" size={18} is:inline />
             {section.category}
             <span class="grocery-count">({section.items.length})</span>
             <span class="grocery-cost">~{section.cost}€</span>
