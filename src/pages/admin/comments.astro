@@ -24,80 +24,121 @@ if (!isAuthorized) {
     <title>Comments Admin</title>
     <style>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; font-size: 1.05rem; }
-      h1 { color: #c9a84c; margin-bottom: 1rem; }
-      .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; }
-      .tabs button { padding: 0.5rem 1rem; background: #141416; border: 1px solid #333; color: #e8e6e1; cursor: pointer; border-radius: 4px; font-size: 0.9rem; }
-      .tabs button.active { border-color: #c9a84c; color: #c9a84c; }
+      body { font-family: system-ui, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; font-size: 1rem; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      .page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+      h1 { color: #c9a84c; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+      .page-sub { color: #8a8a8e; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+
+      .card { background: #121214; border: 1px solid #222; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
+      .card-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+      .card-title { color: #c9a84c; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.5rem; }
+      .card-title-icon { width: 1.1rem; height: 1.1rem; color: #c9a84c; }
+      .card-title-icon svg { display: block; width: 100%; height: 100%; }
+
+      .tabs { display: inline-flex; gap: 0; background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 8px; padding: 3px; }
+      .tabs button { padding: 0.45rem 1rem; background: transparent; border: none; color: #8a8a8e; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
+      .tabs button:hover { color: #e8e6e1; }
+      .tabs button.active { background: rgba(201, 168, 76, 0.12); color: #c9a84c; }
+
       table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #222; font-size: 0.85rem; }
-      th { color: #8a8a8e; text-transform: uppercase; font-size: 0.88rem; letter-spacing: 0.05em; }
-      .page-id { font-family: monospace; color: #4ecdc4; font-size: 0.9rem; }
-      .text-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .email { color: #8a8a8e; font-size: 0.9rem; }
-      .actions { display: flex; gap: 0.5rem; }
-      .btn { padding: 0.3rem 0.8rem; border: 1px solid; border-radius: 4px; cursor: pointer; font-size: 0.9rem; background: transparent; }
-      .btn-approve { color: #4ecdc4; border-color: #4ecdc4; }
-      .btn-approve:hover { background: rgba(78, 205, 196, 0.15); }
-      .btn-delete { color: #e74c3c; border-color: #e74c3c; }
-      .btn-delete:hover { background: rgba(231, 76, 60, 0.15); }
-      .empty { color: #8a8a8e; font-style: italic; padding: 2rem 0; }
-      .count { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1rem; }
-      .reply-indicator { color: #c9a84c; font-size: 0.78rem; font-family: monospace; display: block; margin-bottom: 0.25rem; }
-      .likes { color: #c9a84c; font-family: monospace; font-size: 0.85rem; white-space: nowrap; }
-      .has-children { color: #e74c3c; font-size: 0.75rem; margin-left: 0.4rem; }
-      .author-badge { display: inline-block; background: #c9a84c; color: #0a0a0c; padding: 0.05rem 0.4rem; border-radius: 3px; font-size: 0.7em; font-weight: 600; text-transform: uppercase; margin-left: 0.4rem; vertical-align: middle; }
-      .claps-section { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #222; }
-      .claps-section h2 { color: #c9a84c; font-size: 1.3rem; margin-bottom: 0.5rem; }
-      .claps-totals { color: #8a8a8e; font-size: 0.9rem; margin-bottom: 1.2rem; font-family: monospace; }
-      .claps-totals strong { color: #c9a84c; font-size: 1.1rem; }
-      .claps-table { width: 100%; }
-      .claps-table .clap-count { color: #c9a84c; font-family: monospace; font-weight: 700; text-align: right; white-space: nowrap; }
-      .claps-table .unique-count { color: #8a8a8e; font-family: monospace; font-size: 0.8rem; text-align: right; white-space: nowrap; }
-      .claps-icon { display: inline-block; width: 1.4rem; height: 1.4rem; vertical-align: middle; margin-right: 0.4rem; color: #c9a84c; }
-      .claps-icon svg { display: block; width: 100%; height: 100%; }
+      th, td { padding: 0.85rem 0.75rem; text-align: left; vertical-align: top; }
+      thead th { color: #8a8a8e; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; font-weight: 600; border-bottom: 1px solid #2a2a2e; }
+      tbody tr { transition: background 0.15s; }
+      tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
+      tbody tr + tr td { border-top: 1px solid #1c1c20; }
+      td { font-size: 0.85rem; }
+
+      .page-id { font-family: 'JetBrains Mono', monospace; color: #4ecdc4; font-size: 0.78rem; }
+      .text-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .email { color: #8a8a8e; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
+      .actions { display: flex; gap: 0.4rem; flex-wrap: nowrap; }
+      .btn { padding: 0.35rem 0.75rem; border: 1px solid; border-radius: 5px; cursor: pointer; font-size: 0.78rem; font-weight: 600; background: transparent; transition: all 0.15s; white-space: nowrap; }
+      .btn-approve { color: #4ecdc4; border-color: rgba(78, 205, 196, 0.4); }
+      .btn-approve:hover { background: rgba(78, 205, 196, 0.12); border-color: #4ecdc4; }
+      .btn-delete { color: #e74c3c; border-color: rgba(231, 76, 60, 0.4); }
+      .btn-delete:hover { background: rgba(231, 76, 60, 0.12); border-color: #e74c3c; }
+
+      .empty { color: #8a8a8e; font-style: italic; padding: 2rem; text-align: center; }
+      .count { color: #8a8a8e; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
+
+      .reply-indicator { color: #c9a84c; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-top: 0.25rem; opacity: 0.85; }
+      .likes-cell { color: #c9a84c; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem; }
+      .likes-icon { width: 0.9rem; height: 0.9rem; color: #c9a84c; display: inline-block; }
+      .likes-icon svg { display: block; width: 100%; height: 100%; }
+      .has-children { color: #e74c3c; font-size: 0.65rem; margin-left: 0.4rem; padding: 0.05rem 0.35rem; border: 1px solid rgba(231, 76, 60, 0.4); border-radius: 3px; }
+      .author-badge { display: inline-block; background: #c9a84c; color: #0a0a0c; padding: 0.05rem 0.4rem; border-radius: 3px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; margin-left: 0.4rem; vertical-align: middle; letter-spacing: 0.05em; }
+
+      .claps-totals { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1.2rem; font-family: 'JetBrains Mono', monospace; }
+      .claps-totals strong { color: #c9a84c; font-size: 1.05rem; font-weight: 700; }
+      .claps-table .clap-count { color: #c9a84c; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-align: right; white-space: nowrap; font-size: 0.95rem; }
+      .claps-table .unique-count { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; text-align: right; white-space: nowrap; }
+      .claps-table th.clap-count, .claps-table th.unique-count { text-align: right; }
+
+      @media (max-width: 720px) {
+        body { padding: 1rem; }
+        h1 { font-size: 1.5rem; }
+        .card { padding: 1rem; }
+        .text-cell { max-width: 180px; }
+      }
     </style>
   </head>
   <body>
     <AdminNav currentPage="comments" token={token} />
-    <h1>Comments</h1>
-    <div class="tabs">
-      <button class="active" data-status="pending">Pending</button>
-      <button data-status="approved">Approved</button>
-    </div>
-    <p class="count"></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Page</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Comment</th>
-          <th>♥</th>
-          <th>Date</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="comments-body"></tbody>
-    </table>
-    <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
+    <div class="container">
+      <header class="page-header">
+        <h1>Comments</h1>
+        <span class="page-sub">moderation · likes · claps</span>
+      </header>
 
-    <section class="claps-section">
-      <h2><Icon name="ph:hands-clapping" class="claps-icon" size={22} is:inline />Claps recap</h2>
-      <p class="claps-totals" id="claps-totals">Loading…</p>
-      <table class="claps-table">
-        <thead>
-          <tr>
-            <th>Post</th>
-            <th class="clap-count">Claps</th>
-            <th class="unique-count">Visitors</th>
-            <th>Last clap</th>
-          </tr>
-        </thead>
-        <tbody id="claps-body"></tbody>
-      </table>
-      <p class="empty" id="claps-empty" style="display:none">No claps yet.</p>
-    </section>
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">Moderation</h2>
+          <div class="tabs">
+            <button class="active" data-status="pending">Pending</button>
+            <button data-status="approved">Approved</button>
+          </div>
+        </div>
+        <p class="count"></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Page</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Comment</th>
+              <th><span class="likes-icon" aria-label="likes"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5c-1.936 0-3.598 1.126-4.313 2.733c-.715-1.607-2.377-2.733-4.312-2.733C5.098 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12"/></svg></span></th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="comments-body"></tbody>
+        </table>
+        <p class="empty" id="empty-msg" style="display:none">No comments found.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="card-title-icon"><Icon name="ph:hands-clapping" size={20} is:inline /></span>
+            Claps recap
+          </h2>
+          <p class="claps-totals" id="claps-totals">Loading…</p>
+        </div>
+        <table class="claps-table">
+          <thead>
+            <tr>
+              <th>Post</th>
+              <th class="clap-count">Claps</th>
+              <th class="unique-count">Visitors</th>
+              <th>Last clap</th>
+            </tr>
+          </thead>
+          <tbody id="claps-body"></tbody>
+        </table>
+        <p class="empty" id="claps-empty" style="display:none">No claps yet.</p>
+      </section>
+    </div>
 
     <script is:inline define:vars={{ token }}>
       var ADMIN_TOKEN = token;
@@ -147,7 +188,7 @@ if (!isAuthorized) {
                 '<td>' + escapeHtml(c.name) + authorBadge + childrenBadge + '</td>' +
                 '<td class="email">' + escapeHtml(c.email) + '</td>' +
                 '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
-                '<td class="likes">♥ ' + Number(c.likes_count || 0) + '</td>' +
+                '<td><span class="likes-cell"><span class="likes-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5c-1.936 0-3.598 1.126-4.313 2.733c-.715-1.607-2.377-2.733-4.312-2.733C5.098 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12"/></svg></span>' + Number(c.likes_count || 0) + '</span></td>' +
                 '<td>' + d + '</td>' +
                 '<td class="actions">' + actions + '</td>' +
                 '</tr>';
