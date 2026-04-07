@@ -7,14 +7,30 @@ const currentPath = Astro.url.pathname;
 const isEn = currentPath.startsWith('/en');
 const otherLang = isEn ? 'IT' : 'EN';
 
-const routeMap: Record<string, string> = {
+// Bidirectional map for routes whose IT and EN slugs differ.
+// New entries are auto-mirrored: writing the IT→EN entry is enough.
+const baseRouteMap: Record<string, string> = {
   '/contatti': '/en/contact',
-  '/en/contact': '/contatti',
+  '/blog/dalla-meditazione-alla-programmazione-funzionale': '/en/blog/from-meditation-to-functional-programming',
+  '/tag/meditazione': '/en/tag/meditation',
+  '/tag/programmazione-funzionale': '/en/tag/functional-programming',
 };
+
+const routeMap: Record<string, string> = { ...baseRouteMap };
+for (const [from, to] of Object.entries(baseRouteMap)) {
+  routeMap[to] = from;
+}
 
 function getLangSwitchHref(path: string): string {
   const normalized = path.replace(/\/$/, '') || '/';
   if (routeMap[normalized]) return routeMap[normalized] + '/';
+  // Prefix match for paginated routes (e.g. /tag/meditazione/2)
+  for (const key of Object.keys(routeMap)) {
+    if (normalized.startsWith(key + '/')) {
+      const suffix = normalized.slice(key.length);
+      return routeMap[key] + suffix + '/';
+    }
+  }
   if (isEn) return (normalized.replace(/^\/en/, '') || '/');
   return `/en${normalized}`;
 }
