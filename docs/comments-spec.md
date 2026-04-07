@@ -44,18 +44,54 @@ Database: **Turso** (SQLite edge, via `@libsql/client`).
 
 Tabella `comments`:
 
-| Campo        | Tipo    | Note                                           |
-| ------------ | ------- | ---------------------------------------------- |
-| `id`         | INTEGER | Primary key, autoincrement (implicito SQLite)  |
-| `page_id`    | TEXT    | Identificativo della pagina (es. slug del post)|
-| `name`       | TEXT    | Nome dell'autore (max 100 caratteri)           |
-| `email`      | TEXT    | Email dell'autore (max 254 caratteri)          |
-| `text`       | TEXT    | Contenuto del commento (max 5000 caratteri)    |
-| `approved`   | INTEGER | 0 = pendente (default), 1 = approvato         |
-| `created_at` | TEXT    | Timestamp di creazione (default SQLite)        |
+| Campo               | Tipo    | Note                                                                    |
+| ------------------- | ------- | ----------------------------------------------------------------------- |
+| `id`                | INTEGER | Primary key, autoincrement                                              |
+| `page_id`           | TEXT    | Identificativo della pagina (es. slug del post)                         |
+| `name`              | TEXT    | Nome dell'autore (max 100 caratteri)                                    |
+| `email`             | TEXT    | Email dell'autore (max 254 caratteri)                                   |
+| `text`              | TEXT    | Contenuto del commento (max 5000 caratteri)                             |
+| `approved`          | INTEGER | 0 = pendente (default), 1 = approvato                                   |
+| `parent_id`         | INTEGER | NULL per commenti top-level, FK self → `comments(id)` ON DELETE CASCADE |
+| `likes_count`       | INTEGER | Conteggio denormalizzato dei like (default 0)                           |
+| `notified_approved` | INTEGER | 0 = email approvazione non ancora inviata, 1 = inviata (default 0)      |
+| `lang`              | TEXT    | `'it'` o `'en'`, usato per costruire il link nelle email (default `'it'`) |
+| `created_at`        | TEXT    | Timestamp di creazione (default SQLite)                                 |
 
-Query di lettura pubblica filtrano per `approved = 1` e ordinano per `created_at ASC`.
-Query admin filtrano per `approved = 0` (pendenti) o `approved = 1` (approvati) e ordinano per `created_at DESC`.
+Tabella `comment_likes`:
+
+| Campo          | Tipo    | Note                                                      |
+| -------------- | ------- | --------------------------------------------------------- |
+| `id`           | INTEGER | Primary key, autoincrement                                |
+| `comment_id`   | INTEGER | FK → `comments(id)` ON DELETE CASCADE                     |
+| `visitor_hash` | TEXT    | Hash stabile (no data) di host+IP+UA per identita'        |
+| `created_at`   | TEXT    | Timestamp                                                 |
+
+Constraint `UNIQUE(comment_id, visitor_hash)` impedisce voti multipli dallo stesso visitatore.
+
+Query di lettura pubblica filtrano per `approved = 1` e ordinano per `created_at ASC`. La GET pubblica esegue un LEFT JOIN su `comment_likes` filtrato dal `visitor_hash` corrente per popolare il flag `liked_by_me`.
+Query admin filtrano per `approved = 0` (pendenti) o `approved = 1` (approvati) e ordinano per `created_at DESC`. La GET admin include `parent_id`, `parent_name`, `likes_count` e `children_count` per gestire indicatori di reply e cascade warning.
+
+## Risposte annidate (replies)
+
+I commenti possono avere risposte multi-livello tramite la colonna `parent_id`. La risposta a una risposta crea un nuovo record con il `parent_id` puntato al commento padre. La GET pubblica restituisce comunque una **flat list ordinata cronologicamente**: il client costruisce l'albero in O(n) usando una mappa `id → nodo`. Il rendering CSS limita l'indentazione visiva a 4 livelli (`data-depth="4"`) per non rompere il layout su mobile.
+
+Solo i commenti **gia' approvati** possono ricevere reply. Un POST a un parent pendente o di un'altra pagina viene rifiutato con 400. Eliminare un commento parent elimina in cascata tutto il sottoalbero (`ON DELETE CASCADE`). La pagina admin avvisa l'utente con un `confirm()` quando il commento ha figli.
+
+## Like
+
+Ogni commento approvato puo' ricevere like da visitatori anonimi. L'identita' del votante e' un hash SHA-256 a 16 caratteri esadecimali calcolato da `hostname + ip + user-agent` (vedi `generateStableVisitorHash` in `src/lib/analytics.ts`, variante senza data di `generateVisitorHash` per evitare che lo stesso utente possa ri-likare ogni giorno). Il bottone like e' un toggle: il primo click inserisce in `comment_likes`, il secondo cancella. Il `likes_count` viene ricalcolato dopo ogni operazione con `SELECT COUNT(*)` per garantire consistenza.
+
+## Notifiche email
+
+Quattro funzioni in `src/lib/email.ts`, tutte fire-and-forget e con graceful skip se manca `RESEND_API_KEY`:
+
+1. **`notifyNewComment`** — destinatario admin. Inviata da `POST /api/comments`. Il subject include "Reply" se e' una risposta e mostra il nome del parent.
+2. **`notifyCommentApproved`** — destinatario autore. Inviata da `PATCH /api/admin/comments` su `action: "approve"` solo se `notified_approved = 0` (idempotente). Lingua dal campo `lang` del commento.
+3. **`notifyReplyToYourComment`** — destinatario autore del parent. Inviata insieme a `notifyCommentApproved` quando il commento approvato ha un `parent_id`. Skip se l'email del reply autore coincide con quella del parent (auto-notifica).
+4. **`notifyCommentRejected`** — destinatario autore. Inviata da `PATCH` su `action: "delete"`. Testo gentile, niente dettagli sulla ragione.
+
+Tutti i link nei body usano `https://valerionarcisi.me/{lang}/blog/{pageId}/`.
 
 ## API Endpoints
 
@@ -82,19 +118,35 @@ Logica: seleziona dalla tabella `comments` i record con `page_id` corrispondente
 | **Path**        | `/api/comments`                                 |
 | **Autenticazione** | Nessuna (endpoint pubblico)                  |
 | **Content-Type** | `application/json`                              |
-| **Request body** | `{ pageId, name, email, text, website }`       |
+| **Request body** | `{ pageId, name, email, text, lang, parentId?, website }` |
 | **Response 201** | `{ ok: true }` (commento inserito)             |
 | **Response 200** | `{ ok: true }` (honeypot attivato, silenzioso) |
-| **Response 400** | `{ error: "All fields are required" }` oppure `{ error: "Field too long" }` oppure `{ error: "Invalid email" }` |
+| **Response 400** | `{ error: "..." }` (validazione fallita o parent invalido) |
 
 Logica:
 
-1. **Honeypot**: se il campo `website` e valorizzato, il commento viene scartato silenziosamente (risposta 200 per non rivelare il meccanismo ai bot).
+1. **Honeypot**: se `website` valorizzato, scarta silenzioso (200).
 2. **Validazione campi**: `pageId`, `name`, `email`, `text` obbligatori e non vuoti dopo trim.
-3. **Validazione lunghezza**: `name` <= 100, `email` <= 254, `text` <= 5000 caratteri.
+3. **Validazione lunghezza**: `name` <= 100, `email` <= 254, `text` <= 5000.
 4. **Validazione email**: regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`.
-5. **Inserimento**: `INSERT INTO comments (page_id, name, email, text)` — il campo `approved` resta al default (`0`).
-6. **Notifica email**: chiama `notifyNewComment()` che invia un'email via Resend API all'indirizzo dell'admin (`valerio.narcisi@gmail.com`) con i dettagli del commento e un link diretto alla pagina di moderazione. La notifica e fire-and-forget: se fallisce non blocca la risposta.
+5. **Validazione parentId** (se presente): intero positivo, deve esistere, deve essere `approved = 1`, deve appartenere allo stesso `pageId`. Altrimenti 400.
+6. **Lang**: accetta `'it'` o `'en'`, default `'it'`.
+7. **Inserimento**: `INSERT INTO comments (page_id, name, email, text, parent_id, lang)` — `approved` default 0.
+8. **Notifica email admin**: chiama `notifyNewComment()` (fire-and-forget). Se la submission e' una reply, il subject e il body indicano il parent.
+
+### `POST /api/comments/like`
+
+| Proprieta       | Valore                                          |
+| --------------- | ----------------------------------------------- |
+| **Metodo**      | POST                                            |
+| **Path**        | `/api/comments/like`                            |
+| **Autenticazione** | Nessuna (endpoint pubblico)                  |
+| **Request body** | `{ commentId: number }`                         |
+| **Response 200** | `{ liked: boolean, count: number }`             |
+| **Response 400** | commentId invalido o commento pending           |
+| **Response 404** | commento inesistente                            |
+
+Logica: calcola il `visitor_hash` stabile, verifica che il commento esista e sia approvato, poi toggla il like (insert se manca, delete se presente). Aggiorna `likes_count` con `SELECT COUNT(*)` per consistenza e ritorna lo stato post-toggle. Idempotente per design.
 
 ---
 
@@ -128,8 +180,8 @@ Logica: converte `status` in valore numerico (`approved` = 1, altrimenti 0), sel
 
 Logica:
 
-- `action: "approve"` -> `UPDATE comments SET approved = 1 WHERE id = ?`
-- `action: "delete"` -> `DELETE FROM comments WHERE id = ?`
+- `action: "approve"` -> `UPDATE comments SET approved = 1, notified_approved = 1`. Se `notified_approved` era 0, invia `notifyCommentApproved` all'autore. Se il commento ha `parent_id` e l'email del parent e' diversa da quella del reply, invia anche `notifyReplyToYourComment` al parent author.
+- `action: "delete"` -> `DELETE FROM comments WHERE id = ?` (cascade su figli) + `notifyCommentRejected` all'autore.
 
 ## Componenti UI
 
@@ -192,7 +244,9 @@ Riceve due props:
 | `src/components/Comments.css` | Stili del componente commenti |
 | `src/lib/turso.ts` | Client singleton per Turso (libsql), usato da tutti gli endpoint |
 | `src/lib/auth.ts` | Utility `timeSafeEqual()` e `verifyBearerToken()` per autenticazione admin |
-| `src/lib/email.ts` | Funzione `notifyNewComment()` per notifica email via Resend API |
+| `src/lib/email.ts` | Funzioni `notifyNewComment`, `notifyCommentApproved`, `notifyCommentRejected`, `notifyReplyToYourComment` |
+| `src/pages/api/comments/like.ts` | Endpoint pubblico POST per il toggle del like |
+| `scripts/migrate-comments-replies-likes.ts` | Migration idempotente che aggiunge colonne e tabella `comment_likes` |
 | `src/components/AdminNav.astro` | Navigazione condivisa nelle pagine admin |
 
 ## Dipendenze
@@ -221,15 +275,14 @@ Riceve due props:
 - **Email non visibile pubblicamente**: la GET pubblica non espone l'email, ma questa viene comunque raccolta e salvata nel DB. Non c'e un meccanismo di opt-in esplicito ne informativa sulla privacy inline.
 - **Token admin nel query string**: la pagina admin usa il token come query parameter (`?token=...`), il che lo espone nei log del server e nella cronologia del browser. Mitigato dal meta tag `referrer: no-referrer`.
 - **Label i18n duplicate**: le traduzioni del componente `Comments.astro` sono definite sia nel frontmatter (per SSR) che nello script inline (per il client), creando duplicazione. Questo e necessario perche `<script is:inline>` non ha accesso alle variabili Astro.
-- **Nessuna notifica di risposta**: l'utente che commenta non riceve notifica quando il suo commento viene approvato o quando qualcuno risponde.
-- **Commenti piatti**: non esiste una struttura a thread/risposte. Tutti i commenti sono allo stesso livello, ordinati cronologicamente.
 - **Nessun editing/cancellazione da parte dell'utente**: una volta inviato, il commento puo essere gestito solo dall'admin.
+- **Like aggirabili con VPN/incognito**: l'hash IP+UA non e' a prova di abuso, ma per un blog personale e' sufficiente.
+- **No pre-moderazione delle reply visualmente**: una reply pending appare solo all'admin; il parent in cui si annida e' visibile pubblicamente, ma il thread cresce solo dopo approvazione.
 
 ### Possibili evoluzioni
 
 - Aggiungere rate limiting (es. per IP o fingerprint)
 - Implementare paginazione lato API e UI
-- Aggiungere notifiche email per i commentatori
-- Supportare commenti annidati (thread)
 - Integrare un sistema anti-spam piu robusto (es. Akismet)
 - Spostare l'autenticazione admin su cookie HttpOnly invece che query string
+- Consentire all'utente di cancellare il proprio commento via magic link in email

@@ -7,6 +7,7 @@ import {
   sanitizePathname,
   extractHostname,
   generateVisitorHash,
+  generateStableVisitorHash,
 } from "./analytics";
 
 describe("countryFromTimezone", () => {
@@ -203,5 +204,76 @@ describe("generateVisitorHash", () => {
     const h1 = await generateVisitorHash("example.com", "1.2.3.4", "Chrome");
     const h2 = await generateVisitorHash("example.com", "5.6.7.8", "Chrome");
     expect(h1).not.toBe(h2);
+  });
+});
+
+describe("generateStableVisitorHash", () => {
+  test("returns 16 char hex string", async () => {
+    const hash = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    expect(hash).toMatch(/^[0-9a-f]{16}$/);
+  });
+
+  test("is deterministic across calls", async () => {
+    const h1 = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const h2 = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    expect(h1).toBe(h2);
+  });
+
+  test("is stable across different days (unlike generateVisitorHash)", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-01-01T12:00:00Z"));
+    const day1 = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    vi.setSystemTime(new Date("2026-06-15T12:00:00Z"));
+    const day2 = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    vi.useRealTimers();
+    expect(day1).toBe(day2);
+  });
+
+  test("different IPs produce different hashes", async () => {
+    const h1 = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const h2 = await generateStableVisitorHash(
+      "example.com",
+      "5.6.7.8",
+      "Chrome",
+    );
+    expect(h1).not.toBe(h2);
+  });
+
+  test("different from generateVisitorHash for same input", async () => {
+    const stable = await generateStableVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const dated = await generateVisitorHash(
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    expect(stable).not.toBe(dated);
   });
 });

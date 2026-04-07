@@ -15,6 +15,10 @@ const labels = {
     email: "Email",
     text: "Commento",
     submit: "Invia commento",
+    submitReply: "Invia risposta",
+    cancel: "Annulla",
+    reply: "Rispondi",
+    like: "Mi piace",
     success: "Commento inviato! Sarà visibile dopo la moderazione.",
     error: "Errore nell'invio del commento. Riprova.",
     loading: "Caricamento commenti...",
@@ -27,6 +31,10 @@ const labels = {
     email: "Email",
     text: "Comment",
     submit: "Submit comment",
+    submitReply: "Submit reply",
+    cancel: "Cancel",
+    reply: "Reply",
+    like: "Like",
     success: "Comment submitted! It will be visible after moderation.",
     error: "Error submitting comment. Please try again.",
     loading: "Loading comments...",
@@ -45,7 +53,7 @@ const t = labels[lang];
     <p class="Comments-loading">{t.loading}</p>
   </div>
 
-  <form class="Comments-form">
+  <form class="Comments-form Comments-form--root">
     <div class="Comments-field">
       <label for="comment-name">{t.name} *</label>
       <input type="text" id="comment-name" name="name" required maxlength="100" />
@@ -67,16 +75,16 @@ const t = labels[lang];
   </form>
 </section>
 
-<script is:inline>
+<script is:inline define:vars={{ initialPageId: pageId, initialLang: lang }}>
   (function () {
     var section = document.querySelector(".Comments");
     if (!section) return;
 
-    var pageId = section.dataset.pageId;
-    var lang = section.dataset.lang;
+    var pageId = initialPageId;
+    var lang = initialLang;
     var listEl = section.querySelector(".Comments-list");
-    var form = section.querySelector(".Comments-form");
-    var messageEl = section.querySelector(".Comments-message");
+    var rootForm = section.querySelector(".Comments-form--root");
+    var rootMessage = rootForm.querySelector(".Comments-message");
 
     var labels = {
       it: {
@@ -84,15 +92,30 @@ const t = labels[lang];
         on: "il",
         success: "Commento inviato! Sarà visibile dopo la moderazione.",
         error: "Errore nell'invio del commento. Riprova.",
+        reply: "Rispondi",
+        cancel: "Annulla",
+        like: "Mi piace",
+        submitReply: "Invia risposta",
+        name: "Nome",
+        email: "Email",
+        text: "Commento",
       },
       en: {
         empty: "No comments yet. Be the first!",
         on: "on",
         success: "Comment submitted! It will be visible after moderation.",
         error: "Error submitting comment. Please try again.",
+        reply: "Reply",
+        cancel: "Cancel",
+        like: "Like",
+        submitReply: "Submit reply",
+        name: "Name",
+        email: "Email",
+        text: "Comment",
       },
     };
     var t = labels[lang] || labels.en;
+    var MAX_DEPTH = 4;
 
     function escapeHtml(str) {
       var div = document.createElement("div");
@@ -100,52 +123,192 @@ const t = labels[lang];
       return div.innerHTML;
     }
 
-    fetch("/api/comments?pageId=" + encodeURIComponent(pageId))
-      .then(function (r) {
-        return r.json();
-      })
-      .then(function (comments) {
-        if (!comments.length) {
+    function buildTree(rows) {
+      var byId = {};
+      var roots = [];
+      rows.forEach(function (r) {
+        r.children = [];
+        byId[r.id] = r;
+      });
+      rows.forEach(function (r) {
+        if (r.parent_id != null && byId[r.parent_id]) {
+          byId[r.parent_id].children.push(r);
+        } else {
+          roots.push(r);
+        }
+      });
+      return roots;
+    }
+
+    function renderComment(c, depth) {
+      var d = new Date(c.created_at).toLocaleDateString(
+        lang === "it" ? "it-IT" : "en-US"
+      );
+      var liked = c.liked_by_me ? "is-active" : "";
+      var pressed = c.liked_by_me ? "true" : "false";
+      var visualDepth = depth > MAX_DEPTH ? MAX_DEPTH : depth;
+      var html =
+        '<div class="Comments-item" data-id="' +
+        c.id +
+        '" data-depth="' +
+        visualDepth +
+        '">' +
+        '<div class="Comments-meta"><strong>' +
+        escapeHtml(c.name) +
+        "</strong> " +
+        '<span class="Comments-date">' +
+        t.on +
+        " " +
+        d +
+        "</span></div>" +
+        '<p class="Comments-text">' +
+        escapeHtml(c.text) +
+        "</p>" +
+        '<div class="Comments-actions">' +
+        '<button type="button" class="Comments-like ' +
+        liked +
+        '" aria-pressed="' +
+        pressed +
+        '" data-id="' +
+        c.id +
+        '">' +
+        '<span class="Comments-like-icon" aria-hidden="true">♥</span> ' +
+        '<span class="Comments-like-count">' +
+        Number(c.likes_count || 0) +
+        "</span>" +
+        "</button>" +
+        '<button type="button" class="Comments-reply-btn" data-id="' +
+        c.id +
+        '">' +
+        t.reply +
+        "</button>" +
+        "</div>" +
+        '<div class="Comments-reply-slot"></div>';
+      if (c.children && c.children.length) {
+        html += '<div class="Comments-children">';
+        c.children.forEach(function (child) {
+          html += renderComment(child, depth + 1);
+        });
+        html += "</div>";
+      }
+      html += "</div>";
+      return html;
+    }
+
+    function loadComments() {
+      fetch("/api/comments?pageId=" + encodeURIComponent(pageId))
+        .then(function (r) {
+          return r.json();
+        })
+        .then(function (rows) {
+          if (!rows.length) {
+            listEl.innerHTML =
+              '<p class="Comments-empty">' + t.empty + "</p>";
+            return;
+          }
+          var tree = buildTree(rows);
+          listEl.innerHTML = tree
+            .map(function (c) {
+              return renderComment(c, 0);
+            })
+            .join("");
+          attachHandlers();
+        })
+        .catch(function () {
           listEl.innerHTML =
             '<p class="Comments-empty">' + t.empty + "</p>";
-          return;
-        }
-        listEl.innerHTML = comments
-          .map(function (c) {
-            var d = new Date(c.created_at).toLocaleDateString(
-              lang === "it" ? "it-IT" : "en-US"
-            );
-            return (
-              '<div class="Comments-item">' +
-              '<div class="Comments-meta"><strong>' +
-              escapeHtml(c.name) +
-              "</strong> " +
-              '<span class="Comments-date">' +
-              t.on +
-              " " +
-              d +
-              "</span></div>" +
-              '<p class="Comments-text">' +
-              escapeHtml(c.text) +
-              "</p></div>"
-            );
+        });
+    }
+
+    function attachHandlers() {
+      listEl.querySelectorAll(".Comments-like").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.dataset.id);
+          btn.disabled = true;
+          fetch("/api/comments/like", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ commentId: id }),
           })
-          .join("");
-      })
-      .catch(function () {
-        listEl.innerHTML =
-          '<p class="Comments-empty">' + t.empty + "</p>";
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (typeof data.count === "number") {
+                btn.querySelector(".Comments-like-count").textContent =
+                  data.count;
+                btn.classList.toggle("is-active", !!data.liked);
+                btn.setAttribute("aria-pressed", data.liked ? "true" : "false");
+              }
+            })
+            .catch(function () {})
+            .then(function () {
+              btn.disabled = false;
+            });
+        });
       });
 
-    form.addEventListener("submit", function (e) {
+      listEl.querySelectorAll(".Comments-reply-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.dataset.id);
+          var item = btn.closest(".Comments-item");
+          var slot = item.querySelector(":scope > .Comments-reply-slot");
+          if (slot.querySelector("form")) {
+            slot.innerHTML = "";
+            return;
+          }
+          slot.innerHTML = buildReplyForm(id);
+          var form = slot.querySelector("form");
+          form.addEventListener("submit", function (e) {
+            handleSubmit(e, form, id);
+          });
+          form.querySelector(".Comments-cancel").addEventListener("click", function () {
+            slot.innerHTML = "";
+          });
+        });
+      });
+    }
+
+    function buildReplyForm(parentId) {
+      return (
+        '<form class="Comments-form Comments-form--reply" data-parent="' +
+        parentId +
+        '">' +
+        '<div class="Comments-field"><label>' +
+        t.name +
+        ' *</label><input type="text" name="name" required maxlength="100" /></div>' +
+        '<div class="Comments-field"><label>' +
+        t.email +
+        ' *</label><input type="email" name="email" required maxlength="254" /></div>' +
+        '<div class="Comments-hp" aria-hidden="true"><label>Website</label><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>' +
+        '<div class="Comments-field"><label>' +
+        t.text +
+        ' *</label><textarea name="text" required maxlength="5000" rows="3"></textarea></div>' +
+        '<div class="Comments-form-actions">' +
+        '<button type="submit" class="Button">' +
+        t.submitReply +
+        "</button>" +
+        '<button type="button" class="Comments-cancel">' +
+        t.cancel +
+        "</button>" +
+        "</div>" +
+        '<p class="Comments-message" role="status"></p>' +
+        "</form>"
+      );
+    }
+
+    function handleSubmit(e, form, parentId) {
       e.preventDefault();
+      var messageEl = form.querySelector(".Comments-message");
       var data = {
         pageId: pageId,
+        lang: lang,
         name: form.querySelector('[name="name"]').value,
         email: form.querySelector('[name="email"]').value,
         text: form.querySelector('[name="text"]').value,
         website: form.querySelector('[name="website"]').value,
       };
+      if (parentId != null) data.parentId = parentId;
       messageEl.textContent = "";
       messageEl.className = "Comments-message";
 
@@ -164,6 +327,12 @@ const t = labels[lang];
           messageEl.textContent = t.error;
           messageEl.classList.add("Comments-message--error");
         });
+    }
+
+    rootForm.addEventListener("submit", function (e) {
+      handleSubmit(e, rootForm, null);
     });
+
+    loadComments();
   })();
 </script>

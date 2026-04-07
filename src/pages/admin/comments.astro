@@ -42,6 +42,9 @@ if (!isAuthorized) {
       .btn-delete:hover { background: rgba(231, 76, 60, 0.15); }
       .empty { color: #8a8a8e; font-style: italic; padding: 2rem 0; }
       .count { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1rem; }
+      .reply-indicator { color: #c9a84c; font-size: 0.78rem; font-family: monospace; display: block; margin-bottom: 0.25rem; }
+      .likes { color: #c9a84c; font-family: monospace; font-size: 0.85rem; white-space: nowrap; }
+      .has-children { color: #e74c3c; font-size: 0.75rem; margin-left: 0.4rem; }
     </style>
   </head>
   <body>
@@ -59,6 +62,7 @@ if (!isAuthorized) {
           <th>Name</th>
           <th>Email</th>
           <th>Comment</th>
+          <th>♥</th>
           <th>Date</th>
           <th>Actions</th>
         </tr>
@@ -92,15 +96,26 @@ if (!isAuthorized) {
             emptyMsg.style.display = "none";
             tbody.innerHTML = comments.map(function (c) {
               var d = new Date(c.created_at).toLocaleDateString("en-US");
+              var hasChildren = Number(c.children_count || 0) > 0;
+              var deleteHandler = hasChildren
+                ? 'doActionConfirm(' + c.id + ',\'delete\',' + Number(c.children_count) + ')'
+                : 'doAction(' + c.id + ',\'delete\')';
               var actions = status === "pending"
                 ? '<button class="btn btn-approve" onclick="doAction(' + c.id + ',\'approve\')">Approve</button>'
                 : "";
-              actions += '<button class="btn btn-delete" onclick="doAction(' + c.id + ',\'delete\')">Delete</button>';
+              actions += '<button class="btn btn-delete" onclick="' + deleteHandler + '">Delete</button>';
+              var replyIndicator = c.parent_id != null
+                ? '<span class="reply-indicator">↳ in risposta a #' + c.parent_id + ' (' + escapeHtml(c.parent_name || "?") + ')</span>'
+                : '';
+              var childrenBadge = hasChildren
+                ? '<span class="has-children">+' + Number(c.children_count) + ' replies</span>'
+                : '';
               return '<tr>' +
-                '<td class="page-id">' + escapeHtml(c.page_id) + '</td>' +
-                '<td>' + escapeHtml(c.name) + '</td>' +
+                '<td class="page-id">' + escapeHtml(c.page_id) + replyIndicator + '</td>' +
+                '<td>' + escapeHtml(c.name) + childrenBadge + '</td>' +
                 '<td class="email">' + escapeHtml(c.email) + '</td>' +
                 '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
+                '<td class="likes">♥ ' + Number(c.likes_count || 0) + '</td>' +
                 '<td>' + d + '</td>' +
                 '<td class="actions">' + actions + '</td>' +
                 '</tr>';
@@ -119,6 +134,13 @@ if (!isAuthorized) {
         }).then(function () {
           loadComments(currentStatus);
         });
+      };
+
+      window.doActionConfirm = function (id, action, childrenCount) {
+        var msg = "This comment has " + childrenCount + " replies. Deleting it will also delete all replies. Continue?";
+        if (confirm(msg)) {
+          window.doAction(id, action);
+        }
       };
 
       function escapeHtml(str) {

@@ -159,3 +159,19 @@ export async function generateVisitorHash(
   }
   return hex;
 }
+
+export async function generateStableVisitorHash(
+  hostname: string,
+  ip: string,
+  ua: string,
+): Promise<string> {
+  const raw = `stable:${hostname}:${ip}:${ua}`;
+  const data = new TextEncoder().encode(raw);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  const bytes = new Uint8Array(hash);
+  let hex = "";
+  for (let i = 0; i < 8; i++) {
+    hex += bytes[i].toString(16).padStart(2, "0");
+  }
+  return hex;
+}
