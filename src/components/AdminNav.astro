@@ -3,7 +3,7 @@ import "./AdminNav.css";
 
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma";
 }
 
 const { currentPage, token } = Astro.props;
@@ -26,7 +26,11 @@ const bottomLinks = [
   { id: "workout" as const, label: "Workout Casa", short: "Casa", href: `/admin/workout?token=${token}` },
 ];
 
-const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
+const tripLinks = [
+  { id: "roma" as const, label: "Roma · 11 Apr", short: "Roma", href: `/admin/roma?token=${token}` },
+];
+
+const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];
 ---
 
 <!-- Hamburger button (mobile only) -->
@@ -70,6 +74,19 @@ const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks];
       <a
         href={link.href}
         class:list={["sidebar-link", { active: currentPage === link.id }]}
+      >
+        <span class="sidebar-label-full">{link.label}</span>
+        <span class="sidebar-label-short">{link.short}</span>
+      </a>
+    ))}
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-group-title">Trip</div>
+    {tripLinks.map((link) => (
+      <a
+        href={link.href}
+        class:list={["sidebar-link", "sidebar-link-sub", { active: currentPage === link.id }]}
       >
         <span class="sidebar-label-full">{link.label}</span>
         <span class="sidebar-label-short">{link.short}</span>

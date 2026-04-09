@@ -1,0 +1,333 @@
+---
+import { Icon } from "astro-icon/components";
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const tickets = [
+  {
+    name: "Valerio Narcisi",
+    type: "Intero",
+    price: "18,00 €",
+    code: "SPCO3YZV3ENGV7ZN",
+    icon: "ph:user",
+  },
+  {
+    name: "Adriana Pastore",
+    type: "Intero",
+    price: "18,00 €",
+    code: "SPCO7EB7VZGXA8GE",
+    icon: "ph:user",
+  },
+  {
+    name: "Bianca Narcisi",
+    type: "Gratuito · Under 18",
+    price: "0,00 €",
+    code: "SPCOKPV782WAD36B",
+    icon: "ph:baby",
+  },
+  {
+    name: "Lea Narcisi",
+    type: "Gratuito · Under 18",
+    price: "0,00 €",
+    code: "SPCOAGE4JA3QDD6K",
+    icon: "ph:baby",
+  },
+];
+
+const rules = [
+  {
+    icon: "ph:clock-countdown",
+    title: "Il superpotere 24h",
+    text: "L'ingresso al Colosseo e' fissato alle 16:45 del Sabato. Per Foro Romano/Palatino/Fori Imperiali hai un singolo ingresso entro 24h antecedenti o successive. Spezzi la visita per non stancare le bimbe.",
+  },
+  {
+    icon: "ph:eye",
+    title: "Cosa vedete dentro",
+    text: "Colosseo: primo e secondo ordine (vista panoramica classica). Esclusi arena, sotterranei e attico. Fuori: Foro Romano, Palatino, Fori Imperiali + mostre e musei.",
+  },
+  {
+    icon: "ph:identification-card",
+    title: "Documenti tassativi",
+    text: "Documento d'identita' obbligatorio all'entrata del Colosseo e del Foro Romano/Palatino. Vitale per dimostrare l'eta' di Bianca e Lea per i biglietti gratuiti.",
+  },
+  {
+    icon: "ph:backpack",
+    title: "Zaini in auto",
+    text: "Vietati zaini voluminosi, valigie e trolley. Lasciate tutto nel bagagliaio della Jogger.",
+  },
+  {
+    icon: "ph:timer",
+    title: "Puntualita' e permanenza",
+    text: "Presentarsi all'ingresso del Colosseo alle 16:30 (15 min prima). All'interno, 75 minuti di visita. Percorso a senso unico.",
+  },
+  {
+    icon: "ph:sneaker",
+    title: "Comfort",
+    text: "Scarpe comode, indispensabili per sampietrini e rovine. I bagni dentro al Colosseo si trovano solo all'inizio del percorso.",
+  },
+];
+
+const timeline = [
+  {
+    time: "08:00",
+    title: "Partenza da Porto Sant'Elpidio",
+    desc: "Viaggio con la Jogger Full Hybrid.",
+    icon: "ph:car",
+  },
+  {
+    time: "11:00",
+    title: "Arrivo e parcheggio",
+    desc: "Zona San Saba / Aventino (strisce blu gratis). Lasciare in auto borse ingombranti. Portare solo passeggino leggero per Lea, acqua e documenti.",
+    icon: "ph:map-pin",
+  },
+  {
+    time: "11:45",
+    title: "Foro Romano e Palatino",
+    desc: "Sfruttiamo la regola 24h antecedenti: passeggiata tranquilla tra le rovine prima che faccia troppo caldo. Le bimbe avranno spazio per camminare.",
+    icon: "ph:tree",
+  },
+  {
+    time: "13:15",
+    title: "Pranzo di ricarica",
+    desc: "Uscita dall'area archeologica verso il Rione Monti. Pizza al taglio o pasta.",
+    icon: "ph:pizza",
+  },
+  {
+    time: "14:30",
+    title: "Pausa relax (o Egitto)",
+    desc: "Due ore buche. Riposo per Lea sul passeggino al parco del Colle Oppio. Opzione: mostra Egizia alle Scuderie del Quirinale (valutare la stanchezza).",
+    icon: "ph:park",
+  },
+  {
+    time: "16:30",
+    title: "Appuntamento con la storia",
+    desc: "Presentarsi all'ingresso del Colosseo con i documenti pronti.",
+    icon: "ph:identification-badge",
+  },
+  {
+    time: "16:45",
+    title: "Ingresso al Colosseo",
+    desc: "Primo e secondo ordine. 75 minuti per godersi il tramonto tra le arcate. Bagni all'inizio del percorso.",
+    icon: "ph:buildings",
+  },
+  {
+    time: "18:00",
+    title: "Uscita, gelato e rientro",
+    desc: "Ritorno verso l'Aventino per riprendere la Jogger, gelato lungo la strada per premiare le piccole esploratrici.",
+    icon: "ph:ice-cream",
+  },
+];
+
+const entrances = [
+  "Piazza del Colosseo > Valadier",
+  "Via Sacra > Arco di Tito",
+  "Largo della Salara Vecchia",
+  "Via di San Pietro in Carcere",
+  "Piazza Venezia > Colonna Traiana",
+  "(Via del) Foro Romano",
+  "Via di San Gregorio",
+];
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Roma · 11 Aprile 2026</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; font-size: 1rem; line-height: 1.55; }
+      .container { max-width: 1100px; margin: 0 auto; }
+
+      .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #222; }
+      .page-kicker { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+      .page-header h1 { color: #c9a84c; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.5rem; }
+      .page-subtitle { color: #8a8a8e; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .page-subtitle .icon-inline { width: 1rem; height: 1rem; }
+      .booking-ref { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #4ecdc4; }
+
+      .card { background: #121214; border: 1px solid #222; border-radius: 12px; padding: 1.75rem; margin-bottom: 1.5rem; }
+      .card-title { color: #c9a84c; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; }
+      .card-title-icon { width: 1.15rem; height: 1.15rem; color: #c9a84c; }
+
+      .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+      .ticket { background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 10px; padding: 1.15rem; position: relative; overflow: hidden; }
+      .ticket::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c9a84c 0%, #4ecdc4 100%); }
+      .ticket-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
+      .ticket-avatar { width: 2rem; height: 2rem; border-radius: 50%; background: rgba(201, 168, 76, 0.12); display: flex; align-items: center; justify-content: center; color: #c9a84c; flex-shrink: 0; }
+      .ticket-avatar svg { width: 1.1rem; height: 1.1rem; }
+      .ticket-name { font-weight: 700; font-size: 0.95rem; color: #e8e6e1; }
+      .ticket-type { color: #8a8a8e; font-size: 0.75rem; margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
+      .ticket-price { color: #c9a84c; font-weight: 700; font-size: 1rem; margin-bottom: 0.85rem; }
+      .ticket-price.free { color: #4ecdc4; }
+      .ticket-code { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.02em; padding-top: 0.7rem; border-top: 1px dashed #2a2a2e; word-break: break-all; }
+
+      .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+      .rule { background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 10px; padding: 1.1rem; }
+      .rule-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.55rem; }
+      .rule-icon { width: 1.15rem; height: 1.15rem; color: #c9a84c; flex-shrink: 0; }
+      .rule-title { font-size: 0.85rem; font-weight: 700; color: #e8e6e1; }
+      .rule-text { font-size: 0.82rem; color: #b0b0b4; line-height: 1.55; }
+
+      .timeline { position: relative; padding-left: 2.5rem; }
+      .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: linear-gradient(180deg, rgba(201, 168, 76, 0.6) 0%, rgba(78, 205, 196, 0.6) 100%); }
+      .step { position: relative; padding-bottom: 1.4rem; }
+      .step:last-child { padding-bottom: 0; }
+      .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: #0a0a0c; border: 2px solid #c9a84c; display: flex; align-items: center; justify-content: center; color: #c9a84c; }
+      .step-dot svg { width: 1rem; height: 1rem; }
+      .step-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #4ecdc4; font-weight: 700; letter-spacing: 0.05em; }
+      .step-title { font-size: 1rem; font-weight: 700; color: #e8e6e1; margin: 0.1rem 0 0.35rem; }
+      .step-desc { font-size: 0.88rem; color: #b0b0b4; max-width: 700px; }
+
+      .entrance-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.4rem 1rem; }
+      .entrance-list li { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #b0b0b4; padding: 0.35rem 0; display: flex; align-items: center; gap: 0.5rem; }
+      .entrance-list li::before { content: counter(item); counter-increment: item; width: 1.4rem; height: 1.4rem; background: rgba(201, 168, 76, 0.12); color: #c9a84c; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+      .entrance-list { counter-reset: item; }
+
+      .included-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .included-col h3 { color: #4ecdc4; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem; font-weight: 700; }
+      .included-col.excluded h3 { color: #e74c3c; }
+      .included-col ul { list-style: none; }
+      .included-col li { font-size: 0.85rem; color: #b0b0b4; padding: 0.3rem 0; display: flex; align-items: center; gap: 0.4rem; }
+      .included-col li svg { width: 0.95rem; height: 0.95rem; flex-shrink: 0; }
+      .included-col.included li svg { color: #4ecdc4; }
+      .included-col.excluded li svg { color: #e74c3c; }
+
+      @media (max-width: 720px) {
+        body { padding: 1rem; }
+        .page-header h1 { font-size: 1.7rem; }
+        .card { padding: 1.15rem; }
+        .timeline { padding-left: 2rem; }
+        .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
+        .timeline::before { left: 0.8rem; }
+        .included-wrap { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <AdminNav currentPage="roma" token={token} />
+    <div class="container">
+      <header class="page-header">
+        <div class="page-kicker">Trip · Famiglia Narcisi</div>
+        <h1>Roma · Sabato 11 Aprile 2026</h1>
+        <p class="page-subtitle">
+          <Icon name="ph:ticket" class="icon-inline" size={16} is:inline />
+          <span>Colosseo · Foro Romano · Palatino 24H</span>
+          <span>·</span>
+          <span class="booking-ref">Prenotazione OCO3783643</span>
+        </p>
+      </header>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:ticket" class="card-title-icon" size={18} is:inline />
+          Biglietti · 4 persone
+        </h2>
+        <div class="tickets-grid">
+          {tickets.map((t) => (
+            <div class="ticket">
+              <div class="ticket-head">
+                <div class="ticket-avatar">
+                  <Icon name={t.icon} size={18} is:inline />
+                </div>
+                <div class="ticket-name">{t.name}</div>
+              </div>
+              <div class="ticket-type">{t.type}</div>
+              <div class={`ticket-price ${t.price === "0,00 €" ? "free" : ""}`}>{t.price}</div>
+              <div class="ticket-code">{t.code}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:check-circle" class="card-title-icon" size={18} is:inline />
+          Cosa include il biglietto
+        </h2>
+        <div class="included-wrap">
+          <div class="included-col included">
+            <h3>Incluso</h3>
+            <ul>
+              <li><Icon name="ph:check" size={16} is:inline />Colosseo · primo e secondo ordine</li>
+              <li><Icon name="ph:check" size={16} is:inline />Foro Romano</li>
+              <li><Icon name="ph:check" size={16} is:inline />Palatino</li>
+              <li><Icon name="ph:check" size={16} is:inline />Fori Imperiali</li>
+              <li><Icon name="ph:check" size={16} is:inline />Mostre e musei del circuito</li>
+            </ul>
+          </div>
+          <div class="included-col excluded">
+            <h3>Escluso</h3>
+            <ul>
+              <li><Icon name="ph:x" size={16} is:inline />Colosseo · arena</li>
+              <li><Icon name="ph:x" size={16} is:inline />Colosseo · sotterranei</li>
+              <li><Icon name="ph:x" size={16} is:inline />Colosseo · attico</li>
+              <li><Icon name="ph:x" size={16} is:inline />Foro Romano/Palatino · siti super</li>
+              <li><Icon name="ph:x" size={16} is:inline />Domus Area</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:warning-circle" class="card-title-icon" size={18} is:inline />
+          Regole d'oro
+        </h2>
+        <div class="rules-grid">
+          {rules.map((r) => (
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-icon"><Icon name={r.icon} size={18} is:inline /></span>
+                <span class="rule-title">{r.title}</span>
+              </div>
+              <p class="rule-text">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:path" class="card-title-icon" size={18} is:inline />
+          Itinerario · Sabato
+        </h2>
+        <div class="timeline">
+          {timeline.map((step) => (
+            <div class="step">
+              <div class="step-dot">
+                <Icon name={step.icon} is:inline />
+              </div>
+              <div class="step-time">{step.time}</div>
+              <div class="step-title">{step.title}</div>
+              <div class="step-desc">{step.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:door-open" class="card-title-icon" size={18} is:inline />
+          Entrate disponibili al Colosseo
+        </h2>
+        <ul class="entrance-list">
+          {entrances.map((e) => <li>{e}</li>)}
+        </ul>
+      </section>
+    </div>
+  </body>
+</html>
