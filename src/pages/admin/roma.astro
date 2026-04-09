@@ -77,65 +77,102 @@ const rules = [
   },
 ];
 
+function mapsSearch(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+function mapsDirections(from: string, to: string): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
+}
+
 const timeline = [
   {
     time: "08:00",
     title: "Partenza da Porto Sant'Elpidio",
     desc: "Viaggio con la Jogger Full Hybrid.",
     icon: "ph:car",
+    places: [
+      { label: "Rotta Porto Sant'Elpidio → Roma", url: mapsDirections("Porto Sant'Elpidio, FM", "San Saba, Roma") },
+    ],
   },
   {
     time: "11:00",
     title: "Arrivo e parcheggio",
     desc: "Zona San Saba / Aventino (strisce blu gratis). Lasciare in auto borse ingombranti. Portare solo passeggino leggero per Lea, acqua e documenti.",
     icon: "ph:map-pin",
+    places: [
+      { label: "Parcheggio San Saba", url: mapsSearch("Parcheggio San Saba Roma strisce blu") },
+      { label: "Aventino", url: mapsSearch("Aventino Roma parcheggio") },
+    ],
   },
   {
     time: "11:45",
     title: "Foro Romano e Palatino",
     desc: "Sfruttiamo la regola 24h antecedenti: passeggiata tranquilla tra le rovine prima che faccia troppo caldo. Le bimbe avranno spazio per camminare.",
     icon: "ph:tree",
+    places: [
+      { label: "Foro Romano", url: mapsSearch("Foro Romano Roma") },
+      { label: "Palatino", url: mapsSearch("Palatino Roma ingresso Via di San Gregorio") },
+    ],
   },
   {
     time: "13:15",
     title: "Pranzo di ricarica",
     desc: "Uscita dall'area archeologica verso il Rione Monti. Pizza al taglio o pasta.",
     icon: "ph:pizza",
+    places: [
+      { label: "Rione Monti", url: mapsSearch("Rione Monti Roma ristoranti") },
+      { label: "La Carbonara (Monti)", url: mapsSearch("La Carbonara Monti Roma") },
+    ],
   },
   {
     time: "14:30",
     title: "Pausa relax (o Egitto)",
     desc: "Due ore buche. Riposo per Lea sul passeggino al parco del Colle Oppio. Opzione: mostra Egizia alle Scuderie del Quirinale (valutare la stanchezza).",
     icon: "ph:park",
+    places: [
+      { label: "Parco del Colle Oppio", url: mapsSearch("Parco del Colle Oppio Roma") },
+      { label: "Scuderie del Quirinale", url: mapsSearch("Scuderie del Quirinale Roma") },
+    ],
   },
   {
     time: "16:30",
     title: "Appuntamento con la storia",
     desc: "Presentarsi all'ingresso del Colosseo con i documenti pronti.",
     icon: "ph:identification-badge",
+    places: [
+      { label: "Ingresso Colosseo · Piazza del Colosseo", url: mapsSearch("Colosseo ingresso Piazza del Colosseo Roma") },
+    ],
   },
   {
     time: "16:45",
     title: "Ingresso al Colosseo",
     desc: "Primo e secondo ordine. 75 minuti per godersi il tramonto tra le arcate. Bagni all'inizio del percorso.",
     icon: "ph:buildings",
+    places: [
+      { label: "Colosseo", url: mapsSearch("Colosseo Roma") },
+    ],
   },
   {
     time: "18:00",
     title: "Uscita, gelato e rientro",
     desc: "Ritorno verso l'Aventino per riprendere la Jogger, gelato lungo la strada per premiare le piccole esploratrici.",
     icon: "ph:ice-cream",
+    places: [
+      { label: "Gelateria Fatamorgana Monti", url: mapsSearch("Fatamorgana gelateria Monti Roma") },
+      { label: "Rotta Roma → Porto Sant'Elpidio", url: mapsDirections("Colosseo, Roma", "Porto Sant'Elpidio, FM") },
+    ],
   },
 ];
 
 const entrances = [
-  "Piazza del Colosseo > Valadier",
-  "Via Sacra > Arco di Tito",
-  "Largo della Salara Vecchia",
-  "Via di San Pietro in Carcere",
-  "Piazza Venezia > Colonna Traiana",
-  "(Via del) Foro Romano",
-  "Via di San Gregorio",
+  { label: "Piazza del Colosseo > Valadier", url: mapsSearch("Piazza del Colosseo Valadier Roma") },
+  { label: "Via Sacra > Arco di Tito", url: mapsSearch("Arco di Tito Via Sacra Roma") },
+  { label: "Largo della Salara Vecchia", url: mapsSearch("Largo della Salara Vecchia Roma") },
+  { label: "Via di San Pietro in Carcere", url: mapsSearch("Via di San Pietro in Carcere Roma") },
+  { label: "Piazza Venezia > Colonna Traiana", url: mapsSearch("Colonna Traiana Piazza Venezia Roma") },
+  { label: "(Via del) Foro Romano", url: mapsSearch("Via del Foro Romano Roma") },
+  { label: "Via di San Gregorio", url: mapsSearch("Via di San Gregorio Roma Colosseo") },
 ];
 ---
 
@@ -196,6 +233,15 @@ const entrances = [
       .entrance-list li { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #b0b0b4; padding: 0.35rem 0; display: flex; align-items: center; gap: 0.5rem; }
       .entrance-list li::before { content: counter(item); counter-increment: item; width: 1.4rem; height: 1.4rem; background: rgba(201, 168, 76, 0.12); color: #c9a84c; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
       .entrance-list { counter-reset: item; }
+      .entrance-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.15s; }
+      .entrance-link:hover { color: #4ecdc4; }
+      .entrance-link svg { color: #8a8a8e; transition: color 0.15s; }
+      .entrance-link:hover svg { color: #4ecdc4; }
+
+      .step-places { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
+      .map-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.65rem; border: 1px solid #2a2a2e; border-radius: 999px; background: rgba(78, 205, 196, 0.05); color: #4ecdc4; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+      .map-link:hover { background: rgba(78, 205, 196, 0.14); border-color: #4ecdc4; transform: translateY(-1px); }
+      .map-link svg { color: inherit; }
 
       .included-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
       .included-col h3 { color: #4ecdc4; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem; font-weight: 700; }
@@ -314,6 +360,16 @@ const entrances = [
               <div class="step-time">{step.time}</div>
               <div class="step-title">{step.title}</div>
               <div class="step-desc">{step.desc}</div>
+              {step.places && step.places.length > 0 && (
+                <div class="step-places">
+                  {step.places.map((p) => (
+                    <a class="map-link" href={p.url} target="_blank" rel="noopener noreferrer">
+                      <Icon name="ph:map-trifold" size={14} is:inline />
+                      <span>{p.label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -325,7 +381,14 @@ const entrances = [
           Entrate disponibili al Colosseo
         </h2>
         <ul class="entrance-list">
-          {entrances.map((e) => <li>{e}</li>)}
+          {entrances.map((e) => (
+            <li>
+              <a class="entrance-link" href={e.url} target="_blank" rel="noopener noreferrer">
+                {e.label}
+                <Icon name="ph:arrow-square-out" size={13} is:inline />
+              </a>
+            </li>
+          ))}
         </ul>
       </section>
     </div>
