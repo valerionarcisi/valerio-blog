@@ -66,7 +66,7 @@ export const GET: APIRoute = async ({ request }) => {
         weather,
         homeWorkoutsThisWeek: homeWorkouts,
       }),
-      { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=900" } },
+      { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
     );
   } catch (e) {
     return new Response(JSON.stringify({ error: String(e) }), {

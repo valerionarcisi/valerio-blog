@@ -55,7 +55,7 @@ export const GET: APIRoute = async () => {
     return new Response(JSON.stringify(movies.filter(Boolean)), {
       headers: {
         "Content-Type": "application/json",
-        "Cache-Control": "public, max-age=900",
+        "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
       },
     });
   } catch {
