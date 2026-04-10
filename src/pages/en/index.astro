@@ -498,8 +498,10 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
           });
         }
 
+        var NO_CACHE = { cache: "no-store" };
+
         function refresh() {
-          fetch("/api/letterboxd")
+          fetch("/api/letterboxd", NO_CACHE)
             .then(function (r) { return r.json(); })
             .then(function (movies) {
               var el = document.getElementById("movies-reel");
@@ -510,7 +512,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             })
             .catch(function () {});
 
-          fetch("/api/lastfm")
+          fetch("/api/lastfm", NO_CACHE)
             .then(function (r) { return r.json(); })
             .then(function (songs) {
               var el = document.getElementById("songs-reel");
@@ -521,7 +523,7 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
             })
             .catch(function () {});
 
-          fetch("/api/strava")
+          fetch("/api/strava", NO_CACHE)
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data.error) return;
