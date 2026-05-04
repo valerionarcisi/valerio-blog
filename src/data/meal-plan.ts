@@ -220,10 +220,10 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "4 cucchiaini olio EVO a crudo",
+            oil: "2 cucchiaini olio EVO a crudo",
             items: [
-              "Insalata di patate e piselli: 250g patate (peso a crudo) bollite + 160g piselli + 3 scatolette da 80g di tonno al naturale ben sgocciolate",
-              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
+              "2 friselle integrali da circa 60g l'una (o 4 fette pane tostato) con 100g mozzarella light (Galbani Santa Lucia o Granarolo da 100g) + 1 scatoletta da 80g tonno al naturale ben sgocciolata + pomodorini/funghi + verdure a piacimento + sale ed origano o altre spezie a piacere",
+              "1 frutto fresco di stagione",
             ],
           },
         ],
@@ -305,9 +305,10 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "2 cucchiaini olio EVO a crudo",
+            oil: "1 cucchiaino olio EVO a crudo",
             items: [
-              "Caprese con 100g mozzarella light (Galbani Santa Lucia o Granarolo da 100g) + 2 scatolette da 80g di tonno al naturale ben sgocciolata + verdure a scelta",
+              "150g galantina",
+              "Verdure a sazietà (prediligi il cucchiaino di olio sulle verdure)",
               "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
             ],
           },
@@ -433,10 +434,10 @@ export const days: DayPlan[] = [
             ],
           },
           {
+            oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "240g ceci in scatola ben sciacquati sopra ai finocchi cotti e consuma assieme (senza aggiungere ulteriore olio)",
-              "Finocchi gratinati: 300g finocchi, 60g pan grattato, 1 cucchiaio di parmigiano grattugiato, 1 cucchiaio di olio. Tagliare i finocchi a fette, aggiungere spezie, parmigiano e pangrattato. Forno ventilato 190°C per 35-40 min",
-              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
+              "Caesar salad: 200g petto di pollo cotto alla piastra + zucchine + salsa yogurt (100g yogurt greco 0% bianco + erba cipollina o altra spezia + succo di limone a piacere) + 1 cucchiaio di semi di lino/zucca/girasole (senza sforare la dose di olio prevista dal piano)",
+              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
             ],
           },
         ],
@@ -498,7 +499,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "Polpette di broccoli: 250g broccoli, 40g pan grattato, 1 cucchiaio farina di ceci, 1 spicchio aglio tritato o mezzo cucchiaino in polvere, prezzemolo ed erbe a piacere, sale, pepe, 1 cucchiaio olio EVO. Cuocere broccoli al vapore 6-8 min, schiacciare grossolanamente, mescolare con gli ingredienti. Forno 190°C per 25-30 min o padella 3-4 min per lato",
+              "100g mozzarella light (es. Granarolo o Galbani Santa Lucia da 100g) + 2 scatolette da 80g di tonno al naturale ben sgocciolate + verdure a scelta",
               "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
             ],
           },

@@ -229,10 +229,30 @@
       "ecw_pct_tbw": 38.2,
       "rz_ohm": 460,
       "xc_ohm": 64
+    },
+    {
+      "date": "2026-04-27",
+      "source": "cardinali",
+      "weight_kg": 65.4,
+      "bmi": 23.5,
+      "pha_deg": 8.2,
+      "bmr_kcal": 1796.9,
+      "bcm_kg": 36.1,
+      "bcm_pct_ffm": 63.1,
+      "ffm_kg": 57.2,
+      "ffm_pct": 87.5,
+      "fm_kg": 8.2,
+      "fm_pct": 12.5,
+      "tbw_l": 41.5,
+      "tbw_pct": 63.5,
+      "ecw_l": 15.5,
+      "ecw_pct_tbw": 37.3,
+      "rz_ohm": 455,
+      "xc_ohm": 66
     }
   ],
   "nutrition_plan": {
-    "date": "2026-03-17",
+    "date": "2026-04-27",
     "source": "cardinali",
     "macros_target": {
       "protein_pct": 29.56,
