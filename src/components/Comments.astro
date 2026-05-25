@@ -205,7 +205,8 @@ const t = labels[lang];
 
     function renderComment(c, depth) {
       var d = new Date(c.created_at).toLocaleDateString(
-        lang === "it" ? "it-IT" : "en-US"
+        lang === "it" ? "it-IT" : "en-US",
+        { day: "numeric", month: "short", year: "numeric" }
       );
       var liked = c.liked_by_me ? "is-active" : "";
       var pressed = c.liked_by_me ? "true" : "false";
@@ -225,8 +226,6 @@ const t = labels[lang];
         authorBadge +
         " " +
         '<span class="Comments-date">' +
-        t.on +
-        " " +
         d +
         "</span></div>" +
         '<div class="Comments-text">' +
@@ -377,6 +376,10 @@ const t = labels[lang];
 
     function handleSubmit(e, form, parentId) {
       e.preventDefault();
+      if (form.dataset.submitting === "1") return;
+      form.dataset.submitting = "1";
+      var submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) submitBtn.disabled = true;
       var messageEl = form.querySelector(".Comments-message");
       var textEl = form.querySelector('[name="text"]');
       var data = {
@@ -395,6 +398,11 @@ const t = labels[lang];
 
       var headers = { "Content-Type": "application/json" };
       if (isAuthor) headers["Authorization"] = "Bearer " + authorToken;
+
+      function releaseLock() {
+        form.dataset.submitting = "";
+        if (submitBtn) submitBtn.disabled = false;
+      }
 
       fetch("/api/comments", {
         method: "POST",
@@ -419,7 +427,8 @@ const t = labels[lang];
         .catch(function () {
           messageEl.textContent = t.error;
           messageEl.classList.add("Comments-message--error");
-        });
+        })
+        .then(releaseLock, releaseLock);
     }
 
     applyAuthorMode(rootForm);

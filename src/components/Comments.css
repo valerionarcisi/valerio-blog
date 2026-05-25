@@ -11,14 +11,28 @@
 .Comments h2 {
   font-family: var(--fontFamily-title);
   color: var(--color-tertiary);
+  margin-bottom: var(--space-medium);
+}
+
+.Comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-medium);
+  margin-bottom: var(--space-large);
 }
 
 .Comments-item {
-  padding: var(--space-medium) 0;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-medium);
+  background: var(--backgroundColor-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--borderRadius-small);
 }
 
 .Comments-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
   font-family: var(--fontFamily-mono);
   font-size: var(--fontSize-very-small);
   margin-bottom: var(--space-small);
@@ -26,93 +40,100 @@
 
 .Comments-meta strong {
   color: var(--color-accent-cyan);
+  font-weight: 600;
 }
 
 .Comments-date {
   color: var(--color-secondary);
-  margin-left: 0.5rem;
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
 }
 
-.Comments-text {
+/* Text content — defeat inherited justify/hyphens from .prose */
+.Comments .Comments-text {
   font-size: var(--fontSize-small);
   line-height: var(--lineHeight-loose);
   margin: 0;
   text-align: left;
+  hyphens: none;
+  -webkit-hyphens: none;
+  -moz-hyphens: none;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
-.Comments-text > *:first-child {
+.Comments .Comments-text > *:first-child {
   margin-top: 0;
 }
 
-.Comments-text > *:last-child {
+.Comments .Comments-text > *:last-child {
   margin-bottom: 0;
 }
 
-.Comments-text p {
-  margin: 0 0 var(--space-small);
+.Comments .Comments-text p {
+  margin: 0 0 0.6rem;
 }
 
-.Comments-text ul,
-.Comments-text ol {
-  margin: 0 0 var(--space-small);
+.Comments .Comments-text ul,
+.Comments .Comments-text ol {
+  margin: 0 0 0.6rem;
   padding-left: 1.25rem;
 }
 
-.Comments-text li {
+.Comments .Comments-text li {
   margin-bottom: 0.25rem;
 }
 
-.Comments-text strong {
+.Comments .Comments-text li > p {
+  margin: 0;
+}
+
+.Comments .Comments-text strong {
   color: var(--color-neutral);
   font-weight: 700;
 }
 
-.Comments-text em {
+.Comments .Comments-text em {
   font-style: italic;
 }
 
-.Comments-text a {
+.Comments .Comments-text a {
   color: var(--color-tertiary);
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.Comments-text code {
+.Comments .Comments-text code {
   font-family: var(--fontFamily-mono);
-  font-size: 0.9em;
-  background: var(--backgroundColor-secondary);
+  font-size: 0.88em;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-subtle);
   border-radius: 3px;
   padding: 0.05rem 0.35rem;
+  white-space: nowrap;
 }
 
-.Comments-text pre {
-  background: var(--backgroundColor-secondary);
+.Comments .Comments-text pre {
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-subtle);
   border-radius: var(--borderRadius-small);
   padding: var(--space-small);
   overflow-x: auto;
-  margin: 0 0 var(--space-small);
+  margin: 0 0 0.6rem;
 }
 
-.Comments-text pre code {
+.Comments .Comments-text pre code {
   background: transparent;
   border: 0;
   padding: 0;
+  white-space: pre;
 }
 
-.Comments-text blockquote {
-  margin: 0 0 var(--space-small);
+.Comments .Comments-text blockquote {
+  margin: 0 0 0.6rem;
   padding-left: var(--space-small);
-  border-left: 3px solid var(--border-subtle);
+  border-left: 3px solid var(--color-tertiary);
   color: var(--color-secondary);
-}
-
-.Comments-md-hint {
-  font-family: var(--fontFamily-mono);
-  font-size: var(--fontSize-very-small);
-  color: var(--color-secondary);
-  margin: var(--space-small) 0 0;
-  opacity: 0.75;
 }
 
 .Comments-empty,
@@ -126,10 +147,21 @@
    Form
    ============================================ */
 .Comments-form {
-  margin-top: var(--space-large);
+  padding: var(--space-medium);
+  background: var(--backgroundColor-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--borderRadius-small);
+}
+
+.Comments-form--root {
+  margin-top: var(--space-medium);
 }
 
 .Comments-field {
+  margin-bottom: var(--space-medium);
+}
+
+.Comments-field:last-of-type {
   margin-bottom: var(--space-medium);
 }
 
@@ -147,7 +179,7 @@
 .Comments-field textarea {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  background: var(--backgroundColor-secondary);
+  background: var(--backgroundColor-primary, rgba(0, 0, 0, 0.25));
   border: 1px solid var(--border-subtle);
   border-radius: var(--borderRadius-small);
   color: var(--color-neutral);
@@ -157,10 +189,23 @@
   box-sizing: border-box;
 }
 
+.Comments-field textarea {
+  resize: vertical;
+  min-height: 5rem;
+}
+
 .Comments-field input:focus,
 .Comments-field textarea:focus {
   outline: none;
   border-color: var(--color-tertiary);
+}
+
+.Comments-md-hint {
+  font-family: var(--fontFamily-mono);
+  font-size: var(--fontSize-very-small);
+  color: var(--color-secondary);
+  margin: var(--space-small) 0 0;
+  opacity: 0.7;
 }
 
 .Comments-hp {
@@ -189,24 +234,21 @@
 /* ============================================
    Thread / replies / actions
    ============================================ */
-.Comments-item[data-depth="1"],
-.Comments-item[data-depth="2"],
-.Comments-item[data-depth="3"],
-.Comments-item[data-depth="4"] {
-  border-bottom: none;
-  padding-top: var(--space-small);
-  padding-bottom: var(--space-small);
-}
-
 .Comments-children {
-  margin-top: var(--space-small);
-  margin-left: 1rem;
+  margin-top: var(--space-medium);
   padding-left: var(--space-medium);
   border-left: 2px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-medium);
+}
+
+.Comments-children .Comments-item {
+  padding: var(--space-small) var(--space-medium);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .Comments-item[data-depth="4"] .Comments-children {
-  margin-left: 0;
   padding-left: var(--space-small);
 }
 
@@ -221,11 +263,11 @@
 .Comments-reply-btn {
   background: transparent;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--borderRadius-small);
+  border-radius: 999px;
   color: var(--color-secondary);
   font-family: var(--fontFamily-mono);
   font-size: var(--fontSize-very-small);
-  padding: 0.25rem 0.6rem;
+  padding: 0.2rem 0.7rem;
   cursor: pointer;
   transition: color var(--transition-fast),
     border-color var(--transition-fast),
@@ -249,7 +291,7 @@
 .Comments-like.is-active {
   color: var(--color-tertiary);
   border-color: var(--color-tertiary);
-  background: rgba(201, 168, 76, 0.08);
+  background: rgba(201, 168, 76, 0.1);
 }
 
 .Comments-like-icon {
@@ -270,13 +312,15 @@
   display: none;
 }
 
+.Comments-reply-slot {
+  margin-top: var(--space-small);
+}
+
 .Comments-form--reply {
-  margin-top: var(--space-medium);
-  margin-bottom: var(--space-small);
+  margin-bottom: 0;
   padding: var(--space-medium);
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--borderRadius-small);
-  background: var(--backgroundColor-secondary);
 }
 
 .Comments-form-actions {
@@ -301,8 +345,14 @@
   border-color: var(--color-tertiary);
 }
 
+button[type="submit"]:disabled,
+.Comments-form button[type="submit"]:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* ============================================
-   Author auto-login
+   Author indicator + badge
    ============================================ */
 .Comments-author-badge {
   display: inline-block;
@@ -314,7 +364,6 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-left: 0.4rem;
   vertical-align: middle;
 }
 
@@ -323,4 +372,10 @@
   font-size: var(--fontSize-very-small);
   color: var(--color-tertiary);
   margin: 0 0 var(--space-medium);
+}
+
+/* highlight author comments slightly */
+.Comments-item:has(.Comments-author-badge) {
+  border-color: rgba(201, 168, 76, 0.35);
+  background: rgba(201, 168, 76, 0.04);
 }
