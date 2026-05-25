@@ -98,6 +98,25 @@ const content = await Astro.slots.render("default");
       </article>
     </main>
     <Footer />
+    <script>
+      import { marked } from "marked";
+      import DOMPurify from "dompurify";
+      marked.setOptions({ breaks: true, gfm: true });
+      // @ts-expect-error attaching renderer to window for the inline comments consumer
+      window.__commentsMd = {
+        render(text: string): string {
+          const raw = marked.parse(text, { async: false }) as string;
+          return DOMPurify.sanitize(raw, {
+            ALLOWED_TAGS: [
+              "p", "br", "strong", "em", "code", "pre", "blockquote",
+              "ul", "ol", "li", "a", "h3", "h4", "hr",
+            ],
+            ALLOWED_ATTR: ["href", "title", "target", "rel"],
+          });
+        },
+      };
+      window.dispatchEvent(new CustomEvent("comments-md-ready"));
+    </script>
     <script is:inline>
       document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.prose pre').forEach(function(pre) {

@@ -17,8 +17,6 @@ interface CommentNotification {
 
 function postLink(pageId: string, lang: string): string {
   const clean = pageId.replace(/^\/+|\/+$/g, "");
-  // pageId arriva nel formato "{lang}/{section}/{slug}", es "it/blog/foo".
-  // Per il locale di default IT non c'e' prefix; per EN c'e' "/en".
   const withoutLang = clean.replace(/^(it|en)\//, "");
   if (lang === "en") return `${SITE_URL}/en/${withoutLang}/`;
   return `${SITE_URL}/${withoutLang}/`;

@@ -47,7 +47,7 @@ Tabella `comments`:
 | Campo               | Tipo    | Note                                                                    |
 | ------------------- | ------- | ----------------------------------------------------------------------- |
 | `id`                | INTEGER | Primary key, autoincrement                                              |
-| `page_id`           | TEXT    | Identificativo della pagina (es. slug del post)                         |
+| `page_id`           | TEXT    | Identificativo della pagina nel formato `{section}/{slug}` (es. `blog/foo`, `films/bar`). Lang-agnostico: IT ed EN dello stesso post condividono lo stesso `page_id` e quindi lo stesso thread di commenti. La lingua del singolo commento e' nel campo `lang`. |
 | `name`              | TEXT    | Nome dell'autore (max 100 caratteri)                                    |
 | `email`             | TEXT    | Email dell'autore (max 254 caratteri)                                   |
 | `text`              | TEXT    | Contenuto del commento (max 5000 caratteri)                             |
@@ -215,7 +215,8 @@ Riceve due props:
 - Al caricamento: fetch `GET /api/comments?pageId=...` e rendering della lista. Se vuota, mostra messaggio "Nessun commento ancora".
 - Al submit: fetch `POST /api/comments` con dati JSON. In caso di successo, mostra messaggio di conferma e resetta il form. In caso di errore, mostra messaggio di errore.
 - Le date vengono formattate con `toLocaleDateString()` nella locale corretta (`it-IT` o `en-US`).
-- L'output HTML viene sanitizzato con `escapeHtml()` (creazione di text node nel DOM).
+- Il body del commento e' parsato come Markdown (`marked`, GFM + breaks) e sanitizzato con `DOMPurify` lato client. Tag consentiti: `p`, `br`, `strong`, `em`, `code`, `pre`, `blockquote`, `ul`, `ol`, `li`, `a`, `h3`, `h4`, `hr`. Attributi consentiti: `href`, `title`, `target`, `rel`. Il testo viene salvato in DB come plain text e renderizzato a runtime.
+- `marked` e `DOMPurify` vengono caricati da un module script in `BlogPost.astro` e in `Comments.astro` ed esposti via `window.__commentsMd.render(text)`. L'inline script attende l'evento `comments-md-ready` (con timeout di sicurezza a 2s) prima del primo fetch, per evitare race condition al primo render.
 
 **CSS** (`Comments.css`, co-located):
 - Mobile-first, usa variabili CSS globali del tema

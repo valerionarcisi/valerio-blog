@@ -367,7 +367,42 @@ const { data: result, isLoading } = useQuery({
 // Real error handling is done via pattern matching on `result`
 ```
 
-### 3. Type Safety with ts-pattern
+### 3. Hybrid approach: when to throw and when to return `Result.err`
+
+There's an explicit consequence of this design: if `queryFn` never throws, React Query treats **every** call as a success, never retries, and caches `Result.err` too. For domain errors (user not found, validation failed, business rule violated) this is desirable: you don't want RQ to hammer the server three times because a user doesn't exist, and caching the negative outcome for the same input is almost always the right thing.
+
+For **infrastructure** errors, though, it's wasteful: a network drop or a transient 5xx should be retried — and that's exactly what React Query's `retry` does by default, but only if `queryFn` throws.
+
+The fix is a hybrid approach: throw on **unexpected** errors, return `Result.err` for **domain** errors.
+
+```typescript
+async function fetchUser(id: string): Promise<Result<User, DomainError>> {
+  let response: Response;
+  try {
+    response = await fetch(`/api/users/${id}`);
+  } catch (e) {
+    // Network failure: throw, let RQ retry
+    throw e;
+  }
+
+  if (response.status >= 500) {
+    // Infrastructure error: throw, let RQ retry
+    throw new Error(`Server error: ${response.status}`);
+  }
+
+  if (response.status === 404) {
+    // Domain error: return Result.err, no retry, cache the negative outcome
+    return Result.err({ code: "USER_NOT_FOUND", message: "User not found" });
+  }
+
+  const user = await response.json();
+  return Result.ok(user);
+}
+```
+
+This lets you keep RQ's built-in retries where they belong, while preserving type-level guarantees on domain errors.
+
+### 4. Type Safety with ts-pattern
 
 The `ts-pattern` library provides exhaustive pattern matching, ensuring you handle all cases:
 
@@ -388,7 +423,7 @@ return match(result)
 1. **Consistent Error Types**: Use a standardized error interface across your app
 2. **Explicit Pattern Matching**: Always use `match()` with `.exhaustive()` for complete type safety
 3. **Specific Error Codes**: Use meaningful error codes for different error handling
-4. **No Throwing**: Never throw exceptions - always return Result types
+4. **Domain errors as data, infrastructure errors as exceptions**: Return `Result.err` for expected negative outcomes; throw on genuinely unexpected failures (network, 5xx, timeouts) so you can leverage React Query's retry mechanism
 5. **Early Pattern Matching**: Handle Result types as close to the data source as possible
 6. **Type Annotations**: Be explicit about Result types in function signatures
 
