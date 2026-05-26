@@ -6,23 +6,22 @@ import { getSlugFromId, getLangFromId } from "../i18n/utils";
 export async function GET(context) {
   const allEntries = await getCollection("blog");
 
-  const items = allEntries.map((entry) => {
-    const slug = getSlugFromId(entry.id);
-    const lang = getLangFromId(entry.id);
-    const link = lang === "it" ? `/blog/${slug}/` : `/en/blog/${slug}/`;
-
-    return {
-      title: entry.data.title,
-      pubDate: new Date(entry.data.date),
-      description: entry.data.extract,
-      link,
-      author: "Valerio Narcisi",
-      categories: entry.data.tags || [],
-      customData: entry.data.coverImage
-        ? `<media:content url="${entry.data.coverImage}" type="image/jpeg" />`
-        : "",
-    };
-  });
+  const items = allEntries
+    .filter((entry) => getLangFromId(entry.id) === "it")
+    .map((entry) => {
+      const slug = getSlugFromId(entry.id);
+      return {
+        title: entry.data.title,
+        pubDate: new Date(entry.data.date),
+        description: entry.data.extract,
+        link: `/blog/${slug}/`,
+        author: "Valerio Narcisi",
+        categories: entry.data.tags || [],
+        customData: entry.data.coverImage
+          ? `<media:content url="${entry.data.coverImage}" type="image/jpeg" />`
+          : "",
+      };
+    });
 
   return rss({
     title: SITE_TITLE,

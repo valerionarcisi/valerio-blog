@@ -2,6 +2,8 @@
 import BaseHead from "~/components/BaseHead.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
+import { getCollection } from "astro:content";
+import { getLangFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
 import "~/layouts/FoglioListLayout.css";
 
@@ -34,21 +36,64 @@ const subtitle = isEn
   ? "Writing on cinema and code. Set diaries. Notes when an idea tries to stand up."
   : "Pezzi sul cinema e sul codice. Diari di set quando un corto finisce. Note quando un'idea prova a stare in piedi.";
 
-const chips = isEn
-  ? [
-      { label: "All", tag: null },
-      { label: "Javascript", tag: "javascript" },
-      { label: "Short films", tag: "shortmovie" },
-      { label: "Festival", tag: "festival" },
-      { label: "Thoughts", tag: "thoughts" },
-    ]
-  : [
-      { label: "Tutti", tag: null },
-      { label: "Javascript", tag: "javascript" },
-      { label: "Cortometraggi", tag: "shortmovie" },
-      { label: "Festival", tag: "festival" },
-      { label: "Pensieri", tag: "thoughts" },
-    ];
+// Mappa traduzioni tag → label leggibile. Per i tag non listati uso il tag stesso
+// capitalizzato. Solo i tag effettivamente usati nei post diventano chip.
+const tagLabels: Record<string, { it: string; en: string }> = {
+  javascript: { it: "Javascript", en: "Javascript" },
+  typescript: { it: "TypeScript", en: "TypeScript" },
+  shortmovie: { it: "Cortometraggi", en: "Short films" },
+  festival: { it: "Festival", en: "Festival" },
+  thoughts: { it: "Pensieri", en: "Thoughts" },
+  ai: { it: "AI", en: "AI" },
+  caramella: { it: "Caramella", en: "Caramella" },
+  "non-fa-ridere": { it: "Non fa ridere", en: "Non fa ridere" },
+  letterboxd: { it: "Letterboxd", en: "Letterboxd" },
+  lastfm: { it: "Last.fm", en: "Last.fm" },
+  strava: { it: "Strava", en: "Strava" },
+  meditation: { it: "Meditazione", en: "Meditation" },
+  "result-pattern": { it: "Result Pattern", en: "Result Pattern" },
+  astro: { it: "Astro", en: "Astro" },
+  css: { it: "CSS", en: "CSS" },
+};
+
+function tagLabel(tag: string): string {
+  const t = tagLabels[tag];
+  if (t) return isEn ? t.en : t.it;
+  return tag.charAt(0).toUpperCase() + tag.slice(1).replace(/-/g, " ");
+}
+
+// Conta occorrenze di ogni tag tra TUTTI i post di questa lingua, normalizzato
+// (lowercase + trim) per accorpare duplicati di casing.
+const allEntries = await getCollection("blog");
+const langPosts = allEntries.filter((e) => getLangFromId(e.id) === lang);
+const tagCounts = new Map<string, number>();
+for (const p of langPosts) {
+  for (const t of p.data.tags ?? []) {
+    const key = t.toLowerCase().trim();
+    if (!key) continue;
+    tagCounts.set(key, (tagCounts.get(key) ?? 0) + 1);
+  }
+}
+// Sort per count desc, poi alpha
+const sortedTags = Array.from(tagCounts.entries())
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag]) => tag);
+
+const VISIBLE_CHIP_COUNT = 5;
+const primaryTags = sortedTags.slice(0, VISIBLE_CHIP_COUNT);
+const overflowTags = sortedTags.slice(VISIBLE_CHIP_COUNT);
+
+const primaryChips: Array<{ label: string; tag: string | null }> = [
+  { label: isEn ? "All" : "Tutti", tag: null },
+  ...primaryTags.map((tag) => ({ label: tagLabel(tag), tag })),
+];
+const overflowChips = overflowTags.map((tag) => ({ label: tagLabel(tag), tag }));
+
+// Se il tag attivo è negli overflow, lo "promuoviamo" e accordion deve essere
+// aperta di default così l'utente vede dov'è.
+const activeIsInOverflow = activeTag
+  ? overflowTags.includes(activeTag.toLowerCase().trim())
+  : false;
 
 function chipHref(chip: { label: string; tag: string | null }): string {
   if (!chip.tag) return isEn ? "/en/blog/" : "/blog/";
@@ -95,7 +140,7 @@ const pageDescription = isEn
     </header>
 
     <div class="fl-filters">
-      {chips.map((chip) => (
+      {primaryChips.map((chip) => (
         <a
           href={chipHref(chip)}
           class={`fl-chip${isChipActive(chip) ? " fl-chip--active" : ""}`}
@@ -103,16 +148,30 @@ const pageDescription = isEn
           {chip.label}
         </a>
       ))}
+
+      {overflowChips.length > 0 && (
+        <details class="fl-overflow" open={activeIsInOverflow}>
+          <summary class="fl-chip fl-chip--more" aria-label={isEn ? "More tags" : "Altri tag"}>
+            +{overflowChips.length} {isEn ? "more" : "altri"}
+          </summary>
+          <div class="fl-overflow-row">
+            {overflowChips.map((chip) => (
+              <a
+                href={chipHref(chip)}
+                class={`fl-chip${isChipActive(chip) ? " fl-chip--active" : ""}`}
+              >
+                {chip.label}
+              </a>
+            ))}
+          </div>
+        </details>
+      )}
     </div>
 
     <section class="fl-posts">
       {posts.map((post) => (
         <a href={postHref(post.slug)} class="fl-row">
           <div class="fl-row-date">{formatDate(post.date)}</div>
-          <div
-            class="fl-row-cover"
-            style={post.coverImage ? `background-image: url('${post.coverImage}')` : ""}
-          />
           <div class="fl-row-main">
             <h3>{post.title}</h3>
             <p>{post.extract}</p>

@@ -13,6 +13,7 @@ interface FilmEntry {
   status?: string;
   sortOrder: number;
   coverImage?: string;
+  posterImage?: string;
   plot: string;
   festivals: Array<{ name: string; year: number; location?: string; award?: string }>;
   slug: string;
@@ -65,10 +66,10 @@ function awardCount(film: FilmEntry): number {
       {films.map((film) => (
         <a href={filmHref(film.slug)} class="fi-row">
           <div class="fi-year">{film.year}</div>
-          {film.coverImage && (
+          {(film.posterImage || film.coverImage) && (
             <div
               class="fi-thumb"
-              style={`background-image: url('${film.coverImage}')`}
+              style={`background-image: url('${film.posterImage ?? film.coverImage}')`}
               role="img"
               aria-label={film.title}
             ></div>
@@ -77,7 +78,7 @@ function awardCount(film: FilmEntry): number {
             <div class="fi-info-top">
               <h2 class="fi-film-title">{film.title}</h2>
               {hasAward(film) && (
-                <span class="fi-award-badge foglio-status foglio-status--stabile">
+                <span class="fi-award-badge">
                   {awardCount(film)}{" "}
                   {isEn
                     ? awardCount(film) === 1 ? "award" : "awards"

@@ -2,7 +2,6 @@
 import "normalize.css";
 import "~/styles/fonts.css";
 import "~/styles/global.css";
-import "~/styles/typography-optimized.css";
 
 interface Props {
   title: string;
@@ -99,6 +98,7 @@ const fullImageUrl = new URL(socialImage, Astro.url);
 (function(){
   var EP="/api/e";
   if(new URLSearchParams(location.search).has("notrack")){localStorage.setItem("notrack","1");return;}
+  if(location.pathname.indexOf("/admin")===0){localStorage.setItem("notrack","1");return;}
   if(localStorage.getItem("notrack")||navigator.webdriver)return;
   function send(d){return fetch(EP,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(d),keepalive:true});}
   var pending=localStorage.getItem("_ae");

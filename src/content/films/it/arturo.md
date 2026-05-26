@@ -18,7 +18,10 @@ cast: []
 festivals:
   - name: "Roccafluvione Film Festival"
     year: 2020
-    award: "Vincitore"
+    award: "Vincitore · Menzione Speciale per il Territorio"
+  - name: "Civitanova Film Festival"
+    year: 2020
+    location: "Civitanova Marche (MC)"
 specialThanks: []
 images: []
 ---

@@ -1,100 +1,63 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
 import { SITE_TITLE } from "~/consts";
-import Title from "~/components/Title.astro";
-import "~/layouts/BlogPost.css";
-import "~/components/ContactForm.css";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead
-      title={`Contact | ${SITE_TITLE}`}
-      description="Send me a message, I'll get back to you as soon as possible."
-    />
-  </head>
-  <body>
-    <Header />
-    <main class="BlogPost">
-      <Title title="Contact" />
-      <section class="prose">
-        <p>Got a question, a proposal, or just want to say hi? Fill in the form below and I'll get back to you as soon as possible.</p>
+<FoglioLayout
+  title={`Contact · ${SITE_TITLE}`}
+  description="Get in touch for collaborations, screenplays, ideas, or anything else. I reply to everyone."
+  lang="en"
+  pageId="contact"
+>
+  <div class="ct-page">
+    <header class="ct-head">
+      <p class="ct-eyebrow">Contact</p>
+      <h1><em class="acc">Get in touch.</em></h1>
+      <p class="ct-lede">
+        For collaborations, screenplays, ideas — or just to say something.<br />
+        I reply to everyone, same day.
+      </p>
+    </header>
 
-        <form class="contact-form" id="contact-form">
-          <label>
-            Name
-            <input type="text" name="name" required maxlength="100" autocomplete="name" />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" required maxlength="254" autocomplete="email" />
-          </label>
-          <label>
-            Message
-            <textarea name="message" required maxlength="5000"></textarea>
-          </label>
-          <div class="hp-field" aria-hidden="true">
-            <input type="text" name="website" tabindex="-1" autocomplete="off" />
-          </div>
-          <button type="submit">Send</button>
-        </form>
-        <div id="form-result" aria-live="polite"></div>
-      </section>
-    </main>
-    <Footer />
+    <section class="ct-body">
+      <div class="ct-block">
+        <h2 class="ct-block-label">Email</h2>
+        <a href="mailto:valerio.narcisi@gmail.com" class="ct-primary-link">
+          valerio.narcisi@gmail.com
+        </a>
+      </div>
 
-    <script is:inline>
-      (function() {
-        var form = document.getElementById("contact-form");
-        var result = document.getElementById("form-result");
+      <div class="ct-block">
+        <h2 class="ct-block-label">Elsewhere</h2>
+        <ul class="ct-links">
+          <li>
+            <span class="ct-link-role">GitHub</span>
+            <a href="https://github.com/valerionarcisi" class="ct-link" target="_blank" rel="noopener noreferrer">
+              github.com/valerionarcisi
+            </a>
+          </li>
+          <li>
+            <span class="ct-link-role">LinkedIn</span>
+            <a href="https://www.linkedin.com/in/valerionarcisi/" class="ct-link" target="_blank" rel="noopener noreferrer">
+              linkedin.com/in/valerionarcisi
+            </a>
+          </li>
+          <li>
+            <span class="ct-link-role">Letterboxd</span>
+            <a href="https://letterboxd.com/valerionarcisi/" class="ct-link" target="_blank" rel="noopener noreferrer">
+              letterboxd.com/valerionarcisi
+            </a>
+          </li>
+        </ul>
+      </div>
 
-        function showMsg(cls, text) {
-          result.textContent = "";
-          var div = document.createElement("div");
-          div.className = "form-msg " + cls;
-          div.textContent = text;
-          result.appendChild(div);
-        }
-
-        form.addEventListener("submit", function(e) {
-          e.preventDefault();
-          var btn = form.querySelector("button");
-          btn.disabled = true;
-          btn.textContent = "Sending...";
-          result.textContent = "";
-
-          var data = {
-            name: form.name.value.trim(),
-            email: form.email.value.trim(),
-            message: form.message.value.trim(),
-            website: form.website.value
-          };
-
-          fetch("/api/contact", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-          })
-          .then(function(r) {
-            if (r.ok) {
-              showMsg("ok", "Message sent! I'll get back to you soon.");
-              form.reset();
-            } else {
-              return r.json().then(function(d) { throw new Error(d.error || "Error"); });
-            }
-          })
-          .catch(function(err) {
-            showMsg("err", "Error: " + err.message);
-          })
-          .finally(function() {
-            btn.disabled = false;
-            btn.textContent = "Send";
-          });
-        });
-      })();
-    </script>
-  </body>
-</html>
+      <div class="ct-block">
+        <h2 class="ct-block-label">About films</h2>
+        <p class="ct-note">
+          If you have a film project, a screenplay you'd like me to read, or even just
+          a rough idea — write me. No filter needed.
+        </p>
+      </div>
+    </section>
+  </div>
+</FoglioLayout>

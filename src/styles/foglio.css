@@ -34,6 +34,19 @@
   --foglio-radius-sm: 4px;
   --foglio-radius-md: 6px;
   --foglio-radius-lg: 8px;
+
+  /* Fluid type scale — clamp(min, fluid, max) tuned for 360px → 1280px viewport */
+  --foglio-fs-mono: clamp(0.66rem, 0.62rem + 0.18vw, 0.78rem);
+  --foglio-fs-xs:   clamp(0.82rem, 0.78rem + 0.22vw, 0.95rem);
+  --foglio-fs-sm:   clamp(0.92rem, 0.85rem + 0.32vw, 1.05rem);
+  --foglio-fs-base: clamp(1rem,    0.92rem + 0.4vw,  1.18rem);
+  --foglio-fs-md:   clamp(1.05rem, 0.95rem + 0.45vw, 1.25rem);
+  --foglio-fs-lg:   clamp(1.15rem, 1rem + 0.6vw,    1.4rem);
+  --foglio-fs-xl:   clamp(1.25rem, 1.05rem + 0.85vw, 1.6rem);
+  --foglio-fs-2xl:  clamp(1.4rem,  1.15rem + 1.1vw,  1.9rem);
+  --foglio-fs-3xl:  clamp(1.7rem,  1.3rem + 1.7vw,   2.4rem);
+  --foglio-fs-4xl:  clamp(2.2rem,  1.6rem + 2.6vw,   3.6rem);
+  --foglio-fs-5xl:  clamp(2.6rem,  1.8rem + 3.6vw,   5.2rem);
 }
 
 /* Dark mode — invert the cream */
@@ -86,6 +99,23 @@ html[data-theme="light"] {
 
 /* Base body scope — applied via .foglio class on html */
 .foglio,
+html.foglio,
+.foglio body {
+  overflow-x: clip;
+}
+
+/* Override legacy global heading rules — Foglio pages use EB Garamond */
+.foglio h1,
+.foglio h2,
+.foglio h3,
+.foglio h4,
+.foglio h5,
+.foglio h6 {
+  font-family: var(--foglio-serif);
+  letter-spacing: -0.005em;
+  color: var(--foglio-ink);
+}
+
 .foglio body {
   background: var(--foglio-bg);
   color: var(--foglio-ink);
@@ -104,22 +134,19 @@ html[data-theme="light"] {
 .foglio body::before,
 .foglio body::after { content: none !important; display: none !important; }
 
-/* Re-enable <br> — typography-optimized.css hides "* + br" globally */
-.foglio br { display: inline; }
-
 /* Reset the legacy global typography for .foglio pages — layouts/components
-   define their own type styles. */
+   define their own type styles. Heading font defaults to Foglio serif. */
 .foglio h1,
 .foglio h2,
 .foglio h3,
 .foglio h4,
 .foglio h5,
 .foglio h6 {
-  font-family: inherit;
-  font-weight: inherit;
-  color: inherit;
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  color: var(--foglio-ink);
   text-transform: none;
-  letter-spacing: normal;
+  letter-spacing: -0.005em;
   text-shadow: none;
   margin: 0;
   padding: 0;
@@ -275,4 +302,28 @@ html[data-theme="light"] {
     align-items: flex-start;
   }
   .foglio-footer-social { flex-wrap: wrap; gap: 1rem; }
+}
+
+/* A11y: focus-visible globale + touch targets */
+.foglio a:focus-visible,
+.foglio button:focus-visible,
+.foglio summary:focus-visible,
+.foglio input:focus-visible,
+.foglio textarea:focus-visible {
+  outline: 2px solid var(--foglio-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (max-width: 767px) {
+  .foglio-nav-links a,
+  .foglio-nav-brand,
+  .ft-toggle,
+  .fl-chip,
+  .fp-share-btn,
+  .as-period-link {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
 }

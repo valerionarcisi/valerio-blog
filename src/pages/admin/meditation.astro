@@ -2,6 +2,8 @@
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
 import { quotes as allQuotes } from "~/data/meditation-quotes.js";
 
 export const prerender = false;
@@ -17,7 +19,7 @@ const quotesJson = JSON.stringify(allQuotes);
 ---
 
 <!doctype html>
-<html lang="it">
+<html lang="it" class="foglio">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,10 +27,10 @@ const quotesJson = JSON.stringify(allQuotes);
     <title>Meditazione Vipassana</title>
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: var(--foglio-bg); color: var(--foglio-ink); padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
 
-      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
-      .subtitle { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1.5rem; }
+      h1 { font-family: var(--foglio-serif); color: var(--foglio-accent); font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 0.3rem; }
+      .subtitle { color: var(--foglio-ink-soft); font-size: 0.85rem; margin-bottom: 1.5rem; }
 
       .day-badge {
         display: inline-block;
@@ -38,7 +40,7 @@ const quotesJson = JSON.stringify(allQuotes);
         padding: 0.3rem 0.8rem;
         border-radius: 20px;
         font-size: 0.88rem;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
         margin-bottom: 1.5rem;
       }
 
@@ -50,25 +52,25 @@ const quotesJson = JSON.stringify(allQuotes);
         margin-bottom: 1.5rem;
       }
       .stat-box {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 0.75rem;
         text-align: center;
       }
-      .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #bb86fc; }
-      .stat-label { font-size: 0.78rem; color: #8a8a8e; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+      .stat-value { font-family: var(--foglio-mono); font-size: 1.4rem; font-weight: 700; color: #bb86fc; }
+      .stat-label { font-size: 0.78rem; color: var(--foglio-ink-soft); margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
       /* Heatmap */
       .heatmap-section {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 12px;
         padding: 1rem;
         margin-bottom: 1.5rem;
         overflow-x: auto;
       }
-      .heatmap-title { font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+      .heatmap-title { font-size: 0.82rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
       .heatmap-grid {
         display: grid;
         grid-template-rows: repeat(7, 1fr);
@@ -81,23 +83,23 @@ const quotesJson = JSON.stringify(allQuotes);
         width: 11px;
         height: 11px;
         border-radius: 2px;
-        background: #1a1a1e;
+        background: var(--foglio-paper-2);
         cursor: pointer;
         position: relative;
       }
-      .heatmap-cell.selected { outline: 2px solid #c9a84c; outline-offset: 1px; z-index: 1; }
+      .heatmap-cell.selected { outline: 2px solid var(--foglio-accent); outline-offset: 1px; z-index: 1; }
       .heatmap-cell.l1 { background: rgba(155, 89, 182, 0.25); }
       .heatmap-cell.l2 { background: rgba(155, 89, 182, 0.45); }
       .heatmap-cell.l3 { background: rgba(155, 89, 182, 0.7); }
       .heatmap-cell.l4 { background: #bb86fc; }
-      .heatmap-cell.today { outline: 1px solid #c9a84c; outline-offset: 1px; }
+      .heatmap-cell.today { outline: 1px solid var(--foglio-accent); outline-offset: 1px; }
       .heatmap-legend {
         display: flex;
         align-items: center;
         gap: 0.3rem;
         margin-top: 0.5rem;
         font-size: 0.6rem;
-        color: #666;
+        color: var(--foglio-ink-mute);
       }
       .heatmap-legend-cell {
         width: 10px;
@@ -109,8 +111,8 @@ const quotesJson = JSON.stringify(allQuotes);
         display: none;
         margin-top: 0.75rem;
         padding: 0.75rem 1rem;
-        background: #1a1a1e;
-        border: 1px solid #333;
+        background: var(--foglio-paper-2);
+        border: 1px solid var(--foglio-rule-strong);
         border-radius: 8px;
         animation: fadeSlide 0.2s ease;
       }
@@ -126,7 +128,7 @@ const quotesJson = JSON.stringify(allQuotes);
         margin-bottom: 0.5rem;
       }
       .heatmap-detail-date {
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
         font-size: 0.9rem;
         color: #bb86fc;
         font-weight: 600;
@@ -134,15 +136,15 @@ const quotesJson = JSON.stringify(allQuotes);
       .heatmap-detail-close {
         background: none;
         border: none;
-        color: #555;
+        color: var(--foglio-ink-mute);
         cursor: pointer;
         font-size: 1rem;
         padding: 0.2rem 0.4rem;
         line-height: 1;
       }
-      .heatmap-detail-close:hover { color: #e8e6e1; }
+      .heatmap-detail-close:hover { color: var(--foglio-ink); }
       .heatmap-detail-empty {
-        color: #555;
+        color: var(--foglio-ink-mute);
         font-size: 0.88rem;
         font-style: italic;
       }
@@ -153,7 +155,7 @@ const quotesJson = JSON.stringify(allQuotes);
         padding: 0.4rem 0;
       }
       .heatmap-detail-session + .heatmap-detail-session {
-        border-top: 1px solid #222;
+        border-top: 1px solid var(--foglio-rule);
       }
       .heatmap-detail-dot {
         width: 8px;
@@ -164,29 +166,29 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .heatmap-detail-type {
         font-size: 0.78rem;
-        color: #e8e6e1;
+        color: var(--foglio-ink);
         flex: 1;
       }
       .heatmap-detail-min {
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
         font-size: 0.82rem;
-        color: #8a8a8e;
+        color: var(--foglio-ink-soft);
         flex-shrink: 0;
       }
       .heatmap-detail-total {
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
         font-size: 0.82rem;
-        color: #c9a84c;
+        color: var(--foglio-accent);
         text-align: right;
         margin-top: 0.4rem;
         padding-top: 0.4rem;
-        border-top: 1px solid #333;
+        border-top: 1px solid var(--foglio-rule-strong);
       }
 
       /* Streak bar */
       .streak-bar {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 1rem 1.5rem;
         display: flex;
@@ -197,13 +199,13 @@ const quotesJson = JSON.stringify(allQuotes);
         gap: 0.8rem;
       }
       .streak-info { display: flex; align-items: center; gap: 0.8rem; }
-      .streak-num { font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 700; color: #bb86fc; }
-      .streak-text { font-size: 0.88rem; color: #8a8a8e; }
-      .streak-best { font-size: 0.78rem; color: #555; }
+      .streak-num { font-family: var(--foglio-mono); font-size: 1.6rem; font-weight: 700; color: #bb86fc; }
+      .streak-text { font-size: 0.88rem; color: var(--foglio-ink-soft); }
+      .streak-best { font-size: 0.78rem; color: var(--foglio-ink-mute); }
       .today-status {
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
         font-size: 0.88rem;
-        color: #555;
+        color: var(--foglio-ink-mute);
         padding: 0.4rem 0.8rem;
         border-radius: 6px;
       }
@@ -211,19 +213,19 @@ const quotesJson = JSON.stringify(allQuotes);
 
       /* Quote */
       .meditation-hero {
-        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
+        background: linear-gradient(135deg, var(--foglio-paper) 0%, #1a1520 100%);
         border: 1px solid rgba(155, 89, 182, 0.2);
         border-radius: 12px;
         padding: 2rem;
         margin-bottom: 1.5rem;
         text-align: center;
       }
-      .meditation-hero .quote { font-size: 1.1rem; font-style: italic; color: #ccc; line-height: 1.6; max-width: 600px; margin: 0 auto 1rem; }
-      .meditation-hero .author { font-size: 0.88rem; color: #8a8a8e; }
+      .meditation-hero .quote { font-size: 1.1rem; font-style: italic; color: var(--foglio-ink-soft); line-height: 1.6; max-width: 600px; margin: 0 auto 1rem; }
+      .meditation-hero .author { font-size: 0.88rem; color: var(--foglio-ink-soft); }
 
       /* Focus cards */
       .focus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
-      .focus-card { background: #141416; border: 1px solid #222; border-radius: 8px; padding: 1.2rem; }
+      .focus-card { background: var(--foglio-paper); border: 1px solid var(--foglio-rule); border-radius: 8px; padding: 1.2rem; }
       .focus-card:hover { border-color: rgba(155,89,182,0.4); }
       .focus-card .fc-icon { font-size: 1.3rem; margin-bottom: 0.5rem; }
       .focus-card .fc-title { font-size: 0.9rem; color: #bb86fc; font-weight: 600; margin-bottom: 0.3rem; }
@@ -231,8 +233,8 @@ const quotesJson = JSON.stringify(allQuotes);
 
       /* Timer */
       .timer-section {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 12px;
         padding: 2rem;
         margin-bottom: 1.5rem;
@@ -240,7 +242,7 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .timer-ring-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto; }
       .timer-ring-svg { width: 200px; height: 200px; transform: rotate(-90deg); }
-      .timer-ring-bg { fill: none; stroke: #222; stroke-width: 6; }
+      .timer-ring-bg { fill: none; stroke: var(--foglio-rule); stroke-width: 6; }
       .timer-ring-fg { fill: none; stroke: #bb86fc; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 0.5s linear; }
       .timer-ring-text {
         position: absolute;
@@ -249,23 +251,23 @@ const quotesJson = JSON.stringify(allQuotes);
         transform: translate(-50%, -50%);
         text-align: center;
       }
-      .timer-display { font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; color: #e8e6e1; letter-spacing: 0.05em; }
-      .timer-label { font-size: 0.82rem; color: #8a8a8e; }
+      .timer-display { font-family: var(--foglio-mono); font-size: 2.8rem; color: var(--foglio-ink); letter-spacing: 0.05em; }
+      .timer-label { font-size: 0.82rem; color: var(--foglio-ink-soft); }
       .breath-label { text-align: center; font-size: 0.85rem; color: #bb86fc; min-height: 1.4em; margin: 0.5rem 0; }
 
-      .active-guide { display: none; background: linear-gradient(135deg, rgba(155,89,182,0.12), rgba(201,168,76,0.08)); border: 1px solid rgba(155,89,182,0.3); border-radius: 12px; padding: 1.2rem; margin: 1rem 0; text-align: center; animation: guideIn 0.5s ease; }
+      .active-guide { display: none; background: linear-gradient(135deg, rgba(155,89,182,0.12), var(--foglio-paper-2)); border: 1px solid rgba(155,89,182,0.3); border-radius: 12px; padding: 1.2rem; margin: 1rem 0; text-align: center; animation: guideIn 0.5s ease; }
       .active-guide.visible { display: block; }
-      .active-guide .guide-step-num { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #c9a84c; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
-      .active-guide .guide-title { font-family: 'Staatliches', Impact, sans-serif; font-size: 1.4rem; color: #bb86fc; margin-bottom: 0.5rem; }
+      .active-guide .guide-step-num { font-family: var(--foglio-mono); font-size: 0.82rem; color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+      .active-guide .guide-title { font-family: var(--foglio-serif); font-size: 1.4rem; color: #bb86fc; margin-bottom: 0.5rem; }
       .active-guide .guide-desc { font-size: 1rem; color: #c8c6c1; line-height: 1.6; }
-      .active-guide .guide-hint { font-size: 0.9rem; color: #8a8a8e; margin-top: 0.8rem; font-style: italic; }
+      .active-guide .guide-hint { font-size: 0.9rem; color: var(--foglio-ink-soft); margin-top: 0.8rem; font-style: italic; }
       @keyframes guideIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       .timer-presets { display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.2rem; flex-wrap: wrap; }
       .timer-presets button {
         padding: 0.5rem 0.9rem;
-        background: #1a1a1c;
-        border: 1px solid #333;
-        color: #8a8a8e;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule-strong);
+        color: var(--foglio-ink-soft);
         cursor: pointer;
         border-radius: 4px;
         font-size: 0.9rem;
@@ -285,44 +287,44 @@ const quotesJson = JSON.stringify(allQuotes);
         font-weight: 600;
         min-height: 44px;
       }
-      .timer-btn.start { background: #bb86fc; color: #0a0a0c; }
+      .timer-btn.start { background: #bb86fc; color: var(--foglio-bg); }
       .timer-btn.start:hover { background: #ce9ffc; }
-      .timer-btn.pause { background: #f39c12; color: #0a0a0c; }
-      .timer-btn.reset { background: #333; color: #8a8a8e; }
-      .timer-btn.reset:hover { background: #444; color: #e8e6e1; }
-      .timer-btn.voice { background: #333; color: #8a8a8e; font-size: 0.9rem; }
+      .timer-btn.pause { background: #f39c12; color: var(--foglio-bg); }
+      .timer-btn.reset { background: var(--foglio-rule-strong); color: var(--foglio-ink-soft); }
+      .timer-btn.reset:hover { background: var(--foglio-rule-strong); color: var(--foglio-ink); }
+      .timer-btn.voice { background: var(--foglio-rule-strong); color: var(--foglio-ink-soft); font-size: 0.9rem; }
       .timer-btn.voice.active { background: rgba(155,89,182,0.2); color: #bb86fc; border: 1px solid rgba(155,89,182,0.3); }
-      .voice-tip { text-align: center; font-size: 0.88rem; color: #8a8a8e; margin-top: 0.5rem; font-style: italic; min-height: 1.2em; }
+      .voice-tip { text-align: center; font-size: 0.88rem; color: var(--foglio-ink-soft); margin-top: 0.5rem; font-style: italic; min-height: 1.2em; }
 
       /* Session card */
       .session-card {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 12px;
         padding: 2rem;
         margin-bottom: 1.5rem;
       }
-      .session-card h2 { font-family: 'Staatliches', Impact, sans-serif; color: #bb86fc; font-size: 1.1rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
+      .session-card h2 { font-family: var(--foglio-serif); color: #bb86fc; font-size: 1.1rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
       .session-card .step { display: flex; gap: 1rem; margin-bottom: 1.2rem; align-items: flex-start; }
-      .step-num { flex-shrink: 0; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: rgba(155, 89, 182, 0.15); color: #bb86fc; font-size: 0.88rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+      .step-num { flex-shrink: 0; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: rgba(155, 89, 182, 0.15); color: #bb86fc; font-size: 0.88rem; font-weight: 700; font-family: var(--foglio-mono); }
       .step-content { flex: 1; }
-      .step-title { font-weight: 600; color: #e8e6e1; font-size: 0.9rem; margin-bottom: 0.2rem; }
+      .step-title { font-weight: 600; color: var(--foglio-ink); font-size: 0.9rem; margin-bottom: 0.2rem; }
       .step-desc { color: #aaa; font-size: 0.82rem; line-height: 1.5; }
-      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.3rem; }
+      .step-duration { display: inline-block; background: rgba(155,89,182,0.1); color: #bb86fc; padding: 0.15rem 0.5rem; border-radius: 10px; font-size: 0.78rem; font-family: var(--foglio-mono); margin-top: 0.3rem; }
 
-      .loading-msg { text-align: center; color: #555; font-size: 0.9rem; padding: 2rem; }
+      .loading-msg { text-align: center; color: var(--foglio-ink-mute); font-size: 0.9rem; padding: 2rem; }
 
       /* Journey section */
       .journey-section {
-        background: linear-gradient(135deg, #141416 0%, #1a1520 100%);
+        background: linear-gradient(135deg, var(--foglio-paper) 0%, #1a1520 100%);
         border: 1px solid rgba(155, 89, 182, 0.2);
         border-radius: 12px;
         padding: 1.5rem;
         margin-bottom: 1.5rem;
       }
       .journey-title {
-        font-family: 'Staatliches', Impact, sans-serif;
-        color: #c9a84c;
+        font-family: var(--foglio-serif);
+        color: var(--foglio-accent);
         font-size: 1rem;
         letter-spacing: 0.02em;
         margin-bottom: 0.8rem;
@@ -358,18 +360,18 @@ const quotesJson = JSON.stringify(allQuotes);
         height: 4px;
         border-radius: 2px;
         flex: 1;
-        background: #222;
+        background: var(--foglio-rule);
         transition: background 0.3s;
       }
       .journey-progress-dot.filled { background: #bb86fc; }
-      .journey-progress-dot.current { background: #c9a84c; }
+      .journey-progress-dot.current { background: var(--foglio-accent); }
       .journey-month-label {
         display: flex;
         justify-content: space-between;
         font-size: 0.6rem;
-        color: #555;
+        color: var(--foglio-ink-mute);
         margin-top: 0.3rem;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
       }
       .journey-suggestion {
         background: rgba(155, 89, 182, 0.08);
@@ -378,18 +380,18 @@ const quotesJson = JSON.stringify(allQuotes);
         padding: 0.8rem 1rem;
         margin-top: 1rem;
         font-size: 0.82rem;
-        color: #ccc;
+        color: var(--foglio-ink-soft);
         line-height: 1.5;
       }
       .journey-suggestion strong { color: #bb86fc; }
       .journey-tip {
-        background: rgba(201, 168, 76, 0.08);
-        border: 1px solid rgba(201, 168, 76, 0.15);
+        background: var(--foglio-paper-2);
+        border: 1px solid var(--foglio-paper-2);
         border-radius: 8px;
         padding: 0.8rem 1rem;
         margin-top: 0.6rem;
         font-size: 0.9rem;
-        color: #c9a84c;
+        color: var(--foglio-accent);
         line-height: 1.5;
       }
 
@@ -410,45 +412,45 @@ const quotesJson = JSON.stringify(allQuotes);
       .timeline-segment {
         position: relative;
         padding: 0.5rem 0.4rem 2rem;
-        border-bottom: 3px solid #333;
+        border-bottom: 3px solid var(--foglio-rule-strong);
         text-align: center;
         transition: border-color 0.3s;
       }
       .timeline-segment.filled { border-bottom-color: #bb86fc; }
-      .timeline-segment.current { border-bottom-color: #c9a84c; }
+      .timeline-segment.current { border-bottom-color: var(--foglio-accent); }
       .timeline-seg-icon { font-size: 1.1rem; line-height: 1; }
       .timeline-seg-name {
         font-size: 0.68rem;
         font-weight: 700;
-        color: #888;
+        color: var(--foglio-ink-mute);
         margin-top: 0.2rem;
         white-space: nowrap;
       }
       .timeline-segment.filled .timeline-seg-name { color: #bb86fc; }
-      .timeline-segment.current .timeline-seg-name { color: #c9a84c; }
+      .timeline-segment.current .timeline-seg-name { color: var(--foglio-accent); }
       .timeline-seg-range {
         font-size: 0.58rem;
-        color: #555;
-        font-family: 'JetBrains Mono', monospace;
+        color: var(--foglio-ink-mute);
+        font-family: var(--foglio-mono);
         margin-top: 0.15rem;
         white-space: nowrap;
       }
       .timeline-milestone {
-        background: rgba(201, 168, 76, 0.1);
-        border: 1px solid rgba(201, 168, 76, 0.25);
+        background: var(--foglio-paper-2);
+        border: 1px solid var(--foglio-accent-soft);
         border-radius: 6px;
         padding: 0.25rem 0.4rem;
         margin-top: 0.35rem;
         font-size: 0.58rem;
-        color: #c9a84c;
+        color: var(--foglio-accent);
         line-height: 1.4;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
       }
       .timeline-milestone-label {
         font-weight: 700;
       }
       .timeline-milestone-desc {
-        color: #888;
+        color: var(--foglio-ink-mute);
         font-family: 'Merriweather', serif;
         font-size: 0.55rem;
       }
@@ -457,14 +459,14 @@ const quotesJson = JSON.stringify(allQuotes);
         bottom: -1.5rem;
         left: 50%;
         transform: translateX(-50%);
-        background: #c9a84c;
+        background: var(--foglio-accent);
         color: #111;
         font-size: 0.55rem;
         font-weight: 700;
         padding: 0.1rem 0.4rem;
         border-radius: 8px;
         white-space: nowrap;
-        font-family: 'JetBrains Mono', monospace;
+        font-family: var(--foglio-mono);
       }
 
       /* Roadmap table */
@@ -472,7 +474,7 @@ const quotesJson = JSON.stringify(allQuotes);
       .journey-roadmap-toggle {
         cursor: pointer;
         font-size: 0.88rem;
-        color: #666;
+        color: var(--foglio-ink-mute);
         letter-spacing: 0.04em;
         text-transform: uppercase;
         padding: 0.4rem 0;
@@ -491,21 +493,21 @@ const quotesJson = JSON.stringify(allQuotes);
       }
       .journey-roadmap-table th {
         text-align: left;
-        color: #555;
+        color: var(--foglio-ink-mute);
         font-size: 0.78rem;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         padding: 0.4rem 0.6rem;
-        border-bottom: 1px solid #222;
+        border-bottom: 1px solid var(--foglio-rule);
       }
       .journey-roadmap-table td {
         padding: 0.5rem 0.6rem;
-        border-bottom: 1px solid #1a1a1e;
+        border-bottom: 1px solid var(--foglio-paper-2);
         vertical-align: top;
         line-height: 1.4;
       }
-      .journey-roadmap-table td:last-child { color: #888; font-style: italic; }
-      .roadmap-current td { color: #e8e6e1; background: rgba(155, 89, 182, 0.06); }
+      .journey-roadmap-table td:last-child { color: var(--foglio-ink-mute); font-style: italic; }
+      .roadmap-current td { color: var(--foglio-ink); background: rgba(155, 89, 182, 0.06); }
       .roadmap-current td:first-child { border-left: 2px solid #bb86fc; }
       .roadmap-icon { font-size: 0.9rem; }
 
@@ -548,9 +550,9 @@ const quotesJson = JSON.stringify(allQuotes);
       }
     </style>
   </head>
-  <body>
+  <body class="admin">
     <AdminNav currentPage="meditation" token={token} />
-    <h1>Meditazione Vipassana</h1>
+    <h1><em class="acc">Meditazione</em> Vipassana</h1>
     <p class="subtitle">Pratica quotidiana di consapevolezza — osserva, non reagire</p>
 
     <div class="day-badge" id="day-badge"></div>
@@ -622,7 +624,7 @@ const quotesJson = JSON.stringify(allQuotes);
       <div class="heatmap-grid" id="heatmap"></div>
       <div class="heatmap-legend">
         <span>Meno</span>
-        <div class="heatmap-legend-cell" style="background:#1a1a1e"></div>
+        <div class="heatmap-legend-cell" style="background:var(--foglio-paper-2)"></div>
         <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.25)"></div>
         <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.45)"></div>
         <div class="heatmap-legend-cell" style="background:rgba(155,89,182,0.7)"></div>

@@ -5,8 +5,11 @@ import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
 import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
-import { getMovieById } from "~/services/tmdb";
+import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
+import { formatMoneyCompact } from "~/lib/format-money";
+import { getTopPosts } from "~/lib/top-posts";
+import { fetchPostStats } from "~/lib/post-stats";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
@@ -21,7 +24,7 @@ const lastWatchedMovies = async () => {
     .map(async (item: any) => {
       try {
         const movie = await getMovieById(item["tmdb:movieId"][0]);
-        return { ...movie, ...item };
+        return { ...movie, ...item, directors: extractDirectors(movie) };
       } catch (error) {
         console.error(
           `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
@@ -36,14 +39,38 @@ const lastWatchedMovies = async () => {
 };
 
 const allBlogEntries = await getCollection("blog");
-const posts = allBlogEntries
+const allPosts = allBlogEntries
   .filter((e) => getLangFromId(e.id) === "it")
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-  .slice(0, 5)
   .map((e) => ({
     ...e.data,
     slug: getSlugFromId(e.id),
   }));
+const postsByDate = [...allPosts].sort(
+  (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+);
+const featuredPost = postsByDate[0];
+
+const SECONDARY_LIMIT = 5;
+const postStats = await fetchPostStats();
+const topPostsRaw = await getTopPosts({ lang: "it", days: 90, limit: 12 });
+const slugSet = new Set(allPosts.map((p) => p.slug));
+const topPosts = topPostsRaw
+  .filter((tp) => slugSet.has(tp.slug) && tp.slug !== featuredPost?.slug)
+  .slice(0, SECONDARY_LIMIT)
+  .map((tp) => {
+    const post = allPosts.find((p) => p.slug === tp.slug)!;
+    return { ...post, views: tp.views };
+  });
+
+const fallbackPosts = postsByDate
+  .slice(1)
+  .filter((p) => !topPosts.find((tp) => tp.slug === p.slug))
+  .slice(0, SECONDARY_LIMIT - topPosts.length)
+  .map((p) => ({ ...p, views: 0 }));
+
+const secondaryPosts = [...topPosts, ...fallbackPosts];
+
+const posts = postsByDate.slice(0, 5);
 
 const allFilmEntries = await getCollection("films");
 const films = allFilmEntries
@@ -85,7 +112,7 @@ function formatDate(dateStr: string | Date): string {
     <!-- 1. Hero -->
     <section class="fh-hero">
       <div class="fh-hero-text">
-        <div class="fh-hero-eyebrow">Filmmaker · Porto Sant'Elpidio</div>
+        <div class="fh-hero-eyebrow">Filmmaker · Developer · Porto Sant'Elpidio</div>
         <h1>Scrivo storie. <em>Le più fortunate</em> diventano film.</h1>
         <p class="fh-hero-lede">
           Faccio cortometraggi nelle Marche. Sto sviluppando <em>Oh Writers</em>, un editor per sceneggiature pensato per il mercato italiano. Qui dentro trovi i film che ho chiuso, quelli che sto scrivendo, e i pezzi che metto giù mentre lavoro.
@@ -108,7 +135,7 @@ function formatDate(dateStr: string | Date): string {
           <p>
             <em class="acc">Non fa ridere</em> — il mio nuovo cortometraggio. Quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone, sessanta persone sul set. Ora è in montaggio.
           </p>
-          <a href="/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed" class="foglio-readmore fh-now-link">Vedi il tour di Oh Writers →</a>
+          <a href="mailto:valerio.narcisi@gmail.com?subject=Richiesta%20tour%20Oh%20Writers&body=Ciao%20Valerio%2C%0A%0AVorrei%20vedere%20una%20demo%2Ftour%20di%20Oh%20Writers.%0A%0AGrazie%21" class="foglio-readmore fh-now-link">Richiedi il tour di Oh Writers →</a>
         </div>
       </div>
     </section>
@@ -128,7 +155,7 @@ function formatDate(dateStr: string | Date): string {
             <div class="fh-film-frame">
               <div
                 class="fh-film-poster"
-                style={`background-image: url('${film.coverImage}')`}
+                style={`background-image: url('${film.posterImage ?? film.coverImage}')`}
               >
                 {film.status === "in-production" && (
                   <span class="fh-film-wip-badge">in lavorazione</span>
@@ -136,7 +163,7 @@ function formatDate(dateStr: string | Date): string {
               </div>
             </div>
             <div class="fh-film-meta">{film.year} · {film.role}</div>
-            <h3><em>{film.title}</em></h3>
+            <h3>{film.title}</h3>
             {film.plot && <p>{film.plot.slice(0, 80)}…</p>}
           </a>
         ))}
@@ -149,28 +176,51 @@ function formatDate(dateStr: string | Date): string {
         <h2>Blog</h2>
         <a href="/blog/" class="foglio-readmore">Vedi tutto →</a>
       </div>
-      {posts.length > 0 && (
+      {featuredPost && (
         <div class="fh-writing-grid">
-          <a href={`/blog/${posts[0].slug}/`} class="fh-post-featured">
-            <div class="fh-post-featured-num">N° 01 · l'ultimo</div>
-            <h3 set:html={posts[0].title} />
-            {posts[0].extract && <p>{posts[0].extract}</p>}
-            <div class="fh-post-featured-meta">
-              <span>{formatDate(posts[0].date)}</span>
-              {posts[0].tags?.[0] && <span>{posts[0].tags[0]}</span>}
-              <span class="foglio-status foglio-status--stabile">stabile</span>
+          <a href={`/blog/${featuredPost.slug}/`} class="fh-post-featured">
+            {featuredPost.coverImage && (
+              <div
+                class="fh-post-featured-cover"
+                style={`background-image: url('${featuredPost.coverImage}')`}
+                role="img"
+                aria-label={featuredPost.title}
+              />
+            )}
+            <div class="fh-post-featured-body">
+              <div class="fh-post-featured-num">N° 01 · l'ultimo</div>
+              <h3 set:html={featuredPost.title} />
+              {featuredPost.extract && <p>{featuredPost.extract}</p>}
+              <div class="fh-post-featured-meta">
+                <span>{formatDate(featuredPost.date)}</span>
+                {featuredPost.tags?.[0] && <span>{featuredPost.tags[0]}</span>}
+                {(postStats.claps[featuredPost.slug] ?? 0) > 0 && (
+                  <span>♥ {postStats.claps[featuredPost.slug]}</span>
+                )}
+                {(postStats.comments[featuredPost.slug] ?? 0) > 0 && (
+                  <span>{postStats.comments[featuredPost.slug]} commenti</span>
+                )}
+              </div>
             </div>
           </a>
 
           <div class="fh-post-secondary">
-            {posts.slice(1, 5).map((post) => (
-              <a href={`/blog/${post.slug}/`} class="fh-post-row">
-                <div class="fh-post-row-meta">
-                  {formatDate(post.date)}{post.tags?.[0] ? ` · ${post.tags[0]}` : ""}
-                </div>
-                <h4 set:html={post.title} />
-              </a>
-            ))}
+            <div class="fh-post-secondary-label">I più letti</div>
+            {secondaryPosts.map((post) => {
+              const claps = postStats.claps[post.slug] ?? 0;
+              const comments = postStats.comments[post.slug] ?? 0;
+              return (
+                <a href={`/blog/${post.slug}/`} class="fh-post-row">
+                  <div class="fh-post-row-meta">
+                    {formatDate(post.date)}{post.tags?.[0] ? ` · ${post.tags[0]}` : ""}
+                    {post.views > 0 && <span class="fh-post-row-views">{post.views} letture</span>}
+                    {claps > 0 && <span class="fh-post-row-stat">♥ {claps}</span>}
+                    {comments > 0 && <span class="fh-post-row-stat fh-post-row-stat-dim">{comments} commenti</span>}
+                  </div>
+                  <h4 set:html={post.title} />
+                </a>
+              );
+            })}
           </div>
         </div>
       )}
@@ -191,15 +241,36 @@ function formatDate(dateStr: string | Date): string {
                   ></div>
                   <div class="fh-lib-title">
                     <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                    {(() => {
+                      const b = formatMoneyCompact(movie.budget);
+                      const r = formatMoneyCompact(movie.revenue);
+                      if (!b && !r) return null;
+                      return (
+                        <span class="fh-lib-money" title="Budget → Box office">
+                          {b ?? "—"} <span class="fh-lib-money-arrow">→</span> {r ?? "—"}
+                        </span>
+                      );
+                    })()}
+                    {movie.directors && movie.directors.length > 0 && (
+                      <span class="fh-lib-director">di {movie.directors.join(", ")}</span>
+                    )}
                   </div>
-                  <div class="fh-lib-detail">{movie["letterboxd:watchedDate"]?.[0]}</div>
+                  <div class="fh-lib-detail">{(() => {
+                    const raw = movie["letterboxd:watchedDate"]?.[0];
+                    if (!raw) return "";
+                    const d = new Date(raw);
+                    return isNaN(d.getTime()) ? raw : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+                  })()}</div>
                 </li>
               ))}
             </ul>
           ) : (
             <p class="fh-lib-fallback">Dati non disponibili al momento.</p>
           )}
-          <a href="/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed" class="foglio-readmore" style="display:inline-block;margin-top:1.2rem;">Come l'ho costruito →</a>
+          <div class="fh-lib-actions">
+            <a href="/visti" class="foglio-readmore">Vedi tutti →</a>
+            <a href="/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed" class="foglio-readmore fh-lib-secondary">Come l'ho costruito →</a>
+          </div>
         </div>
 
         <div class="fh-lib-block">
@@ -215,21 +286,29 @@ function formatDate(dateStr: string | Date): string {
                   <div class="fh-lib-title">
                     {song.artist?.["#text"]} — <em>{song.name}</em>
                   </div>
-                  <div class="fh-lib-detail">{song.date?.["#text"] ?? "di recente"}</div>
+                  <div class="fh-lib-detail">{(() => {
+                    const raw = song.date?.["#text"];
+                    if (!raw) return "di recente";
+                    const d = new Date(raw + " UTC");
+                    return isNaN(d.getTime()) ? raw : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+                  })()}</div>
                 </li>
               ))}
             </ul>
           ) : (
             <p class="fh-lib-fallback">Dati non disponibili al momento.</p>
           )}
-          <a href="/blog/how-i-display-my-recently-played-music-using-lastfm-api" class="foglio-readmore" style="display:inline-block;margin-top:1.2rem;">Come l'ho costruito →</a>
+          <div class="fh-lib-actions">
+            <a href="/ascolti" class="foglio-readmore">Vedi tutti →</a>
+            <a href="/blog/how-i-display-my-recently-played-music-using-lastfm-api" class="foglio-readmore fh-lib-secondary">Come l'ho costruito →</a>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- 6. About strip -->
     <section class="fh-about-strip">
-      <p class="fh-quote">"Sono uno che inventa storie. <em class="acc">Poi cerca di farle vedere</em> a qualcuno."</p>
+      <p class="fh-quote">"Fare un film o costruire un prodotto, alla fine è sempre la stessa cosa. <em class="acc">Un gruppo di persone che si fidano di una visione</em> — e ci arrivano insieme."</p>
       <a href="/who-i-am" class="foglio-readmore">Chi sono →</a>
     </section>
 

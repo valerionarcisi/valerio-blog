@@ -30,7 +30,7 @@ interface Props {
   technicalSpecs?: TechnicalSpecs;
   crew: Array<{ role: string; name: string; url?: string }>;
   cast: Array<{ name: string; url?: string; character?: string }>;
-  festivals: Array<{ name: string; year: number; location?: string; award?: string }>;
+  festivals: Array<{ name: string; year: number; location?: string; award?: string; laurel?: string }>;
   distribution?: { name: string; url?: string };
   specialThanks: Array<{ name: string; url?: string }>;
   images: Array<{ src: string; alt: string }>;
@@ -120,7 +120,7 @@ const awardsCount = festivals.filter((f) => f.award).length;
       <div class="ff-eyebrow">
         <span>{year}</span>
         <span>{role}</span>
-        {status && (
+        {status && status !== "completed" && (
           <span class={statusBadgeClass(status)}>{statusLabel(status)}</span>
         )}
         {awardsCount > 0 && (
@@ -129,8 +129,8 @@ const awardsCount = festivals.filter((f) => f.award).length;
           </span>
         )}
       </div>
-      <h1 class="ff-title"><em>{title}</em></h1>
-      <p class="ff-credit"><em>{role} {isEn ? "by" : "di"} Valerio Narcisi</em></p>
+      <h1 class="ff-title" set:html={title} />
+      <p class="ff-credit"><em>{role} {isEn ? "by" : (/\b(Scritto|Diretto|Montato|Prodotto|Sceneggiato|Girato)\b/i.test(role) ? "da" : "di")} Valerio Narcisi</em></p>
     </header>
 
     {coverImage && (
@@ -149,6 +149,36 @@ const awardsCount = festivals.filter((f) => f.award).length;
         <h2>{t.synopsis}</h2>
         <p>{plot}</p>
         <slot />
+
+        {festivals.length > 0 && (
+          <section class="ff-awards">
+            <header class="ff-awards-header">
+              <h2 class="ff-awards-title">
+                <em>{t.festivals}</em>
+                <span class="ff-awards-count">{festivals.length}</span>
+              </h2>
+            </header>
+            <ol class="ff-awards-list">
+              {festivals.map((fest) => (
+                <li class={`ff-awards-item ${fest.award ? "ff-awards-item--winner" : ""} ${fest.laurel ? "ff-awards-item--laurel" : ""}`}>
+                  {fest.laurel ? (
+                    <div class="ff-awards-laurel">
+                      <img src={fest.laurel} alt="" loading="lazy" />
+                      <div class="ff-awards-laurel-year">{fest.year}</div>
+                    </div>
+                  ) : (
+                    <div class="ff-awards-year">{fest.year}</div>
+                  )}
+                  <div class="ff-awards-body">
+                    <p class="ff-awards-name">{fest.name}</p>
+                    {fest.location && <p class="ff-awards-loc">{fest.location}</p>}
+                    {fest.award && <p class="ff-awards-prize">{fest.award}</p>}
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
       </div>
 
       <aside class="ff-aside">
@@ -232,21 +262,6 @@ const awardsCount = festivals.filter((f) => f.award).length;
                       : actor.name}
                     {actor.character && <span class="ff-character"> — {actor.character}</span>}
                   </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {festivals.length > 0 && (
-          <div class="ff-aside-block">
-            <h3 class="ff-aside-label">{t.festivals}</h3>
-            <ul class="ff-festival-list">
-              {festivals.map((fest) => (
-                <li class="ff-festival-item">
-                  <span class="ff-festival-name">{fest.name} {fest.year}</span>
-                  {fest.location && <span class="ff-festival-location">{fest.location}</span>}
-                  {fest.award && <span class="ff-festival-award">{fest.award}</span>}
                 </li>
               ))}
             </ul>

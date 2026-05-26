@@ -3,6 +3,8 @@ import { Icon } from "astro-icon/components";
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
@@ -177,98 +179,93 @@ const entrances = [
 ---
 
 <!doctype html>
-<html lang="it">
+<html lang="it" class="foglio">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
     <title>Roma · 11 Aprile 2026</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; font-size: 1rem; line-height: 1.55; }
-      .container { max-width: 1100px; margin: 0 auto; }
+    <style is:global>
+      .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
 
-      .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid #222; }
-      .page-kicker { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
-      .page-header h1 { color: #c9a84c; font-size: 2.4rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 0.5rem; }
-      .page-subtitle { color: #8a8a8e; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-      .page-subtitle .icon-inline { width: 1rem; height: 1rem; }
-      .booking-ref { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #4ecdc4; }
+      .foglio body.admin .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .page-kicker { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-header h1 { font-family: var(--foglio-serif); color: var(--foglio-ink); font-size: var(--foglio-fs-4xl); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-subtitle { color: var(--foglio-ink-soft); font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .foglio body.admin .page-subtitle .icon-inline { width: 1rem; height: 1rem; color: var(--foglio-accent); }
+      .foglio body.admin .booking-ref { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.1em; font-style: normal; }
 
-      .card { background: #121214; border: 1px solid #222; border-radius: 12px; padding: 1.75rem; margin-bottom: 1.5rem; }
-      .card-title { color: #c9a84c; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; }
-      .card-title-icon { width: 1.15rem; height: 1.15rem; color: #c9a84c; }
+      .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .card-title-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); }
 
-      .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-      .ticket { background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 10px; padding: 1.15rem; position: relative; overflow: hidden; }
-      .ticket::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #c9a84c 0%, #4ecdc4 100%); }
-      .ticket-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
-      .ticket-avatar { width: 2rem; height: 2rem; border-radius: 50%; background: rgba(201, 168, 76, 0.12); display: flex; align-items: center; justify-content: center; color: #c9a84c; flex-shrink: 0; }
-      .ticket-avatar svg { width: 1.1rem; height: 1.1rem; }
-      .ticket-name { font-weight: 700; font-size: 0.95rem; color: #e8e6e1; }
-      .ticket-type { color: #8a8a8e; font-size: 0.75rem; margin-bottom: 0.5rem; font-family: 'JetBrains Mono', monospace; }
-      .ticket-price { color: #c9a84c; font-weight: 700; font-size: 1rem; margin-bottom: 0.85rem; }
-      .ticket-price.free { color: #4ecdc4; }
-      .ticket-code { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; letter-spacing: 0.02em; padding-top: 0.7rem; border-top: 1px dashed #2a2a2e; word-break: break-all; }
+      .foglio body.admin .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+      .foglio body.admin .ticket { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.15rem; position: relative; overflow: hidden; }
+      .foglio body.admin .ticket::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--foglio-accent); }
+      .foglio body.admin .ticket-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; }
+      .foglio body.admin .ticket-avatar { width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .ticket-avatar svg { width: 1.1rem; height: 1.1rem; }
+      .foglio body.admin .ticket-name { font-family: var(--foglio-serif); font-weight: 500; font-size: var(--foglio-fs-md); color: var(--foglio-ink); }
+      .foglio body.admin .ticket-type { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); margin-bottom: 0.5rem; font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+      .foglio body.admin .ticket-price { font-family: var(--foglio-mono); color: var(--foglio-accent); font-weight: 700; font-size: var(--foglio-fs-md); margin-bottom: 0.85rem; font-variant-numeric: tabular-nums; }
+      .foglio body.admin .ticket-price.free { color: var(--foglio-ink-soft); }
+      .foglio body.admin .ticket-code { color: var(--foglio-ink-mute); font-family: var(--foglio-mono); font-size: 0.68rem; letter-spacing: 0.04em; padding-top: 0.7rem; border-top: 1px dashed var(--foglio-rule); word-break: break-all; }
 
-      .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
-      .rule { background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 10px; padding: 1.1rem; }
-      .rule-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.55rem; }
-      .rule-icon { width: 1.15rem; height: 1.15rem; color: #c9a84c; flex-shrink: 0; }
-      .rule-title { font-size: 0.85rem; font-weight: 700; color: #e8e6e1; }
-      .rule-text { font-size: 0.82rem; color: #b0b0b4; line-height: 1.55; }
+      .foglio body.admin .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+      .foglio body.admin .rule { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      .foglio body.admin .rule-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.55rem; }
+      .foglio body.admin .rule-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .rule-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
+      .foglio body.admin .rule-text { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.6; }
 
-      .timeline { position: relative; padding-left: 2.5rem; }
-      .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: linear-gradient(180deg, rgba(201, 168, 76, 0.6) 0%, rgba(78, 205, 196, 0.6) 100%); }
-      .step { position: relative; padding-bottom: 1.4rem; }
-      .step:last-child { padding-bottom: 0; }
-      .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: #0a0a0c; border: 2px solid #c9a84c; display: flex; align-items: center; justify-content: center; color: #c9a84c; }
-      .step-dot svg { width: 1rem; height: 1rem; }
-      .step-time { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #4ecdc4; font-weight: 700; letter-spacing: 0.05em; }
-      .step-title { font-size: 1rem; font-weight: 700; color: #e8e6e1; margin: 0.1rem 0 0.35rem; }
-      .step-desc { font-size: 0.88rem; color: #b0b0b4; max-width: 700px; }
+      .foglio body.admin .timeline { position: relative; padding-left: 2.5rem; }
+      .foglio body.admin .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--foglio-rule-strong); }
+      .foglio body.admin .step { position: relative; padding-bottom: 1.6rem; }
+      .foglio body.admin .step:last-child { padding-bottom: 0; }
+      .foglio body.admin .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); }
+      .foglio body.admin .step-dot svg { width: 1rem; height: 1rem; }
+      .foglio body.admin .step-time { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); font-weight: 700; letter-spacing: 0.1em; }
+      .foglio body.admin .step-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); margin: 0.1rem 0 0.35rem; }
+      .foglio body.admin .step-desc { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); max-width: 700px; line-height: 1.6; }
 
-      .entrance-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.4rem 1rem; }
-      .entrance-list li { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: #b0b0b4; padding: 0.35rem 0; display: flex; align-items: center; gap: 0.5rem; }
-      .entrance-list li::before { content: counter(item); counter-increment: item; width: 1.4rem; height: 1.4rem; background: rgba(201, 168, 76, 0.12); color: #c9a84c; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
-      .entrance-list { counter-reset: item; }
-      .entrance-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.15s; }
-      .entrance-link:hover { color: #4ecdc4; }
-      .entrance-link svg { color: #8a8a8e; transition: color 0.15s; }
-      .entrance-link:hover svg { color: #4ecdc4; }
+      .foglio body.admin .entrance-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.4rem 1rem; counter-reset: item; }
+      .foglio body.admin .entrance-list li { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); padding: 0.4rem 0; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .entrance-list li::before { content: counter(item); counter-increment: item; width: 1.4rem; height: 1.4rem; background: var(--foglio-accent); color: var(--foglio-paper); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-family: var(--foglio-mono); font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+      .foglio body.admin .entrance-link { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem; transition: color 0.15s; }
+      .foglio body.admin .entrance-link:hover { color: var(--foglio-accent); }
+      .foglio body.admin .entrance-link svg { color: var(--foglio-ink-mute); transition: color 0.15s; }
+      .foglio body.admin .entrance-link:hover svg { color: var(--foglio-accent); }
 
-      .step-places { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
-      .map-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.65rem; border: 1px solid #2a2a2e; border-radius: 999px; background: rgba(78, 205, 196, 0.05); color: #4ecdc4; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
-      .map-link:hover { background: rgba(78, 205, 196, 0.14); border-color: #4ecdc4; transform: translateY(-1px); }
-      .map-link svg { color: inherit; }
+      .foglio body.admin .step-places { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
+      .foglio body.admin .map-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.7rem; border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-sm); background: var(--foglio-paper-2); color: var(--foglio-ink); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+      .foglio body.admin .map-link:hover { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .map-link svg { color: inherit; }
 
-      .included-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-      .included-col h3 { color: #4ecdc4; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem; font-weight: 700; }
-      .included-col.excluded h3 { color: #e74c3c; }
-      .included-col ul { list-style: none; }
-      .included-col li { font-size: 0.85rem; color: #b0b0b4; padding: 0.3rem 0; display: flex; align-items: center; gap: 0.4rem; }
-      .included-col li svg { width: 0.95rem; height: 0.95rem; flex-shrink: 0; }
-      .included-col.included li svg { color: #4ecdc4; }
-      .included-col.excluded li svg { color: #e74c3c; }
+      .foglio body.admin .included-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .foglio body.admin .included-col h3 { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.6rem; font-weight: 700; }
+      .foglio body.admin .included-col.included h3 { color: #2e8b57; }
+      .foglio body.admin .included-col.excluded h3 { color: #c0392b; }
+      .foglio body.admin .included-col ul { list-style: none; }
+      .foglio body.admin .included-col li { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); padding: 0.35rem 0; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .included-col li svg { width: 0.95rem; height: 0.95rem; flex-shrink: 0; }
+      .foglio body.admin .included-col.included li svg { color: #2e8b57; }
+      .foglio body.admin .included-col.excluded li svg { color: #c0392b; }
 
       @media (max-width: 720px) {
-        body { padding: 1rem; }
-        .page-header h1 { font-size: 1.7rem; }
-        .card { padding: 1.15rem; }
-        .timeline { padding-left: 2rem; }
-        .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
-        .timeline::before { left: 0.8rem; }
-        .included-wrap { grid-template-columns: 1fr; }
+        .foglio body.admin .card { padding: 1.15rem; }
+        .foglio body.admin .timeline { padding-left: 2rem; }
+        .foglio body.admin .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
+        .foglio body.admin .timeline::before { left: 0.8rem; }
+        .foglio body.admin .included-wrap { grid-template-columns: 1fr; }
       }
     </style>
   </head>
-  <body>
+  <body class="admin">
     <AdminNav currentPage="roma" token={token} />
     <div class="container">
       <header class="page-header">
         <div class="page-kicker">Trip · Famiglia Narcisi</div>
-        <h1>Roma · Sabato 11 Aprile 2026</h1>
+        <h1><em class="acc">Roma.</em> Sabato 11 Aprile 2026</h1>
         <p class="page-subtitle">
           <Icon name="ph:ticket" class="icon-inline" size={16} is:inline />
           <span>Colosseo · Foro Romano · Palatino 24H</span>

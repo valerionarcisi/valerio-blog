@@ -1,0 +1,210 @@
+/* ============================================
+   Visti / Watched — full list of films watched
+   Tokens from foglio.css (--foglio-* prefix)
+   ============================================ */
+
+.vw-head {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 4rem 3rem 2.5rem;
+  border-bottom: 1px solid var(--foglio-rule);
+}
+.vw-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1rem;
+}
+.vw-head h1 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-5xl);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  margin: 0 0 1.4rem;
+}
+.vw-head h1 em { font-style: italic; }
+.vw-lede {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-md);
+  line-height: 1.55;
+  color: var(--foglio-ink-soft);
+  max-width: 38em;
+  margin: 0 0 2.5rem;
+}
+.vw-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin: 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--foglio-rule);
+}
+.vw-stat dt {
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+  margin-bottom: 0.4rem;
+}
+.vw-stat dd {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-2xl);
+  color: var(--foglio-ink);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.vw-main {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 3rem 3rem 5rem;
+}
+.vw-empty {
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  color: var(--foglio-ink-mute);
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.vw-year + .vw-year { margin-top: 3rem; }
+.vw-year-label {
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--foglio-ink-soft);
+  font-weight: 400;
+  margin: 0 0 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--foglio-ink);
+}
+
+.vw-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.vw-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 160px;
+  gap: 1.8rem;
+  padding: 1.4rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+  align-items: start;
+}
+.vw-row:last-child { border-bottom: none; }
+
+.vw-cover {
+  aspect-ratio: 2 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--foglio-paper-2);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+}
+
+.vw-title {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-xl);
+  line-height: 1.2;
+  margin: 0 0 0.4rem;
+  color: var(--foglio-ink);
+}
+.vw-title em {
+  font-style: italic;
+  color: var(--foglio-accent);
+}
+.vw-director {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-sm);
+  line-height: 1.4;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 0.5rem;
+  font-style: italic;
+}
+.vw-director span {
+  color: var(--foglio-ink);
+  font-style: normal;
+}
+.vw-director-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.vw-director-link:hover,
+.vw-director-link:focus-visible {
+  color: var(--foglio-accent);
+  border-bottom: 1px solid var(--foglio-accent-soft);
+}
+.vw-overview {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-sm);
+  line-height: 1.5;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 0.7rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.vw-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--foglio-ink-mute);
+}
+.vw-my-rating { color: var(--foglio-accent); }
+
+.vw-side {
+  text-align: right;
+  font-family: var(--foglio-mono);
+}
+.vw-money {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--foglio-ink);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.5rem;
+  justify-content: flex-end;
+  white-space: nowrap;
+}
+.vw-money-arrow { color: var(--foglio-accent); }
+.vw-date {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+}
+
+@media (max-width: 767px) {
+  .vw-head { padding: 2.5rem 1.4rem 1.5rem; }
+  .vw-main { padding: 2rem 1.4rem 3rem; }
+  .vw-stats { grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
+  .vw-row {
+    grid-template-columns: 60px 1fr;
+    gap: 1rem;
+    padding: 1.1rem 0;
+  }
+  .vw-side {
+    grid-column: 2;
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+  .vw-money { justify-content: flex-start; }
+  .vw-overview { -webkit-line-clamp: 3; }
+}

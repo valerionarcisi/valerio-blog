@@ -1,0 +1,187 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import { SITE_TITLE } from "~/consts";
+import {
+  fetchRecentTracks,
+  fetchTopAlbums,
+  fetchTopArtists,
+  fetchUserInfo,
+  type Period,
+} from "~/services/audioscrobbler";
+import "~/styles/foglio.css";
+import "./Ascolti.css";
+
+export const prerender = false;
+
+const period = (Astro.url.searchParams.get("p") as Period) || "1month";
+const validPeriods: Period[] = ["7day", "1month", "3month", "6month", "12month", "overall"];
+const activePeriod: Period = validPeriods.includes(period) ? period : "1month";
+
+const periodLabels: Record<Period, string> = {
+  "7day": "7 giorni",
+  "1month": "30 giorni",
+  "3month": "3 mesi",
+  "6month": "6 mesi",
+  "12month": "12 mesi",
+  overall: "Sempre",
+};
+
+const [albums, artists, info, recent] = await Promise.all([
+  fetchTopAlbums(activePeriod, 12),
+  fetchTopArtists(activePeriod, 8),
+  fetchUserInfo(),
+  fetchRecentTracks(undefined, undefined, "30").catch(() => []),
+]);
+
+const totalPlaysPeriod = albums.reduce((s, a) => s + a.playcount, 0);
+const uniqueArtists = new Set(albums.map((a) => a.artist)).size;
+const topArtistName = artists[0]?.name ?? "—";
+const topArtistPlays = artists[0]?.playcount ?? 0;
+
+function fmtTrackDate(raw?: string): string {
+  if (!raw) return "";
+  const d = new Date(raw + " UTC");
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <BaseHead
+      title={`Ascolti · ${SITE_TITLE}`}
+      description="Cosa ho ascoltato di recente — album, artisti, cronologia. Dati da Last.FM."
+    />
+  </head>
+  <body>
+    <FoglioHeader lang="it" />
+
+    <header class="as-head">
+      <p class="as-eyebrow">Diario d'ascolto</p>
+      <h1><em class="acc">Ascolti.</em></h1>
+      <p class="as-lede">
+        Cosa ho ascoltato — feed Last.FM con scrobble totali e album più ricorrenti.
+        Dietro c'è {info ? info.playcount.toLocaleString("it-IT") : "—"} scrobble dal {info ? new Date(parseInt(info.registered) * 1000).getFullYear() : "—"}.
+      </p>
+
+      <nav class="as-period-switch" aria-label="Periodo">
+        {validPeriods.map((p) => (
+          <a
+            href={p === "1month" ? "/ascolti" : `/ascolti?p=${p}`}
+            class={`as-period-link ${p === activePeriod ? "is-active" : ""}`}
+          >
+            {periodLabels[p]}
+          </a>
+        ))}
+      </nav>
+
+      <dl class="as-stats">
+        <div class="as-stat">
+          <dt>Ascolti del periodo</dt>
+          <dd>{totalPlaysPeriod.toLocaleString("it-IT")}</dd>
+        </div>
+        <div class="as-stat">
+          <dt>Album distinti</dt>
+          <dd>{albums.length}</dd>
+        </div>
+        <div class="as-stat">
+          <dt>Artisti distinti</dt>
+          <dd>{uniqueArtists}</dd>
+        </div>
+        <div class="as-stat">
+          <dt>Più ascoltato</dt>
+          <dd class="as-stat-name">{topArtistName}<span> · {topArtistPlays}</span></dd>
+        </div>
+      </dl>
+    </header>
+
+    <main class="as-main">
+      <section class="as-section">
+        <h2 class="as-section-title">Top album <span class="as-section-period">— {periodLabels[activePeriod]}</span></h2>
+        {albums.length === 0 ? (
+          <p class="as-empty">Nessun album per questo periodo.</p>
+        ) : (
+          <div class="as-album-grid">
+            {albums.map((a, i) => (
+              <a class="as-album" href={a.url} target="_blank" rel="noopener noreferrer">
+                <div
+                  class={`as-album-cover ${a.imageUrl ? "" : "as-album-cover--empty"}`}
+                  style={a.imageUrl ? `background-image: url('${a.imageUrl}')` : ""}
+                >
+                  {!a.imageUrl && (
+                    <span class="as-album-fallback">
+                      <em>{(a.name || "?").slice(0, 1).toUpperCase()}</em>
+                    </span>
+                  )}
+                  <span class="as-album-rank">{String(i + 1).padStart(2, "0")}</span>
+                </div>
+                <div class="as-album-meta">
+                  <p class="as-album-title">{a.name || "(senza titolo)"}</p>
+                  <p class="as-album-artist">{a.artist}</p>
+                  <p class="as-album-plays">▶ {a.playcount}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="as-section">
+        <h2 class="as-section-title">Top artisti <span class="as-section-period">— {periodLabels[activePeriod]}</span></h2>
+        {artists.length === 0 ? (
+          <p class="as-empty">Nessun artista per questo periodo.</p>
+        ) : (
+          <ol class="as-artist-list">
+            {artists.map((a, i) => (
+              <li class="as-artist-row">
+                <span class="as-artist-rank">{String(i + 1).padStart(2, "0")}</span>
+                <a href={a.url} class="as-artist-name" target="_blank" rel="noopener noreferrer">{a.name}</a>
+                <span class="as-artist-plays">{a.playcount} ascolti</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+
+      <section class="as-section">
+        <h2 class="as-section-title">Cronologia <span class="as-section-period">— ultimi {recent.length} brani</span></h2>
+        {recent.length === 0 ? (
+          <p class="as-empty">Cronologia non disponibile.</p>
+        ) : (
+          <ul class="as-recent-list">
+            {(recent as any[]).map((t: any) => (
+              <li class="as-recent-row">
+                {(() => {
+                  const raw = t.image?.[0]?.["#text"];
+                  const isBlank = !raw || raw.includes("2a96cbd8b46e442fc41c2b86b821562f");
+                  return (
+                    <div
+                      class={`as-recent-cover ${isBlank ? "as-recent-cover--empty" : ""}`}
+                      style={isBlank ? "" : `background-image: url('${raw}')`}
+                    />
+                  );
+                })()}
+                <div class="as-recent-main">
+                  <p class="as-recent-track">
+                    <span class="as-recent-artist">{t.artist?.["#text"] || ""}</span>
+                    <span class="as-recent-sep">—</span>
+                    <em class="as-recent-name">{t.name}</em>
+                  </p>
+                  {t.album?.["#text"] && (
+                    <p class="as-recent-album">{t.album["#text"]}</p>
+                  )}
+                </div>
+                <time class="as-recent-date">{fmtTrackDate(t.date?.["#text"])}</time>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </main>
+
+    <FoglioFooter lang="it" />
+  </body>
+</html>

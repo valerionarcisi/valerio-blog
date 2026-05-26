@@ -66,6 +66,43 @@
   background: var(--foglio-paper);
 }
 
+/* Overflow toggle — summary inline coi primary chip, lista overflow su riga separata sotto */
+.fl-overflow {
+  display: contents;
+}
+.fl-overflow > summary {
+  list-style: none;
+  user-select: none;
+  /* inherit chip styling via .fl-chip--more class */
+}
+.fl-overflow > summary::-webkit-details-marker { display: none; }
+.fl-overflow > summary::marker { display: none; }
+
+.fl-chip--more {
+  cursor: pointer;
+  background: transparent;
+  border-style: dashed;
+}
+.fl-overflow[open] > summary.fl-chip--more {
+  border-style: solid;
+  color: var(--foglio-ink);
+  border-color: var(--foglio-ink);
+}
+
+/* La riga overflow è un flex child che occupa la riga successiva intera */
+.fl-overflow-row {
+  display: none;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px dashed var(--foglio-rule);
+}
+.fl-overflow[open] > .fl-overflow-row {
+  display: flex;
+}
+
 /* Posts container */
 .fl-posts {
   max-width: var(--foglio-maxw);
@@ -77,7 +114,7 @@
 /* Each post row */
 .fl-row {
   display: grid;
-  grid-template-columns: 110px 90px 1fr 100px;
+  grid-template-columns: 110px 1fr 100px;
   gap: 2rem;
   padding: 2rem 0;
   border-bottom: 1px solid var(--foglio-rule);
@@ -97,17 +134,6 @@
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--foglio-ink-soft);
-}
-
-/* Cover thumbnail */
-.fl-row-cover {
-  aspect-ratio: 4 / 3;
-  background-size: cover;
-  background-position: center;
-  background-color: var(--foglio-paper-2);
-  border: 1px solid var(--foglio-rule);
-  border-radius: var(--foglio-radius-md);
-  margin-top: 0.15rem;
 }
 
 /* Main content column */
@@ -188,24 +214,17 @@
   }
 
   .fl-row {
-    grid-template-columns: 80px 1fr;
-    gap: 1rem;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
     padding: 1.4rem 0;
   }
 
-  .fl-row-cover {
-    grid-row: span 3;
-  }
-
   .fl-row-date {
-    grid-column: 2;
     text-align: left;
   }
 
   .fl-row-tag {
-    grid-column: 2;
     text-align: left;
-    margin-top: 0.5rem;
   }
 
   .fl-pagination {

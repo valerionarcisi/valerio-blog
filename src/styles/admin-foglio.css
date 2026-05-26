@@ -1,0 +1,181 @@
+/* ============================================
+   ADMIN — Foglio editorial overlay
+   Maps the legacy dark-admin tokens onto the Foglio palette
+   so existing admin pages can keep their structure with a
+   simple class="foglio" on <html>.
+   Import order: foglio.css first, then this file.
+   ============================================ */
+
+/* Body shell — cream paper, EB Garamond default */
+.foglio body.admin {
+  background: var(--foglio-bg);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-sans);
+  padding: 1.5rem;
+  min-height: 100vh;
+  font-size: 17px;
+}
+
+/* Headings — serif, ink color, terracotta italic via .acc */
+.foglio body.admin h1 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-3xl);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--foglio-ink);
+  margin: 0 0 0.4rem;
+}
+.foglio body.admin h1 em.acc,
+.foglio body.admin h1 .acc {
+  color: var(--foglio-accent);
+  font-style: italic;
+}
+.foglio body.admin h2 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-xl);
+  color: var(--foglio-ink);
+  margin: 0 0 0.8rem;
+}
+.foglio body.admin .subtitle {
+  font-family: var(--foglio-serif);
+  color: var(--foglio-ink-soft);
+  font-size: var(--foglio-fs-sm);
+  margin: 0 0 1.8rem;
+  font-style: italic;
+}
+
+/* Sections — flat cream paper, single border, no heavy shadows */
+.foglio body.admin .section,
+.foglio body.admin .card {
+  background: var(--foglio-paper);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  box-shadow: none;
+}
+.foglio body.admin .section-title,
+.foglio body.admin .card-title {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--foglio-rule);
+}
+
+/* Stats grids — mono labels, serif numbers */
+.foglio body.admin .stat-label,
+.foglio body.admin .week-stat-label {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .stat-val,
+.foglio body.admin .week-stat-val {
+  font-family: var(--foglio-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--foglio-ink);
+}
+
+/* Buttons / tabs / pills — cream paper with terracotta hover */
+.foglio body.admin button,
+.foglio body.admin .btn,
+.foglio body.admin .tab,
+.foglio body.admin .pill {
+  background: var(--foglio-paper);
+  color: var(--foglio-ink);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  padding: 0.5rem 0.9rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.foglio body.admin button:hover,
+.foglio body.admin .btn:hover,
+.foglio body.admin .tab:hover,
+.foglio body.admin .pill:hover {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+.foglio body.admin button.active,
+.foglio body.admin .btn.active,
+.foglio body.admin .tab.active,
+.foglio body.admin .pill.active {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+  border-color: var(--foglio-accent);
+}
+.foglio body.admin button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Inputs */
+.foglio body.admin input,
+.foglio body.admin textarea,
+.foglio body.admin select {
+  background: var(--foglio-bg);
+  color: var(--foglio-ink);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  padding: 0.5rem 0.7rem;
+  font-family: var(--foglio-sans);
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin input:focus,
+.foglio body.admin textarea:focus,
+.foglio body.admin select:focus {
+  outline: none;
+  border-color: var(--foglio-accent);
+}
+
+/* Tables — flat row-based separators */
+.foglio body.admin table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--foglio-sans);
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin th {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--foglio-rule-strong);
+}
+.foglio body.admin td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--foglio-rule);
+  color: var(--foglio-ink);
+}
+
+/* Loading / empty */
+.foglio body.admin .loading,
+.foglio body.admin .empty {
+  text-align: center;
+  color: var(--foglio-ink-mute);
+  padding: 3rem;
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  font-size: var(--foglio-fs-sm);
+}
+
+/* Generic accent text — use sparingly */
+.foglio body.admin .accent { color: var(--foglio-accent); }
+.foglio body.admin .muted  { color: var(--foglio-ink-soft); }

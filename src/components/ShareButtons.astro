@@ -1,0 +1,156 @@
+---
+interface Props {
+  title: string;
+  url: string;
+  lang?: "it" | "en";
+}
+
+const { title, url, lang = "it" } = Astro.props;
+
+const t = {
+  it: {
+    label: "Condividi",
+    twitter: "Su X",
+    linkedin: "Su LinkedIn",
+    reddit: "Su Reddit",
+    copy: "Copia link",
+    copied: "Copiato!",
+    native: "Condividi…",
+  },
+  en: {
+    label: "Share",
+    twitter: "On X",
+    linkedin: "On LinkedIn",
+    reddit: "On Reddit",
+    copy: "Copy link",
+    copied: "Copied!",
+    native: "Share…",
+  },
+}[lang];
+
+const encodedUrl = encodeURIComponent(url);
+const encodedTitle = encodeURIComponent(title);
+const twitterUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
+const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;
+const redditUrl = `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`;
+---
+
+<div class="fp-share" data-share-title={title} data-share-url={url} data-lang={lang}>
+  <span class="fp-share-label">{t.label}</span>
+
+  <a class="fp-share-btn" href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label={t.twitter}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+    <span>X</span>
+  </a>
+
+  <a class="fp-share-btn" href={linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={t.linkedin}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.3 6.5a1.78 1.78 0 0 1-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0 0 13 14.19a.66.66 0 0 0 0 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.7-1.4c1.55 0 3.36.86 3.36 3.66z"/>
+    </svg>
+    <span>LinkedIn</span>
+  </a>
+
+  <a class="fp-share-btn" href={redditUrl} target="_blank" rel="noopener noreferrer" aria-label={t.reddit}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M22 11.816a2.503 2.503 0 0 0-2.5-2.5c-.764 0-1.44.343-1.893.882c-1.439-.882-3.36-1.44-5.456-1.539l1.187-3.751l3.131.882l-.012.114a1.94 1.94 0 0 0 1.928 1.945a1.948 1.948 0 1 0-.494-3.831l-3.439-.97c-.143-.057-.286.057-.34.171L12.797 8.7c-1.989.114-3.78.659-5.182 1.482a2.483 2.483 0 0 0-1.781-.756a2.503 2.503 0 0 0-1.039 4.768a4.31 4.31 0 0 0-.058.74c0 3.755 4.066 6.802 9.078 6.802s9.077-3.046 9.077-6.802c0-.247-.024-.494-.058-.74A2.49 2.49 0 0 0 22 11.816M7 14.522a1.452 1.452 0 1 1 2.904.001A1.452 1.452 0 0 1 7 14.522m8.106 4.182c-.785.785-2.297.84-2.74.84c-.444 0-1.967-.043-2.74-.84a.297.297 0 0 1 0-.421a.297.297 0 0 1 .422 0c.498.498 1.563.668 2.319.668c.755 0 1.832-.17 2.319-.668a.297.297 0 0 1 .422 0a.31.31 0 0 1-.002.421m-.282-2.73a1.452 1.452 0 1 1-.001-2.904a1.452 1.452 0 0 1 .001 2.904"/>
+    </svg>
+    <span>Reddit</span>
+  </a>
+
+  <button class="fp-share-btn fp-share-copy" type="button" aria-label={t.copy}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+    </svg>
+    <span class="fp-share-copy-label">{t.copy}</span>
+  </button>
+</div>
+
+<script is:inline>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".fp-share").forEach(function (root) {
+      var title = root.getAttribute("data-share-title") || document.title;
+      var url = root.getAttribute("data-share-url") || location.href;
+      var lang = root.getAttribute("data-lang") || "it";
+      var labels = lang === "en"
+        ? { copy: "Copy link", copied: "Copied!" }
+        : { copy: "Copia link", copied: "Copiato!" };
+
+      var copyBtn = root.querySelector(".fp-share-copy");
+      var copyLabel = root.querySelector(".fp-share-copy-label");
+      if (copyBtn && copyLabel) {
+        copyBtn.addEventListener("click", function () {
+          if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            navigator.share({ title: title, url: url }).catch(function () {});
+            return;
+          }
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(url).then(function () {
+              copyLabel.textContent = labels.copied;
+              copyBtn.classList.add("is-copied");
+              setTimeout(function () {
+                copyLabel.textContent = labels.copy;
+                copyBtn.classList.remove("is-copied");
+              }, 1800);
+            });
+          }
+        });
+      }
+    });
+  });
+</script>
+
+<style is:global>
+  .fp-share {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 3rem 0 2rem;
+    padding: 1.4rem 0;
+    border-top: 1px solid var(--foglio-rule);
+    border-bottom: 1px solid var(--foglio-rule);
+  }
+  .fp-share-label {
+    font-family: var(--foglio-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--foglio-ink-soft);
+    margin-right: 0.6rem;
+  }
+  .fp-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: transparent;
+    border: 1px solid var(--foglio-rule);
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-family: var(--foglio-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-ink-soft);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .fp-share-btn:hover {
+    color: var(--foglio-accent);
+    border-color: var(--foglio-accent);
+    background: var(--foglio-paper);
+  }
+  .fp-share-btn svg { flex-shrink: 0; }
+  .fp-share-copy.is-copied {
+    color: var(--foglio-accent);
+    border-color: var(--foglio-accent);
+  }
+  @media (max-width: 600px) {
+    .fp-share { gap: 0.4rem; padding: 1rem 0; }
+    .fp-share-btn { padding: 0.35rem 0.7rem; font-size: 0.65rem; }
+    .fp-share-btn span:not(.fp-share-copy-label) { display: none; }
+  }
+</style>

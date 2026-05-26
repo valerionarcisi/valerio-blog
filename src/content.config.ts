@@ -63,6 +63,7 @@ const films = defineCollection({
         url: z.string().optional(),
       })
       .optional(),
+    posterImage: z.string().optional(),
     festivals: z
       .array(
         z.object({
@@ -70,6 +71,7 @@ const films = defineCollection({
           year: z.number(),
           location: z.string().optional(),
           award: z.string().optional(),
+          laurel: z.string().optional(),
         }),
       )
       .default([]),

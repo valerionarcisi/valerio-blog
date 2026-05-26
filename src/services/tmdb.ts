@@ -8,7 +8,7 @@ export const VERSION = "3";
 export const getMovieById = async (id: string): Promise<Response> => {
   try {
     const response = await fetch(
-      `${BASE_URL}${VERSION}/movie/${id}?api_key=${API_KEY}`,
+      `${BASE_URL}${VERSION}/movie/${id}?api_key=${API_KEY}&append_to_response=credits`,
     );
 
     if (!response.ok) {
@@ -23,3 +23,21 @@ export const getMovieById = async (id: string): Promise<Response> => {
     throw error;
   }
 };
+
+interface CrewMember {
+  job?: string;
+  name?: string;
+}
+
+export function extractDirectors(movie: any): string[] {
+  const crew: CrewMember[] = movie?.credits?.crew ?? [];
+  const seen = new Set<string>();
+  const directors: string[] = [];
+  for (const c of crew) {
+    if (c?.job === "Director" && c.name && !seen.has(c.name)) {
+      seen.add(c.name);
+      directors.push(c.name);
+    }
+  }
+  return directors;
+}
