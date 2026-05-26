@@ -230,10 +230,10 @@ function formatDate(dateStr: string | Date): string {
     <!-- 5. Library -->
     <section class="fh-library">
       <div class="fh-library-inner">
-        <div class="fh-lib-block">
+        <div class="fh-lib-block" data-watched-home>
           <h3>Recently watched.</h3>
           {lastWatched.length > 0 ? (
-            <ul class="fh-lib-list fh-lib-list--films">
+            <ul class="fh-lib-list fh-lib-list--films" data-watched-list>
               {(lastWatched as any[]).slice(0, 5).map((movie: any) => (
                 <li>
                   <div
@@ -314,5 +314,17 @@ function formatDate(dateStr: string | Date): string {
     </section>
 
     <FoglioFooter lang="en" />
+
+    <script>
+      import { fetchWatched, renderCompact } from "~/scripts/watched-movies";
+      const block = document.querySelector<HTMLElement>("[data-watched-home]");
+      if (block) {
+        fetchWatched()
+          .then((movies) => {
+            if (movies.length > 0) renderCompact(block, movies, { locale: "en-GB", byLabel: "by" });
+          })
+          .catch(() => {});
+      }
+    </script>
   </body>
 </html>
