@@ -1,0 +1,282 @@
+---
+export const prerender = false;
+---
+
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup A — Blog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/mockup-a-base.css" />
+    <style is:global>
+      .blog-head {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 4rem 3rem 3rem;
+      }
+      .blog-head h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2.6rem, 5vw, 4rem);
+        line-height: 1.04;
+        margin: 0 0 1rem;
+      }
+      .blog-head h1 em { font-style: italic; color: var(--accent); }
+      .blog-head p {
+        font-family: var(--serif);
+        font-size: 1.25rem;
+        color: var(--ink-soft);
+        max-width: 38em;
+        margin: 0;
+      }
+
+      /* Filter strip */
+      .filters {
+        max-width: var(--maxw);
+        margin: 3rem auto 1rem;
+        padding: 0 3rem;
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        flex-wrap: wrap;
+      }
+      .filters-label {
+        color: var(--ink-soft);
+        margin-right: 1rem;
+      }
+      .chip {
+        padding: 0.3rem 0.8rem;
+        border: 1px solid var(--rule);
+        border-radius: 100px;
+        color: var(--ink-soft);
+        cursor: pointer;
+      }
+      .chip.is-active {
+        border-color: var(--ink);
+        color: var(--ink);
+        background: var(--paper);
+      }
+      .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+      /* Posts list */
+      .posts {
+        max-width: var(--maxw);
+        margin: 3rem auto 0;
+        padding: 0 3rem;
+        border-top: 1px solid var(--ink);
+      }
+      .post-row {
+        display: grid;
+        grid-template-columns: 110px 90px 1fr 100px;
+        gap: 2rem;
+        padding: 2rem 0;
+        border-bottom: 1px solid var(--rule);
+        align-items: start;
+      }
+      .post-cover {
+        aspect-ratio: 4 / 3;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        margin-top: 0.15rem;
+      }
+      @media (max-width: 767px) {
+        .post-row {
+          grid-template-columns: 80px 1fr;
+          gap: 1rem;
+          padding: 1.4rem 0;
+        }
+        .post-cover { grid-row: span 3; }
+        .post-row-date,
+        .post-row-meta { grid-column: 2; text-align: left; }
+        .post-row-meta { margin-top: 0.5rem; }
+      }
+      .post-row:hover h3 { color: var(--accent); }
+      .post-row:hover h3 em { color: var(--accent); }
+      .post-row-date {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+      }
+      .post-row-main h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.6rem;
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+        transition: color 0.15s;
+      }
+      .post-row-main h3 em { font-style: italic; transition: color 0.15s; }
+      .post-row-main p {
+        font-family: var(--serif);
+        font-size: 1.05rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+      .post-row-meta {
+        text-align: right;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-soft);
+      }
+      .post-row-status {
+        display: inline-block;
+        margin-top: 0.4rem;
+        padding: 0.05rem 0.4rem;
+        border-radius: 2px;
+        background: var(--paper-2);
+        color: var(--ink-soft);
+      }
+      .post-row-status.stabile { background: var(--accent); color: var(--paper); }
+      .post-row-status.bozza { background: var(--paper); border: 1px solid var(--ink-soft); }
+    </style>
+  </head>
+  <body>
+    <nav class="mk-nav">
+      <a href="/admin/mockups/home" class="mk-nav-brand">Valerio Narcisi</a>
+      <div class="mk-nav-links">
+        <a href="/admin/mockups/film">Film</a>
+        <a href="/admin/mockups/blog" class="is-active">Blog</a>
+        <a href="/admin/mockups/about">Chi</a>
+        <a href="#">EN</a>
+      </div>
+    </nav>
+
+    <header class="blog-head">
+      <h1><em>Blog</em>.</h1>
+      <p>
+        Pezzi sul cinema e sul codice. Diari di set quando un corto finisce. Note quando un'idea prova a stare in piedi. Ogni pezzo ha uno stato — pubblico anche le cose non finite, perché tanto niente lo è davvero.
+      </p>
+    </header>
+
+    <div class="filters">
+      <span class="chip is-active">Tutti</span>
+      <span class="chip">Codice</span>
+      <span class="chip">Cinema</span>
+      <span class="chip">Set</span>
+      <span class="chip">Festival</span>
+    </div>
+
+    <section class="posts">
+      <a href="/admin/mockups/post" class="post-row">
+        <div class="post-row-date">25 mar 2026</div>
+        <div class="post-cover" style="background-image:url('/img/blog/dalla-meditazione-alla-programmazione-funzionale/cover.jpg')"></div>
+        <div class="post-row-main">
+          <h3>Dalla meditazione alla <em>programmazione funzionale</em>: Result, Pipe e la domanda scomoda sui framework</h3>
+          <p>Volevo solo tracciare le mie sessioni di meditazione. Ho finito per ripensare come scrivo codice, adottando pattern funzionali come Result e Pipe.</p>
+        </div>
+        <div class="post-row-meta">
+          codice<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">9 mar 2026</div>
+        <div class="post-cover" style="background-image:url('/img/blog/come-mostro-le-mie-attivita-strava-sul-mio-sito-usando-le-api-di-strava/cover.jpg')"></div>
+        <div class="post-row-main">
+          <h3>Come mostro le mie attività Strava sul mio sito usando le API di Strava</h3>
+          <p>Un esperimento di personal API: corro, scrivo, pubblico. Tre verbi che si possono allineare.</p>
+        </div>
+        <div class="post-row-meta">
+          personal site<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">4 mar 2026</div>
+        <div class="post-cover" style="background-image:url('/img/blog/il-vero-parametro-perche-iterare-conta-piu-di-scrivere-codice/cover.jpg')"></div>
+        <div class="post-row-main">
+          <h3>Il vero parametro: perché <em>iterare</em> conta più di scrivere codice</h3>
+          <p>Ho costruito un sistema di analytics self-hosted usando Claude. Ma la parte interessante non è il codice — è il processo iterativo che ha trasformato un'idea in un prodotto in poche ore.</p>
+        </div>
+        <div class="post-row-meta">
+          AI · iterazione<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">22 feb 2026</div>
+        <div class="post-cover" style="background-image:url('/img/blog/come-nasce-un-corto-falerone/8E4A6521.jpg')"></div>
+        <div class="post-row-main">
+          <h3>"Come nasce un corto?" a Falerone</h3>
+          <p>Un incontro pubblico per raccontare come si arriva da un'idea a un cortometraggio finito.</p>
+        </div>
+        <div class="post-row-meta">
+          cinema<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">8 gen 2026</div>
+        <div class="post-cover" style="background-image:url('/img/blog/non-fa-ridere-backstage/gruppo.jpg')"></div>
+        <div class="post-row-main">
+          <h3><em>Non fa ridere</em>: quattro giorni sul set</h3>
+          <p>Ho girato il mio nuovo cortometraggio in quattro giorni al Ristorante L'Oasi del Gusto. La febbre al terzo giorno, sessanta persone sul set, attori professionisti per la prima volta.</p>
+        </div>
+        <div class="post-row-meta">
+          set<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">26 ott 2025</div>
+        <div class="post-cover" style="background-image:url('/img/blog/caramella-vince-fano-film-festival-2025/cmjscw7wbmp3707lggdc06uuv.jpg')"></div>
+        <div class="post-row-main">
+          <h3>Caramella vince al Fano International Film Festival 2025</h3>
+          <p>Il cortometraggio premiato come miglior film della sezione cortometraggi.</p>
+        </div>
+        <div class="post-row-meta">
+          festival<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+
+      <a href="#" class="post-row">
+        <div class="post-row-date">5 set 2025</div>
+        <div class="post-cover" style="background-image:url('/img/blog/result-pattern-with-react-query-integration-guide/cmf6ms4bn0unu07jzcgne9ox3.png')"></div>
+        <div class="post-row-main">
+          <h3>Guida al <em>Result Pattern</em> con integrazione React Query</h3>
+          <p>Il Result Pattern rende espliciti gli stati di successo e di errore nel sistema di tipi. Una guida pratica integrata con React Query.</p>
+        </div>
+        <div class="post-row-meta">
+          TypeScript<br/>
+          <span class="post-row-status stabile">stabile</span>
+        </div>
+      </a>
+    </section>
+
+    <footer class="mk-footer">
+      <div class="mk-footer-inner">
+        <div>© 2026 Valerio Narcisi · Porto Sant'Elpidio</div>
+        <div class="mk-footer-social">
+          <a href="#">Instagram</a>
+          <a href="#">Letterboxd</a>
+          <a href="#">GitHub</a>
+          <a href="#">RSS</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

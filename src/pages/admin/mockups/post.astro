@@ -1,0 +1,485 @@
+---
+export const prerender = false;
+---
+
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup A — Post detail</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/mockup-a-base.css" />
+    <style is:global>
+      .progress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 2px;
+        background: var(--accent);
+        width: 38%;
+        z-index: 100;
+      }
+
+      /* Post cover (above header) */
+      .post-cover-hero {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 3rem 0;
+      }
+      .post-cover-hero-img {
+        aspect-ratio: 16 / 7;
+        background: url("/img/blog/result-pattern-with-react-query-integration-guide/cmf6ms4bn0unu07jzcgne9ox3.png") center / cover, var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+      }
+      .post-cover-hero-caption {
+        font-family: var(--mono);
+        font-size: 0.66rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink-soft);
+        text-align: right;
+        margin-top: 0.5rem;
+      }
+
+      /* Post header */
+      .post-head {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 3rem 3rem 3rem;
+      }
+      .post-slug {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--ink-soft);
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+      }
+      .post-slug .slug-status {
+        display: inline-block;
+        background: var(--accent);
+        color: var(--paper);
+        padding: 0.1rem 0.55rem;
+        border-radius: 2px;
+        font-size: 0.66rem;
+        letter-spacing: 0.14em;
+      }
+      .post-head h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2.4rem, 4.8vw, 3.8rem);
+        line-height: 1.06;
+        letter-spacing: -0.01em;
+        margin: 0 0 1.5rem;
+      }
+      .post-head h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+      .post-extract {
+        font-family: var(--serif);
+        font-size: 1.3rem;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+
+      /* Layout with sidebars */
+      .post-layout {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 3rem 3rem 6rem;
+        display: grid;
+        grid-template-columns: 200px minmax(0, 680px) 200px;
+        gap: 4rem;
+        justify-content: center;
+      }
+      @media (max-width: 1100px) {
+        .post-layout { grid-template-columns: 1fr; max-width: 720px; gap: 2rem; }
+        .toc { position: static !important; }
+      }
+
+      /* ToC */
+      .toc {
+        position: sticky;
+        top: 3rem;
+        align-self: start;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-soft);
+        /* reset details default */
+        list-style: none;
+      }
+      .toc summary {
+        list-style: none;
+        cursor: default;
+        padding-bottom: 0.6rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--rule);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .toc summary::-webkit-details-marker { display: none; }
+      .toc summary::after {
+        content: "";
+        display: none;
+      }
+      .toc-title {
+        padding-bottom: 0.6rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--rule);
+        color: var(--ink);
+      }
+      @media (max-width: 1099px) {
+        .toc {
+          position: static;
+          padding: 1rem 1.4rem;
+          margin: 1rem 1.4rem 2rem;
+          border: 1px solid var(--rule);
+          background: var(--paper);
+          border-radius: 4px;
+        }
+        .toc summary {
+          cursor: pointer;
+          padding-bottom: 0;
+          margin-bottom: 0;
+          border-bottom: 0;
+        }
+        .toc summary::after {
+          content: "↓";
+          display: inline-block;
+          color: var(--accent);
+          transition: transform 0.15s;
+          margin-left: 0.5rem;
+        }
+        .toc[open] summary::after { transform: rotate(180deg); content: "↑"; }
+        .toc[open] summary {
+          padding-bottom: 0.6rem;
+          margin-bottom: 1rem;
+          border-bottom: 1px solid var(--rule);
+        }
+      }
+      .toc ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        counter-reset: tocnum;
+      }
+      .toc li {
+        counter-increment: tocnum;
+        margin-bottom: 0.7rem;
+        line-height: 1.4;
+      }
+      .toc li a {
+        display: block;
+        padding-left: 1.6rem;
+        position: relative;
+        color: var(--ink-soft);
+      }
+      .toc li a::before {
+        content: counter(tocnum, decimal-leading-zero);
+        position: absolute;
+        left: 0;
+        color: var(--ink-mute);
+      }
+      .toc li a:hover { color: var(--accent); }
+      .toc li.is-current a { color: var(--accent); border-left: 1px solid var(--accent); margin-left: -0.7rem; padding-left: 2.3rem; }
+      .toc li.is-current a::before { left: 0.7rem; color: var(--accent); }
+
+      /* Article body */
+      article {
+        font-family: var(--serif);
+        font-size: 1.18rem;
+        line-height: 1.7;
+        color: var(--ink);
+      }
+      article h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.9rem;
+        line-height: 1.2;
+        margin: 3rem 0 1rem;
+        scroll-margin-top: 3rem;
+      }
+      article h2 em { font-style: italic; }
+      article h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-style: italic;
+        font-size: 1.4rem;
+        line-height: 1.25;
+        margin: 2rem 0 0.8rem;
+      }
+      article p { margin: 0 0 1.2rem; }
+      article strong { color: var(--ink); font-weight: 600; }
+      article em { font-style: italic; }
+      article a {
+        color: var(--accent);
+        border-bottom: 1px solid var(--accent-soft);
+        padding-bottom: 1px;
+      }
+      article a:hover { background: rgba(168, 69, 26, 0.08); }
+      article code {
+        font-family: var(--mono);
+        font-size: 0.86em;
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        padding: 0.1rem 0.4rem;
+      }
+      article pre {
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        padding: 1.2rem;
+        overflow-x: auto;
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin: 1.5rem 0 1.8rem;
+      }
+      article pre code {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        font-size: inherit;
+      }
+      article ul, article ol { padding-left: 1.4rem; margin: 0 0 1.4rem; }
+      article li { margin-bottom: 0.5rem; }
+      article blockquote {
+        border-left: 3px solid var(--accent);
+        margin: 1.5rem 0;
+        padding: 0.2rem 0 0.2rem 1.2rem;
+        font-style: italic;
+        color: var(--ink-soft);
+      }
+
+      /* Sidenote (margin) */
+      .sidenote {
+        position: relative;
+        font-family: var(--sans);
+        font-size: 0.85rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        padding: 0.5rem 0.5rem 0.5rem 1rem;
+        border-left: 2px solid var(--accent);
+        background: var(--paper);
+        margin: 1.5rem 0;
+      }
+      @media (min-width: 1100px) {
+        .sidenote {
+          position: absolute;
+          right: -240px;
+          width: 220px;
+          background: transparent;
+          margin: 0;
+          padding: 0 0 0 1rem;
+        }
+      }
+      .sidenote-anchor {
+        position: relative;
+      }
+
+      /* Footer / nav between posts */
+      .post-bottom {
+        max-width: 880px;
+        margin: 4rem auto 0;
+        padding: 3rem 3rem 0;
+        border-top: 1px solid var(--ink);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+      .post-bottom-link {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+      }
+      .post-bottom-title {
+        font-family: var(--serif);
+        font-size: 1.2rem;
+        font-style: italic;
+        margin-top: 0.5rem;
+        color: var(--ink);
+      }
+      .post-bottom-prev { text-align: left; }
+      .post-bottom-next { text-align: right; }
+
+      /* Comments block (placeholder) */
+      .post-comments {
+        max-width: 720px;
+        margin: 4rem auto 0;
+        padding: 3rem 3rem;
+        background: var(--paper);
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .post-comments h3 {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem;
+      }
+      .post-comments p {
+        font-family: var(--serif);
+        color: var(--ink-soft);
+        margin: 0 0 1rem;
+        font-size: 1.05rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="progress"></div>
+
+    <nav class="mk-nav">
+      <a href="/admin/mockups/home" class="mk-nav-brand">Valerio Narcisi</a>
+      <div class="mk-nav-links">
+        <a href="/admin/mockups/film">Film</a>
+        <a href="/admin/mockups/blog" class="is-active">Blog</a>
+        <a href="/admin/mockups/about">Chi</a>
+        <a href="#">EN</a>
+      </div>
+    </nav>
+
+    <section class="post-cover-hero">
+      <div class="post-cover-hero-img"></div>
+      <div class="post-cover-hero-caption">Cover · Result Pattern</div>
+    </section>
+
+    <header class="post-head">
+      <div class="post-slug">
+        <span>TypeScript · React Query · 5 settembre 2025</span>
+        <span class="slug-status">stabile</span>
+      </div>
+      <h1>Guida al <em>Result Pattern</em> con integrazione React Query</h1>
+      <p class="post-extract">
+        Il Result Pattern è un approccio della programmazione funzionale alla gestione degli errori che rende espliciti gli stati di successo e di errore nel sistema di tipi. Invece di lanciare eccezioni, tutte le operazioni restituiscono un tipo <code>Result&lt;T, E&gt;</code>.
+      </p>
+    </header>
+
+    <div class="post-layout">
+      <details class="toc" open>
+        <summary>In questa pagina</summary>
+        <ol>
+          <li class="is-current"><a href="#perche">Perché Result Pattern</a></li>
+          <li><a href="#impl">Implementazione base</a></li>
+          <li><a href="#rq">Integrazione con React Query</a></li>
+          <li><a href="#ibrido">Approccio ibrido</a></li>
+          <li><a href="#tspattern">Type safety con ts-pattern</a></li>
+          <li><a href="#best">Best practice</a></li>
+        </ol>
+      </details>
+
+      <article>
+        <h2 id="perche">Perché Result Pattern</h2>
+        <p>
+          Per anni il modo standard di gestire gli errori in JavaScript è stato <code>try / catch</code>: lanci un'eccezione e qualcuno, da qualche parte, la catturerà. Il Result Pattern propone l'opposto: <strong>l'errore è un valore di ritorno</strong>, non un effetto collaterale.
+        </p>
+
+        <div class="sidenote-anchor">
+          <aside class="sidenote">
+            In Rust questo è il modello base: <code>Result&lt;T, E&gt;</code>. Anche Swift, Go, Kotlin e ora TypeScript stanno convergendo verso lo stesso pattern.
+          </aside>
+        </div>
+
+        <p>
+          La differenza è di sostanza, non di forma. Quando un errore è un valore, il compilatore può <em>vederlo</em>: ti costringe a gestirlo, non lo fa passare in silenzio dieci livelli di stack più su. In un linguaggio tipato come TypeScript, è una vittoria enorme.
+        </p>
+
+        <h2 id="impl">Implementazione base</h2>
+        <p>
+          Il tipo è semplice — un'unione discriminata tra successo e fallimento:
+        </p>
+
+        <pre><code set:html={`type Result&lt;T, E&gt; =
+  | { type: "ok"; value: T }
+  | { type: "err"; error: E };
+
+const ok = &lt;T&gt;(value: T): Result&lt;T, never&gt; =&gt;
+  ({ type: "ok", value });
+
+const err = &lt;E&gt;(error: E): Result&lt;never, E&gt; =&gt;
+  ({ type: "err", error });`}></code></pre>
+
+        <p>
+          Da qui in poi, ogni funzione che può fallire restituisce un <code>Result&lt;T, E&gt;</code>. Niente <code>throw</code>, niente eccezioni. Il chiamante <em>vede</em> nel tipo che c'è un caso negativo da gestire.
+        </p>
+
+        <h2 id="rq">Integrazione con React Query</h2>
+        <p>
+          La parte interessante è cosa succede quando un fetcher di React Query restituisce un <code>Result</code>. Tecnicamente: la <code>queryFn</code> non lancia mai, quindi RQ tratta ogni chiamata come success. Niente retry automatici, e l'errore viene cachato come qualsiasi altro valore.
+        </p>
+
+        <blockquote>
+          Per gli errori di dominio (utente non trovato, validazione fallita) questo è esattamente ciò che vuoi. Per quelli infrastrutturali, no.
+        </blockquote>
+
+        <h2 id="ibrido">Approccio ibrido</h2>
+        <p>
+          La sintesi è: <strong>lancia per gli errori inattesi, ritorna <code>Result.err</code> per quelli di dominio</strong>. Così sfrutti i retry built-in di React Query dove servono, mantenendo la garanzia a livello di tipi sugli errori previsti.
+        </p>
+
+        <h2 id="tspattern">Type safety con ts-pattern</h2>
+        <p>
+          A questo punto, <a href="https://github.com/gvergnaud/ts-pattern">ts-pattern</a> diventa lo strumento naturale per <em>consumare</em> i Result: il pattern matching esaustivo garantisce che ogni caso sia gestito, e il compilatore te lo fa sapere se ne dimentichi uno.
+        </p>
+
+        <h2 id="best">Best practice</h2>
+        <ul>
+          <li>Tipi di errore consistenti — una <code>DomainError</code> unione discriminata in tutta l'app</li>
+          <li>Pattern matching esplicito con <code>.exhaustive()</code></li>
+          <li>Errori di dominio come dati, errori infrastrutturali come eccezioni</li>
+          <li>Pattern matching anticipato — vicino alla fonte dei dati</li>
+        </ul>
+      </article>
+
+      <aside></aside>
+    </div>
+
+    <div class="post-bottom">
+      <a href="#" class="post-bottom-prev">
+        <div class="post-bottom-link">← Precedente</div>
+        <div class="post-bottom-title">Dalla meditazione alla programmazione funzionale</div>
+      </a>
+      <a href="#" class="post-bottom-next">
+        <div class="post-bottom-link">Successivo →</div>
+        <div class="post-bottom-title">Mostrare Strava sul sito</div>
+      </a>
+    </div>
+
+    <section class="post-comments">
+      <h3>Commenti</h3>
+      <p>
+        <strong>Abdelouadoud</strong> · 25 maggio 2026 — Great pattern, but RQ won't retry if you return <code>Result.err</code> instead of throwing...
+      </p>
+      <p>
+        <strong>Valerio</strong> · Author — Hai ragione, è intenzionale. Domain errors come dati, infrastructure errors come eccezioni. Aggiungo una sezione...
+      </p>
+    </section>
+
+    <footer class="mk-footer">
+      <div class="mk-footer-inner">
+        <div>© 2026 Valerio Narcisi · Porto Sant'Elpidio</div>
+        <div class="mk-footer-social">
+          <a href="#">Instagram</a>
+          <a href="#">Letterboxd</a>
+          <a href="#">GitHub</a>
+          <a href="#">RSS</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

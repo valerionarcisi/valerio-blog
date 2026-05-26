@@ -1,0 +1,440 @@
+---
+export const prerender = false;
+---
+
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup A — Film detail · Caramella</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/mockup-a-base.css" />
+    <style is:global>
+      .film-head {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 3rem 3rem 0;
+      }
+      .film-slug {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--ink-soft);
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--rule);
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1.5rem;
+      }
+      .film-slug span:not(:last-child)::after {
+        content: "·";
+        margin-left: 1.5rem;
+        color: var(--ink-mute);
+      }
+
+      .film-title {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(3rem, 6.4vw, 5.2rem);
+        line-height: 1.02;
+        letter-spacing: -0.015em;
+        margin: 0 0 0.5rem;
+      }
+      .film-title em { font-style: italic; }
+      .film-credit {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 1.4rem;
+        color: var(--ink-soft);
+        margin: 0 0 3rem;
+      }
+
+      /* Main poster */
+      .poster {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 3rem;
+      }
+      .poster-img {
+        aspect-ratio: 16 / 9;
+        background: url("/img/caramella/STILL_00.jpg") center / cover;
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+      }
+      .poster-caption {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+        text-align: right;
+        margin-top: 0.6rem;
+      }
+
+      /* Two-column film info */
+      .film-body {
+        max-width: 1200px;
+        margin: 5rem auto 0;
+        padding: 0 3rem;
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 5rem;
+        align-items: start;
+      }
+      .film-body h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-style: italic;
+        font-size: 1.5rem;
+        margin: 0 0 1rem;
+      }
+      .film-synopsis {
+        font-family: var(--serif);
+        font-size: 1.25rem;
+        line-height: 1.6;
+        color: var(--ink);
+      }
+      .film-synopsis p { margin: 0 0 1.2rem; }
+      .film-synopsis p:first-child::first-letter {
+        font-family: var(--serif);
+        font-size: 4rem;
+        font-weight: 500;
+        line-height: 0.85;
+        float: left;
+        margin: 0.2rem 0.6rem -0.2rem 0;
+        color: var(--accent);
+      }
+
+      .film-aside h3 {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink-soft);
+        margin: 0 0 0.8rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      .film-aside-block { margin-bottom: 2.5rem; }
+      .film-aside ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-family: var(--serif);
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+      .film-aside li {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        padding: 0.4rem 0;
+        align-items: baseline;
+      }
+      .crew-role {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-soft);
+      }
+      .crew-name {
+        font-style: italic;
+      }
+
+      /* Stills gallery */
+      .stills {
+        max-width: 1200px;
+        margin: 6rem auto 0;
+        padding: 0 3rem;
+      }
+      .stills h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.7rem;
+        margin: 0 0 2rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid var(--ink);
+      }
+      .stills-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+      .stills-grid button.plate {
+        appearance: none;
+        background: var(--ink);
+        border: 1px solid var(--rule);
+        padding: 0;
+        cursor: zoom-in;
+        background-size: cover;
+        background-position: center;
+        border-radius: 6px;
+        aspect-ratio: 3 / 2;
+        transition: opacity 0.15s;
+      }
+      .stills-grid button.plate:hover { opacity: 0.85; }
+      .stills-grid button.plate:nth-child(1) { background-image: url("/img/caramella/STILL_01.jpg"); }
+      .stills-grid button.plate:nth-child(2) { background-image: url("/img/caramella/STILL_02.jpg"); }
+      .stills-grid button.plate:nth-child(3) { background-image: url("/img/caramella/STILL_03.jpg"); }
+      .stills-grid button.plate:nth-child(4) { background-image: url("/img/caramella/corto-valerio1.jpg"); }
+      .stills-grid button.plate:nth-child(5) { background-image: url("/img/caramella/corto-valerio4.jpg"); }
+      .stills-grid button.plate:nth-child(6) { background-image: url("/img/caramella/corto-valerio8.jpg"); }
+
+      /* Lightbox */
+      .lightbox {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 10, 5, 0.92);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 3rem;
+      }
+      .lightbox[hidden] { display: none; }
+      .lightbox.is-open { display: flex; }
+      .lightbox-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 4px;
+        box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+      }
+      .lightbox-close,
+      .lightbox-prev,
+      .lightbox-next {
+        position: absolute;
+        background: rgba(246, 241, 232, 0.1);
+        border: 1px solid rgba(246, 241, 232, 0.3);
+        color: var(--paper);
+        font-family: var(--mono);
+        font-size: 1.4rem;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+      .lightbox-close:hover,
+      .lightbox-prev:hover,
+      .lightbox-next:hover { background: rgba(246, 241, 232, 0.25); }
+      .lightbox-close { top: 1.5rem; right: 1.5rem; }
+      .lightbox-prev { left: 1.5rem; top: 50%; transform: translateY(-50%); }
+      .lightbox-next { right: 1.5rem; top: 50%; transform: translateY(-50%); }
+      .lightbox-counter {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--paper);
+        opacity: 0.7;
+      }
+
+      /* Awards / festivals */
+      .awards {
+        max-width: 1200px;
+        margin: 6rem auto 0;
+        padding: 0 3rem;
+      }
+      .awards-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.6rem 2.5rem;
+        border-top: 1px solid var(--ink);
+        padding-top: 2rem;
+      }
+      .award h3 {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 1.2rem;
+        margin: 0 0 0.4rem;
+      }
+      .award p {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="mk-nav">
+      <a href="/admin/mockups/home" class="mk-nav-brand">Valerio Narcisi</a>
+      <div class="mk-nav-links">
+        <a href="/admin/mockups/film" class="is-active">Film</a>
+        <a href="/admin/mockups/blog">Blog</a>
+        <a href="/admin/mockups/about">Chi</a>
+        <a href="#">EN</a>
+      </div>
+    </nav>
+
+    <header class="film-head">
+      <div class="film-slug">
+        <span>Cortometraggio</span>
+        <span>2025</span>
+        <span>14 minuti</span>
+        <span>Italia · Marche</span>
+      </div>
+      <h1 class="film-title"><em>Caramella</em></h1>
+      <p class="film-credit">Scritto e diretto da Valerio Narcisi</p>
+    </header>
+
+    <section class="poster">
+      <div class="poster-img"></div>
+      <div class="poster-caption">Frame · DOP Jacopo Fermani</div>
+    </section>
+
+    <section class="film-body">
+      <div class="film-synopsis">
+        <h2>Sinossi.</h2>
+        <p>
+          Ilenia è una ragazza che lavora in un calzaturificio nelle Marche e sogna di diventare attrice. Quando le viene assegnato un turno di notte che coincide con il suo corso di recitazione, cerca disperatamente qualcuno con cui scambiare il turno.
+        </p>
+        <p>
+          Mentre la frustrazione cresce, si confida con Massimino, un nuovo collega, sul suo desiderio di fuggire dalla monotonia e inseguire la sua passione. Quattordici minuti di cinema piccolo, marchigiano, sincero.
+        </p>
+      </div>
+
+      <aside class="film-aside">
+        <div class="film-aside-block">
+          <h3>Scheda tecnica</h3>
+          <ul>
+            <li><span class="crew-role">Anno</span><span class="crew-name">2025</span></li>
+            <li><span class="crew-role">Durata</span><span class="crew-name">14 min</span></li>
+            <li><span class="crew-role">Formato</span><span class="crew-name">16:9 / Digitale</span></li>
+            <li><span class="crew-role">Suono</span><span class="crew-name">AAC</span></li>
+            <li><span class="crew-role">Lingua</span><span class="crew-name">Italiano</span></li>
+            <li><span class="crew-role">Sub</span><span class="crew-name">IT · EN</span></li>
+          </ul>
+        </div>
+
+        <div class="film-aside-block">
+          <h3>Crew</h3>
+          <ul>
+            <li><span class="crew-role">Regia</span><span class="crew-name">V. Narcisi</span></li>
+            <li><span class="crew-role">Sceneggiatura</span><span class="crew-name">V. Narcisi</span></li>
+            <li><span class="crew-role">Montaggio</span><span class="crew-name">V. Narcisi</span></li>
+            <li><span class="crew-role">DOP</span><span class="crew-name">J. Fermani</span></li>
+          </ul>
+        </div>
+
+        <div class="film-aside-block">
+          <h3>Link</h3>
+          <ul>
+            <li><span class="crew-role">Trailer</span><span class="crew-name"><a href="#" style="color:var(--accent)">YouTube ↗</a></span></li>
+            <li><span class="crew-role">Letterboxd</span><span class="crew-name"><a href="#" style="color:var(--accent)">scheda ↗</a></span></li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+
+    <section class="stills">
+      <h2>Stills</h2>
+      <div class="stills-grid">
+        <button class="plate" data-src="/img/caramella/STILL_01.jpg" aria-label="Apri immagine 1"></button>
+        <button class="plate" data-src="/img/caramella/STILL_02.jpg" aria-label="Apri immagine 2"></button>
+        <button class="plate" data-src="/img/caramella/STILL_03.jpg" aria-label="Apri immagine 3"></button>
+        <button class="plate" data-src="/img/caramella/corto-valerio1.jpg" aria-label="Apri immagine 4"></button>
+        <button class="plate" data-src="/img/caramella/corto-valerio4.jpg" aria-label="Apri immagine 5"></button>
+        <button class="plate" data-src="/img/caramella/corto-valerio8.jpg" aria-label="Apri immagine 6"></button>
+      </div>
+    </section>
+
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Galleria stills" hidden>
+      <button class="lightbox-prev" aria-label="Precedente">←</button>
+      <img class="lightbox-img" alt="" />
+      <button class="lightbox-next" aria-label="Successivo">→</button>
+      <button class="lightbox-close" aria-label="Chiudi">✕</button>
+      <div class="lightbox-counter"></div>
+    </div>
+
+    <script is:inline>
+      (function () {
+        const plates = Array.from(document.querySelectorAll(".stills-grid button.plate"));
+        const lb = document.getElementById("lightbox");
+        if (!lb || !plates.length) return;
+        const img = lb.querySelector(".lightbox-img");
+        const counter = lb.querySelector(".lightbox-counter");
+        const closeBtn = lb.querySelector(".lightbox-close");
+        const prevBtn = lb.querySelector(".lightbox-prev");
+        const nextBtn = lb.querySelector(".lightbox-next");
+        let idx = 0;
+
+        function show(i) {
+          idx = (i + plates.length) % plates.length;
+          img.src = plates[idx].getAttribute("data-src");
+          counter.textContent = (idx + 1) + " / " + plates.length;
+        }
+        function open(i) {
+          show(i);
+          lb.hidden = false;
+          lb.classList.add("is-open");
+          document.body.style.overflow = "hidden";
+        }
+        function close() {
+          lb.hidden = true;
+          lb.classList.remove("is-open");
+          document.body.style.overflow = "";
+        }
+
+        plates.forEach((b, i) => b.addEventListener("click", () => open(i)));
+        prevBtn.addEventListener("click", () => show(idx - 1));
+        nextBtn.addEventListener("click", () => show(idx + 1));
+        closeBtn.addEventListener("click", close);
+        lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
+        document.addEventListener("keydown", (e) => {
+          if (lb.hidden) return;
+          if (e.key === "Escape") close();
+          if (e.key === "ArrowLeft") show(idx - 1);
+          if (e.key === "ArrowRight") show(idx + 1);
+        });
+      })();
+    </script>
+
+    <section class="awards">
+      <h2 style="font-family:var(--serif);font-weight:500;font-size:1.7rem;margin:0;padding:0;border:0;">Festival e premi</h2>
+      <div class="awards-grid">
+        <div class="award">
+          <h3>Fano International Film Festival 2025</h3>
+          <p>Vincitore · miglior film d'autore marchigiano · 37ª edizione</p>
+        </div>
+        <div class="award">
+          <h3>Bracciano International Film Exhibition 2025</h3>
+          <p>Vincitore · Premio GASP miglior film per impegno sociale</p>
+        </div>
+        <div class="award">
+          <h3>Corti al Castello di Moresco 2025</h3>
+          <p>Selezione ufficiale · proiezione agosto 2025</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="mk-footer">
+      <div class="mk-footer-inner">
+        <div>© 2026 Valerio Narcisi · Porto Sant'Elpidio</div>
+        <div class="mk-footer-social">
+          <a href="#">Instagram</a>
+          <a href="#">Letterboxd</a>
+          <a href="#">GitHub</a>
+          <a href="#">RSS</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

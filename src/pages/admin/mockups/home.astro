@@ -1,0 +1,688 @@
+---
+export const prerender = false;
+---
+
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup A — Foglio · Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles/mockup-a-base.css" />
+    <style is:global>
+      .hero {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 5rem 3rem 7rem;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 200px;
+        gap: 4rem;
+        align-items: end;
+        min-height: 60vh;
+      }
+      .hero-text { min-width: 0; padding-bottom: 0.5rem; }
+      .hero-portrait {
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 0.5rem;
+        box-shadow:
+          0 1px 0 var(--rule),
+          0 10px 22px -12px rgba(34, 26, 18, 0.22);
+        align-self: end;
+      }
+      .hero-portrait-img {
+        aspect-ratio: 4 / 5;
+        background: url("/img/me.jpg") center 30% / cover, var(--ink);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+      }
+      .hero-portrait-caption {
+        font-family: var(--mono);
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--ink-soft);
+        margin-top: 0.6rem;
+        text-align: center;
+      }
+      .hero-eyebrow {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--ink-soft);
+        margin-bottom: 1.5rem;
+      }
+      .hero h1 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(2.6rem, 5.4vw, 4.4rem);
+        line-height: 1.04;
+        letter-spacing: -0.01em;
+        margin: 0 0 1.5rem;
+        max-width: 16ch;
+      }
+      .hero h1 em { font-style: italic; color: var(--accent); font-weight: 500; }
+      .hero-lede {
+        font-family: var(--serif);
+        font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+        line-height: 1.55;
+        color: var(--ink-soft);
+        max-width: 38em;
+        margin: 0;
+      }
+
+      /* "In lavorazione" / Now */
+      .now {
+        background: var(--paper);
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+      .now-inner {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 4.5rem 3rem;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 4rem;
+        align-items: baseline;
+      }
+      .now h2 {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 2.2rem;
+        margin: 0;
+      }
+      .now-body p {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        line-height: 1.6;
+        color: var(--ink);
+        margin: 0 0 1rem;
+      }
+      .now-body em { font-style: italic; color: var(--accent); }
+      .now-body .now-link {
+        display: inline-block;
+        margin-top: 1rem;
+      }
+
+      /* Filmography grid */
+      .films-section {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 6rem 3rem 2rem;
+      }
+      .section-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid var(--ink);
+        margin-bottom: 2.5rem;
+      }
+      .section-head h2 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.7rem;
+        margin: 0;
+      }
+      .section-head h2 em { font-style: italic; }
+
+      .films-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 2.5rem 1.8rem;
+        margin-bottom: 3rem;
+      }
+      .film { cursor: pointer; display: block; }
+      .film-frame {
+        background: var(--paper);
+        border: 1px solid var(--rule);
+        border-radius: 6px;
+        padding: 0.5rem;
+        margin-bottom: 1rem;
+        box-shadow:
+          0 1px 0 var(--rule),
+          0 8px 18px -10px rgba(34, 26, 18, 0.18);
+      }
+      .film-poster {
+        aspect-ratio: 2 / 3;
+        background-size: cover;
+        background-position: center;
+        background-color: var(--ink);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        position: relative;
+        overflow: hidden;
+      }
+      .film-1 .film-poster { background-image: url("/img/caramella/Locandina_jpeg.jpg"); }
+      .film-2 .film-poster {
+        background-image: url("/img/blog/non-fa-ridere-backstage/ciak.jpg");
+        background-position: 50% 50%;
+      }
+      .film-3 .film-poster {
+        background-image: url("/img/pochiistanti.png");
+        background-position: 50% 30%;
+      }
+      .film-4 .film-poster {
+        background-image: url("/img/metano.png");
+        background-position: 50% 30%;
+      }
+      .film-meta {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+        margin-bottom: 0.35rem;
+      }
+      .film-wip-badge {
+        position: absolute;
+        top: 0.6rem;
+        left: 0.6rem;
+        background: var(--bg);
+        color: var(--accent);
+        font-family: var(--mono);
+        font-size: 0.62rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        padding: 0.2rem 0.5rem;
+        border: 1px solid var(--accent);
+        border-radius: 2px;
+      }
+      .film-wip .film-poster::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(34, 26, 18, 0) 60%, rgba(34, 26, 18, 0.25) 100%);
+        pointer-events: none;
+      }
+      .film h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.35rem;
+        line-height: 1.15;
+        margin: 0 0 0.4rem;
+      }
+      .film h3 em { font-style: italic; }
+      .film p {
+        font-family: var(--serif);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+
+      /* ============================================
+         Mobile (< 768px)
+         ============================================ */
+      @media (max-width: 767px) {
+        .hero {
+          padding: 2.5rem 1.4rem 4rem;
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        .hero-portrait { max-width: 160px; order: -1; }
+        .hero-portrait-caption { font-size: 0.6rem; }
+        .hero h1 { font-size: clamp(2rem, 8vw, 3rem); max-width: 100%; }
+        .hero-lede { font-size: 1.1rem; }
+
+        .now-inner {
+          padding: 3rem 1.4rem;
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+        .now h2 { font-size: 1.7rem; }
+        .now-body p { font-size: 1.05rem; }
+
+        .films-section,
+        .writing-section,
+        .about-strip { padding: 3rem 1.4rem; }
+
+        .section-head { padding-bottom: 0.8rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .section-head h2 { font-size: 1.4rem; }
+
+        .film-row {
+          grid-template-columns: 1fr;
+          gap: 0.5rem;
+          padding: 1.4rem 0;
+        }
+        .film-year { font-size: 0.72rem; margin-bottom: 0.3rem; }
+        .film-main h3 { font-size: 1.4rem; }
+        .film-main .film-plot { font-size: 1rem; }
+        .film-tag { text-align: left; font-size: 0.66rem; margin-top: 0.4rem; }
+
+        .writing-grid {
+          grid-template-columns: 1fr;
+          gap: 2.5rem;
+        }
+        .post-featured h3 { font-size: 1.8rem; }
+        .post-featured p { font-size: 1.05rem; }
+        .post-featured-meta { flex-wrap: wrap; gap: 0.6rem; font-size: 0.66rem; }
+        .post-featured-meta span:not(:last-child)::after { margin-left: 0.6rem; }
+        .post-row-sec h4 { font-size: 1.1rem; }
+
+        .library-inner {
+          padding: 3rem 1.4rem;
+          grid-template-columns: 1fr;
+          gap: 2.5rem;
+        }
+        .lib-list li {
+          grid-template-columns: 40px 1fr;
+          gap: 0.8rem;
+          row-gap: 0.2rem;
+        }
+        .lib-list li .lib-detail {
+          grid-column: 2;
+          font-size: 0.62rem;
+        }
+
+        .about-strip { margin-top: 3rem; }
+        .about-strip .quote { font-size: 1.25rem; }
+      }
+
+      /* Writing section */
+      .writing-section {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 4rem 3rem 2rem;
+      }
+      .writing-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 4rem;
+        margin-bottom: 2rem;
+        align-items: start;
+      }
+      .post-featured {
+        display: block;
+      }
+      .post-featured-num {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--accent);
+        margin-bottom: 1.2rem;
+      }
+      .post-featured h3 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: clamp(1.8rem, 3vw, 2.5rem);
+        line-height: 1.1;
+        margin: 0 0 1.2rem;
+        letter-spacing: -0.005em;
+        transition: color 0.15s;
+      }
+      .post-featured:hover h3,
+      .post-featured:hover h3 em { color: var(--accent); }
+      .post-featured h3 em { font-style: italic; transition: color 0.15s; }
+      .post-featured p {
+        font-family: var(--serif);
+        font-size: 1.2rem;
+        line-height: 1.55;
+        color: var(--ink-soft);
+        margin: 0 0 1.5rem;
+        max-width: 28em;
+      }
+      .post-featured-meta {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--ink-soft);
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+      .post-featured-meta span:not(:last-child)::after {
+        content: "·";
+        margin-left: 1rem;
+        color: var(--ink-mute);
+      }
+      .post-featured-status {
+        display: inline-block;
+        padding: 0.05rem 0.45rem;
+        border-radius: 2px;
+        background: var(--accent);
+        color: var(--paper);
+      }
+
+      .post-secondary {
+        display: flex;
+        flex-direction: column;
+      }
+      .post-row-sec {
+        display: block;
+        padding: 1.4rem 0;
+        border-top: 1px solid var(--rule);
+        transition: padding 0.15s;
+      }
+      .post-row-sec:first-child { border-top: 1px solid var(--ink); }
+      .post-row-sec:last-child { border-bottom: 1px solid var(--rule); }
+      .post-row-sec:hover h4,
+      .post-row-sec:hover h4 em { color: var(--accent); }
+      .post-row-sec-meta {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-soft);
+        margin-bottom: 0.5rem;
+      }
+      .post-row-sec h4 {
+        font-family: var(--serif);
+        font-weight: 500;
+        font-size: 1.25rem;
+        line-height: 1.2;
+        margin: 0;
+        transition: color 0.15s;
+      }
+      .post-row-sec h4 em { font-style: italic; transition: color 0.15s; }
+
+      /* Library — watching / listening */
+      .library {
+        background: var(--paper);
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+        margin-top: 6rem;
+      }
+      .library-inner {
+        max-width: var(--maxw);
+        margin: 0 auto;
+        padding: 4.5rem 3rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+      }
+      .lib-block h3 {
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 400;
+        font-size: 1.5rem;
+        margin: 0 0 1.5rem;
+      }
+      .lib-howto {
+        display: block;
+        margin-top: 1.2rem;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        border-bottom: 1px solid var(--accent);
+        padding-bottom: 2px;
+        width: fit-content;
+      }
+      .lib-howto:hover { color: var(--ink); border-color: var(--ink); }
+      .lib-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .lib-list li {
+        display: grid;
+        grid-template-columns: 40px 1fr auto;
+        gap: 1rem;
+        padding: 0.7rem 0;
+        border-top: 1px solid var(--rule);
+        align-items: center;
+      }
+      .lib-list li:last-child { border-bottom: 1px solid var(--rule); }
+      .lib-cover {
+        background-size: cover;
+        background-position: center;
+        background-color: var(--paper-2);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        filter: saturate(0.88);
+      }
+      .lib-list--films .lib-cover {
+        aspect-ratio: 2 / 3;
+        width: 36px;
+      }
+      .lib-list--music .lib-cover {
+        aspect-ratio: 1;
+        width: 40px;
+      }
+      .lib-title {
+        font-family: var(--serif);
+        font-size: 1rem;
+        line-height: 1.3;
+      }
+      .lib-title em { font-style: italic; color: var(--accent); }
+      .lib-detail {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ink-soft);
+      }
+
+      /* Cover placeholders (mockup only — real data from Letterboxd/Last.fm) */
+      .cover-film-1 { background: linear-gradient(155deg, #c44a2a 0%, #8a1a1a 50%, #4a0c0c 100%); }
+      .cover-film-2 { background: linear-gradient(155deg, #1d3a5f 0%, #0f1f3a 50%, #050a1a 100%); }
+      .cover-film-3 { background: linear-gradient(155deg, #e8c98a 0%, #b88a4a 50%, #6a4a1a 100%); }
+      .cover-film-4 { background: linear-gradient(155deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%); }
+      .cover-music-1 { background: linear-gradient(160deg, #d4a574 0%, #8a5a3a 50%, #3a2a1a 100%); }
+      .cover-music-2 { background: linear-gradient(160deg, #5a8a5a 0%, #2a5a3a 50%, #0a2a1a 100%); }
+      .cover-music-3 { background: linear-gradient(160deg, #c44a2a 0%, #4a1a1a 100%); }
+      .cover-music-4 { background: linear-gradient(160deg, #e8e0c8 0%, #b8a070 50%, #6a5040 100%); }
+
+      /* About strip */
+      .about-strip {
+        max-width: var(--maxw-prose);
+        margin: 6rem auto 0;
+        padding: 0 3rem;
+        text-align: center;
+      }
+      .about-strip .quote {
+        font-family: var(--serif);
+        font-style: italic;
+        font-size: 1.6rem;
+        line-height: 1.45;
+        color: var(--ink);
+        margin: 0 0 1.5rem;
+      }
+      .about-strip .quote em { color: var(--accent); font-style: italic; }
+    </style>
+  </head>
+  <body>
+    <nav class="mk-nav">
+      <a href="/admin/mockups/home" class="mk-nav-brand">Valerio Narcisi</a>
+      <div class="mk-nav-links">
+        <a href="/admin/mockups/film">Film</a>
+        <a href="/admin/mockups/blog">Blog</a>
+        <a href="/admin/mockups/about">Chi</a>
+        <a href="#">EN</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-text">
+        <div class="hero-eyebrow">Filmmaker · Porto Sant'Elpidio</div>
+        <h1>Scrivo storie. <em>Le più fortunate</em> diventano film.</h1>
+        <p class="hero-lede">
+          Faccio cortometraggi nelle Marche. Sto sviluppando <em>Oh Writers</em>, un editor per sceneggiature pensato per il mercato italiano. Qui dentro trovi i film che ho chiuso, quelli che sto scrivendo, e i pezzi che metto giù mentre lavoro.
+        </p>
+      </div>
+      <aside class="hero-portrait">
+        <div class="hero-portrait-img"></div>
+        <div class="hero-portrait-caption">Valerio · 2026</div>
+      </aside>
+    </section>
+
+    <section class="now">
+      <div class="now-inner">
+        <h2>Adesso.</h2>
+        <div class="now-body">
+          <p>
+            <em>Oh Writers</em> — un editor per sceneggiature, italiano, costruito per come si scrive un copione qui da noi. Soggetto, scaletta, breakdown, budget, location, schedule: tutto nello stesso posto.
+          </p>
+          <p>
+            <em>Non fa ridere</em> — il mio nuovo cortometraggio. Quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone, sessanta persone sul set. Ora è in montaggio.
+          </p>
+          <a href="#" class="mk-readmore now-link">Vedi il tour di Oh Writers →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="films-section">
+      <div class="section-head">
+        <h2>Film</h2>
+        <a href="/admin/mockups/film" class="mk-readmore">Vedi tutto →</a>
+      </div>
+      <div class="films-grid">
+        <a href="/admin/mockups/film" class="film film-1">
+          <div class="film-frame"><div class="film-poster"></div></div>
+          <div class="film-meta">2025 · scritto e diretto</div>
+          <h3><em>Caramella</em></h3>
+          <p>Ilenia lavora in un calzaturificio nelle Marche e sogna di fare l'attrice.</p>
+        </a>
+        <a href="#" class="film film-2 film-wip">
+          <div class="film-frame">
+            <div class="film-poster">
+              <span class="film-wip-badge">in lavorazione</span>
+            </div>
+          </div>
+          <div class="film-meta">2026 · scritto e diretto · in montaggio</div>
+          <h3><em>Non fa ridere</em></h3>
+          <p>Quattro giorni di set al Ristorante L'Oasi del Gusto, a Piane di Falerone.</p>
+        </a>
+        <a href="#" class="film film-3">
+          <div class="film-frame"><div class="film-poster"></div></div>
+          <div class="film-meta">2024 · co-sceneggiatore · ass. regia</div>
+          <h3><em>Pochi Istanti</em></h3>
+          <p>Un drone in campagna marchigiana cattura immagini che non doveva vedere.</p>
+        </a>
+        <a href="#" class="film film-4">
+          <div class="film-frame"><div class="film-poster"></div></div>
+          <div class="film-meta">2024 · sup. sceneggiatura</div>
+          <h3><em>Metanaro</em></h3>
+          <p>Sitcom ambientata nelle Marche. Nicola e i suoi amici nella vita di provincia.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="writing-section">
+      <div class="section-head">
+        <h2>Blog</h2>
+        <a href="/admin/mockups/blog" class="mk-readmore">Vedi tutto →</a>
+      </div>
+      <div class="writing-grid">
+        <a href="/admin/mockups/post" class="post-featured">
+          <div class="post-featured-num">N° 01 · l'ultimo</div>
+          <h3>Dalla meditazione alla <em>programmazione funzionale</em></h3>
+          <p>
+            Volevo solo tracciare le mie sessioni di meditazione. Ho finito per ripensare come scrivo codice, adottando pattern funzionali come Result e Pipe. E mi sono posto una domanda scomoda.
+          </p>
+          <div class="post-featured-meta">
+            <span>25 mar 2026</span>
+            <span>Codice · meditazione</span>
+            <span class="post-featured-status">stabile</span>
+          </div>
+        </a>
+
+        <div class="post-secondary">
+          <a href="/admin/mockups/post" class="post-row-sec">
+            <div class="post-row-sec-meta">9 mar 2026 · personal site</div>
+            <h4>Come mostro le mie attività Strava sul mio sito</h4>
+          </a>
+          <a href="/admin/mockups/post" class="post-row-sec">
+            <div class="post-row-sec-meta">4 mar 2026 · AI · iterazione</div>
+            <h4>Il vero parametro: perché <em>iterare</em> conta più di scrivere codice</h4>
+          </a>
+          <a href="/admin/mockups/post" class="post-row-sec">
+            <div class="post-row-sec-meta">8 gen 2026 · set</div>
+            <h4><em>Non fa ridere</em>: quattro giorni sul set</h4>
+          </a>
+          <a href="/admin/mockups/post" class="post-row-sec">
+            <div class="post-row-sec-meta">5 set 2025 · TypeScript</div>
+            <h4>Guida al <em>Result Pattern</em> con React Query</h4>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="library">
+      <div class="library-inner">
+        <div class="lib-block">
+          <h3>Visti di recente.</h3>
+          <ul class="lib-list lib-list--films">
+            <li>
+              <div class="lib-cover cover-film-1"></div>
+              <div class="lib-title"><em>Il Sol dell'Avvenire</em> · Moretti</div>
+              <div class="lib-detail">★★★★ · 18 mag</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-film-2"></div>
+              <div class="lib-title"><em>La Chimera</em> · Rohrwacher</div>
+              <div class="lib-detail">★★★★½ · 12 mag</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-film-3"></div>
+              <div class="lib-title"><em>Past Lives</em> · Celine Song</div>
+              <div class="lib-detail">★★★★ · 5 mag</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-film-4"></div>
+              <div class="lib-title"><em>Anatomy of a Fall</em> · Triet</div>
+              <div class="lib-detail">★★★★½ · 28 apr</div>
+            </li>
+          </ul>
+          <a href="/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed" class="lib-howto">Come l'ho costruito · Letterboxd RSS →</a>
+        </div>
+        <div class="lib-block">
+          <h3>Ascoltato.</h3>
+          <ul class="lib-list lib-list--music">
+            <li>
+              <div class="lib-cover cover-music-1"></div>
+              <div class="lib-title">Mac DeMarco — <em>Some Other Ones</em></div>
+              <div class="lib-detail">42 plays · 7 giorni</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-music-2"></div>
+              <div class="lib-title">Big Thief — <em>Dragon New Warm Mountain</em></div>
+              <div class="lib-detail">31 plays · 7 giorni</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-music-3"></div>
+              <div class="lib-title">Iosonouncane — <em>IRA</em></div>
+              <div class="lib-detail">28 plays · 7 giorni</div>
+            </li>
+            <li>
+              <div class="lib-cover cover-music-4"></div>
+              <div class="lib-title">Nick Drake — <em>Pink Moon</em></div>
+              <div class="lib-detail">24 plays · 7 giorni</div>
+            </li>
+          </ul>
+          <a href="/blog/how-i-display-my-recently-played-music-using-lastfm-api" class="lib-howto">Come l'ho costruito · Last.fm API →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-strip">
+      <p class="quote">"Sono uno che inventa storie. <em>Poi cerca di farle vedere</em> a qualcuno."</p>
+      <a href="/admin/mockups/about" class="mk-readmore">Chi sono →</a>
+    </section>
+
+    <footer class="mk-footer">
+      <div class="mk-footer-inner">
+        <div>© 2026 Valerio Narcisi · Porto Sant'Elpidio</div>
+        <div class="mk-footer-social">
+          <a href="#">Instagram</a>
+          <a href="#">Letterboxd</a>
+          <a href="#">GitHub</a>
+          <a href="#">RSS</a>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
