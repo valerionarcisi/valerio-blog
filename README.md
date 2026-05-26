@@ -25,6 +25,7 @@ Built with **Astro 5**, deployed on **Netlify**, content in Markdown.
 ### Content
 - Blog posts and films live in `src/content/` as Markdown files, organized by locale (`it/`, `en/`)
 - External data fetched at build time: **Letterboxd** (movies), **Last.FM** (music), **Strava** (sport)
+- **Watched movies** also refresh client-side: pages render the build-time list as a fallback, then fetch `/api/letterboxd` on load so a freshly-logged film appears without a redeploy (see `docs/letterboxd-spec.md`)
 
 ### API Endpoints
 All endpoints use a `Result<T, E>` pattern — no exceptions, no silent failures. Every handler is a pipeline:

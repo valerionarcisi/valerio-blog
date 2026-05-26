@@ -123,24 +123,24 @@ if (myRatings.length > 0) {
       <dl class="vw-stats">
         <div class="vw-stat">
           <dt>Films</dt>
-          <dd>{totalCount}</dd>
+          <dd data-stat="total">{totalCount}</dd>
         </div>
         <div class="vw-stat">
           <dt>Last 7 days</dt>
-          <dd>{lastWeekCount}</dd>
+          <dd data-stat="week">{lastWeekCount}</dd>
         </div>
         <div class="vw-stat">
           <dt>Hours watched</dt>
-          <dd>{totalHours} h</dd>
+          <dd data-stat="hours">{totalHours} h</dd>
         </div>
         <div class="vw-stat">
           <dt>Average rating</dt>
-          <dd>{avgLabel}</dd>
+          <dd data-stat="rating">{avgLabel}</dd>
         </div>
       </dl>
     </header>
 
-    <main class="vw-main">
+    <main class="vw-main" data-watched-main>
       {totalCount === 0 ? (
         <p class="vw-empty">No data available right now.</p>
       ) : (
@@ -205,5 +205,22 @@ if (myRatings.length > 0) {
     </main>
 
     <FoglioFooter lang="en" />
+
+    <script>
+      import { fetchWatched, renderFull } from "~/scripts/watched-movies";
+      const main = document.querySelector<HTMLElement>("[data-watched-main]");
+      if (main) {
+        fetchWatched()
+          .then((movies) => {
+            if (movies.length > 0)
+              renderFull(main, movies, {
+                locale: "en-GB",
+                byLabel: "by",
+                myRatingLabel: (r) => `my rating: ${r}/5`,
+              });
+          })
+          .catch(() => {});
+      }
+    </script>
   </body>
 </html>
