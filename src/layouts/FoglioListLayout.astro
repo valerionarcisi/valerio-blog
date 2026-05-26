@@ -37,17 +37,17 @@ const subtitle = isEn
 const chips = isEn
   ? [
       { label: "All", tag: null },
-      { label: "Code", tag: "codice" },
-      { label: "Cinema", tag: "cinema" },
-      { label: "Set", tag: "set" },
+      { label: "Javascript", tag: "javascript" },
+      { label: "Short films", tag: "shortmovie" },
       { label: "Festival", tag: "festival" },
+      { label: "Thoughts", tag: "thoughts" },
     ]
   : [
       { label: "Tutti", tag: null },
-      { label: "Codice", tag: "codice" },
-      { label: "Cinema", tag: "cinema" },
-      { label: "Set", tag: "set" },
+      { label: "Javascript", tag: "javascript" },
+      { label: "Cortometraggi", tag: "shortmovie" },
       { label: "Festival", tag: "festival" },
+      { label: "Pensieri", tag: "thoughts" },
     ];
 
 function chipHref(chip: { label: string; tag: string | null }): string {
