@@ -1,22 +1,16 @@
 ---
 import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
 import StructuredData from "~/components/StructuredData.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import Hero from "~/components/Hero.astro";
-import Title from "~/components/Title.astro";
-import Card from "~/components/Card.astro";
 import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
 import { getMovieById } from "~/services/tmdb";
-import Reel from "~/components/Reel.astro";
-import "~/pages/index.css";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
-import { fetchRecentActivities, fetchFullStats } from "~/services/strava";
-import StravaSummary from "~/components/StravaSummary.astro";
-import ActivityDonut from "~/components/ActivityDonut.astro";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
+import "~/styles/foglio.css";
+import "~/pages/FoglioHome.css";
 
 const lastWatchedMovies = async () => {
   const xml = await getLetterboxdRss();
@@ -41,28 +35,41 @@ const lastWatchedMovies = async () => {
   return watchedMovies.filter(Boolean);
 };
 
-const allEntries = await getCollection("blog");
-const posts = allEntries
+const allBlogEntries = await getCollection("blog");
+const posts = allBlogEntries
   .filter((e) => getLangFromId(e.id) === "en")
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
-  .slice(0, 6)
+  .slice(0, 5)
   .map((e) => ({
     ...e.data,
     slug: getSlugFromId(e.id),
   }));
 
-const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
-  lastWatchedMovies(),
-  fetchRecentTracks(),
-  fetchRecentActivities(5).catch(() => []),
-  fetchFullStats().catch(() => null),
+const allFilmEntries = await getCollection("films");
+const films = allFilmEntries
+  .filter((e) => getLangFromId(e.id) === "en")
+  .sort((a, b) => (a.data.sortOrder ?? 99) - (b.data.sortOrder ?? 99))
+  .slice(0, 4)
+  .map((e) => ({
+    ...e.data,
+    slug: getSlugFromId(e.id),
+  }));
+
+const [lastWatched, lastSongs] = await Promise.all([
+  lastWatchedMovies().catch(() => []),
+  fetchRecentTracks().catch(() => []),
 ]);
+
+function formatDate(dateStr: string | Date): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="foglio">
   <head>
-    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} lang="en" />
     <StructuredData
       type="website"
       title={SITE_TITLE}
@@ -72,495 +79,160 @@ const [lastWatched, lastSongs, lastActivities, fullStats] = await Promise.all([
     />
   </head>
   <body>
-    <Header />
-    <Hero
-      title="Hi, I'm Valerio_"
-      role="developer.filmmaker"
-      subtitle="I solve problems. I tell stories."
-      aiTagline="AI-assisted, human-driven"
-      callToActions={[
-        {
-          label: "Connect with me",
-          href: "http://linkedin.com/in/cv-valerio-narcisi",
-        },
-        {
-          label: "Watch Caramella's Trailer",
-          href: "https://www.youtube.com/watch?v=UnQ8NSXYXao",
-        },
-      ]}
-      latestPost={posts[0]}
-      lang="en"
-    />
-    <main>
-      <section id="last-watched">
-        <Title title="Last watched movies" />
-        <div class="ReelContainer" id="movies-reel">
-          {
-            lastWatched.map((movie: any) => (
-              <Reel
-                type="movie"
-                vote_average={movie.vote_average}
-                vote_count={movie.vote_count}
-                url={`https://image.tmdb.org/t/p/w185/${movie.poster_path}`}
-                href={movie.link[0]}
-                title={movie["letterboxd:filmTitle"][0]}
-                watchedDate={movie["letterboxd:watchedDate"][0]}
-              />
-            ))
-          }
+    <FoglioHeader lang="en" />
+    <hr class="foglio-rule" />
+
+    <!-- 1. Hero -->
+    <section class="fh-hero">
+      <div class="fh-hero-text">
+        <div class="fh-hero-eyebrow">Filmmaker · Porto Sant'Elpidio</div>
+        <h1>I write stories. <em>The lucky ones</em> become films.</h1>
+        <p class="fh-hero-lede">
+          I make short films in the Marche region of Italy. I'm developing <em>Oh Writers</em>, a screenplay editor built for the Italian market. Here you'll find the films I've finished, the ones I'm still writing, and the pieces I put down while working.
+        </p>
+      </div>
+      <aside class="fh-portrait">
+        <div class="fh-portrait-img"></div>
+        <div class="fh-portrait-caption">Valerio · 2026</div>
+      </aside>
+    </section>
+
+    <!-- 2. Now -->
+    <section class="fh-now">
+      <div class="fh-now-inner">
+        <h2>Now.</h2>
+        <div class="fh-now-body">
+          <p>
+            <em class="acc">Oh Writers</em> — a screenplay editor, Italian, built for how we write scripts here. Treatment, outline, breakdown, budget, locations, schedule: everything in one place.
+          </p>
+          <p>
+            <em class="acc">Non fa ridere</em> — my new short film. Four days of shooting at Ristorante L'Oasi del Gusto in Piane di Falerone, sixty people on set. Now in editing.
+          </p>
+          <a href="/en/blog/" class="foglio-readmore fh-now-link">See the Oh Writers tour →</a>
         </div>
-      </section>
-      <section>
-        <Title title="Last Listened songs" />
-        <div class="ReelContainer" id="songs-reel">
-          {
-            lastSongs.map((song) => (
-              <Reel
-                type="song"
-                artist={song.artist["#text"]}
-                album={song.album["#text"]}
-                url={song.image[3]["#text"]}
-                href={song.url}
-                title={song.name}
-                watchedDate={
-                  song?.date
-                    ? song.date["#text"]
-                    : new Date().toLocaleDateString("en-us", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                }
-              />
-            ))
-          }
-        </div>
-      </section>
-      <section id="strava-section" style={lastActivities.length === 0 ? "display:none" : ""}>
-        <Title title="Latest activities" />
-        <div class="strava-top" id="strava-top">
-          <div id="strava-summary">
-            {fullStats && (
-              <StravaSummary stats={fullStats.periodStats} />
-            )}
-          </div>
-          {fullStats && (
-            <div id="strava-donut">
-              <ActivityDonut
-                distribution={fullStats.typeDistribution}
-                totalActivities={fullStats.periodStats.monthly.totalActivities}
-              />
+      </div>
+    </section>
+
+    <!-- 3. Films grid -->
+    <section class="fh-films">
+      <div class="fh-section-head">
+        <h2>Films</h2>
+        <a href="/en/films/" class="foglio-readmore">See all →</a>
+      </div>
+      <div class="fh-films-grid">
+        {films.map((film) => (
+          <a
+            href={`/en/films/${film.slug}/`}
+            class={`fh-film${film.status === "in-production" ? " fh-film--wip" : ""}`}
+          >
+            <div class="fh-film-frame">
+              <div
+                class="fh-film-poster"
+                style={`background-image: url('${film.coverImage}')`}
+              >
+                {film.status === "in-production" && (
+                  <span class="fh-film-wip-badge">in production</span>
+                )}
+              </div>
             </div>
+            <div class="fh-film-meta">{film.year} · {film.role}</div>
+            <h3><em>{film.title}</em></h3>
+            {film.plot && <p>{film.plot.slice(0, 80)}…</p>}
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- 4. Blog spread -->
+    <section class="fh-writing">
+      <div class="fh-section-head">
+        <h2>Blog</h2>
+        <a href="/en/blog/" class="foglio-readmore">See all →</a>
+      </div>
+      {posts.length > 0 && (
+        <div class="fh-writing-grid">
+          <a href={`/en/blog/${posts[0].slug}/`} class="fh-post-featured">
+            <div class="fh-post-featured-num">No. 01 · latest</div>
+            <h3 set:html={posts[0].title} />
+            {posts[0].extract && <p>{posts[0].extract}</p>}
+            <div class="fh-post-featured-meta">
+              <span>{formatDate(posts[0].date)}</span>
+              {posts[0].tags?.[0] && <span>{posts[0].tags[0]}</span>}
+              <span class="foglio-status foglio-status--stabile">stable</span>
+            </div>
+          </a>
+
+          <div class="fh-post-secondary">
+            {posts.slice(1, 5).map((post) => (
+              <a href={`/en/blog/${post.slug}/`} class="fh-post-row">
+                <div class="fh-post-row-meta">
+                  {formatDate(post.date)}{post.tags?.[0] ? ` · ${post.tags[0]}` : ""}
+                </div>
+                <h4 set:html={post.title} />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+
+    <!-- 5. Library -->
+    <section class="fh-library">
+      <div class="fh-library-inner">
+        <div class="fh-lib-block">
+          <h3>Recently watched.</h3>
+          {lastWatched.length > 0 ? (
+            <ul class="fh-lib-list fh-lib-list--films">
+              {(lastWatched as any[]).slice(0, 5).map((movie: any) => (
+                <li>
+                  <div
+                    class="fh-lib-cover"
+                    style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
+                  ></div>
+                  <div class="fh-lib-title">
+                    <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                  </div>
+                  <div class="fh-lib-detail">{movie["letterboxd:watchedDate"]?.[0]}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="fh-lib-fallback">Data not available right now.</p>
           )}
+          <a href="/en/blog/" class="foglio-readmore" style="display:inline-block;margin-top:1.2rem;">How I built it →</a>
         </div>
-        <div class="strava-chart-full" id="strava-charts"></div>
-      </section>
-      <section>
-        <Title title="Latest posts" />
-        <div class="cards-grid">
-          {
-            posts?.map((post) => (
-              <Card
-                date={post.date}
-                title={post.title}
-                extract={post.extract}
-                slug={post.slug}
-                coverImage={post.coverImage}
-                tags={post.tags}
-                lang="en"
-              />
-            ))
-          }
+
+        <div class="fh-lib-block">
+          <h3>Listened.</h3>
+          {lastSongs.length > 0 ? (
+            <ul class="fh-lib-list fh-lib-list--music">
+              {(lastSongs as any[]).slice(0, 5).map((song: any) => (
+                <li>
+                  <div
+                    class="fh-lib-cover"
+                    style={song.image?.[3]?.["#text"] ? `background-image: url('${song.image[3]["#text"]}')` : ""}
+                  ></div>
+                  <div class="fh-lib-title">
+                    {song.artist?.["#text"]} — <em>{song.name}</em>
+                  </div>
+                  <div class="fh-lib-detail">{song.date?.["#text"] ?? "recently"}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p class="fh-lib-fallback">Data not available right now.</p>
+          )}
+          <a href="/en/blog/" class="foglio-readmore" style="display:inline-block;margin-top:1.2rem;">How I built it →</a>
         </div>
-      </section>
-    </main>
-    <Footer />
-    <style is:inline>
-      .RunWeeklyChart{flex:1;min-width:0}
-      .RunWeeklyChart .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;padding:0 4px}
-      .RunWeeklyChart .chart-title{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:#8a8a8e;text-transform:uppercase;letter-spacing:.05em}
-      .RunWeeklyChart .legend-item{display:flex;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:#8a8a8e}
-      .RunWeeklyChart svg{width:100%;height:auto;display:block}
-      .RunWeeklyChart .chart-empty{color:#8a8a8e;font-size:.8rem;text-align:center;padding:2rem 0}
-      .heatmap-detail{display:none;margin-top:.75rem;padding:.75rem 1rem;background:#1a1a1c;border:1px solid #333;border-radius:8px;animation:heatmapFade .2s ease}
-      .heatmap-detail.visible{display:block}
-      @keyframes heatmapFade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
-      .heatmap-detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem}
-      .heatmap-detail-date{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#fc4c02;font-weight:600}
-      .heatmap-detail-close{background:none;border:none;color:#555;cursor:pointer;font-size:1.2rem;padding:.2rem .4rem;line-height:1}
-      .heatmap-detail-close:hover{color:#e8e6e1}
-      .heatmap-detail-empty{color:#555;font-size:.75rem;font-style:italic}
-      .heatmap-detail-link{text-decoration:none;color:inherit;display:block;border-radius:6px;transition:background .15s;margin:0 -.4rem;padding:0 .4rem}
-      a.heatmap-detail-link:hover{background:rgba(252,76,2,.06)}
-      .heatmap-detail-session{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0}
-      .heatmap-detail-session+.heatmap-detail-session{border-top:1px solid #252528}
-      .heatmap-detail-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
-      .heatmap-detail-info{display:flex;flex-direction:column;gap:.25rem;flex:1;min-width:0}
-      .heatmap-detail-type{font-size:.82rem;color:#e8e6e1;font-weight:600}
-      .heatmap-detail-meta-row{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .5rem}
-      .heatmap-detail-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:600;padding:.1rem .45rem;border-radius:10px;border:1px solid;text-transform:uppercase;letter-spacing:.03em}
-      .heatmap-detail-stat{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#bbb}
-      .heatmap-detail-stat+.heatmap-detail-stat::before{content:"·";margin-right:.35rem;color:#555}
-      .heatmap-detail-pace{color:#c9a84c;font-weight:600}
-      .heatmap-detail-elev{color:#44b783}
-      .heatmap-detail-hr{color:#e85d75}
-      .heatmap-detail-pause{color:#8a8a8e;font-style:italic}
-      .heatmap-detail-effort{color:#f39c12;font-weight:600}
-      .heatmap-detail-kudos{color:#fc4c02}
-      .heatmap-detail-total{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:#c9a84c;text-align:right;margin-top:.4rem;padding-top:.4rem;border-top:1px solid #333}
-      rect.selected{stroke:#c9a84c;stroke-width:1.5}
-      @media(max-width:768px){
-        .RunWeeklyChart .chart-header{flex-direction:column;align-items:flex-start;gap:.25rem}
-      }
-    </style>
-    <script is:inline>
-      (function () {
-        var REFRESH_MS = 15 * 60 * 1000;
-        var MOVIE_PLACEHOLDER = "https://placeholder.pics/svg/178x278/1a1b26/8a8a8e/No%20Poster";
-        var SONG_PLACEHOLDER = "https://placeholder.pics/svg/185x185/1a1b26/8a8a8e/No%20Cover";
+      </div>
+    </section>
 
-        function fmtDate(dateStr) {
-          if (!dateStr) return "";
-          var d = new Date(dateStr);
-          return d.toLocaleDateString("en-us", { month: "short", day: "numeric" });
-        }
+    <!-- 6. About strip -->
+    <section class="fh-about-strip">
+      <p class="fh-quote">"I'm someone who invents stories. <em class="acc">Then tries to show them</em> to someone."</p>
+      <a href="/en/who-i-am" class="foglio-readmore">About me →</a>
+    </section>
 
-        function renderMovie(m) {
-          var img = m.posterPath
-            ? "https://image.tmdb.org/t/p/w185" + m.posterPath
-            : MOVIE_PLACEHOLDER;
-          var vote = m.voteAverage
-            ? '<span class="vote">' + m.voteAverage.toFixed(1) + "</span>"
-            : "";
-          return '<div class="Reel movie">'
-            + '<a href="' + m.link + '" target="_blank" rel="noopener noreferrer">'
-            + '<div class="thumbnail"><img src="' + img + '" alt="' + m.title + '" loading="lazy" />' + vote + "</div>"
-            + "</a>"
-            + '<div class="info"><h3 class="reel-title">' + m.title + "</h3>"
-            + '<p class="reel-date">' + fmtDate(m.watchedDate) + "</p></div></div>";
-        }
-
-        function renderSong(s) {
-          var img = s.image || SONG_PLACEHOLDER;
-          var date = s.date ? fmtDate(s.date) : fmtDate(new Date().toISOString());
-          return '<div class="Reel song">'
-            + '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer">'
-            + '<div class="thumbnail"><img src="' + img + '" alt="' + s.name + '" loading="lazy" /></div>'
-            + "</a>"
-            + '<div class="info"><h3 class="reel-title">' + s.name + "</h3>"
-            + '<p class="reel-artist">' + s.artist + "</p>"
-            + '<p class="reel-album">' + s.album + "</p>"
-            + '<p class="reel-date">' + date + "</p></div></div>";
-        }
-
-        function renderSummaryRow(s, badge) {
-          var html = '<div class="summary-row">'
-            + '<span class="summary-badge">' + badge + "</span>"
-            + '<span class="summary-km">' + s.distance + "</span>"
-            + '<span class="summary-sep">·</span>'
-            + '<span class="summary-meta">' + s.count + " act.</span>";
-          if (s.pace) html += '<span class="summary-sep">·</span><span class="summary-pace">' + s.pace + "</span>";
-          if (s.elevation) html += '<span class="summary-sep">·</span><span class="summary-meta">' + s.elevation + "</span>";
-          html += "</div>";
-          return html;
-        }
-
-        function renderHeatmap(days) {
-          if (!days || days.length === 0) return '<div class="RunWeeklyChart"><div class="chart-empty">No recent activity</div></div>';
-
-          var isYear = days.length > 60;
-          var cellGap = 2;
-          var labelW = 18;
-          var dayLabels = ["", "M", "", "W", "", "F", ""];
-          var maxDur = 1;
-          for (var i = 0; i < days.length; i++) { if (days[i].duration > maxDur) maxDur = days[i].duration; }
-
-          var weeks = [];
-          var currentWeek = [];
-          for (var i = 0; i < days.length; i++) {
-            var d = new Date(days[i].date + "T12:00:00");
-            var dow = (d.getDay() + 6) % 7;
-            if (i === 0 && dow > 0) {
-              for (var p = 0; p < dow; p++) currentWeek.push(null);
-            }
-            currentWeek.push(days[i]);
-            if (dow === 6 || i === days.length - 1) {
-              weeks.push(currentWeek);
-              currentWeek = [];
-            }
-          }
-
-          var cols = weeks.length;
-          var containerEl = document.getElementById('strava-charts');
-          var targetW = containerEl ? Math.min(700, containerEl.clientWidth - 16) : 700;
-          if (targetW < 200) targetW = 700;
-          var cellSize = Math.floor((targetW - labelW) / cols - cellGap);
-          cellSize = Math.max(6, Math.min(cellSize, 14));
-          var svgW = labelW + cols * (cellSize + cellGap);
-          var svgH = 7 * (cellSize + cellGap) + 20;
-
-          var svg = '';
-          for (var r = 0; r < 7; r++) {
-            if (!dayLabels[r]) continue;
-            svg += '<text x="' + (labelW - 3) + '" y="' + (r * (cellSize + cellGap) + cellSize / 2 + 3) + '" text-anchor="end" fill="#8a8a8e" font-size="6" font-family="JetBrains Mono, monospace">' + dayLabels[r] + '</text>';
-          }
-
-          var monthLabels = [];
-          for (var c = 0; c < weeks.length; c++) {
-            var week = weeks[c];
-            for (var r = 0; r < week.length; r++) {
-              var day = week[r];
-              var x = labelW + c * (cellSize + cellGap);
-              var y = r * (cellSize + cellGap);
-
-              if (!day) {
-                svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="#1a1a1c" opacity="0.3"/>';
-                continue;
-              }
-
-              var intensity = day.duration > 0 ? Math.max(0.15, day.duration / maxDur) : 0;
-              var fill = day.duration > 0 ? day.color || '#fc4c02' : '#1a1a1c';
-              var opacity = day.duration > 0 ? (0.3 + intensity * 0.7).toFixed(2) : '0.4';
-
-              var dateLabel = new Date(day.date + "T12:00:00").toLocaleDateString("en-US", { day: "numeric", month: "short" });
-              var durMin = Math.round(day.duration / 60);
-              var distKm = (day.distance / 1000).toFixed(1);
-              var tip = day.duration > 0 ? dateLabel + ": " + distKm + " km — " + durMin + " min" : dateLabel + ": rest";
-
-              svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="' + fill + '" opacity="' + opacity + '" data-date="' + day.date + '" style="cursor:pointer"><title>' + tip + '</title></rect>';
-
-              if (r === 0) {
-                var dd = new Date(day.date + "T12:00:00");
-                if (dd.getDate() <= 7) {
-                  var mLabel = dd.toLocaleDateString("en-US", { month: "short" });
-                  if (monthLabels.indexOf(mLabel) === -1) {
-                    monthLabels.push(mLabel);
-                    svg += '<text x="' + x + '" y="' + (svgH - 4) + '" text-anchor="start" fill="#8a8a8e" font-size="7" font-family="JetBrains Mono, monospace">' + mLabel + '</text>';
-                  }
-                }
-              }
-            }
-          }
-
-          var totalDays = 0, activeDays = 0;
-          for (var i = 0; i < days.length; i++) {
-            totalDays++;
-            if (days[i].duration > 0) activeDays++;
-          }
-
-          var periodLabel = isYear ? "Last year activity" : "Last 30 days activity";
-          var header = '<div class="chart-header"><span class="chart-title">' + periodLabel + '</span>'
-            + '<span class="legend-item" style="font-size:0.65rem;color:#8a8a8e;font-family:JetBrains Mono,monospace">' + activeDays + '/' + totalDays + ' active days</span></div>';
-
-          var svgTag = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" role="img" aria-label="Activity heatmap" style="width:100%;min-width:' + svgW + 'px;display:block">' + svg + '</svg>';
-          return '<div class="RunWeeklyChart">' + header + '<div class="heatmap-scroll" style="overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none">' + svgTag + '</div><div class="heatmap-detail" id="strava-heatmap-detail"></div></div>';
-        }
-
-        var heatmapDayMap = {};
-        var selectedHeatmapDate = null;
-
-        function buildDayMap(days) {
-          heatmapDayMap = {};
-          for (var i = 0; i < days.length; i++) {
-            heatmapDayMap[days[i].date] = days[i];
-          }
-        }
-
-        function fmtDist(m) { return m >= 1000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m) + ' m'; }
-        function fmtDur(s) { var h = Math.floor(s / 3600); var m = Math.floor((s % 3600) / 60); return h > 0 ? h + 'h ' + m + 'min' : m + ' min'; }
-        function fmtPaceFromSpeed(speed, type) {
-          if (!speed || speed === 0 || type === 'WeightTraining' || type === 'Workout') return '';
-          var secPerKm = 1000 / speed;
-          var m = Math.floor(secPerKm / 60);
-          var s = Math.round(secPerKm % 60);
-          return m + ':' + (s < 10 ? '0' : '') + s + ' /km';
-        }
-
-        function initHeatmapDetail(container) {
-          container.addEventListener('click', function(e) {
-            var rect = e.target.closest('rect[data-date]');
-            var detail = document.getElementById('strava-heatmap-detail');
-            if (!detail) return;
-
-            if (!rect) {
-              if (!e.target.closest('.heatmap-detail')) {
-                selectedHeatmapDate = null;
-                detail.classList.remove('visible');
-                container.querySelectorAll('rect.selected').forEach(function(r) { r.classList.remove('selected'); });
-              }
-              return;
-            }
-
-            var ds = rect.getAttribute('data-date');
-            container.querySelectorAll('rect.selected').forEach(function(r) { r.classList.remove('selected'); });
-
-            if (selectedHeatmapDate === ds) {
-              selectedHeatmapDate = null;
-              detail.classList.remove('visible');
-              return;
-            }
-
-            selectedHeatmapDate = ds;
-            rect.classList.add('selected');
-
-            var dayData = heatmapDayMap[ds];
-            var parts = ds.split('-');
-            var dateLabel = parts[1] + '/' + parts[2] + '/' + parts[0];
-
-            var html = '<div class="heatmap-detail-header">'
-              + '<span class="heatmap-detail-date">' + dateLabel + '</span>'
-              + '<button class="heatmap-detail-close" onclick="document.getElementById(\'strava-heatmap-detail\').classList.remove(\'visible\');document.querySelectorAll(\'rect.selected\').forEach(function(r){r.classList.remove(\'selected\')});">&times;</button>'
-              + '</div>';
-
-            if (!dayData || dayData.duration === 0) {
-              html += '<div class="heatmap-detail-empty">Rest day</div>';
-            } else if (dayData.activities && dayData.activities.length > 0) {
-              for (var i = 0; i < dayData.activities.length; i++) {
-                var a = dayData.activities[i];
-                var linkOpen = a.url ? '<a href="' + a.url + '" target="_blank" rel="noopener noreferrer" class="heatmap-detail-link">' : '<div class="heatmap-detail-link">';
-                var linkClose = a.url ? '</a>' : '</div>';
-                html += linkOpen;
-                html += '<div class="heatmap-detail-session">';
-                html += '<div class="heatmap-detail-dot" style="background:' + a.color + '"></div>';
-                html += '<div class="heatmap-detail-info">';
-                html += '<span class="heatmap-detail-type">' + (a.name || a.label) + '</span>';
-                var row1 = '<span class="heatmap-detail-badge" style="background:' + a.color + '22;color:' + a.color + ';border-color:' + a.color + '44">' + a.label + '</span>';
-                if (a.distance > 0) row1 += '<span class="heatmap-detail-stat">' + fmtDist(a.distance) + '</span>';
-                row1 += '<span class="heatmap-detail-stat">' + fmtDur(a.duration) + '</span>';
-                var pace = fmtPaceFromSpeed(a.averageSpeed, a.type);
-                if (pace) row1 += '<span class="heatmap-detail-stat heatmap-detail-pace">' + pace + '</span>';
-                if (a.elevation > 0) row1 += '<span class="heatmap-detail-stat heatmap-detail-elev">&uarr;' + Math.round(a.elevation) + 'm</span>';
-                html += '<div class="heatmap-detail-meta-row">' + row1 + '</div>';
-
-                var row2 = '';
-                if (a.averageHeartrate) {
-                  row2 += '<span class="heatmap-detail-stat heatmap-detail-hr">&hearts; ' + Math.round(a.averageHeartrate) + ' avg';
-                  if (a.maxHeartrate) row2 += ' / ' + Math.round(a.maxHeartrate) + ' max';
-                  row2 += '</span>';
-                }
-                if (a.maxSpeed && a.type !== 'WeightTraining' && a.type !== 'Workout') {
-                  var maxPace = fmtPaceFromSpeed(a.maxSpeed, a.type);
-                  if (maxPace) row2 += '<span class="heatmap-detail-stat">max ' + maxPace + '</span>';
-                }
-                if (a.elapsedTime && a.elapsedTime > a.duration + 60) {
-                  var pauseSec = a.elapsedTime - a.duration;
-                  row2 += '<span class="heatmap-detail-stat heatmap-detail-pause">pause ' + fmtDur(pauseSec) + '</span>';
-                }
-                if (a.sufferScore) row2 += '<span class="heatmap-detail-stat heatmap-detail-effort">effort ' + a.sufferScore + '</span>';
-                if (a.kudos > 0) row2 += '<span class="heatmap-detail-stat heatmap-detail-kudos">&hearts; ' + a.kudos + ' kudos</span>';
-                if (row2) html += '<div class="heatmap-detail-meta-row">' + row2 + '</div>';
-                html += '</div></div>';
-                html += linkClose;
-              }
-              if (dayData.activities.length > 1) {
-                html += '<div class="heatmap-detail-total">Total: ' + fmtDist(dayData.distance) + ' · ' + fmtDur(dayData.duration) + '</div>';
-              }
-            } else {
-              html += '<div class="heatmap-detail-session">';
-              html += '<div class="heatmap-detail-dot" style="background:' + dayData.color + '"></div>';
-              html += '<span class="heatmap-detail-type">' + fmtDist(dayData.distance) + ' — ' + fmtDur(dayData.duration) + '</span>';
-              html += '</div>';
-            }
-
-            detail.innerHTML = html;
-            detail.classList.add('visible');
-          });
-        }
-
-        function renderDonut(dist, total) {
-          var r = 36, sw = 8, cx = 50, cy = 50;
-          var circ = 2 * Math.PI * r;
-          var acc = 0;
-          var arcs = '<circle cx="50" cy="50" r="36" fill="none" stroke="#252528" stroke-width="8"/>';
-          for (var i = 0; i < dist.length; i++) {
-            var seg = dist[i];
-            var len = (seg.percentage / 100) * circ;
-            arcs += '<circle cx="50" cy="50" r="36" fill="none" stroke="' + seg.color + '" stroke-width="8" stroke-dasharray="' + len + " " + (circ - len) + '" stroke-dashoffset="' + (-acc) + '" stroke-linecap="round" transform="rotate(-90 50 50)" opacity="0.85"><title>' + seg.label + ": " + seg.count + " (" + seg.percentage + "%)</title></circle>";
-            acc += len;
-          }
-          var svg = '<svg viewBox="0 0 100 100" role="img">' + arcs
-            + '<text x="50" y="46" text-anchor="middle" fill="#e8e6e1" font-size="14" font-weight="700" font-family="Staatliches, sans-serif">' + total + "</text>"
-            + '<text x="50" y="58" text-anchor="middle" fill="#8a8a8e" font-size="6">act.</text></svg>';
-          var legend = "";
-          for (var i = 0; i < dist.length; i++) {
-            var s = dist[i];
-            legend += '<div class="legend-item"><span class="legend-dot" style="background:' + s.color + '"></span><span class="legend-text">' + s.label + '</span><span class="legend-pct">' + s.percentage + "%</span></div>";
-          }
-          return '<div class="ActivityDonut"><div class="donut-chart">' + svg + '</div><div class="donut-legend">' + legend + "</div></div>";
-        }
-
-        function fixBrokenImages(container, placeholder) {
-          if (!container) return;
-          container.querySelectorAll("img").forEach(function (img) {
-            function onFail() { img.removeEventListener("error", onFail); img.src = placeholder; }
-            img.addEventListener("error", onFail);
-            if (img.complete && img.naturalWidth === 0 && img.src !== placeholder) onFail();
-          });
-        }
-
-        var NO_CACHE = { cache: "no-store" };
-
-        function refresh() {
-          fetch("/api/letterboxd", NO_CACHE)
-            .then(function (r) { return r.json(); })
-            .then(function (movies) {
-              var el = document.getElementById("movies-reel");
-              if (el && Array.isArray(movies)) {
-                el.innerHTML = movies.map(renderMovie).join("");
-                fixBrokenImages(el, MOVIE_PLACEHOLDER);
-              }
-            })
-            .catch(function () {});
-
-          fetch("/api/lastfm", NO_CACHE)
-            .then(function (r) { return r.json(); })
-            .then(function (songs) {
-              var el = document.getElementById("songs-reel");
-              if (el && Array.isArray(songs)) {
-                el.innerHTML = songs.map(renderSong).join("");
-                fixBrokenImages(el, SONG_PLACEHOLDER);
-              }
-            })
-            .catch(function () {});
-
-          fetch("/api/strava", NO_CACHE)
-            .then(function (r) { return r.json(); })
-            .then(function (data) {
-              if (data.error) return;
-              var section = document.getElementById("strava-section");
-              var summary = document.getElementById("strava-summary");
-              var charts = document.getElementById("strava-charts");
-              var donutEl = document.getElementById("strava-donut");
-              if (section && data.activities && data.activities.length > 0) {
-                section.style.display = "";
-                if (summary && data.stats) {
-                  summary.innerHTML = '<div class="StravaSummary">'
-                    + renderSummaryRow(data.stats.weekly, "7d")
-                    + renderSummaryRow(data.stats.monthly, "30d")
-                    + "</div>";
-                }
-                if (donutEl && data.typeDistribution) {
-                  var total = data.stats ? data.stats.monthly.count : 0;
-                  donutEl.innerHTML = renderDonut(data.typeDistribution, total);
-                }
-                if (charts) {
-                  var heatDays = data.yearlyBreakdown || data.dailyBreakdown;
-                  if (heatDays) {
-                    charts.innerHTML = renderHeatmap(heatDays);
-                    buildDayMap(heatDays);
-                    initHeatmapDetail(charts);
-                    var scrollWrap = charts.querySelector('.heatmap-scroll');
-                    if (scrollWrap) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
-                  }
-                }
-              }
-            })
-            .catch(function () {});
-        }
-
-        refresh();
-        setInterval(refresh, REFRESH_MS);
-      })();
-    </script>
+    <FoglioFooter lang="en" />
   </body>
 </html>
