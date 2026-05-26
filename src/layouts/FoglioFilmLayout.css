@@ -284,8 +284,11 @@
 
 .ff-trailer-video {
   width: 100%;
+  aspect-ratio: 16 / 9;
   border-radius: var(--foglio-radius-lg);
   border: 1px solid var(--foglio-rule);
+  background: var(--foglio-paper-2);
+  display: block;
 }
 
 /* Comments wrapper */
