@@ -252,10 +252,11 @@ hr {
 
 /* ============================================
    Code Blocks — tokyo-night + copy button
+   (scoped to legacy pages; .foglio pages use dual Shiki theme)
    ============================================ */
-pre {
+html:not(.foglio) pre {
   position: relative;
-  background-color: #1a1b26;
+  background-color: #1a1b26 !important;
   border-left: 3px solid var(--color-accent-muted);
   border-radius: var(--borderRadius-medium);
   padding: var(--space-large) var(--space-medium);

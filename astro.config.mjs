@@ -68,7 +68,10 @@ export default defineConfig({
   },
   markdown: {
     shikiConfig: {
-      theme: "tokyo-night",
+      themes: {
+        light: "github-light",
+        dark: "tokyo-night",
+      },
     },
   },
   server: {
