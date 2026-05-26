@@ -1,0 +1,20 @@
+---
+interface Props {
+  lang?: "it" | "en";
+}
+
+const { lang = "it" } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="foglio-footer">
+  <div class="foglio-footer-inner">
+    <div>© {year} Valerio Narcisi · Porto Sant'Elpidio</div>
+    <div class="foglio-footer-social">
+      <a href="https://www.instagram.com/narcisi.valerio/" target="_blank" rel="noopener">Instagram</a>
+      <a href="https://boxd.it/2mFff" target="_blank" rel="noopener">Letterboxd</a>
+      <a href="https://github.com/valerionarcisi" target="_blank" rel="noopener">GitHub</a>
+      <a href={lang === "en" ? "/en/rss.xml" : "/rss.xml"}>RSS</a>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,41 @@
+---
+interface Props {
+  lang?: "it" | "en";
+  active?: string;
+}
+
+const { lang = "it", active = "" } = Astro.props;
+
+const isEn = lang === "en";
+
+const t = {
+  films: isEn ? "Films" : "Film",
+  blog: "Blog",
+  about: isEn ? "About" : "Chi",
+};
+
+const links = [
+  { id: "films", label: t.films, href: isEn ? "/en/films" : "/films" },
+  { id: "blog", label: t.blog, href: isEn ? "/en/blog" : "/blog" },
+  { id: "about", label: t.about, href: isEn ? "/en/who-i-am" : "/chi-sono" },
+];
+
+const langSwitchHref = isEn ? "/" : "/en/";
+const langSwitchLabel = isEn ? "IT" : "EN";
+
+function isActive(id: string): boolean {
+  return active === id;
+}
+---
+
+<nav class="foglio-nav">
+  <a href={isEn ? "/en/" : "/"} class="foglio-nav-brand">Valerio Narcisi</a>
+  <div class="foglio-nav-links">
+    {links.map((link) => (
+      <a href={link.href} class={isActive(link.id) ? "is-active" : ""}>
+        {link.label}
+      </a>
+    ))}
+    <a href={langSwitchHref}>{langSwitchLabel}</a>
+  </div>
+</nav>

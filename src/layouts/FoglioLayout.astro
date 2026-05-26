@@ -1,0 +1,31 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import "~/styles/foglio.css";
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  lang?: "it" | "en";
+  pageId?: string;
+}
+
+const { title, description, image, lang = "it", pageId } = Astro.props;
+---
+
+<html lang={lang} class="foglio">
+  <head>
+    <BaseHead title={title} description={description} image={image} lang={lang} />
+  </head>
+  <body>
+    <FoglioHeader lang={lang} active={pageId} />
+
+    <main>
+      <slot />
+    </main>
+
+    <FoglioFooter lang={lang} />
+  </body>
+</html>

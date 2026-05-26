@@ -1,0 +1,248 @@
+---
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import { SITE_TITLE } from "~/consts";
+---
+
+<FoglioLayout
+  title={`Chi · ${SITE_TITLE}`}
+  description="Valerio Narcisi — filmmaker e sviluppatore. Vive a Porto Sant'Elpidio, nelle Marche. Cortometraggi, sceneggiature, codice."
+  lang="it"
+  pageId="about"
+>
+  <header class="about-head">
+    <h1><em class="acc">Chi</em><br />c'è dietro.</h1>
+    <div class="about-portrait"></div>
+  </header>
+
+  <article class="about-body">
+    <p>
+      Mi chiamo <strong>Valerio Narcisi</strong>, vivo a Porto Sant'Elpidio. Faccio film e scrivo codice — più o meno nelle stesse ore della giornata. <em>Prima però vengono le storie</em>: il resto è il modo in cui provo a portarle fuori dalla testa.
+    </p>
+    <p>
+      Dal 2020 sono dentro a cinque cortometraggi. I miei, da regista, sono <em>Caramella</em> — vincitore al Fano International Film Festival 2025 e del Premio GASP — e <em>Non fa ridere</em>, in montaggio dopo quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone. Su <em>Arturo</em> ho fatto soggetto e sceneggiatura insieme al regista. Su <em>Pochi Istanti</em> e <em>Metanaro</em> ho partecipato come assistente alla regia o supervisore della sceneggiatura.
+    </p>
+    <p>
+      Sto anche costruendo <em>Oh Writers</em>: un editor per sceneggiature pensato per come si scrive un copione in Italia. È il posto dove le due cose che faccio — codice e cinema — finalmente parlano tra loro.
+    </p>
+    <p>
+      Di giorno lavoro a <a href="https://www.cleafy.com/">Cleafy</a> da sei anni. Scrivo software — TypeScript, React, design system. Onestamente non so più bene come chiamare quello che faccio: con l'AI il mestiere sta cambiando mentre lo faccio, e "fullstack developer" non basta più a descriverlo. Prima ero a Fieldtronics e a New System.
+    </p>
+    <p>
+      Fuori da tutto questo c'è <strong>Adriana</strong>, e le nostre figlie <strong>Bianca</strong> e <strong>Lea</strong>. È la cosa che mi tiene insieme quando il resto si muove troppo veloce.
+    </p>
+    <p>
+      Se hai una sceneggiatura, un progetto, un'idea su cui ti serve uno sguardo — o se vuoi solo raccontarmi qualcosa — <a href="mailto:valerio.narcisi@gmail.com">scrivimi</a>. Rispondo a tutti.
+    </p>
+  </article>
+
+  <section class="cv">
+    <h2>Cose recenti.</h2>
+
+    <div class="cv-row">
+      <div class="cv-year">2026 —</div>
+      <div class="cv-content">
+        <h3>Sviluppando · <em>Oh Writers</em></h3>
+        <p>Editor per sceneggiature pensato per il mercato italiano. Dashboard, soggetto, scaletta, breakdown, budget, location, schedule in un unico flusso.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2026 —</div>
+      <div class="cv-content">
+        <h3><em>Non fa ridere</em> · Cortometraggio · <span class="foglio-status foglio-status--in-lavorazione">in lavorazione</span></h3>
+        <p>Scritto e diretto. Quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone. Attualmente in montaggio.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2025</div>
+      <div class="cv-content">
+        <h3><em>Caramella</em> · Cortometraggio</h3>
+        <p>Scritto e diretto. Vincitore al Fano International Film Festival 2025 e del Premio GASP per il miglior film per impegno sociale.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2024</div>
+      <div class="cv-content">
+        <h3><em>Metanaro</em> · Sitcom</h3>
+        <p>Supervisore della sceneggiatura e assistente alla regia. Ambientata e girata nelle Marche.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2024</div>
+      <div class="cv-content">
+        <h3><em>Pochi Istanti</em> · Cortometraggio</h3>
+        <p>Co-sceneggiatore e assistente alla regia. Un drone in campagna marchigiana cattura immagini inquietanti.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2020 —</div>
+      <div class="cv-content">
+        <h3>Fullstack Developer · <a href="https://www.cleafy.com/">Cleafy</a></h3>
+        <p>TypeScript, React, design system, real-time fraud detection. Prima: Fieldtronics (Senior Software Engineer), New System.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2020</div>
+      <div class="cv-content">
+        <h3><em>Arturo</em> · Cortometraggio</h3>
+        <p>Soggetto e sceneggiatura. Due anziani cercano un maiale nella profonda campagna marchigiana.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact">
+    <h2>Scrivimi.</h2>
+    <p>
+      Per collaborazioni, sceneggiature, idee, o solo per dire qualcosa.<br />
+      Rispondo a tutti, in giornata.
+    </p>
+    <a href="mailto:valerio.narcisi@gmail.com" class="contact-email">valerio.narcisi@gmail.com</a>
+  </section>
+</FoglioLayout>
+
+<style is:global>
+  .about-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 3rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 3rem;
+    align-items: end;
+  }
+  .about-head h1 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: clamp(2.8rem, 5vw, 4rem);
+    line-height: 1;
+    margin: 0;
+  }
+  .about-head h1 em { font-style: italic; }
+  .about-portrait {
+    aspect-ratio: 4 / 5;
+    background: url("/img/me.jpg") center / cover, var(--foglio-paper);
+    border: 1px solid var(--foglio-rule);
+    border-radius: var(--foglio-radius-md);
+  }
+  @media (max-width: 767px) {
+    .about-head {
+      grid-template-columns: 1fr;
+      padding: 3rem 1.4rem;
+      gap: 2rem;
+    }
+    .about-portrait { max-width: 200px; }
+  }
+
+  .about-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 3rem;
+    font-family: var(--foglio-serif);
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--foglio-ink);
+  }
+  .about-body p { margin: 0 0 1.4rem; }
+  .about-body p:first-child::first-letter {
+    font-family: var(--foglio-serif);
+    font-size: 2.6rem;
+    font-weight: 500;
+    line-height: 0.95;
+    float: left;
+    margin: 0.25rem 0.4rem 0 0;
+    color: var(--foglio-ink);
+  }
+  .about-body em { font-style: italic; }
+  .about-body strong { color: var(--foglio-ink); font-weight: 600; }
+  .about-body a {
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+  }
+  @media (max-width: 767px) {
+    .about-body { padding: 0 1.4rem; font-size: 1.1rem; }
+  }
+
+  /* CV-style section */
+  .cv {
+    max-width: 880px;
+    margin: 5rem auto 0;
+    padding: 0 3rem;
+  }
+  .cv h2 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 1.7rem;
+    margin: 0 0 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--foglio-ink);
+  }
+  .cv-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 2rem;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid var(--foglio-rule);
+    align-items: baseline;
+  }
+  .cv-year {
+    font-family: var(--foglio-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--foglio-ink-soft);
+  }
+  .cv-content h3 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: 1.3rem;
+    margin: 0 0 0.3rem;
+  }
+  .cv-content h3 em { font-style: italic; }
+  .cv-content p {
+    font-family: var(--foglio-serif);
+    font-size: 1.05rem;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .cv-content a { color: var(--foglio-accent); }
+  @media (max-width: 767px) {
+    .cv { padding: 0 1.4rem; }
+    .cv-row { grid-template-columns: 1fr; gap: 0.3rem; }
+  }
+
+  .contact {
+    max-width: 720px;
+    margin: 6rem auto 0;
+    padding: 0 3rem;
+    text-align: center;
+  }
+  .contact h2 {
+    font-family: var(--foglio-serif);
+    font-style: italic;
+    font-size: 2rem;
+    margin: 0 0 1rem;
+  }
+  .contact p {
+    font-family: var(--foglio-serif);
+    font-size: 1.2rem;
+    color: var(--foglio-ink-soft);
+    margin: 0 0 2rem;
+  }
+  .contact-email {
+    font-family: var(--foglio-mono);
+    font-size: 0.95rem;
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent);
+    padding-bottom: 2px;
+  }
+  @media (max-width: 767px) {
+    .contact { padding: 0 1.4rem; }
+  }
+</style>

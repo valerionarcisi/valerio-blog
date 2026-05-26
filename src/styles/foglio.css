@@ -84,7 +84,7 @@ html[data-theme="light"] {
   --foglio-shadow-strong: 0 14px 28px -12px rgba(34, 26, 18, 0.28);
 }
 
-/* Base body scope — applied via .foglio class on body or html */
+/* Base body scope — applied via .foglio class on html */
 .foglio,
 .foglio body {
   background: var(--foglio-bg);
@@ -99,6 +99,44 @@ html[data-theme="light"] {
 .foglio * { box-sizing: border-box; }
 .foglio a { color: inherit; text-decoration: none; }
 .foglio img { max-width: 100%; display: block; }
+
+/* Disable the cinematic grain/scanlines from the legacy global.css */
+.foglio body::before,
+.foglio body::after { content: none !important; display: none !important; }
+
+/* Re-enable <br> — typography-optimized.css hides "* + br" globally */
+.foglio br { display: inline; }
+
+/* Reset the legacy global typography for .foglio pages — layouts/components
+   define their own type styles. */
+.foglio h1,
+.foglio h2,
+.foglio h3,
+.foglio h4,
+.foglio h5,
+.foglio h6 {
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  text-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Force inheritance on container elements — global.css explicitly
+   colors some of them (main, etc.) which breaks .foglio cascade. */
+.foglio main,
+.foglio header,
+.foglio footer,
+.foglio section,
+.foglio article,
+.foglio aside {
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+}
 
 /* Italic by default = ink (not accent). Use .acc to opt-in. */
 .foglio em { font-style: italic; }
