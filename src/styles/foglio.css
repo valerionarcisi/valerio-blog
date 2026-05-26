@@ -190,7 +190,16 @@ html.foglio,
   letter-spacing: 0;
   color: var(--foglio-ink);
 }
+.foglio-nav-right {
+  display: flex;
+  align-items: baseline;
+  gap: 1.8rem;
+}
 .foglio-nav-links {
+  display: flex;
+  gap: 1.8rem;
+}
+.foglio-nav-meta {
   display: flex;
   gap: 1.8rem;
 }
@@ -284,13 +293,24 @@ html.foglio,
 @media (max-width: 767px) {
   .foglio-nav {
     padding: 1.2rem 1.4rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.8rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    column-gap: 1rem;
+    row-gap: 0.9rem;
   }
   .foglio-nav-brand { font-size: 1.1rem; }
-  .foglio-nav-links {
+  .foglio-nav-right { display: contents; }
+  .foglio-nav-meta {
+    order: 1;
+    align-items: center;
     gap: 1.2rem;
+  }
+  .foglio-nav-links {
+    order: 2;
+    flex-basis: 100%;
+    gap: 1.4rem;
     flex-wrap: wrap;
     font-size: 0.72rem;
   }
@@ -317,6 +337,7 @@ html.foglio,
 
 @media (max-width: 767px) {
   .foglio-nav-links a,
+  .foglio-nav-meta a,
   .foglio-nav-brand,
   .ft-toggle,
   .fl-chip,
