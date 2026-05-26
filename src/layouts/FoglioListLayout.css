@@ -1,0 +1,215 @@
+/* ============================================
+   FoglioListLayout — Blog listing page styles
+   Tokens from foglio.css (--foglio-* prefix)
+   ============================================ */
+
+/* Blog header section */
+.fl-head {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 4rem 3rem 3rem;
+}
+
+.fl-head h1 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  line-height: 1.04;
+  margin: 0 0 1rem;
+}
+
+.fl-head h1 em {
+  font-style: italic;
+}
+
+.fl-head p {
+  font-family: var(--foglio-serif);
+  font-size: 1.25rem;
+  color: var(--foglio-ink-soft);
+  max-width: 38em;
+  margin: 0;
+}
+
+/* Filter chips strip */
+.fl-filters {
+  max-width: var(--foglio-maxw);
+  margin: 3rem auto 1rem;
+  padding: 0 3rem;
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  flex-wrap: wrap;
+}
+
+.fl-chip {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: 100px;
+  color: var(--foglio-ink-soft);
+  cursor: pointer;
+  text-decoration: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.fl-chip:hover {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+
+.fl-chip--active {
+  border-color: var(--foglio-ink);
+  color: var(--foglio-ink);
+  background: var(--foglio-paper);
+}
+
+/* Posts container */
+.fl-posts {
+  max-width: var(--foglio-maxw);
+  margin: 3rem auto 0;
+  padding: 0 3rem;
+  border-top: 1px solid var(--foglio-ink);
+}
+
+/* Each post row */
+.fl-row {
+  display: grid;
+  grid-template-columns: 110px 90px 1fr 100px;
+  gap: 2rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+  align-items: start;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fl-row:hover .fl-row-main h3 {
+  color: var(--foglio-accent);
+}
+
+/* Date column */
+.fl-row-date {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+}
+
+/* Cover thumbnail */
+.fl-row-cover {
+  aspect-ratio: 4 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--foglio-paper-2);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  margin-top: 0.15rem;
+}
+
+/* Main content column */
+.fl-row-main h3 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 0.5rem;
+  transition: color 0.15s;
+}
+
+.fl-row-main h3 em {
+  font-style: italic;
+  transition: color 0.15s;
+}
+
+.fl-row-main p {
+  font-family: var(--foglio-serif);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--foglio-ink-soft);
+  margin: 0;
+}
+
+/* Tag column */
+.fl-row-tag {
+  text-align: right;
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+}
+
+/* Pagination */
+.fl-pagination {
+  max-width: var(--foglio-maxw);
+  margin: 3rem auto;
+  padding: 0 3rem;
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.fl-pagination a {
+  color: var(--foglio-ink-soft);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.fl-pagination a:hover {
+  color: var(--foglio-accent);
+}
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .fl-head {
+    padding: 2.5rem 1.4rem 2rem;
+  }
+
+  .fl-head h1 {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .fl-filters {
+    margin: 2rem auto 0.5rem;
+    padding: 0 1.4rem;
+  }
+
+  .fl-posts {
+    margin: 2rem auto 0;
+    padding: 0 1.4rem;
+  }
+
+  .fl-row {
+    grid-template-columns: 80px 1fr;
+    gap: 1rem;
+    padding: 1.4rem 0;
+  }
+
+  .fl-row-cover {
+    grid-row: span 3;
+  }
+
+  .fl-row-date {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .fl-row-tag {
+    grid-column: 2;
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+
+  .fl-pagination {
+    padding: 0 1.4rem;
+    gap: 2rem;
+  }
+}

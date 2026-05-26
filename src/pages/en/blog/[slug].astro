@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
-import BlogPost from '~/layouts/BlogPost.astro';
+import FoglioPostLayout from '~/layouts/FoglioPostLayout.astro';
 import Comments from '~/components/Comments.astro';
 import PostClaps from '~/components/PostClaps.astro';
 import { getLangFromId, getSlugFromId } from '~/i18n/utils';
@@ -16,11 +16,11 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 const slug = getSlugFromId(entry.id);
 ---
 
-<BlogPost
+<FoglioPostLayout
   slug={slug}
   title={entry.data.title}
   extract={entry.data.extract}
@@ -31,8 +31,9 @@ const slug = getSlugFromId(entry.id);
   lang="en"
   tags={entry.data.tags}
   coverDescription={entry.data.coverDescription}
+  headings={headings}
 >
   <Content />
   <PostClaps postId={`blog/${slug}`} lang="en" />
   <Comments pageId={`blog/${slug}`} lang="en" />
-</BlogPost>
+</FoglioPostLayout>

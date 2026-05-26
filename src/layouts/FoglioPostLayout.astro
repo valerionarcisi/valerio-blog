@@ -1,0 +1,237 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import StructuredData from "~/components/StructuredData.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import RelatedPosts from "~/components/RelatedPosts.astro";
+import { SITE_TITLE } from "~/consts";
+import "~/styles/foglio.css";
+import "./FoglioPostLayout.css";
+
+interface Props {
+  title: string;
+  extract: string;
+  date: string;
+  coverImage?: string | null;
+  coverAuthorName?: string | null;
+  coverAuthorLink?: string | null;
+  coverDescription?: string | null;
+  tags: string[];
+  slug: string;
+  lang?: "it" | "en";
+  headings?: Array<{ depth: number; slug: string; text: string }>;
+}
+
+const {
+  title,
+  extract,
+  date,
+  coverImage,
+  coverAuthorName,
+  coverAuthorLink,
+  coverDescription,
+  tags,
+  slug,
+  lang = "it",
+  headings = [],
+} = Astro.props;
+
+const isEn = lang === "en";
+const langSwitchHref = isEn
+  ? `/blog/${slug}`
+  : `/en/blog/${slug}`;
+const langSwitchLabel = isEn ? "IT" : "EN";
+
+const formattedDate = new Date(date).toLocaleDateString(
+  isEn ? "en-GB" : "it-IT",
+  { day: "numeric", month: "long", year: "numeric" }
+);
+
+const eyebrowTags = tags.join(" · ");
+
+const h2Headings = headings.filter((h) => h.depth === 2);
+---
+
+<html lang={lang} class="foglio">
+  <head>
+    <BaseHead
+      title={`${title} | ${SITE_TITLE}`}
+      description={extract}
+      cover={coverImage ?? undefined}
+      lang={lang}
+    />
+    <StructuredData
+      type="article"
+      title={title}
+      description={extract}
+      url={Astro.url.href}
+      image={coverImage ?? undefined}
+      datePublished={date}
+      tags={tags}
+    />
+  </head>
+
+  <body>
+    <!-- Reading progress bar -->
+    <div class="fp-progress" id="fp-progress"></div>
+
+    <FoglioHeader lang={lang} active="blog" />
+
+    <!-- Cover hero -->
+    {coverImage && (
+      <section class="fp-cover-hero">
+        <img
+          class="fp-cover-hero-img"
+          src={coverImage}
+          alt={title}
+          loading="eager"
+        />
+        {(coverAuthorName || coverDescription) && (
+          <div class="fp-cover-hero-caption">
+            {coverDescription && <span>{coverDescription}</span>}
+            {coverAuthorName && (
+              <span>
+                {" · "}
+                {coverAuthorLink
+                  ? <a href={coverAuthorLink} target="_blank" rel="noopener">{coverAuthorName}</a>
+                  : coverAuthorName}
+              </span>
+            )}
+          </div>
+        )}
+      </section>
+    )}
+
+    <!-- Post header -->
+    <header class="fp-head">
+      <div class="fp-eyebrow">
+        <span class="fp-eyebrow-tags-date">
+          {eyebrowTags}{eyebrowTags ? " · " : ""}{formattedDate}
+        </span>
+        <a href={langSwitchHref} class="fp-eyebrow-lang">{langSwitchLabel}</a>
+      </div>
+      <h1 class="fp-title">{title}</h1>
+      {extract && <p class="fp-extract">{extract}</p>}
+    </header>
+
+    <!-- 3-column layout -->
+    <div class="fp-layout">
+      <!-- Left: Table of Contents -->
+      {h2Headings.length > 0 && (
+        <details class="fp-toc" open>
+          <summary>{isEn ? "On this page" : "In questa pagina"}</summary>
+          <ol>
+            {h2Headings.map((heading) => (
+              <li>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+      {h2Headings.length === 0 && <div></div>}
+
+      <!-- Center: article content -->
+      <article class="fp-article">
+        <slot />
+      </article>
+
+      <!-- Right: sidenote column (reserved for future use) -->
+      <aside class="fp-sidenote-col"></aside>
+    </div>
+
+    <!-- Related posts -->
+    <div class="fp-related">
+      <RelatedPosts currentSlug={slug} currentTags={tags} lang={lang} />
+    </div>
+
+    <FoglioFooter lang={lang} />
+
+    <!-- marked + DOMPurify for comment rendering -->
+    <script>
+      import { marked } from "marked";
+      import DOMPurify from "dompurify";
+      marked.setOptions({ breaks: true, gfm: true });
+      // @ts-expect-error attaching renderer to window for the inline comments consumer
+      window.__commentsMd = {
+        render(text: string): string {
+          const raw = marked.parse(text, { async: false }) as string;
+          return DOMPurify.sanitize(raw, {
+            ALLOWED_TAGS: [
+              "p", "br", "strong", "em", "code", "pre", "blockquote",
+              "ul", "ol", "li", "a", "h3", "h4", "hr",
+            ],
+            ALLOWED_ATTR: ["href", "title", "target", "rel"],
+          });
+        },
+      };
+      window.dispatchEvent(new CustomEvent("comments-md-ready"));
+    </script>
+
+    <!-- Reading progress bar -->
+    <script is:inline>
+      (function () {
+        var bar = document.getElementById("fp-progress");
+        if (!bar) return;
+        function update() {
+          var h = document.documentElement.scrollHeight - window.innerHeight;
+          var pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+          bar.style.width = pct + "%";
+        }
+        window.addEventListener("scroll", update, { passive: true });
+        update();
+      })();
+    </script>
+
+    <!-- Copy button for <pre> blocks -->
+    <script is:inline>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".fp-article pre").forEach(function (pre) {
+          var btn = document.createElement("button");
+          btn.className = "copy-btn";
+          btn.textContent = "Copy";
+          btn.addEventListener("click", function () {
+            var code = pre.querySelector("code");
+            if (code) {
+              navigator.clipboard.writeText(code.textContent || "");
+              btn.textContent = "✓";
+              setTimeout(function () {
+                btn.textContent = "Copy";
+              }, 2000);
+            }
+          });
+          pre.appendChild(btn);
+        });
+      });
+    </script>
+
+    <!-- ToC active section highlight -->
+    <script is:inline>
+      (function () {
+        var toc = document.querySelector(".fp-toc");
+        if (!toc) return;
+        var links = Array.from(toc.querySelectorAll("a[href^='#']"));
+        if (!links.length) return;
+        var headings = links.map(function (a) {
+          return document.getElementById(a.getAttribute("href").slice(1));
+        }).filter(Boolean);
+
+        function activate() {
+          var scrollY = window.scrollY + 80;
+          var active = headings[0];
+          headings.forEach(function (h) {
+            if (h.offsetTop <= scrollY) active = h;
+          });
+          links.forEach(function (a) {
+            a.parentElement.classList.toggle(
+              "is-current",
+              a.getAttribute("href") === "#" + active.id
+            );
+          });
+        }
+        window.addEventListener("scroll", activate, { passive: true });
+        activate();
+      })();
+    </script>
+  </body>
+</html>

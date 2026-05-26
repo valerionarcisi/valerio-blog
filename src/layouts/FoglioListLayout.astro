@@ -1,0 +1,140 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import "~/styles/foglio.css";
+import "~/layouts/FoglioListLayout.css";
+
+interface Props {
+  category?: string;
+  posts: Array<{
+    title: string;
+    extract: string;
+    date: string;
+    coverImage?: string;
+    tags: string[];
+    slug: string;
+  }>;
+  lang?: "it" | "en";
+  pagination?: {
+    currentPage: number;
+    lastPage: number;
+    url: { prev?: string; next?: string; current: string };
+    basePath: string;
+  };
+  noindex?: boolean;
+  activeTag?: string;
+}
+
+const { posts, lang = "it", pagination, noindex = false, activeTag } = Astro.props;
+
+const isEn = lang === "en";
+
+const subtitle = isEn
+  ? "Writing on cinema and code. Set diaries. Notes when an idea tries to stand up."
+  : "Pezzi sul cinema e sul codice. Diari di set quando un corto finisce. Note quando un'idea prova a stare in piedi.";
+
+const chips = isEn
+  ? [
+      { label: "All", tag: null },
+      { label: "Code", tag: "codice" },
+      { label: "Cinema", tag: "cinema" },
+      { label: "Set", tag: "set" },
+      { label: "Festival", tag: "festival" },
+    ]
+  : [
+      { label: "Tutti", tag: null },
+      { label: "Codice", tag: "codice" },
+      { label: "Cinema", tag: "cinema" },
+      { label: "Set", tag: "set" },
+      { label: "Festival", tag: "festival" },
+    ];
+
+function chipHref(chip: { label: string; tag: string | null }): string {
+  if (!chip.tag) return isEn ? "/en/blog/" : "/blog/";
+  return isEn ? `/en/tag/${chip.tag}/` : `/tag/${chip.tag}/`;
+}
+
+function isChipActive(chip: { label: string; tag: string | null }): boolean {
+  if (!chip.tag) return !activeTag;
+  return !!activeTag && activeTag.toLowerCase() === chip.tag.toLowerCase();
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString(isEn ? "en-GB" : "it-IT", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function postHref(slug: string): string {
+  return isEn ? `/en/blog/${slug}/` : `/blog/${slug}/`;
+}
+
+const pageTitle = isEn ? "Blog | Valerio Narcisi" : "Blog | Valerio Narcisi";
+const pageDescription = isEn
+  ? "Writing on cinema and code. Set diaries. Notes when an idea tries to stand up."
+  : "Pezzi sul cinema e sul codice. Diari di set quando un corto finisce. Note quando un'idea prova a stare in piedi.";
+---
+
+<!doctype html>
+<html lang={lang} class="foglio">
+  <head>
+    <BaseHead title={pageTitle} description={pageDescription} lang={lang} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+  </head>
+  <body>
+    <FoglioHeader lang={lang} active="blog" />
+
+    <header class="fl-head">
+      <h1><em class="acc">Blog</em>.</h1>
+      <p>{subtitle}</p>
+    </header>
+
+    <div class="fl-filters">
+      {chips.map((chip) => (
+        <a
+          href={chipHref(chip)}
+          class={`fl-chip${isChipActive(chip) ? " fl-chip--active" : ""}`}
+        >
+          {chip.label}
+        </a>
+      ))}
+    </div>
+
+    <section class="fl-posts">
+      {posts.map((post) => (
+        <a href={postHref(post.slug)} class="fl-row">
+          <div class="fl-row-date">{formatDate(post.date)}</div>
+          <div
+            class="fl-row-cover"
+            style={post.coverImage ? `background-image: url('${post.coverImage}')` : ""}
+          />
+          <div class="fl-row-main">
+            <h3>{post.title}</h3>
+            <p>{post.extract}</p>
+          </div>
+          <div class="fl-row-tag">
+            {post.tags[0] ?? ""}
+          </div>
+        </a>
+      ))}
+    </section>
+
+    {pagination && (pagination.url.prev || pagination.url.next) && (
+      <nav class="fl-pagination">
+        {pagination.url.prev && (
+          <a href={pagination.url.prev}>&larr; {isEn ? "Prev" : "Prec"}</a>
+        )}
+        {pagination.url.next && (
+          <a href={pagination.url.next}>{isEn ? "Next" : "Succ"} &rarr;</a>
+        )}
+      </nav>
+    )}
+
+    <FoglioFooter lang={lang} />
+  </body>
+</html>
