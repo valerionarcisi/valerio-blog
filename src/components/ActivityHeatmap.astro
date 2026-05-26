@@ -1,0 +1,427 @@
+---
+import type { DailyBreakdown } from "~/services/strava";
+
+interface Props {
+  days: DailyBreakdown[];
+  title?: string;
+  compact?: boolean;
+}
+
+const { days, title = "Attività ultimi 365 giorni", compact = false } = Astro.props;
+
+const instanceId = `heatmap-${Math.random().toString(36).slice(2, 10)}`;
+const containerId = `${instanceId}-container`;
+const detailId = `${instanceId}-detail`;
+---
+
+<div class={`heatmap-component${compact ? " heatmap-compact" : ""}`}>
+  {title && <div class="heatmap-component-title">{title}</div>}
+  <div class="heatmap-wrap" id={containerId} data-detail-id={detailId}></div>
+</div>
+
+<script is:inline define:vars={{ days, containerId, detailId }}>
+  (function () {
+    function renderHeatmap(days, containerEl) {
+      if (!days || days.length === 0) {
+        containerEl.innerHTML = '<div class="heatmap-empty">Nessuna attività recente</div>';
+        return;
+      }
+
+      var isYear = days.length > 60;
+      var cellGap = 2;
+      var labelW = 18;
+      var dayLabels = ["", "L", "", "M", "", "V", ""];
+      var maxDur = 1;
+      for (var i = 0; i < days.length; i++) {
+        if (days[i].duration > maxDur) maxDur = days[i].duration;
+      }
+
+      var weeks = [];
+      var currentWeek = [];
+      for (var i = 0; i < days.length; i++) {
+        var d = new Date(days[i].date + "T12:00:00");
+        var dow = (d.getDay() + 6) % 7;
+        if (i === 0 && dow > 0) {
+          for (var p = 0; p < dow; p++) currentWeek.push(null);
+        }
+        currentWeek.push(days[i]);
+        if (dow === 6 || i === days.length - 1) {
+          weeks.push(currentWeek);
+          currentWeek = [];
+        }
+      }
+
+      var cols = weeks.length;
+      var targetW = Math.min(900, containerEl.clientWidth - 16);
+      if (targetW < 200) targetW = 700;
+      var cellSize = Math.floor((targetW - labelW) / cols - cellGap);
+      cellSize = Math.max(6, Math.min(cellSize, 14));
+      var svgW = labelW + cols * (cellSize + cellGap);
+      var svgH = 7 * (cellSize + cellGap) + 20;
+
+      var svg = "";
+      for (var r = 0; r < 7; r++) {
+        if (!dayLabels[r]) continue;
+        svg += '<text x="' + (labelW - 3) + '" y="' + (r * (cellSize + cellGap) + cellSize / 2 + 3) + '" text-anchor="end" fill="#8a7c66" font-size="6" font-family="JetBrains Mono, monospace">' + dayLabels[r] + '</text>';
+      }
+
+      var monthLabels = [];
+      for (var c = 0; c < weeks.length; c++) {
+        var week = weeks[c];
+        for (var r2 = 0; r2 < week.length; r2++) {
+          var day = week[r2];
+          var x = labelW + c * (cellSize + cellGap);
+          var y = r2 * (cellSize + cellGap);
+
+          if (!day) {
+            svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="#f1ebdd" opacity="0.5"/>';
+            continue;
+          }
+
+          var intensity = day.duration > 0 ? Math.max(0.2, day.duration / maxDur) : 0;
+          var fill = day.duration > 0 ? (day.color || "#fc4c02") : "#f1ebdd";
+          var opacity = day.duration > 0 ? (0.35 + intensity * 0.65).toFixed(2) : "0.5";
+
+          var dateLabel = new Date(day.date + "T12:00:00").toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+          var durMin = Math.round(day.duration / 60);
+          var distKm = (day.distance / 1000).toFixed(1);
+          var tip = day.duration > 0 ? dateLabel + ": " + distKm + " km — " + durMin + " min" : dateLabel + ": riposo";
+
+          svg += '<rect x="' + x + '" y="' + y + '" width="' + cellSize + '" height="' + cellSize + '" rx="1" fill="' + fill + '" opacity="' + opacity + '" data-date="' + day.date + '" style="cursor:pointer"><title>' + tip + '</title></rect>';
+
+          if (r2 === 0) {
+            var dd = new Date(day.date + "T12:00:00");
+            if (dd.getDate() <= 7) {
+              var mLabel = dd.toLocaleDateString("it-IT", { month: "short" });
+              if (monthLabels.indexOf(mLabel) === -1) {
+                monthLabels.push(mLabel);
+                svg += '<text x="' + x + '" y="' + (svgH - 4) + '" text-anchor="start" fill="#8a7c66" font-size="7" font-family="JetBrains Mono, monospace">' + mLabel + '</text>';
+              }
+            }
+          }
+        }
+      }
+
+      var totalDays = 0, activeDays = 0;
+      for (var j = 0; j < days.length; j++) {
+        totalDays++;
+        if (days[j].duration > 0) activeDays++;
+      }
+
+      var periodLabel = isYear ? "Ultimi 12 mesi" : "Ultimi 30 giorni";
+      var header = '<div class="heatmap-header"><span class="heatmap-title">' + periodLabel + '</span>'
+        + '<span class="heatmap-active">' + activeDays + '/' + totalDays + ' giorni attivi</span></div>';
+
+      var svgTag = '<svg viewBox="0 0 ' + svgW + ' ' + svgH + '" role="img" aria-label="Activity heatmap" style="width:100%;min-width:' + svgW + 'px;display:block">' + svg + '</svg>';
+      containerEl.innerHTML = header
+        + '<div class="heatmap-scroll">' + svgTag + '</div>'
+        + '<div class="heatmap-detail" id="' + detailId + '"></div>';
+
+      var scrollWrap = containerEl.querySelector(".heatmap-scroll");
+      if (scrollWrap) scrollWrap.scrollLeft = scrollWrap.scrollWidth;
+    }
+
+    var heatmapDayMap = {};
+    var selectedHeatmapDate = null;
+
+    function buildDayMap(days) {
+      heatmapDayMap = {};
+      for (var i = 0; i < days.length; i++) {
+        heatmapDayMap[days[i].date] = days[i];
+      }
+    }
+
+    function fmtDist(m) { return m >= 1000 ? (m / 1000).toFixed(1) + " km" : Math.round(m) + " m"; }
+    function fmtDur(s) {
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      return h > 0 ? h + "h " + m + "min" : m + " min";
+    }
+    function fmtPaceFromSpeed(speed, type) {
+      if (!speed || speed === 0 || type === "WeightTraining" || type === "Workout") return "";
+      var secPerKm = 1000 / speed;
+      var m = Math.floor(secPerKm / 60);
+      var s = Math.round(secPerKm % 60);
+      return m + ":" + (s < 10 ? "0" : "") + s + " /km";
+    }
+
+    function initHeatmapDetail(container) {
+      container.addEventListener("click", function (e) {
+        var rect = e.target.closest("rect[data-date]");
+        var detail = document.getElementById(detailId);
+        if (!detail) return;
+
+        if (!rect) {
+          if (!e.target.closest(".heatmap-detail")) {
+            selectedHeatmapDate = null;
+            detail.classList.remove("visible");
+            container.querySelectorAll("rect.selected").forEach(function (r) { r.classList.remove("selected"); });
+          }
+          return;
+        }
+
+        var ds = rect.getAttribute("data-date");
+        container.querySelectorAll("rect.selected").forEach(function (r) { r.classList.remove("selected"); });
+
+        if (selectedHeatmapDate === ds) {
+          selectedHeatmapDate = null;
+          detail.classList.remove("visible");
+          return;
+        }
+
+        selectedHeatmapDate = ds;
+        rect.classList.add("selected");
+
+        var dayData = heatmapDayMap[ds];
+        var parts = ds.split("-");
+        var dateLabel = parts[2] + "/" + parts[1] + "/" + parts[0];
+
+        var html = '<div class="heatmap-detail-header">'
+          + '<span class="heatmap-detail-date">' + dateLabel + '</span>'
+          + '<button class="heatmap-detail-close" aria-label="Chiudi">&times;</button>'
+          + '</div>';
+
+        if (!dayData || dayData.duration === 0) {
+          html += '<div class="heatmap-detail-empty">Giorno di riposo</div>';
+        } else if (dayData.activities && dayData.activities.length > 0) {
+          for (var i = 0; i < dayData.activities.length; i++) {
+            var a = dayData.activities[i];
+            var linkOpen = a.url ? '<a href="' + a.url + '" target="_blank" rel="noopener noreferrer" class="heatmap-detail-link">' : '<div class="heatmap-detail-link">';
+            var linkClose = a.url ? '</a>' : '</div>';
+            html += linkOpen;
+            html += '<div class="heatmap-detail-session">';
+            html += '<div class="heatmap-detail-dot" style="background:' + a.color + '"></div>';
+            html += '<div class="heatmap-detail-info">';
+            html += '<span class="heatmap-detail-type">' + (a.name || a.label) + '</span>';
+            var row1 = '<span class="heatmap-detail-badge" style="background:' + a.color + '22;color:' + a.color + ';border-color:' + a.color + '44">' + a.label + '</span>';
+            if (a.distance > 0) row1 += '<span class="heatmap-detail-stat">' + fmtDist(a.distance) + '</span>';
+            row1 += '<span class="heatmap-detail-stat">' + fmtDur(a.duration) + '</span>';
+            var pace = fmtPaceFromSpeed(a.averageSpeed, a.type);
+            if (pace) row1 += '<span class="heatmap-detail-stat heatmap-detail-pace">' + pace + '</span>';
+            if (a.elevation > 0) row1 += '<span class="heatmap-detail-stat heatmap-detail-elev">&uarr;' + Math.round(a.elevation) + 'm</span>';
+            html += '<div class="heatmap-detail-meta-row">' + row1 + '</div>';
+
+            var row2 = "";
+            if (a.averageHeartrate) {
+              row2 += '<span class="heatmap-detail-stat heatmap-detail-hr">&hearts; ' + Math.round(a.averageHeartrate) + ' media';
+              if (a.maxHeartrate) row2 += " / " + Math.round(a.maxHeartrate) + " max";
+              row2 += "</span>";
+            }
+            if (a.maxSpeed && a.type !== "WeightTraining" && a.type !== "Workout") {
+              var maxPace = fmtPaceFromSpeed(a.maxSpeed, a.type);
+              if (maxPace) row2 += '<span class="heatmap-detail-stat">max ' + maxPace + '</span>';
+            }
+            if (a.elapsedTime && a.elapsedTime > a.duration + 60) {
+              var pauseSec = a.elapsedTime - a.duration;
+              row2 += '<span class="heatmap-detail-stat heatmap-detail-pause">pausa ' + fmtDur(pauseSec) + '</span>';
+            }
+            if (a.sufferScore) row2 += '<span class="heatmap-detail-stat heatmap-detail-effort">sforzo ' + a.sufferScore + '</span>';
+            if (a.kudos > 0) row2 += '<span class="heatmap-detail-stat heatmap-detail-kudos">&hearts; ' + a.kudos + ' kudos</span>';
+            if (row2) html += '<div class="heatmap-detail-meta-row">' + row2 + '</div>';
+            html += "</div></div>";
+            html += linkClose;
+          }
+          if (dayData.activities.length > 1) {
+            html += '<div class="heatmap-detail-total">Totale: ' + fmtDist(dayData.distance) + " · " + fmtDur(dayData.duration) + "</div>";
+          }
+        } else {
+          html += '<div class="heatmap-detail-session">';
+          html += '<div class="heatmap-detail-dot" style="background:' + dayData.color + '"></div>';
+          html += '<span class="heatmap-detail-type">' + fmtDist(dayData.distance) + " — " + fmtDur(dayData.duration) + "</span>";
+          html += "</div>";
+        }
+
+        detail.innerHTML = html;
+        detail.classList.add("visible");
+
+        var closeBtn = detail.querySelector(".heatmap-detail-close");
+        if (closeBtn) {
+          closeBtn.addEventListener("click", function () {
+            detail.classList.remove("visible");
+            selectedHeatmapDate = null;
+            container.querySelectorAll("rect.selected").forEach(function (r) { r.classList.remove("selected"); });
+          });
+        }
+      });
+    }
+
+    var container = document.getElementById(containerId);
+    if (container && days && days.length > 0) {
+      renderHeatmap(days, container);
+      buildDayMap(days);
+      initHeatmapDetail(container);
+    } else if (container) {
+      container.innerHTML = '<div class="heatmap-empty">Nessuna attività disponibile</div>';
+    }
+  })();
+</script>
+
+<style is:global>
+  .heatmap-component-title {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-ink-mute);
+    margin-bottom: 1rem;
+  }
+  .heatmap-compact .heatmap-component-title { margin-bottom: 0.5rem; }
+
+  .heatmap-wrap { width: 100%; }
+  .heatmap-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .heatmap-title {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    color: var(--foglio-ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .heatmap-active {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    color: var(--foglio-ink-mute);
+  }
+  .heatmap-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .heatmap-scroll svg { display: block; }
+  .heatmap-empty {
+    color: var(--foglio-ink-mute);
+    font-style: italic;
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  .heatmap-wrap rect.selected {
+    stroke: var(--foglio-accent);
+    stroke-width: 1.5;
+  }
+
+  .heatmap-detail {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--foglio-paper);
+    border: 1px solid var(--foglio-rule);
+    border-radius: var(--foglio-radius-md);
+  }
+  .heatmap-detail.visible { display: block; }
+  .heatmap-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .heatmap-detail-date {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-xs);
+    color: var(--foglio-accent);
+    font-weight: 600;
+  }
+  .heatmap-detail-close {
+    background: none;
+    border: none;
+    color: var(--foglio-ink-mute);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.2rem 0.4rem;
+    line-height: 1;
+  }
+  .heatmap-detail-close:hover { color: var(--foglio-ink); }
+  .heatmap-detail-empty {
+    color: var(--foglio-ink-mute);
+    font-style: italic;
+    font-size: var(--foglio-fs-xs);
+  }
+  .heatmap-detail-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: var(--foglio-radius-sm);
+    transition: background 0.15s;
+    margin: 0 -0.5rem;
+    padding: 0 0.5rem;
+  }
+  a.heatmap-detail-link:hover { background: var(--foglio-paper-2); }
+  .heatmap-detail-session {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.55rem 0;
+  }
+  .heatmap-detail-session + .heatmap-detail-session {
+    border-top: 1px solid var(--foglio-rule);
+  }
+  .heatmap-detail-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .heatmap-detail-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    min-width: 0;
+  }
+  .heatmap-detail-type {
+    font-size: var(--foglio-fs-sm);
+    color: var(--foglio-ink);
+    font-weight: 600;
+    font-family: var(--foglio-serif);
+  }
+  .heatmap-detail-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.5rem;
+  }
+  .heatmap-detail-badge {
+    display: inline-block;
+    font-family: var(--foglio-mono);
+    font-size: 0.6rem;
+    font-weight: 600;
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+    border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .heatmap-detail-stat {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    color: var(--foglio-ink-soft);
+  }
+  .heatmap-detail-stat + .heatmap-detail-stat::before {
+    content: "·";
+    margin-right: 0.35rem;
+    color: var(--foglio-ink-mute);
+  }
+  .heatmap-detail-pace { color: var(--foglio-accent); font-weight: 600; }
+  .heatmap-detail-elev { color: #44805d; }
+  .heatmap-detail-hr { color: #b04458; }
+  .heatmap-detail-pause { color: var(--foglio-ink-mute); font-style: italic; }
+  .heatmap-detail-effort { color: #b07118; font-weight: 600; }
+  .heatmap-detail-kudos { color: var(--foglio-accent); }
+  .heatmap-detail-total {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    color: var(--foglio-accent);
+    text-align: right;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--foglio-rule);
+  }
+</style>

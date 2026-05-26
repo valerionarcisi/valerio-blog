@@ -3,6 +3,8 @@ import { Icon } from "astro-icon/components";
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
@@ -15,79 +17,73 @@ if (!isAuthorized) {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="foglio">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
     <title>Comments Admin</title>
-    <style>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 2rem; font-size: 1rem; }
-      .container { max-width: 1200px; margin: 0 auto; }
-      .page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-      h1 { color: #c9a84c; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
-      .page-sub { color: #8a8a8e; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+    <style is:global>
+      .foglio body.admin .container { max-width: 1200px; margin: 0 auto; }
+      .foglio body.admin .page-header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+      .foglio body.admin .page-sub { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.12em; }
 
-      .card { background: #121214; border: 1px solid #222; border-radius: 10px; padding: 1.5rem; margin-bottom: 1.5rem; }
-      .card-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-      .card-title { color: #c9a84c; font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.5rem; }
-      .card-title-icon { width: 1.1rem; height: 1.1rem; color: #c9a84c; }
-      .card-title-icon svg { display: block; width: 100%; height: 100%; }
+      .foglio body.admin .card-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+      .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; display: flex; align-items: center; gap: 0.5rem; border: none; padding: 0; margin: 0; }
+      .foglio body.admin .card-title-icon { width: 1.1rem; height: 1.1rem; color: var(--foglio-accent); }
+      .foglio body.admin .card-title-icon svg { display: block; width: 100%; height: 100%; }
 
-      .tabs { display: inline-flex; gap: 0; background: #0a0a0c; border: 1px solid #2a2a2e; border-radius: 8px; padding: 3px; }
-      .tabs button { padding: 0.45rem 1rem; background: transparent; border: none; color: #8a8a8e; cursor: pointer; border-radius: 6px; font-size: 0.85rem; font-weight: 600; transition: all 0.15s; }
-      .tabs button:hover { color: #e8e6e1; }
-      .tabs button.active { background: rgba(201, 168, 76, 0.12); color: #c9a84c; }
+      .foglio body.admin .tabs { display: inline-flex; gap: 0; border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-sm); padding: 3px; background: var(--foglio-bg); }
+      .foglio body.admin .tabs button { padding: 0.4rem 0.9rem; background: transparent; border: none; color: var(--foglio-ink-soft); cursor: pointer; border-radius: var(--foglio-radius-sm); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; transition: color 0.15s, background 0.15s; }
+      .foglio body.admin .tabs button:hover { color: var(--foglio-ink); }
+      .foglio body.admin .tabs button.active { background: var(--foglio-accent); color: var(--foglio-paper); }
 
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 0.85rem 0.75rem; text-align: left; vertical-align: top; }
-      thead th { color: #8a8a8e; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.08em; font-weight: 600; border-bottom: 1px solid #2a2a2e; }
-      tbody tr { transition: background 0.15s; }
-      tbody tr:hover { background: rgba(255, 255, 255, 0.02); }
-      tbody tr + tr td { border-top: 1px solid #1c1c20; }
-      td { font-size: 0.85rem; }
+      .foglio body.admin .page-id { font-family: var(--foglio-mono); color: var(--foglio-accent); font-size: var(--foglio-fs-mono); }
+      .foglio body.admin .post-link {
+        color: inherit;
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.15s, opacity 0.15s;
+      }
+      .foglio body.admin .post-link:hover {
+        border-bottom-color: var(--foglio-accent);
+        opacity: 0.85;
+      }
+      .foglio body.admin .text-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--foglio-serif); }
+      .foglio body.admin .email { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-family: var(--foglio-mono); }
+      .foglio body.admin .actions { display: flex; gap: 0.4rem; flex-wrap: nowrap; }
+      .foglio body.admin .btn-approve { color: #2e8b57; border-color: rgba(46, 139, 87, 0.4); }
+      .foglio body.admin .btn-approve:hover { border-color: #2e8b57; color: #2e8b57; }
+      .foglio body.admin .btn-delete { color: #c0392b; border-color: rgba(192, 57, 43, 0.4); }
+      .foglio body.admin .btn-delete:hover { border-color: #c0392b; color: #c0392b; }
 
-      .page-id { font-family: 'JetBrains Mono', monospace; color: #4ecdc4; font-size: 0.78rem; }
-      .text-cell { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .email { color: #8a8a8e; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
-      .actions { display: flex; gap: 0.4rem; flex-wrap: nowrap; }
-      .btn { padding: 0.35rem 0.75rem; border: 1px solid; border-radius: 5px; cursor: pointer; font-size: 0.78rem; font-weight: 600; background: transparent; transition: all 0.15s; white-space: nowrap; }
-      .btn-approve { color: #4ecdc4; border-color: rgba(78, 205, 196, 0.4); }
-      .btn-approve:hover { background: rgba(78, 205, 196, 0.12); border-color: #4ecdc4; }
-      .btn-delete { color: #e74c3c; border-color: rgba(231, 76, 60, 0.4); }
-      .btn-delete:hover { background: rgba(231, 76, 60, 0.12); border-color: #e74c3c; }
+      .foglio body.admin .count { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }
 
-      .empty { color: #8a8a8e; font-style: italic; padding: 2rem; text-align: center; }
-      .count { color: #8a8a8e; font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; }
+      .foglio body.admin .reply-indicator { color: var(--foglio-accent); font-size: 0.7rem; font-family: var(--foglio-mono); display: block; margin-top: 0.25rem; }
+      .foglio body.admin .likes-cell { color: var(--foglio-accent); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem; }
+      .foglio body.admin .likes-icon { width: 0.9rem; height: 0.9rem; color: var(--foglio-accent); display: inline-block; }
+      .foglio body.admin .likes-icon svg { display: block; width: 100%; height: 100%; }
+      .foglio body.admin .has-children { color: #c0392b; font-size: 0.65rem; margin-left: 0.4rem; padding: 0.05rem 0.35rem; border: 1px solid rgba(192, 57, 43, 0.4); border-radius: 3px; font-family: var(--foglio-mono); }
+      .foglio body.admin .author-badge { display: inline-block; background: var(--foglio-accent); color: var(--foglio-paper); padding: 0.05rem 0.4rem; border-radius: 2px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; margin-left: 0.4rem; vertical-align: middle; letter-spacing: 0.08em; font-family: var(--foglio-mono); }
 
-      .reply-indicator { color: #c9a84c; font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; display: block; margin-top: 0.25rem; opacity: 0.85; }
-      .likes-cell { color: #c9a84c; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.3rem; }
-      .likes-icon { width: 0.9rem; height: 0.9rem; color: #c9a84c; display: inline-block; }
-      .likes-icon svg { display: block; width: 100%; height: 100%; }
-      .has-children { color: #e74c3c; font-size: 0.65rem; margin-left: 0.4rem; padding: 0.05rem 0.35rem; border: 1px solid rgba(231, 76, 60, 0.4); border-radius: 3px; }
-      .author-badge { display: inline-block; background: #c9a84c; color: #0a0a0c; padding: 0.05rem 0.4rem; border-radius: 3px; font-size: 0.62rem; font-weight: 700; text-transform: uppercase; margin-left: 0.4rem; vertical-align: middle; letter-spacing: 0.05em; }
-
-      .claps-totals { color: #8a8a8e; font-size: 0.85rem; margin-bottom: 1.2rem; font-family: 'JetBrains Mono', monospace; }
-      .claps-totals strong { color: #c9a84c; font-size: 1.05rem; font-weight: 700; }
-      .claps-table .clap-count { color: #c9a84c; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-align: right; white-space: nowrap; font-size: 0.95rem; }
-      .claps-table .unique-count { color: #8a8a8e; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; text-align: right; white-space: nowrap; }
-      .claps-table th.clap-count, .claps-table th.unique-count { text-align: right; }
+      .foglio body.admin .claps-totals { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-sm); margin-bottom: 1.2rem; font-family: var(--foglio-mono); }
+      .foglio body.admin .claps-totals strong { color: var(--foglio-accent); font-size: var(--foglio-fs-md); font-weight: 700; }
+      .foglio body.admin .claps-table .clap-count { color: var(--foglio-accent); font-family: var(--foglio-mono); font-weight: 700; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+      .foglio body.admin .claps-table .unique-count { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-align: right; white-space: nowrap; }
+      .foglio body.admin .claps-table th.clap-count, .foglio body.admin .claps-table th.unique-count { text-align: right; }
 
       @media (max-width: 720px) {
-        body { padding: 1rem; }
-        h1 { font-size: 1.5rem; }
-        .card { padding: 1rem; }
-        .text-cell { max-width: 180px; }
+        .foglio body.admin .card { padding: 1rem; }
+        .foglio body.admin .text-cell { max-width: 180px; }
       }
     </style>
   </head>
-  <body>
+  <body class="admin">
     <AdminNav currentPage="comments" token={token} />
     <div class="container">
       <header class="page-header">
-        <h1>Comments</h1>
+        <h1><em class="acc">Comments.</em></h1>
         <span class="page-sub">moderation · likes · claps</span>
       </header>
 
@@ -183,8 +179,9 @@ if (!isAuthorized) {
               var authorBadge = c.is_author
                 ? '<span class="author-badge">Author</span>'
                 : '';
+              var commentUrl = '/' + String(c.page_id || '').replace(/^\/+/, '').replace(/\/+$/, '') + '/';
               return '<tr>' +
-                '<td class="page-id">' + escapeHtml(c.page_id) + replyIndicator + '</td>' +
+                '<td class="page-id"><a href="' + commentUrl + '" target="_blank" rel="noopener" class="post-link">' + escapeHtml(c.page_id) + '</a>' + replyIndicator + '</td>' +
                 '<td>' + escapeHtml(c.name) + authorBadge + childrenBadge + '</td>' +
                 '<td class="email">' + escapeHtml(c.email) + '</td>' +
                 '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
@@ -252,8 +249,9 @@ if (!isAuthorized) {
             emptyEl.style.display = "none";
             tbody.innerHTML = rows.map(function (r) {
               var last = r.last_clap_at ? new Date(r.last_clap_at).toLocaleString("en-US") : "—";
+              var url = '/' + r.post_id.replace(/^\/+/, '').replace(/\/+$/, '') + '/';
               return '<tr>' +
-                '<td class="page-id">' + escapeHtml(r.post_id) + '</td>' +
+                '<td class="page-id"><a href="' + url + '" target="_blank" rel="noopener" class="post-link">' + escapeHtml(r.post_id) + '</a></td>' +
                 '<td class="clap-count">' + Number(r.total_claps) + '</td>' +
                 '<td class="unique-count">' + Number(r.unique_clappers) + '</td>' +
                 '<td>' + escapeHtml(last) + '</td>' +

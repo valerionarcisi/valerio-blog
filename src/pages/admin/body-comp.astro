@@ -2,6 +2,8 @@
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
 import rawData from "../../../data/body-comp/measurements.json";
 
 export const prerender = false;
@@ -19,7 +21,7 @@ const sources = rawData.sources;
 ---
 
 <!doctype html>
-<html lang="it">
+<html lang="it" class="foglio">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,10 +31,10 @@ const sources = rawData.sources;
     <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0c; color: #e8e6e1; padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
+      body { font-family: system-ui, -apple-system, sans-serif; background: var(--foglio-bg); color: var(--foglio-ink); padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
 
-      h1 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 1.5rem; }
-      h2 { font-family: 'Staatliches', Impact, sans-serif; color: #c9a84c; font-size: 1.2rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
+      h1 { font-family: var(--foglio-serif); color: var(--foglio-accent); font-size: 1.8rem; letter-spacing: 0.02em; margin-bottom: 1.5rem; }
+      h2 { font-family: var(--foglio-serif); color: var(--foglio-accent); font-size: 1.2rem; letter-spacing: 0.02em; margin-bottom: 1rem; }
 
       .summary-grid {
         display: grid;
@@ -41,27 +43,27 @@ const sources = rawData.sources;
         margin-bottom: 2rem;
       }
       .stat-card {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 0.8rem;
         text-align: center;
         transition: border-color 0.2s;
         position: relative;
       }
-      .stat-card:hover { border-color: #c9a84c; }
-      .stat-card .label { font-size: 0.82rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
-      .info-icon { display: inline-block; width: 14px; height: 14px; line-height: 14px; text-align: center; border-radius: 50%; background: rgba(255,255,255,0.06); color: #8a8a8e; font-size: 0.55rem; cursor: help; vertical-align: middle; margin-left: 0.2rem; }
-      .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 260px; z-index: 10; line-height: 1.4; text-align: left; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+      .stat-card:hover { border-color: var(--foglio-accent); }
+      .stat-card .label { font-size: 0.82rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.3rem; }
+      .info-icon { display: inline-block; width: 14px; height: 14px; line-height: 14px; text-align: center; border-radius: 50%; background: var(--foglio-rule); color: var(--foglio-ink-soft); font-size: 0.55rem; cursor: help; vertical-align: middle; margin-left: 0.2rem; }
+      .tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--foglio-paper); border: 1px solid var(--foglio-rule-strong); color: var(--foglio-ink-soft); font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 260px; z-index: 10; line-height: 1.4; text-align: left; pointer-events: none; box-shadow: 0 4px 12px rgba(34, 26, 18, 0.18); }
       .stat-card:hover .tooltip { display: block; }
       .chart-card { position: relative; }
-      .chart-tooltip { display: none; position: absolute; top: 0.3rem; right: 0.5rem; background: #1a1a1c; border: 1px solid #333; color: #ccc; font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 280px; z-index: 10; line-height: 1.4; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+      .chart-tooltip { display: none; position: absolute; top: 0.3rem; right: 0.5rem; background: var(--foglio-paper); border: 1px solid var(--foglio-rule-strong); color: var(--foglio-ink-soft); font-size: 0.68rem; padding: 0.5rem 0.7rem; border-radius: 6px; width: max-content; max-width: 280px; z-index: 10; line-height: 1.4; text-align: left; box-shadow: 0 4px 12px rgba(34, 26, 18, 0.18); }
       .chart-card:hover .chart-tooltip { display: block; }
-      .stat-card .value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: #e8e6e1; font-weight: 700; }
-      .stat-card .delta { font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; margin-top: 0.2rem; }
+      .stat-card .value { font-family: var(--foglio-mono); font-size: 1.4rem; color: var(--foglio-ink); font-weight: 700; }
+      .stat-card .delta { font-size: 0.82rem; font-family: var(--foglio-mono); margin-top: 0.2rem; }
       .delta.pos { color: #2ecc71; }
       .delta.neg { color: #e74c3c; }
-      .delta.neutral { color: #8a8a8e; }
+      .delta.neutral { color: var(--foglio-ink-soft); }
 
       .charts-grid {
         display: grid;
@@ -70,13 +72,13 @@ const sources = rawData.sources;
         margin-bottom: 2rem;
       }
       .chart-card {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 1rem;
       }
       .chart-card.full { grid-column: 1 / -1; }
-      .chart-card h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .chart-card h3 { font-size: 0.9rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
       .chart-wrap { position: relative; width: 100%; }
       .chart-wrap canvas { width: 100% !important; }
 
@@ -87,44 +89,44 @@ const sources = rawData.sources;
         margin-bottom: 2rem;
       }
       .donut-card {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;
       }
-      .donut-card h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      .donut-card h3 { font-size: 0.9rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
       .donut-wrap { position: relative; width: 220px; height: 220px; }
       .donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none; }
-      .donut-center .big { font-family: 'JetBrains Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #e8e6e1; }
-      .donut-center .sub { font-size: 0.78rem; color: #8a8a8e; }
+      .donut-center .big { font-family: var(--foglio-mono); font-size: 1.3rem; font-weight: 700; color: var(--foglio-ink); }
+      .donut-center .sub { font-size: 0.78rem; color: var(--foglio-ink-soft); }
 
       .source-legend {
-        display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; font-size: 0.88rem; color: #8a8a8e;
+        display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; font-size: 0.88rem; color: var(--foglio-ink-soft);
       }
       .source-legend span { display: flex; align-items: center; gap: 0.3rem; }
       .source-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
       .source-dot.mancini { background: #4ecdc4; }
-      .source-dot.cardinali { background: #c9a84c; }
+      .source-dot.cardinali { background: var(--foglio-accent); }
 
       .data-table-wrap {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 1rem;
         overflow-x: auto;
         margin-bottom: 2rem;
       }
-      .data-table-wrap h3 { font-size: 0.9rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
-      table { width: 100%; border-collapse: collapse; font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; }
-      thead th { color: #8a8a8e; text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid #333; white-space: nowrap; font-weight: 500; }
-      tbody td { padding: 0.45rem 0.6rem; border-bottom: 1px solid #1a1a1c; color: #e8e6e1; white-space: nowrap; }
-      tbody tr:hover { background: rgba(201, 168, 76, 0.04); }
+      .data-table-wrap h3 { font-size: 0.9rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.8rem; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.88rem; font-family: var(--foglio-mono); }
+      thead th { color: var(--foglio-ink-soft); text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--foglio-rule-strong); white-space: nowrap; font-weight: 500; }
+      tbody td { padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--foglio-paper); color: var(--foglio-ink); white-space: nowrap; }
+      tbody tr:hover { background: var(--foglio-paper-2); }
       .src-badge { display: inline-block; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.6rem; }
       .src-badge.mancini { background: rgba(78,205,196,0.15); color: #4ecdc4; }
-      .src-badge.cardinali { background: rgba(201,168,76,0.15); color: #c9a84c; }
+      .src-badge.cardinali { background: var(--foglio-paper-2); color: var(--foglio-accent); }
 
       .daily-tips {
         display: grid;
@@ -133,17 +135,17 @@ const sources = rawData.sources;
         margin-bottom: 2rem;
       }
       .tip-card {
-        background: #141416;
-        border: 1px solid #222;
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
         border-radius: 8px;
         padding: 1rem 1.2rem;
         transition: border-color 0.3s;
       }
-      .tip-card:hover { border-color: #c9a84c; }
-      .tip-card .tip-icon { color: #c9a84c; margin-bottom: 0.5rem; display: flex; align-items: center; }
+      .tip-card:hover { border-color: var(--foglio-accent); }
+      .tip-card .tip-icon { color: var(--foglio-accent); margin-bottom: 0.5rem; display: flex; align-items: center; }
       .tip-card .tip-icon svg { width: 1.4rem; height: 1.4rem; }
-      .tip-card .tip-cat { font-size: 0.78rem; color: #8a8a8e; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
-      .tip-card .tip-text { font-size: 0.82rem; color: #e8e6e1; line-height: 1.5; }
+      .tip-card .tip-cat { font-size: 0.78rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+      .tip-card .tip-text { font-size: 0.82rem; color: var(--foglio-ink); line-height: 1.5; }
       .tip-card.wellness { border-left: 3px solid #2ecc71; }
       .tip-card.consistency { border-left: 3px solid #f39c12; }
       .tip-card.meditation { border-left: 3px solid #9b59b6; }
@@ -160,9 +162,9 @@ const sources = rawData.sources;
       }
     </style>
   </head>
-  <body>
+  <body class="admin">
     <AdminNav currentPage="body-comp" token={token} />
-    <h1>Body Composition</h1>
+    <h1><em class="acc">Body Composition.</em></h1>
 
     <div class="daily-tips" id="daily-tips"></div>
 
@@ -394,19 +396,29 @@ const sources = rawData.sources;
         return '<div class="stat-card"><div class="label">' + c.label + ' <span class="info-icon">?</span></div><div class="value">' + c.value + "</div>" + c.d + '<div class="tooltip">' + c.tip + '</div></div>';
       }).join("");
 
+      var cssVar = function(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      };
+      var FG_ACCENT = cssVar("--foglio-accent") || "#a8451a";
+      var FG_INK = cssVar("--foglio-ink") || "#221a12";
+      var FG_INK_SOFT = cssVar("--foglio-ink-soft") || "#6b5d4d";
+      var FG_PAPER = cssVar("--foglio-paper") || "#f6f1e8";
+      var FG_RULE = cssVar("--foglio-rule") || "#d9cfbe";
+      var FG_RULE_STRONG = cssVar("--foglio-rule-strong") || "#a89e8a";
+
       var labels = M.map(function(m) { return fmtDate(m.date); });
-      var srcColors = M.map(function(m) { return m.source === "cardinali" ? "#c9a84c" : "#4ecdc4"; });
+      var srcColors = M.map(function(m) { return m.source === "cardinali" ? FG_ACCENT : "#4ecdc4"; });
 
       var FONT = { family: "system-ui", size: 11 };
-      var GRID = { color: "rgba(255,255,255,0.06)" };
-      var TICK = { color: "#8a8a8e", font: FONT };
+      var GRID = { color: FG_RULE };
+      var TICK = { color: FG_INK_SOFT, font: FONT };
 
       var baseOpts = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: true, labels: { color: "#8a8a8e", font: FONT, boxWidth: 12, padding: 8 } },
-          tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, padding: 8, bodyFont: FONT, titleFont: FONT }
+          legend: { display: true, labels: { color: FG_INK_SOFT, font: FONT, boxWidth: 12, padding: 8 } },
+          tooltip: { backgroundColor: FG_PAPER, titleColor: FG_ACCENT, bodyColor: FG_INK, borderColor: FG_RULE_STRONG, borderWidth: 1, padding: 8, bodyFont: FONT, titleFont: FONT }
         },
         scales: {
           x: { ticks: TICK, grid: { display: false } },
@@ -430,7 +442,7 @@ const sources = rawData.sources;
         data: {
           labels: labels,
           datasets: [
-            { label: "Peso", data: M.map(function(m) { return m.weight_kg; }), borderColor: "#e8e6e1", backgroundColor: "rgba(232,230,225,0.1)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 },
+            { label: "Peso", data: M.map(function(m) { return m.weight_kg; }), borderColor: FG_INK, backgroundColor: "rgba(232,230,225,0.1)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 5, tension: 0.3 },
             { label: "FFM", data: M.map(function(m) { return m.ffm_kg; }), borderColor: "#4ecdc4", backgroundColor: "rgba(78,205,196,0.1)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 4, fill: true, tension: 0.3 },
             { label: "FM", data: M.map(function(m) { return m.fm_kg; }), borderColor: "#e74c3c", backgroundColor: "rgba(231,76,60,0.15)", borderWidth: 2, pointBackgroundColor: srcColors, pointRadius: 4, fill: true, tension: 0.3 }
           ]
@@ -582,14 +594,14 @@ const sources = rawData.sources;
           type: "doughnut",
           data: {
             labels: ["FM (" + fmKg + " kg)", "FFM (" + ffmKg + " kg)"],
-            datasets: [{ data: [fmKg, ffmKg], backgroundColor: ["#e74c3c", "#4ecdc4"], borderColor: "#141416", borderWidth: 2 }]
+            datasets: [{ data: [fmKg, ffmKg], backgroundColor: ["#e74c3c", "#4ecdc4"], borderColor: FG_PAPER, borderWidth: 2 }]
           },
           options: {
             responsive: true,
             cutout: "65%",
             plugins: {
-              legend: { position: "bottom", labels: { color: "#8a8a8e", font: FONT, padding: 12, boxWidth: 12 } },
-              tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, bodyFont: FONT }
+              legend: { position: "bottom", labels: { color: FG_INK_SOFT, font: FONT, padding: 12, boxWidth: 12 } },
+              tooltip: { backgroundColor: FG_PAPER, titleColor: FG_ACCENT, bodyColor: FG_INK, borderColor: FG_RULE_STRONG, borderWidth: 1, bodyFont: FONT }
             }
           }
         });
@@ -606,14 +618,14 @@ const sources = rawData.sources;
           type: "doughnut",
           data: {
             labels: ["Proteine " + t.protein_pct + "%", "Lipidi " + t.fat_pct + "%", "Glucidi " + t.carb_pct + "%"],
-            datasets: [{ data: [t.protein_pct, t.fat_pct, t.carb_pct], backgroundColor: ["#e74c3c", "#f39c12", "#2ecc71"], borderColor: "#141416", borderWidth: 2 }]
+            datasets: [{ data: [t.protein_pct, t.fat_pct, t.carb_pct], backgroundColor: ["#e74c3c", "#f39c12", "#2ecc71"], borderColor: FG_PAPER, borderWidth: 2 }]
           },
           options: {
             responsive: true,
             cutout: "65%",
             plugins: {
-              legend: { position: "bottom", labels: { color: "#8a8a8e", font: FONT, padding: 12, boxWidth: 12 } },
-              tooltip: { backgroundColor: "#1a1a1c", titleColor: "#c9a84c", bodyColor: "#e8e6e1", borderColor: "#333", borderWidth: 1, bodyFont: FONT }
+              legend: { position: "bottom", labels: { color: FG_INK_SOFT, font: FONT, padding: 12, boxWidth: 12 } },
+              tooltip: { backgroundColor: FG_PAPER, titleColor: FG_ACCENT, bodyColor: FG_INK, borderColor: FG_RULE_STRONG, borderWidth: 1, bodyFont: FONT }
             }
           }
         });
@@ -643,12 +655,12 @@ const sources = rawData.sources;
               var y = yAxis.getPixelForValue(avgKcal);
               var ctx2 = chart.ctx;
               ctx2.save();
-              ctx2.strokeStyle = "#c9a84c";
+              ctx2.strokeStyle = FG_ACCENT;
               ctx2.lineWidth = 1.5;
               ctx2.setLineDash([6, 4]);
               ctx2.beginPath(); ctx2.moveTo(xAxis.left, y); ctx2.lineTo(xAxis.right, y); ctx2.stroke();
               ctx2.setLineDash([]);
-              ctx2.fillStyle = "#c9a84c";
+              ctx2.fillStyle = FG_ACCENT;
               ctx2.font = "11px system-ui";
               ctx2.fillText("avg " + avgKcal, xAxis.right - 52, y - 6);
               ctx2.restore();

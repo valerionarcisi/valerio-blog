@@ -1,0 +1,137 @@
+---
+interface Props {
+  lang?: "it" | "en";
+  active?: string;
+}
+
+const { lang = "it", active = "" } = Astro.props;
+
+const isEn = lang === "en";
+
+const t = {
+  films: isEn ? "Films" : "Film",
+  blog: "Blog",
+  about: isEn ? "About" : "Chi",
+  contact: isEn ? "Contact" : "Contatti",
+};
+
+const links = [
+  { id: "films", label: t.films, href: isEn ? "/en/films" : "/films" },
+  { id: "blog", label: t.blog, href: isEn ? "/en/blog" : "/blog" },
+  { id: "about", label: t.about, href: isEn ? "/en/who-i-am" : "/who-i-am" },
+  { id: "contact", label: t.contact, href: isEn ? "/en/contact" : "/contatti" },
+];
+
+const langSwitchHref = isEn ? "/" : "/en/";
+const langSwitchLabel = isEn ? "IT" : "EN";
+
+function isActive(id: string): boolean {
+  return active === id;
+}
+---
+
+<nav class="foglio-nav">
+  <a href={isEn ? "/en/" : "/"} class="foglio-nav-brand">Valerio Narcisi</a>
+  <div class="foglio-nav-links">
+    {links.map((link) => (
+      <a href={link.href} class={isActive(link.id) ? "is-active" : ""}>
+        {link.label}
+      </a>
+    ))}
+    <a href={langSwitchHref}>{langSwitchLabel}</a>
+    <button id="ft-toggle" class="ft-toggle" aria-label="Toggle theme">
+      <svg class="ft-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="3"/>
+        <line x1="8" y1="1" x2="8" y2="2.5"/>
+        <line x1="8" y1="13.5" x2="8" y2="15"/>
+        <line x1="1" y1="8" x2="2.5" y2="8"/>
+        <line x1="13.5" y1="8" x2="15" y2="8"/>
+        <line x1="3.05" y1="3.05" x2="4.11" y2="4.11"/>
+        <line x1="11.89" y1="11.89" x2="12.95" y2="12.95"/>
+        <line x1="12.95" y1="3.05" x2="11.89" y2="4.11"/>
+        <line x1="4.11" y1="11.89" x2="3.05" y2="12.95"/>
+      </svg>
+      <svg class="ft-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<style>
+  .ft-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--foglio-ink-soft);
+    vertical-align: middle;
+    padding: 0;
+    line-height: 0;
+  }
+
+  .ft-toggle:hover {
+    color: var(--foglio-accent);
+  }
+
+  .ft-sun {
+    display: none;
+  }
+
+  .ft-moon {
+    display: inline;
+  }
+
+  html[data-theme="dark"] .ft-sun {
+    display: inline;
+  }
+
+  html[data-theme="dark"] .ft-moon {
+    display: none;
+  }
+
+  html[data-theme="light"] .ft-sun {
+    display: none;
+  }
+
+  html[data-theme="light"] .ft-moon {
+    display: inline;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .ft-sun {
+      display: inline;
+    }
+
+    .ft-moon {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    var saved = localStorage.getItem("foglio-theme");
+    if (saved) {
+      document.documentElement.dataset.theme = saved;
+    }
+  })();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var btn = document.getElementById("ft-toggle");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var current = document.documentElement.dataset.theme;
+      var next;
+      if (current === "dark") {
+        next = "light";
+      } else if (current === "light") {
+        next = "dark";
+      } else {
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        next = prefersDark ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem("foglio-theme", next);
+    });
+  });
+</script>

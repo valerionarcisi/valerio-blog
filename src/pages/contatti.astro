@@ -1,100 +1,204 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
 import { SITE_TITLE } from "~/consts";
-import Title from "~/components/Title.astro";
-import "~/layouts/BlogPost.css";
-import "~/components/ContactForm.css";
 ---
 
-<!doctype html>
-<html lang="it">
-  <head>
-    <BaseHead
-      title={`Contatti | ${SITE_TITLE}`}
-      description="Scrivimi un messaggio, ti rispondo il prima possibile."
-    />
-  </head>
-  <body>
-    <Header />
-    <main class="BlogPost">
-      <Title title="Contatti" />
-      <section class="prose">
-        <p>Hai una domanda, una proposta o vuoi semplicemente salutare? Compila il form e ti rispondo il prima possibile.</p>
+<FoglioLayout
+  title={`Contatti · ${SITE_TITLE}`}
+  description="Scrivimi per collaborazioni, sceneggiature, idee o qualsiasi altra cosa. Rispondo a tutti."
+  lang="it"
+  pageId="contact"
+>
+  <div class="ct-page">
+    <header class="ct-head">
+      <p class="ct-eyebrow">Contatti</p>
+      <h1><em class="acc">Scrivimi.</em></h1>
+      <p class="ct-lede">
+        Per collaborazioni, sceneggiature, idee — o solo per dire qualcosa.<br />
+        Rispondo a tutti, in giornata.
+      </p>
+    </header>
 
-        <form class="contact-form" id="contact-form">
-          <label>
-            Nome
-            <input type="text" name="name" required maxlength="100" autocomplete="name" />
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" required maxlength="254" autocomplete="email" />
-          </label>
-          <label>
-            Messaggio
-            <textarea name="message" required maxlength="5000"></textarea>
-          </label>
-          <div class="hp-field" aria-hidden="true">
-            <input type="text" name="website" tabindex="-1" autocomplete="off" />
-          </div>
-          <button type="submit">Invia</button>
-        </form>
-        <div id="form-result" aria-live="polite"></div>
-      </section>
-    </main>
-    <Footer />
+    <section class="ct-body">
+      <div class="ct-block">
+        <h2 class="ct-block-label">Email</h2>
+        <a href="mailto:valerio.narcisi@gmail.com" class="ct-primary-link">
+          valerio.narcisi@gmail.com
+        </a>
+      </div>
 
-    <script is:inline>
-      (function() {
-        var form = document.getElementById("contact-form");
-        var result = document.getElementById("form-result");
+      <div class="ct-block">
+        <h2 class="ct-block-label">Altrove</h2>
+        <ul class="ct-links">
+          <li>
+            <span class="ct-link-role">GitHub</span>
+            <a href="https://github.com/valerionarcisi" class="ct-link" target="_blank" rel="noopener noreferrer">
+              github.com/valerionarcisi
+            </a>
+          </li>
+          <li>
+            <span class="ct-link-role">LinkedIn</span>
+            <a href="https://www.linkedin.com/in/valerionarcisi/" class="ct-link" target="_blank" rel="noopener noreferrer">
+              linkedin.com/in/valerionarcisi
+            </a>
+          </li>
+          <li>
+            <span class="ct-link-role">Letterboxd</span>
+            <a href="https://letterboxd.com/valerionarcisi/" class="ct-link" target="_blank" rel="noopener noreferrer">
+              letterboxd.com/valerionarcisi
+            </a>
+          </li>
+        </ul>
+      </div>
 
-        function showMsg(cls, text) {
-          result.textContent = "";
-          var div = document.createElement("div");
-          div.className = "form-msg " + cls;
-          div.textContent = text;
-          result.appendChild(div);
-        }
+      <div class="ct-block">
+        <h2 class="ct-block-label">Per i film</h2>
+        <p class="ct-note">
+          Se hai un progetto cinematografico, una sceneggiatura da leggere o un'idea in testa —
+          anche abbozzata — scrivimi. Non ho nessun filtro.
+        </p>
+      </div>
+    </section>
+  </div>
+</FoglioLayout>
 
-        form.addEventListener("submit", function(e) {
-          e.preventDefault();
-          var btn = form.querySelector("button");
-          btn.disabled = true;
-          btn.textContent = "Invio in corso...";
-          result.textContent = "";
+<style is:global>
+  .ct-page {
+    max-width: var(--foglio-maxw);
+    margin: 0 auto;
+    padding: 5rem 3rem 8rem;
+  }
 
-          var data = {
-            name: form.name.value.trim(),
-            email: form.email.value.trim(),
-            message: form.message.value.trim(),
-            website: form.website.value
-          };
+  .ct-head {
+    max-width: 600px;
+    margin-bottom: 5rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--foglio-rule);
+  }
 
-          fetch("/api/contact", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-          })
-          .then(function(r) {
-            if (r.ok) {
-              showMsg("ok", "Messaggio inviato! Ti rispondo il prima possibile.");
-              form.reset();
-            } else {
-              return r.json().then(function(d) { throw new Error(d.error || "Errore"); });
-            }
-          })
-          .catch(function(err) {
-            showMsg("err", "Errore: " + err.message);
-          })
-          .finally(function() {
-            btn.disabled = false;
-            btn.textContent = "Invia";
-          });
-        });
-      })();
-    </script>
-  </body>
-</html>
+  .ct-eyebrow {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--foglio-ink-soft);
+    margin: 0 0 1.2rem;
+  }
+
+  .ct-head h1 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: clamp(3rem, 6vw, 5rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0 0 1.5rem;
+  }
+
+  .ct-lede {
+    font-family: var(--foglio-serif);
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+  }
+
+  .ct-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4rem;
+    align-items: start;
+  }
+
+  .ct-block-label {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--foglio-ink-soft);
+    font-weight: 400;
+    margin: 0 0 1rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--foglio-rule);
+  }
+
+  .ct-primary-link {
+    font-family: var(--foglio-mono);
+    font-size: 0.9rem;
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+    padding-bottom: 2px;
+    transition: opacity 0.15s;
+  }
+
+  .ct-primary-link:hover {
+    opacity: 0.75;
+  }
+
+  .ct-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ct-links li {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--foglio-rule);
+    align-items: baseline;
+  }
+
+  .ct-links li:last-child {
+    border-bottom: none;
+  }
+
+  .ct-link-role {
+    font-family: var(--foglio-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-ink-soft);
+  }
+
+  .ct-link {
+    font-family: var(--foglio-serif);
+    font-size: 0.95rem;
+    color: var(--foglio-ink);
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    word-break: break-all;
+  }
+
+  .ct-link:hover {
+    color: var(--foglio-accent);
+    border-bottom-color: var(--foglio-accent-soft);
+  }
+
+  .ct-note {
+    font-family: var(--foglio-serif);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .ct-body {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ct-page {
+      padding: 3rem 1.4rem 6rem;
+    }
+    .ct-body {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    .ct-head {
+      margin-bottom: 3rem;
+    }
+  }
+</style>

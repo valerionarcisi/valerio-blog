@@ -3,7 +3,7 @@ import "./AdminNav.css";
 
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "strava";
 }
 
 const { currentPage, token } = Astro.props;
@@ -23,6 +23,7 @@ const dietaLinks = [
 const bottomLinks = [
   { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation?token=${token}` },
   { id: "training" as const, label: "Training", short: "Run", href: `/admin/training?token=${token}` },
+  { id: "strava" as const, label: "Allenamento", short: "Strava", href: `/admin/strava?token=${token}` },
   { id: "workout" as const, label: "Workout Casa", short: "Casa", href: `/admin/workout?token=${token}` },
 ];
 

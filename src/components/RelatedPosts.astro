@@ -1,9 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import Title from "~/components/Title.astro";
-import Card from "~/components/Card.astro";
-import { getSlugFromId, getLangFromId, useTranslations } from "~/i18n/utils";
-import type { Lang } from "~/i18n/ui";
+import { getSlugFromId, getLangFromId } from "~/i18n/utils";
 
 interface Props {
   currentSlug: string;
@@ -12,8 +9,13 @@ interface Props {
   lang?: string;
 }
 
-const { currentSlug, currentTags, maxPosts = 6, lang = "it" } = Astro.props;
-const t = useTranslations(lang as Lang);
+const { currentSlug, currentTags, maxPosts = 5, lang = "it" } = Astro.props;
+
+const isEn = lang === "en";
+
+function formatDate(d: string) {
+  return new Date(d).toLocaleDateString(isEn ? "en-GB" : "it-IT", { day: "numeric", month: "short", year: "numeric" });
+}
 
 function calculateSimilarity(postTags: string[], currentTags: string[]): number {
   const commonTags = postTags.filter(tag => currentTags.includes(tag));
@@ -27,7 +29,6 @@ const relatedPosts = allPosts
   .map(post => ({
     ...post.data,
     slug: getSlugFromId(post.id),
-    coverImage: post.data.coverImage,
     similarity: calculateSimilarity(post.data.tags || [], currentTags),
   }))
   .filter(post => post.similarity > 0)
@@ -39,63 +40,114 @@ const relatedPosts = allPosts
 ---
 
 {relatedPosts.length > 0 && (
-  <section class="related-posts">
-    <Title title={t("blog.relatedPosts")} />
-    <div class="related-posts-grid">
+  <section class="rp-section">
+    <h2 class="rp-title">{isEn ? "Related articles." : "Articoli correlati."}</h2>
+    <div class="rp-list">
       {relatedPosts.map((post) => (
-        <Card {...post} slug={post.slug} lang={lang} />
+        <a href={isEn ? `/en/blog/${post.slug}/` : `/blog/${post.slug}/`} class="rp-row">
+          <div class="rp-row-date">{formatDate(post.date)}</div>
+          <div class="rp-row-main">
+            <h3 class="rp-row-title">{post.title}</h3>
+            {post.extract && <p class="rp-row-extract">{post.extract}</p>}
+          </div>
+          {post.tags?.[0] && <div class="rp-row-meta">{post.tags[0]}</div>}
+        </a>
       ))}
     </div>
   </section>
 )}
 
-<style>
-  .related-posts {
-    max-width: 85%;
-    margin: 0 auto;
-    padding: var(--space-large) 0;
-    border-top: 2px solid var(--color-tertiary);
+<style is:global>
+  .rp-section {
+    max-width: 880px;
+    margin: 5rem auto 0;
+    padding: 0 3rem 4rem;
   }
-
-  .related-posts-grid {
+  .rp-title {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 1.5rem;
+    color: var(--foglio-ink);
+    margin: 0 0 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--foglio-ink);
+  }
+  .rp-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .rp-row {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-medium);
-    margin-top: var(--space-large);
+    grid-template-columns: 110px 1fr 100px;
+    gap: 2rem;
+    padding: 1.6rem 0;
+    border-bottom: 1px solid var(--foglio-rule);
+    align-items: start;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.15s;
   }
-
-  .related-posts-grid :global(.Card) {
-    max-width: 100%;
+  .rp-row:last-child {
+    border-bottom: none;
+  }
+  .rp-row:hover .rp-row-title,
+  .rp-row:hover .rp-row-title em {
+    color: var(--foglio-accent);
+  }
+  .rp-row-date {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--foglio-ink-soft);
+    padding-top: 0.3rem;
+  }
+  .rp-row-title {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+    color: var(--foglio-ink);
+    transition: color 0.15s;
+  }
+  .rp-row-title em {
+    font-style: italic;
+    transition: color 0.15s;
+  }
+  .rp-row-extract {
+    font-family: var(--foglio-serif);
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--foglio-ink-soft);
     margin: 0;
-    padding: 0;
-    grid-template-columns: 1fr;
-    gap: var(--space-small);
-  }
-
-  .related-posts-grid :global(.Card .content) {
-    padding: 0 6rem;
-  }
-
-  .related-posts-grid :global(.Card h3) {
-    font-size: var(--fontSize-medium);
-    margin-bottom: var(--space-small);
-  }
-
-  .related-posts-grid :global(.Card .description) {
-    font-size: var(--fontSize-very-small);
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  @media screen and (max-width: 768px) {
-    .related-posts {
-      max-width: 85%;
+  .rp-row-meta {
+    text-align: right;
+    font-family: var(--foglio-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-accent);
+  }
+  @media (max-width: 767px) {
+    .rp-section {
+      padding: 0 1.4rem 3rem;
+      margin-top: 3rem;
     }
-
-    .related-posts-grid {
+    .rp-row {
       grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1.4rem 0;
     }
+    .rp-row-date,
+    .rp-row-meta { grid-column: 2; text-align: left; }
+    .rp-row-meta { margin-top: 0.3rem; }
+    .rp-row-title { font-size: 1.25rem; }
   }
 </style>

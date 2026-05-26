@@ -3,6 +3,8 @@ import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import { days, snacks } from "~/data/meal-plan";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
@@ -25,7 +27,7 @@ const mealIconName: Record<string, string> = {
 ---
 
 <!doctype html>
-<html lang="it">
+<html lang="it" class="foglio">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -33,176 +35,168 @@ const mealIconName: Record<string, string> = {
     <meta name="referrer" content="no-referrer" />
     <title>Piano Alimentare</title>
     <style is:global>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background: #0a0a0c;
-        color: #e8e6e1;
-        padding: 1rem;
-        min-height: 100vh;
-        font-size: 1.05rem;
-        -webkit-text-size-adjust: 100%;
-      }
-
-      .day-tabs {
+      .foglio body.admin .day-tabs {
         display: flex;
-        gap: 0.25rem;
+        gap: 0.4rem;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
         scrollbar-width: none;
       }
-      .day-tabs::-webkit-scrollbar { display: none; }
+      .foglio body.admin .day-tabs::-webkit-scrollbar { display: none; }
 
-      .day-tab {
+      .foglio body.admin .day-tab {
         flex-shrink: 0;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        border: 1px solid #333;
-        background: #151518;
-        color: #999;
-        font-size: 0.85rem;
+        padding: 0.45rem 0.9rem;
+        border-radius: var(--foglio-radius-sm);
+        border: 1px solid var(--foglio-rule);
+        background: var(--foglio-paper);
+        color: var(--foglio-ink-soft);
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
         font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
         cursor: pointer;
-        transition: all 0.15s;
-        text-decoration: none;
+        transition: color 0.15s, border-color 0.15s, background 0.15s;
       }
-      .day-tab:hover { border-color: #555; color: #ccc; }
-      .day-tab.active {
-        background: #c8a000;
-        color: #0a0a0c;
-        border-color: #c8a000;
+      .foglio body.admin .day-tab:hover { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .day-tab.active {
+        background: var(--foglio-accent);
+        color: var(--foglio-paper);
+        border-color: var(--foglio-accent);
         font-weight: 700;
       }
 
-      .day-content { display: none; }
-      .day-content.active { display: block; }
+      .foglio body.admin .day-content { display: none; }
+      .foglio body.admin .day-content.active { display: block; }
 
-      .meal-card {
-        background: #151518;
-        border: 1px solid #252528;
-        border-radius: 0.75rem;
+      .foglio body.admin .meal-card {
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
+        border-radius: var(--foglio-radius-md);
         padding: 1rem;
         margin-bottom: 0.75rem;
       }
 
-      .meal-header {
-        font-size: 0.95rem;
-        font-weight: 700;
+      .foglio body.admin .meal-header {
+        font-family: var(--foglio-serif);
+        font-weight: 500;
+        font-size: var(--foglio-fs-md);
+        color: var(--foglio-ink);
         margin-bottom: 0.6rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--foglio-rule);
         display: flex;
         align-items: center;
-        gap: 0.4rem;
+        gap: 0.5rem;
       }
-      .meal-header .meal-icon { width: 1.25rem; height: 1.25rem; color: #c9a84c; flex-shrink: 0; }
+      .foglio body.admin .meal-header .meal-icon { width: 1.2rem; height: 1.2rem; color: var(--foglio-accent); flex-shrink: 0; }
 
-      .oil-badge {
+      .foglio body.admin .oil-badge {
         display: inline-block;
-        font-size: 0.82rem;
+        font-family: var(--foglio-mono);
+        font-size: 0.7rem;
         font-weight: 500;
-        background: #1a2a1a;
-        color: #6abf6a;
-        padding: 0.15rem 0.5rem;
-        border-radius: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border: 1px solid rgba(46, 139, 87, 0.5);
+        color: #2e8b57;
+        padding: 0.1rem 0.5rem;
+        border-radius: 2px;
         margin-left: auto;
         white-space: nowrap;
       }
-      .oil-badge.no-oil {
-        background: #2a1a1a;
-        color: #bf6a6a;
+      .foglio body.admin .oil-badge.no-oil {
+        border-color: rgba(192, 57, 43, 0.5);
+        color: #c0392b;
       }
 
-      .meal-items {
+      .foglio body.admin .meal-items {
         list-style: none;
         padding: 0;
       }
-      .meal-items li {
-        font-size: 0.85rem;
-        line-height: 1.5;
-        padding: 0.25rem 0 0.25rem 1.2rem;
+      .foglio body.admin .meal-items li {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        line-height: 1.55;
+        padding: 0.2rem 0 0.2rem 1rem;
         position: relative;
-        color: #ccc;
+        color: var(--foglio-ink-soft);
       }
-      .meal-items li::before {
-        content: "•";
+      .foglio body.admin .meal-items li::before {
+        content: "·";
         position: absolute;
         left: 0.25rem;
-        color: #666;
+        color: var(--foglio-accent);
+        font-weight: 700;
       }
 
-      details.alternatives {
+      .foglio body.admin details.alternatives {
         margin-top: 0.5rem;
-        border-top: 1px solid #252528;
+        border-top: 1px solid var(--foglio-rule);
         padding-top: 0.5rem;
       }
-      details.alternatives summary {
-        font-size: 0.9rem;
-        color: #c8a000;
+      .foglio body.admin details.alternatives summary {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--foglio-accent);
         cursor: pointer;
         user-select: none;
         padding: 0.25rem 0;
         list-style: none;
       }
-      details.alternatives summary::-webkit-details-marker { display: none; }
-      details.alternatives summary::before {
-        content: "▸ ";
-        display: inline;
-      }
-      details.alternatives[open] summary::before {
-        content: "▾ ";
-      }
+      .foglio body.admin details.alternatives summary::-webkit-details-marker { display: none; }
+      .foglio body.admin details.alternatives summary::before { content: "▸ "; display: inline; }
+      .foglio body.admin details.alternatives[open] summary::before { content: "▾ "; }
 
-      .alt-option {
+      .foglio body.admin .alt-option {
         padding: 0.5rem 0;
-        border-bottom: 1px dashed #1f1f22;
+        border-bottom: 1px dashed var(--foglio-rule);
       }
-      .alt-option:last-child { border-bottom: none; }
+      .foglio body.admin .alt-option:last-child { border-bottom: none; }
 
-      .alt-label {
-        font-size: 0.82rem;
+      .foglio body.admin .alt-label {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
         font-weight: 600;
-        color: #888;
+        color: var(--foglio-ink-mute);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.12em;
         margin-bottom: 0.25rem;
       }
 
-      .snack-section {
-        margin-bottom: 1rem;
-      }
-      .snack-section-title {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #e8e6e1;
-        margin-bottom: 0.5rem;
-        padding-left: 0.25rem;
-      }
-      .snack-option {
-        font-size: 0.85rem;
+      .foglio body.admin .snack-section { margin-bottom: 1rem; }
+      .foglio body.admin .snack-option {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
         line-height: 1.5;
-        padding: 0.35rem 0.5rem;
-        color: #ccc;
-        border-radius: 0.35rem;
+        padding: 0.4rem 0.5rem;
+        color: var(--foglio-ink-soft);
       }
-      .snack-option:nth-child(odd) {
-        background: #111114;
+      .foglio body.admin .snack-option:nth-child(odd) {
+        background: var(--foglio-paper-2);
+        border-radius: var(--foglio-radius-sm);
       }
-      .snack-option .snack-num {
-        color: #666;
-        font-size: 0.88rem;
-        margin-right: 0.3rem;
+      .foglio body.admin .snack-option .snack-num {
+        font-family: var(--foglio-mono);
+        color: var(--foglio-accent);
+        font-size: var(--foglio-fs-mono);
+        margin-right: 0.4rem;
       }
 
       @media (max-width: 500px) {
-        body { padding: 0.75rem; }
-        .day-tab { padding: 0.45rem 0.75rem; font-size: 0.8rem; }
-        .meal-card { padding: 0.75rem; }
+        .foglio body.admin .meal-card { padding: 0.75rem; }
       }
     </style>
   </head>
-  <body>
+  <body class="admin">
     <AdminNav currentPage="meal-plan" token={token} />
+
+    <h1><em class="acc">Piano alimentare.</em></h1>
 
     <div class="day-tabs" role="tablist">
       {days.map((day) => (
@@ -226,7 +220,7 @@ const mealIconName: Record<string, string> = {
         data-panel={day.id}
         role="tabpanel"
       >
-        <h2 style="font-size:1.1rem; margin-bottom:0.75rem; color:#e8e6e1;">
+        <h2 style="margin-bottom:0.75rem;">
           {day.label}
         </h2>
 
@@ -285,7 +279,7 @@ const mealIconName: Record<string, string> = {
     ))}
 
     <div class="day-content" data-panel="snacks" role="tabpanel">
-      <h2 style="font-size:1.1rem; margin-bottom:0.75rem; color:#e8e6e1;">
+      <h2 style="margin-bottom:0.75rem;">
         Spuntini
       </h2>
 

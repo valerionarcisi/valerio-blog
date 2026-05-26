@@ -1,0 +1,157 @@
+/* ============================================
+   FoglioFilmsIndexLayout — Films listing page styles
+   Tokens from foglio.css (--foglio-* prefix)
+   ============================================ */
+
+.fi-head {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 4rem 3rem 3rem;
+}
+
+.fi-head h1 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: clamp(2.6rem, 5vw, 4rem);
+  line-height: 1.04;
+  margin: 0 0 1rem;
+}
+
+.fi-head p {
+  font-family: var(--foglio-serif);
+  font-size: 1.25rem;
+  color: var(--foglio-ink-soft);
+  max-width: 38em;
+  margin: 0;
+}
+
+/* Timeline */
+.fi-timeline {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 0 3rem;
+  border-top: 1px solid var(--foglio-rule);
+}
+
+.fi-row {
+  display: grid;
+  grid-template-columns: 4rem 180px 1fr;
+  gap: 2rem;
+  align-items: start;
+  padding: 2.5rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s;
+}
+
+.fi-row:hover {
+  background: var(--foglio-paper-2);
+  margin: 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.fi-year {
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-mute);
+  padding-top: 0.3rem;
+}
+
+.fi-thumb {
+  aspect-ratio: 3 / 2;
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  flex-shrink: 0;
+}
+
+.fi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.fi-info-top {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.fi-film-title {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: 1.5rem;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--foglio-ink);
+}
+.fi-film-title em {
+  font-style: italic;
+  color: var(--foglio-accent);
+}
+
+.fi-award-badge {
+  flex-shrink: 0;
+}
+
+.fi-role {
+  font-family: var(--foglio-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+  margin: 0;
+}
+
+.fi-plot {
+  font-family: var(--foglio-serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--foglio-ink-soft);
+  margin: 0.3rem 0 0.6rem;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .fi-head {
+    padding: 2.5rem 1.4rem 2rem;
+  }
+
+  .fi-timeline {
+    padding: 0 1.4rem;
+  }
+
+  .fi-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 2rem 0;
+  }
+
+  .fi-row:hover {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .fi-year {
+    padding-top: 0;
+  }
+
+  .fi-thumb {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .fi-row {
+    grid-template-columns: 4rem 140px 1fr;
+    gap: 1.5rem;
+  }
+}

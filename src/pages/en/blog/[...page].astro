@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import Blog from '~/layouts/Blog.astro';
+import FoglioListLayout from '~/layouts/FoglioListLayout.astro';
 import { getCollection } from 'astro:content';
 import { getLangFromId, getSlugFromId } from '~/i18n/utils';
 
@@ -20,8 +20,7 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props as any;
 ---
 
-<Blog
-  category="Blog"
+<FoglioListLayout
   posts={page.data}
   lang="en"
   pagination={{

@@ -189,25 +189,6 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    // Behavioral bot detection: 2+ visits with zero meaningful engagement → likely bot
-    try {
-      const visits = await db.execute({
-        sql: `SELECT COUNT(*) as total,
-              SUM(CASE WHEN (time_on_page IS NOT NULL AND time_on_page > 5) OR (scroll_depth IS NOT NULL AND scroll_depth > 0) THEN 1 ELSE 0 END) as engaged
-              FROM pageviews WHERE visitor_hash = ? AND created_at >= date('now', '-7 days')`,
-        args: [visitorHash],
-      });
-      const row = visits.rows[0];
-      if (Number(row.total) >= 2 && Number(row.engaged) === 0) {
-        await db.execute({
-          sql: "INSERT OR IGNORE INTO bot_hashes (hash) VALUES (?)",
-          args: [visitorHash],
-        });
-      }
-    } catch {
-      // best-effort — bot_hashes table may not exist
-    }
-
     return new Response(null, { status: 204 });
   }
 

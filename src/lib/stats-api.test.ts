@@ -250,25 +250,19 @@ describe("GET /api/stats", () => {
     expect(customBody.summary.visitors).toBe(todayBody.summary.visitors);
   });
 
-  test("excludes bot hashes from counts", async () => {
-    const botHash = "bot-hash-123456";
+  test("includes all pageviews (bot filtering done by isBot UA at write-time only)", async () => {
     await insertPageview({
-      visitor_hash: botHash,
+      visitor_hash: "any-hash-1",
       created_at: "2026-03-05 08:00:00",
     });
     await insertPageview({ created_at: "2026-03-05 09:00:00" });
-
-    await db.execute({
-      sql: "INSERT INTO bot_hashes (hash) VALUES (?)",
-      args: [botHash],
-    });
 
     const { GET } = await import("~/pages/api/stats");
     const { url, request } = makeRequest("today");
     const res = await GET({ url, request } as never);
     const body = await res.json();
 
-    expect(body.summary.pageviews).toBe(1);
+    expect(body.summary.pageviews).toBe(2);
   });
 
   test("filters by pathname when provided", async () => {

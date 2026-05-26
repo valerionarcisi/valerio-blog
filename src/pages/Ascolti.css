@@ -1,0 +1,356 @@
+/* ============================================
+   Ascolti / Listening — full music page
+   Tokens from foglio.css (--foglio-* prefix)
+   ============================================ */
+
+.as-head {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 4rem 3rem 2.5rem;
+  border-bottom: 1px solid var(--foglio-rule);
+}
+.as-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1rem;
+}
+.as-head h1 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-5xl);
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  margin: 0 0 1.4rem;
+}
+.as-head h1 em { font-style: italic; }
+.as-lede {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-md);
+  line-height: 1.55;
+  color: var(--foglio-ink-soft);
+  max-width: 38em;
+  margin: 0 0 2rem;
+}
+
+/* Period switch */
+.as-period-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 2.5rem;
+}
+.as-period-link {
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: 999px;
+  color: var(--foglio-ink-soft);
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.as-period-link:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+.as-period-link.is-active {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+  border-color: var(--foglio-accent);
+}
+
+/* Stats */
+.as-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin: 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--foglio-rule);
+}
+.as-stat dt {
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+  margin-bottom: 0.4rem;
+}
+.as-stat dd {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: var(--foglio-fs-2xl);
+  color: var(--foglio-ink);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+.as-stat-name {
+  font-size: var(--foglio-fs-md) !important;
+  line-height: 1.2;
+}
+.as-stat-name span {
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  color: var(--foglio-ink-soft);
+  font-weight: 400;
+}
+
+.as-main {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 3rem 3rem 5rem;
+}
+.as-section + .as-section { margin-top: 5rem; }
+.as-section-title {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-style: italic;
+  font-size: var(--foglio-fs-xl);
+  color: var(--foglio-ink);
+  margin: 0 0 3rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid var(--foglio-ink);
+}
+.as-section-period {
+  font-family: var(--foglio-mono);
+  font-style: normal;
+  font-weight: 400;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+  margin-left: 0.5rem;
+}
+.as-empty {
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  color: var(--foglio-ink-mute);
+  padding: 2rem 0;
+  text-align: center;
+}
+
+/* Album grid */
+.as-album-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem 1.4rem;
+}
+.as-album {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: opacity 0.15s;
+}
+.as-album:hover { opacity: 0.88; }
+.as-album-cover {
+  aspect-ratio: 1 / 1;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--foglio-paper-2);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  position: relative;
+  margin-bottom: 0.7rem;
+  box-shadow: var(--foglio-shadow);
+}
+
+.as-album-cover--empty {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--foglio-paper-2),
+      var(--foglio-paper-2) 14px,
+      var(--foglio-paper) 14px,
+      var(--foglio-paper) 28px
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.as-album-fallback {
+  font-family: var(--foglio-serif);
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  font-weight: 500;
+  color: var(--foglio-accent);
+  opacity: 0.7;
+  line-height: 1;
+  user-select: none;
+}
+
+.as-album-fallback em {
+  font-style: italic;
+}
+.as-album-rank {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0.4rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.7rem;
+  background: rgba(34, 26, 18, 0.78);
+  color: var(--foglio-paper);
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  letter-spacing: 0.06em;
+}
+.as-album-meta { padding: 0 0.1rem; }
+.as-album-title {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-sm);
+  line-height: 1.3;
+  margin: 0 0 0.2rem;
+  color: var(--foglio-ink);
+}
+.as-album-title em {
+  font-style: italic;
+  color: var(--foglio-accent);
+}
+.as-album:hover .as-album-title em {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.as-album-artist {
+  font-family: var(--foglio-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 0.3rem;
+}
+.as-album-plays {
+  font-family: var(--foglio-mono);
+  font-size: 0.7rem;
+  color: var(--foglio-ink-mute);
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Artist list */
+.as-artist-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: artistnum;
+}
+.as-artist-row {
+  display: grid;
+  grid-template-columns: 60px 1fr auto;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+  align-items: baseline;
+}
+.as-artist-row:last-child { border-bottom: none; }
+.as-artist-rank {
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-mute);
+}
+.as-artist-name {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-lg);
+  color: var(--foglio-ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.as-artist-name:hover {
+  color: var(--foglio-accent);
+  border-bottom-color: var(--foglio-accent-soft);
+}
+.as-artist-plays {
+  font-family: var(--foglio-mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recent scrobbles */
+.as-recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.as-recent-row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+  align-items: center;
+}
+.as-recent-row:last-child { border-bottom: none; }
+.as-recent-cover {
+  width: 42px;
+  height: 42px;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--foglio-paper-2);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+}
+
+.as-recent-cover--empty {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      var(--foglio-paper-2),
+      var(--foglio-paper-2) 6px,
+      var(--foglio-paper) 6px,
+      var(--foglio-paper) 12px
+    );
+}
+.as-recent-main { min-width: 0; }
+.as-recent-track {
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-sm);
+  margin: 0;
+  color: var(--foglio-ink);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.as-recent-artist { color: var(--foglio-ink); }
+.as-recent-sep { color: var(--foglio-ink-mute); }
+.as-recent-name {
+  font-style: italic;
+  color: var(--foglio-accent);
+}
+.as-recent-album {
+  font-family: var(--foglio-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+  margin: 0.2rem 0 0;
+}
+.as-recent-date {
+  font-family: var(--foglio-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .as-album-grid { grid-template-columns: repeat(3, 1fr); }
+  .as-stats { grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
+}
+@media (max-width: 600px) {
+  .as-head { padding: 2.5rem 1.4rem 1.5rem; }
+  .as-main { padding: 2rem 1.4rem 3rem; }
+  .as-album-grid { grid-template-columns: repeat(2, 1fr); gap: 1.4rem 1rem; }
+  .as-artist-row { grid-template-columns: 40px 1fr; }
+  .as-artist-plays { grid-column: 2; }
+  .as-recent-date { font-size: 0.6rem; }
+}

@@ -1,0 +1,201 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+import StravaSummary from "~/components/StravaSummary.astro";
+import ActivityDonut from "~/components/ActivityDonut.astro";
+import ActivityHeatmap from "~/components/ActivityHeatmap.astro";
+import { fetchFullStats, fetchRecentActivities } from "~/services/strava";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const [fullStats, recentActivities] = await Promise.all([
+  fetchFullStats().catch(() => null),
+  fetchRecentActivities(10).catch(() => []),
+]);
+
+const heatmapData = fullStats?.yearlyBreakdown ?? fullStats?.dailyBreakdown ?? [];
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Allenamento · Admin</title>
+    <style is:global>
+      .strava-admin {
+        max-width: var(--foglio-maxw);
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+
+      .strava-admin h1 em.acc {
+        font-style: italic;
+        color: var(--foglio-accent);
+        font-weight: 400;
+      }
+      .strava-admin .subtitle {
+        color: var(--foglio-ink-mute);
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 2rem;
+      }
+
+      .strava-top {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      @media (min-width: 768px) {
+        .strava-top {
+          grid-template-columns: 1.4fr 1fr;
+          align-items: start;
+        }
+      }
+
+      .strava-empty {
+        color: var(--foglio-ink-mute);
+        font-style: italic;
+        padding: 2rem 0;
+        text-align: center;
+      }
+
+      /* Recent activities list */
+      .activity-list { display: flex; flex-direction: column; gap: 0.5rem; }
+      .activity-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.6rem 0.75rem;
+        border-radius: var(--foglio-radius-sm);
+        background: var(--foglio-paper-2);
+        text-decoration: none;
+        color: inherit;
+        transition: background 0.15s;
+        border: 1px solid transparent;
+      }
+      .activity-row:hover {
+        background: var(--foglio-paper);
+        border-color: var(--foglio-rule);
+      }
+      .activity-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .activity-name {
+        flex: 1;
+        font-size: var(--foglio-fs-sm);
+        color: var(--foglio-ink);
+      }
+      .activity-meta {
+        display: flex;
+        gap: 0.6rem;
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        color: var(--foglio-ink-soft);
+      }
+      .activity-meta .pace { color: var(--foglio-accent); }
+      .activity-date {
+        font-size: var(--foglio-fs-mono);
+        font-family: var(--foglio-mono);
+        color: var(--foglio-ink-mute);
+        white-space: nowrap;
+      }
+
+      @media (max-width: 768px) {
+        .strava-admin { padding: 1.25rem 1rem 3rem; }
+        .activity-meta { flex-wrap: wrap; gap: 0.4rem; }
+        .activity-date { display: none; }
+      }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="strava" token={token} />
+
+    <div class="strava-admin">
+      <h1><em class="acc">Allenamento</em></h1>
+      <p class="subtitle">Heatmap, statistiche e attività Strava</p>
+
+      {!fullStats && (
+        <div class="section">
+          <div class="strava-empty">Impossibile caricare i dati Strava.</div>
+        </div>
+      )}
+
+      {fullStats && (
+        <>
+          <div class="section">
+            <div class="section-title">Sintesi</div>
+            <div class="strava-top">
+              <StravaSummary stats={fullStats.periodStats} />
+              <ActivityDonut
+                distribution={fullStats.typeDistribution}
+                totalActivities={fullStats.periodStats.monthly.totalActivities}
+              />
+            </div>
+          </div>
+
+          <div class="section">
+            <ActivityHeatmap days={heatmapData} title="Heatmap annuale" />
+          </div>
+
+          {recentActivities.length > 0 && (
+            <div class="section">
+              <div class="section-title">Attività recenti</div>
+              <div class="activity-list">
+                {recentActivities.map((a) => {
+                  const km = a.distance > 0 ? (a.distance / 1000).toFixed(1) + " km" : "";
+                  const pace = a.averageSpeed > 0 && a.sportType === "Run"
+                    ? (() => {
+                        const secPerKm = 1000 / a.averageSpeed;
+                        const m = Math.floor(secPerKm / 60);
+                        const s = Math.round(secPerKm % 60);
+                        return `${m}:${String(s).padStart(2, "0")}/km`;
+                      })()
+                    : "";
+                  const elev = a.elevation > 10 ? `↑${Math.round(a.elevation)}m` : "";
+                  const hours = Math.floor(a.movingTime / 3600);
+                  const mins = Math.floor((a.movingTime % 3600) / 60);
+                  const dur = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+                  const dateLabel = new Date(a.date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+                  const color = a.sportType === "Run" ? "#fc4c02"
+                    : a.sportType === "WeightTraining" ? "#a855f7"
+                    : a.sportType === "Ride" || a.sportType === "VirtualRide" ? "#2563eb"
+                    : "#8a7c66";
+                  return (
+                    <a href={a.url} target="_blank" rel="noopener" class="activity-row">
+                      <div class="activity-dot" style={`background:${color}`}></div>
+                      <div class="activity-name">{a.name}</div>
+                      <div class="activity-meta">
+                        {km && <span>{km}</span>}
+                        {pace && <span class="pace">{pace}</span>}
+                        {elev && <span>{elev}</span>}
+                        <span>{dur}</span>
+                      </div>
+                      <div class="activity-date">{dateLabel}</div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  </body>
+</html>

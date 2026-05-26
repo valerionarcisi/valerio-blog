@@ -379,3 +379,224 @@ button[type="submit"]:disabled,
   border-color: rgba(201, 168, 76, 0.35);
   background: rgba(201, 168, 76, 0.04);
 }
+
+/* ============================================
+   Foglio overrides — flat editorial, no cards
+   Applied when inside a .foglio page
+   ============================================ */
+.foglio .Comments {
+  max-width: 720px;
+  margin: 4rem auto 0;
+  padding: 3rem 3rem;
+  border-top: 1px solid var(--foglio-rule);
+  border-bottom: 1px solid var(--foglio-rule);
+}
+
+@media (max-width: 767px) {
+  .foglio .Comments {
+    margin: 2.5rem 0 0;
+    padding: 2rem 1.4rem;
+  }
+  .foglio .Comments-children {
+    padding-left: 0.8rem;
+  }
+}
+
+.foglio .Comments h2 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--foglio-ink);
+  margin: 0 0 1.5rem;
+}
+
+.foglio .Comments-item {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--foglio-rule);
+  border-radius: 0;
+  padding: 1.4rem 0;
+}
+
+.foglio .Comments-list .Comments-item:last-child {
+  border-bottom: none;
+}
+
+.foglio .Comments-meta {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-meta strong {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments-date {
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments .Comments-text {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text strong {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text a {
+  color: var(--foglio-accent);
+  border-bottom: 1px solid var(--foglio-accent-soft);
+}
+
+.foglio .Comments .Comments-text code {
+  background: var(--foglio-paper-2);
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text pre {
+  background: var(--foglio-paper-2);
+  border-color: var(--foglio-rule);
+}
+
+.foglio .Comments .Comments-text blockquote {
+  border-left-color: var(--foglio-accent-soft);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-empty,
+.foglio .Comments-loading {
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments-form {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.foglio .Comments-form--root {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--foglio-rule);
+}
+
+.foglio .Comments-form--reply {
+  background: transparent;
+  border: none;
+  padding-left: 1rem;
+  border-left: 2px solid var(--foglio-rule);
+}
+
+.foglio .Comments-field label {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-field input,
+.foglio .Comments-field textarea {
+  background: var(--foglio-paper);
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-serif);
+}
+
+.foglio .Comments-field input:focus,
+.foglio .Comments-field textarea:focus {
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-md-hint {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments-message--success {
+  color: var(--foglio-accent);
+}
+
+.foglio .Comments-children {
+  border-left-color: var(--foglio-rule);
+  padding-left: 1.2rem;
+}
+
+.foglio .Comments-children .Comments-item {
+  background: transparent;
+  border-bottom: 1px solid var(--foglio-rule);
+  padding: 1rem 0;
+}
+
+.foglio .Comments-children .Comments-item:last-child {
+  border-bottom: none;
+}
+
+.foglio .Comments-like,
+.foglio .Comments-reply-btn {
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink-soft);
+  font-family: var(--foglio-mono);
+}
+
+.foglio .Comments-like:hover,
+.foglio .Comments-reply-btn:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-like.is-active {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+  background: rgba(168, 69, 26, 0.07);
+}
+
+.foglio .Comments-cancel {
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink-soft);
+  font-family: var(--foglio-mono);
+}
+
+.foglio .Comments-cancel:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-author-badge {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+
+.foglio .Comments-author-indicator {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-accent);
+}
+
+.foglio .Comments-item:has(.Comments-author-badge) {
+  background: transparent;
+}
+
+/* Submit button — override legacy .Button on Foglio pages */
+.foglio .Comments-form .Button {
+  appearance: none;
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+  border: 1px solid var(--foglio-accent);
+  border-radius: var(--foglio-radius-sm);
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.foglio .Comments-form .Button:hover {
+  opacity: 0.82;
+}
+
+.foglio .Comments-form .Button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

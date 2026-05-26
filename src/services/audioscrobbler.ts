@@ -82,3 +82,128 @@ export const fetchRecentTracks = async (
     }
   }
 };
+
+/* ============================================
+   Aggregate methods for "Ascolti" / listening page
+   ============================================ */
+
+export type Period = "7day" | "1month" | "3month" | "6month" | "12month" | "overall";
+
+export interface TopAlbum {
+  name: string;
+  artist: string;
+  playcount: number;
+  url: string;
+  imageUrl: string | null;
+}
+
+export interface TopArtist {
+  name: string;
+  playcount: number;
+  url: string;
+  imageUrl: string | null;
+}
+
+export interface UserInfo {
+  playcount: number;
+  registered: string;
+  artistCount: number;
+  albumCount: number;
+  trackCount: number;
+}
+
+const LASTFM_BLANK_IMAGE_HASH = "2a96cbd8b46e442fc41c2b86b821562f";
+
+function isBlankImage(url: string | undefined): boolean {
+  if (!url) return true;
+  return url.includes(LASTFM_BLANK_IMAGE_HASH);
+}
+
+function bestImage(images: { "#text": string; size: string }[] | undefined): string | null {
+  if (!images || images.length === 0) return null;
+  const prefer = ["extralarge", "large", "medium", "small"];
+  for (const size of prefer) {
+    const found = images.find((i) => i.size === size && i["#text"] && !isBlankImage(i["#text"]));
+    if (found) return found["#text"];
+  }
+  return null;
+}
+
+export async function fetchTopAlbums(period: Period = "1month", limit = 24): Promise<TopAlbum[]> {
+  const params = new URLSearchParams({
+    method: "user.gettopalbums",
+    user: AUDIO_SCROBBLER_USER,
+    api_key: AUDIO_SCROBBLER_API_KEY,
+    format: "json",
+    period,
+    limit: String(limit),
+  });
+  try {
+    const r = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+    if (!r.ok) throw new Error(`top albums status ${r.status}`);
+    const json: any = await r.json();
+    const albums = json?.topalbums?.album ?? [];
+    return albums.map((a: any) => ({
+      name: a.name ?? "",
+      artist: a.artist?.name ?? "",
+      playcount: Number(a.playcount ?? 0),
+      url: a.url ?? "",
+      imageUrl: bestImage(a.image),
+    }));
+  } catch (err) {
+    console.error("Error fetching top albums:", err);
+    return [];
+  }
+}
+
+export async function fetchTopArtists(period: Period = "1month", limit = 10): Promise<TopArtist[]> {
+  const params = new URLSearchParams({
+    method: "user.gettopartists",
+    user: AUDIO_SCROBBLER_USER,
+    api_key: AUDIO_SCROBBLER_API_KEY,
+    format: "json",
+    period,
+    limit: String(limit),
+  });
+  try {
+    const r = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+    if (!r.ok) throw new Error(`top artists status ${r.status}`);
+    const json: any = await r.json();
+    const artists = json?.topartists?.artist ?? [];
+    return artists.map((a: any) => ({
+      name: a.name ?? "",
+      playcount: Number(a.playcount ?? 0),
+      url: a.url ?? "",
+      imageUrl: bestImage(a.image),
+    }));
+  } catch (err) {
+    console.error("Error fetching top artists:", err);
+    return [];
+  }
+}
+
+export async function fetchUserInfo(): Promise<UserInfo | null> {
+  const params = new URLSearchParams({
+    method: "user.getinfo",
+    user: AUDIO_SCROBBLER_USER,
+    api_key: AUDIO_SCROBBLER_API_KEY,
+    format: "json",
+  });
+  try {
+    const r = await fetch(`https://ws.audioscrobbler.com/2.0/?${params}`);
+    if (!r.ok) throw new Error(`user info status ${r.status}`);
+    const json: any = await r.json();
+    const u = json?.user;
+    if (!u) return null;
+    return {
+      playcount: Number(u.playcount ?? 0),
+      registered: u.registered?.["#text"] ?? "",
+      artistCount: Number(u.artist_count ?? 0),
+      albumCount: Number(u.album_count ?? 0),
+      trackCount: Number(u.track_count ?? 0),
+    };
+  } catch (err) {
+    console.error("Error fetching user info:", err);
+    return null;
+  }
+}

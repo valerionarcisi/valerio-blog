@@ -1,0 +1,210 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import { SITE_TITLE } from "~/consts";
+import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import { getMovieById, extractDirectors } from "~/services/tmdb";
+import { formatMoneyCompact } from "~/lib/format-money";
+import { letterboxdDirectorUrl } from "~/lib/letterboxd-slug";
+import "~/styles/foglio.css";
+import "./Visti.css";
+
+interface WatchedMovie {
+  title?: string;
+  watchedDate?: string;
+  rating?: string;
+  poster_path?: string;
+  budget?: number;
+  revenue?: number;
+  overview?: string;
+  release_date?: string;
+  vote_average?: number;
+  runtime?: number;
+  directors?: string[];
+}
+
+const fetchAllWatched = async (): Promise<WatchedMovie[]> => {
+  try {
+    const xml = await getLetterboxdRss();
+    const parsedXml = (await parseXmlContent(await xml.text())) as any;
+    const items = parsedXml?.rss?.channel?.[0]?.item ?? [];
+
+    const promises = items
+      .filter((it: any) => it?.["tmdb:movieId"]?.[0])
+      .map(async (it: any) => {
+        try {
+          const movie = await getMovieById(it["tmdb:movieId"][0]);
+          return {
+            ...(movie as any),
+            directors: extractDirectors(movie),
+            title: it["letterboxd:filmTitle"]?.[0],
+            watchedDate: it["letterboxd:watchedDate"]?.[0],
+            rating: it["letterboxd:memberRating"]?.[0],
+          } as WatchedMovie;
+        } catch {
+          return null;
+        }
+      });
+    const results = await Promise.all(promises);
+    return results.filter(Boolean) as WatchedMovie[];
+  } catch {
+    return [];
+  }
+};
+
+const all = await fetchAllWatched();
+
+const groupByYear: Record<string, WatchedMovie[]> = {};
+for (const m of all) {
+  const y = m.watchedDate ? new Date(m.watchedDate).getFullYear().toString() : "—";
+  if (!groupByYear[y]) groupByYear[y] = [];
+  groupByYear[y].push(m);
+}
+const years = Object.keys(groupByYear).sort((a, b) => b.localeCompare(a));
+
+function fmtDate(raw?: string): string {
+  if (!raw) return "";
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
+}
+
+const totalCount = all.length;
+const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+const lastWeekCount = all.filter((m) => {
+  if (!m.watchedDate) return false;
+  const t = new Date(m.watchedDate).getTime();
+  return Number.isFinite(t) && t >= oneWeekAgo;
+}).length;
+
+const totalMinutes = all.reduce(
+  (s, m) => s + (typeof m.runtime === "number" && m.runtime > 0 ? m.runtime : 0),
+  0,
+);
+const totalHours = Math.round(totalMinutes / 60);
+
+const myRatings = all
+  .map((m) => (m.rating ? Number(m.rating) : NaN))
+  .filter((n) => Number.isFinite(n) && n > 0);
+const tmdbRatings = all
+  .map((m) => (typeof m.vote_average === "number" ? m.vote_average : NaN))
+  .filter((n) => Number.isFinite(n) && n > 0);
+
+let avgLabel = "—";
+if (myRatings.length > 0) {
+  const avg = myRatings.reduce((s, n) => s + n, 0) / myRatings.length;
+  avgLabel = `★ ${avg.toFixed(1)}/5`;
+} else if (tmdbRatings.length > 0) {
+  const avg = tmdbRatings.reduce((s, n) => s + n, 0) / tmdbRatings.length;
+  avgLabel = `★ ${avg.toFixed(1)}/10`;
+}
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <BaseHead
+      title={`Visti · ${SITE_TITLE}`}
+      description="Lista completa dei film visti, con date, budget e incassi al box office. Dati Letterboxd + TMDB."
+    />
+  </head>
+  <body>
+    <FoglioHeader lang="it" />
+
+    <header class="vw-head">
+      <p class="vw-eyebrow">Diario di visione</p>
+      <h1><em class="acc">Visti.</em></h1>
+      <p class="vw-lede">
+        Cosa ho guardato di recente — feed Letterboxd, metadata da TMDB.
+        Budget e box office quando disponibili.
+      </p>
+
+      <dl class="vw-stats">
+        <div class="vw-stat">
+          <dt>Film</dt>
+          <dd>{totalCount}</dd>
+        </div>
+        <div class="vw-stat">
+          <dt>Ultimi 7 giorni</dt>
+          <dd>{lastWeekCount}</dd>
+        </div>
+        <div class="vw-stat">
+          <dt>Ore guardate</dt>
+          <dd>{totalHours} h</dd>
+        </div>
+        <div class="vw-stat">
+          <dt>Voto medio</dt>
+          <dd>{avgLabel}</dd>
+        </div>
+      </dl>
+    </header>
+
+    <main class="vw-main">
+      {totalCount === 0 ? (
+        <p class="vw-empty">Nessun dato disponibile al momento.</p>
+      ) : (
+        years.map((year) => (
+          <section class="vw-year">
+            <h2 class="vw-year-label">{year}</h2>
+            <ul class="vw-list">
+              {groupByYear[year].map((m) => {
+                const b = formatMoneyCompact(m.budget);
+                const r = formatMoneyCompact(m.revenue);
+                const hasMoney = b || r;
+                return (
+                  <li class="vw-row">
+                    <div
+                      class="vw-cover"
+                      style={m.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w185/${m.poster_path}')` : ""}
+                    />
+                    <div class="vw-main-col">
+                      <h3 class="vw-title">{m.title}</h3>
+                      {m.directors && m.directors.length > 0 && (
+                        <p class="vw-director">di <span>{m.directors.map((d, i) => (
+                          <>
+                            {i > 0 && ", "}
+                            <a
+                              class="vw-director-link"
+                              href={letterboxdDirectorUrl(d)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >{d}</a>
+                          </>
+                        ))}</span></p>
+                      )}
+                      {m.overview && <p class="vw-overview">{m.overview}</p>}
+                      <div class="vw-meta">
+                        {m.release_date && <span>{m.release_date.slice(0, 4)}</span>}
+                        {typeof m.runtime === "number" && m.runtime > 0 && (
+                          <span>{m.runtime}′</span>
+                        )}
+                        {typeof m.vote_average === "number" && m.vote_average > 0 && (
+                          <span>★ {m.vote_average.toFixed(1)}</span>
+                        )}
+                        {m.rating && <span class="vw-my-rating">il mio: {m.rating}/5</span>}
+                      </div>
+                    </div>
+                    <div class="vw-side">
+                      {hasMoney && (
+                        <div class="vw-money">
+                          <span class="vw-money-budget">{b ?? "—"}</span>
+                          <span class="vw-money-arrow">→</span>
+                          <span class="vw-money-revenue">{r ?? "—"}</span>
+                        </div>
+                      )}
+                      <time class="vw-date">{fmtDate(m.watchedDate)}</time>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ))
+      )}
+    </main>
+
+    <FoglioFooter lang="it" />
+
+  </body>
+</html>

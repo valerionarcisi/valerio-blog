@@ -1,6 +1,6 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import Blog from '~/layouts/Blog.astro';
+import FoglioListLayout from '~/layouts/FoglioListLayout.astro';
 import { getCollection } from 'astro:content';
 import { getLangFromId, getSlugFromId } from '~/i18n/utils';
 
@@ -31,11 +31,11 @@ const { tag } = Astro.params;
 const { page } = Astro.props as any;
 ---
 
-<Blog
-  category={tag}
+<FoglioListLayout
   posts={page.data}
   lang="it"
   noindex
+  activeTag={tag}
   pagination={{
     currentPage: page.currentPage,
     lastPage: page.lastPage,

@@ -1,30 +1,52 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import Title from "~/components/Title.astro";
-import "./404.css";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import { SITE_TITLE } from "~/consts";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead title={`404 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
-  </head>
-  <body >
-    <Header />
-    <main class="container">
-      <Title title="404: Page not found 😢" />
-      <section>
-        <p>
-          <img class="avatar" src="/img/avatar.png" alt="Valerio" />
-          <h2>
-            Home is always... <a href="/">Home</a>!
-          </h2>
-        </p>
-      </section>
-    </main>
-    <Footer />
-  </body>
-</html>
+<FoglioLayout
+  title={`404 · ${SITE_TITLE}`}
+  description="Pagina non trovata."
+  lang="it"
+>
+  <section class="nf-section">
+    <p class="nf-eyebrow">PAGINA NON TROVATA</p>
+    <h1 class="nf-title"><em class="acc">404</em>.</h1>
+    <p class="nf-body">Questa pagina non esiste. Forse è stata spostata, o forse non è mai nata.</p>
+    <a href="/" class="foglio-readmore">← Torna alla home</a>
+  </section>
+</FoglioLayout>
+
+<style is:global>
+  .nf-section {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 8rem 3rem 10rem;
+    text-align: center;
+  }
+  .nf-eyebrow {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--foglio-ink-soft);
+    margin: 0 0 1.5rem;
+  }
+  .nf-title {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: clamp(5rem, 15vw, 9rem);
+    line-height: 1;
+    margin: 0 0 2rem;
+    color: var(--foglio-ink);
+  }
+  .nf-body {
+    font-family: var(--foglio-serif);
+    font-size: 1.2rem;
+    color: var(--foglio-ink-soft);
+    line-height: 1.6;
+    margin: 0 0 3rem;
+  }
+  @media (max-width: 767px) {
+    .nf-section { padding: 5rem 1.4rem 7rem; }
+  }
+</style>

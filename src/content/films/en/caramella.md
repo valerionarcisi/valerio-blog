@@ -4,7 +4,8 @@ year: 2025
 role: "Written & Directed"
 status: "completed"
 sortOrder: 1
-coverImage: "/img/caramella/Copertina.jpg"
+coverImage: "/img/caramella/STILL_00.jpg"
+posterImage: "/img/caramella/Locandina_jpeg.jpg"
 trailerLocalPath: "/img/caramella/CARAMELLA_TRAILER_.mp4"
 trailerUrl: "https://www.youtube.com/watch?v=UnQ8NSXYXao"
 plot: "Ilenia is a girl working in a shoe factory in Le Marche (Italy), who dreams of becoming an actress. When she's assigned to a night shift that conflicts with her acting course, she struggles to get anyone to swap shifts. As her frustration builds, she confides in Massimino, a new colleague, about her desire to escape the monotony and pursue her passion."
@@ -64,6 +65,7 @@ festivals:
   - name: "Dorico International Film Fest"
     year: 2025
     location: "Ancona - Mole Vanvitelliana"
+    laurel: "/img/caramella/laurels/dorico-2025.png"
   - name: "Festival della Commedia - Pulcinella FilmFest"
     year: 2025
     location: "Acerra (NA) - Castello dei Conti"
@@ -73,6 +75,7 @@ festivals:
   - name: "Corti al Castello"
     year: 2025
     location: "Moresco (FM)"
+    laurel: "/img/caramella/laurels/corti-al-castello-dark.png"
   - name: "Scollinare Film Festival"
     year: 2025
     location: "Tolentino (MC)"
@@ -82,6 +85,11 @@ festivals:
     year: 2025
   - name: "Colonnella Film Festival"
     year: 2026
+    laurel: "/img/caramella/laurels/colonnella-selection.png"
+  - name: "River Film Festival"
+    year: 2026
+    location: "Padova - Scalinata di Porta Portello, June 7"
+    laurel: "/img/caramella/laurels/river-2026.png"
 specialThanks:
   - name: "Officine Mattoli"
     url: "https://www.officinemattoli.it/"

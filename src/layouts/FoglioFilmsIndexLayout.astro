@@ -1,0 +1,101 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import { SITE_TITLE } from "~/consts";
+import "~/styles/foglio.css";
+import "./FoglioFilmsIndexLayout.css";
+
+interface FilmEntry {
+  title: string;
+  year: number;
+  role: string;
+  status?: string;
+  sortOrder: number;
+  coverImage?: string;
+  posterImage?: string;
+  plot: string;
+  festivals: Array<{ name: string; year: number; location?: string; award?: string }>;
+  slug: string;
+}
+
+interface Props {
+  films: FilmEntry[];
+  lang?: "it" | "en";
+}
+
+const { films, lang = "it" } = Astro.props;
+
+const isEn = lang === "en";
+
+const pageTitle = isEn ? `Films | ${SITE_TITLE}` : `Film | ${SITE_TITLE}`;
+const pageDescription = isEn
+  ? "Short films by Valerio Narcisi — director and screenwriter from Le Marche, Italy."
+  : "I cortometraggi di Valerio Narcisi — regista e sceneggiatore dalle Marche.";
+
+const subtitle = isEn
+  ? "Short films and screenplays. Cinema made in Le Marche."
+  : "Cortometraggi e sceneggiature. Cinema fatto nelle Marche.";
+
+function filmHref(slug: string): string {
+  return isEn ? `/en/films/${slug}/` : `/films/${slug}/`;
+}
+
+function hasAward(film: FilmEntry): boolean {
+  return film.festivals.some((f) => f.award);
+}
+
+function awardCount(film: FilmEntry): number {
+  return film.festivals.filter((f) => f.award).length;
+}
+---
+
+<html lang={lang} class="foglio">
+  <head>
+    <BaseHead title={pageTitle} description={pageDescription} lang={lang} />
+  </head>
+  <body>
+    <FoglioHeader lang={lang} active="films" />
+
+    <header class="fi-head">
+      <h1><em class="acc">Film</em>.</h1>
+      <p>{subtitle}</p>
+    </header>
+
+    <section class="fi-timeline">
+      {films.map((film) => (
+        <a href={filmHref(film.slug)} class="fi-row">
+          <div class="fi-year">{film.year}</div>
+          {(film.posterImage || film.coverImage) && (
+            <div
+              class="fi-thumb"
+              style={`background-image: url('${film.posterImage ?? film.coverImage}')`}
+              role="img"
+              aria-label={film.title}
+            ></div>
+          )}
+          <div class="fi-info">
+            <div class="fi-info-top">
+              <h2 class="fi-film-title">{film.title}</h2>
+              {hasAward(film) && (
+                <span class="fi-award-badge">
+                  {awardCount(film)}{" "}
+                  {isEn
+                    ? awardCount(film) === 1 ? "award" : "awards"
+                    : awardCount(film) === 1 ? "premio" : "premi"}
+                </span>
+              )}
+            </div>
+            <p class="fi-role">{film.role}</p>
+            <p class="fi-plot">{film.plot.slice(0, 180)}{film.plot.length > 180 ? "…" : ""}</p>
+            <span class="foglio-readmore">
+              {isEn ? "Read more →" : "Leggi →"}
+            </span>
+          </div>
+        </a>
+      ))}
+    </section>
+
+    <FoglioFooter lang={lang} />
+  </body>
+</html>

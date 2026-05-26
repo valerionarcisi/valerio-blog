@@ -1,14 +1,15 @@
+/* AdminNav — Foglio editorial sidebar */
 .admin-sidebar {
   position: fixed;
   top: 0;
   left: 0;
-  width: 170px;
+  width: 180px;
   height: 100vh;
-  background: #111113;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: var(--foglio-paper);
+  border-right: 1px solid var(--foglio-rule);
   display: flex;
   flex-direction: column;
-  padding: 1rem 0.5rem;
+  padding: 1.25rem 0.6rem;
   gap: 0.25rem;
   z-index: 50;
   overflow-y: auto;
@@ -21,46 +22,51 @@
 }
 
 .sidebar-section + .sidebar-section {
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--foglio-rule);
 }
 
 .sidebar-group-title {
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #555;
-  padding: 0.25rem 0.75rem 0.15rem;
+  letter-spacing: 0.14em;
+  color: var(--foglio-ink-mute);
+  padding: 0.25rem 0.75rem 0.35rem;
 }
 
 .sidebar-link {
   display: block;
   padding: 0.45rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-family: system-ui, -apple-system, sans-serif;
-  color: #8a8a8e;
+  border-radius: var(--foglio-radius-sm);
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
   white-space: nowrap;
 }
 
 .sidebar-link:hover {
-  color: #4ecdc4;
-  background: rgba(78, 205, 196, 0.08);
+  color: var(--foglio-accent);
+  background: var(--foglio-paper-2);
 }
 
 .sidebar-link.active {
-  color: #c9a84c;
-  background: rgba(201, 168, 76, 0.1);
-  font-weight: 600;
+  color: var(--foglio-accent);
+  background: var(--foglio-paper-2);
+  font-weight: 700;
+  border-left: 2px solid var(--foglio-accent);
+  padding-left: calc(0.75rem - 2px);
 }
 
 .sidebar-link-sub {
   padding-left: 1rem;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
 }
 
 .sidebar-label-short {
@@ -68,20 +74,19 @@
 }
 
 body:has(.admin-sidebar) {
-  padding-left: 186px !important;
+  padding-left: 196px !important;
 }
 
-/* ── Hamburger button (mobile only, hidden on desktop) ── */
+/* ── Hamburger button (mobile only) ── */
 .admin-hamburger {
   display: none;
 }
 
-/* ── Backdrop (mobile only) ── */
 .admin-backdrop {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(34, 26, 18, 0.45);
   z-index: 98;
   opacity: 0;
   transition: opacity 0.25s;
@@ -89,14 +94,12 @@ body:has(.admin-sidebar) {
   backdrop-filter: blur(4px);
 }
 
-/* ── Mobile: hamburger + slide-in drawer ── */
 @media (max-width: 768px) {
   body:has(.admin-sidebar) {
     padding-left: 1rem !important;
     padding-bottom: 1rem !important;
   }
 
-  /* Hamburger button — top-left pill */
   .admin-hamburger {
     display: flex;
     align-items: center;
@@ -107,23 +110,21 @@ body:has(.admin-sidebar) {
     z-index: 200;
     width: 44px;
     height: 44px;
-    background: rgba(28, 28, 30, 0.85);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: var(--foglio-paper);
+    border: 1px solid var(--foglio-rule);
+    border-radius: var(--foglio-radius-md);
     cursor: pointer;
     flex-direction: column;
     gap: 5px;
     padding: 11px 10px;
-    transition: background 0.2s;
+    transition: border-color 0.2s;
   }
-  .admin-hamburger:hover { background: rgba(50, 50, 55, 0.9); }
+  .admin-hamburger:hover { border-color: var(--foglio-accent); }
   .admin-hamburger span {
     display: block;
     width: 22px;
     height: 2px;
-    background: #e8e6e1;
+    background: var(--foglio-ink);
     border-radius: 2px;
     transition: transform 0.25s, opacity 0.25s;
     transform-origin: center;
@@ -132,7 +133,6 @@ body:has(.admin-sidebar) {
   .admin-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
   .admin-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-  /* Backdrop */
   .admin-backdrop {
     display: block;
     pointer-events: none;
@@ -142,74 +142,26 @@ body:has(.admin-sidebar) {
     pointer-events: auto;
   }
 
-  /* Drawer */
   .admin-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 220px;
-    height: 100vh;
+    width: 230px;
     transform: translateX(-100%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 199;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(17, 17, 19, 0.97);
-    -webkit-backdrop-filter: saturate(180%) blur(30px);
-    backdrop-filter: saturate(180%) blur(30px);
     padding: 5rem 0.75rem 1.5rem;
-    overflow-y: auto;
   }
   .admin-sidebar.open {
     transform: translateX(0);
   }
 
-  /* Restore vertical layout inside drawer */
-  .sidebar-section {
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-  }
-  .sidebar-section + .sidebar-section {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-left: none;
-    padding-left: 0;
-  }
-  .sidebar-group-title {
-    display: block;
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #555;
-    padding: 0.25rem 0.75rem 0.15rem;
-  }
   .sidebar-label-short { display: none; }
   .sidebar-label-full { display: inline; }
 
   .sidebar-link {
-    display: block;
     padding: 0.6rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    color: rgba(255, 255, 255, 0.7);
-    text-align: left;
-    min-height: unset;
-  }
-  .sidebar-link:hover,
-  .sidebar-link:active {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-  }
-  .sidebar-link.active {
-    color: #c9a84c;
-    background: rgba(201, 168, 76, 0.12);
-    font-weight: 700;
+    font-size: 0.85rem;
   }
   .sidebar-link-sub {
     padding-left: 1.25rem;
-    font-size: 0.88rem;
+    font-size: 0.78rem;
   }
 }
