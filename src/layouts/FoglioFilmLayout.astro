@@ -1,0 +1,400 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import Comments from "~/components/Comments.astro";
+import { SITE_TITLE } from "~/consts";
+import "~/styles/foglio.css";
+import "./FoglioFilmLayout.css";
+
+interface TechnicalSpecs {
+  shootingFormat?: string;
+  soundFormat?: string;
+  aspectRatio?: string;
+  musicalRights?: string;
+  spokenLanguage?: string;
+  subtitleLanguages?: string[];
+  duration?: string;
+}
+
+interface Props {
+  title: string;
+  year: number;
+  role: string;
+  status?: string;
+  plot: string;
+  coverImage?: string;
+  youtubeUrl?: string;
+  trailerLocalPath?: string;
+  trailerUrl?: string;
+  technicalSpecs?: TechnicalSpecs;
+  crew: Array<{ role: string; name: string; url?: string }>;
+  cast: Array<{ name: string; url?: string; character?: string }>;
+  festivals: Array<{ name: string; year: number; location?: string; award?: string }>;
+  distribution?: { name: string; url?: string };
+  specialThanks: Array<{ name: string; url?: string }>;
+  images: Array<{ src: string; alt: string }>;
+  slug: string;
+  lang?: "it" | "en";
+}
+
+const {
+  title,
+  year,
+  role,
+  status,
+  plot,
+  coverImage,
+  youtubeUrl,
+  trailerLocalPath,
+  technicalSpecs,
+  crew,
+  cast,
+  festivals,
+  distribution,
+  specialThanks,
+  images,
+  slug,
+  lang = "it",
+} = Astro.props;
+
+const isEn = lang === "en";
+
+const t = {
+  synopsis: isEn ? "Plot." : "Trama.",
+  stills: isEn ? "Stills" : "Stills",
+  crew: isEn ? "Crew" : "Crew",
+  cast: isEn ? "Cast" : "Cast",
+  festivals: isEn ? "Festivals & Awards" : "Festival e Premi",
+  distribution: isEn ? "Distribution" : "Distribuzione",
+  specialThanks: isEn ? "Special Thanks" : "Ringraziamenti",
+  techSpecs: isEn ? "Technical Specs" : "Scheda Tecnica",
+  watchOn: isEn ? "Watch on" : "Guarda su",
+  openImage: isEn ? "Open image" : "Apri immagine",
+  prev: isEn ? "Previous" : "Precedente",
+  next: isEn ? "Next" : "Successivo",
+  close: isEn ? "Close" : "Chiudi",
+  gallery: isEn ? "Stills gallery" : "Galleria stills",
+  statusCompleted: isEn ? "Completed" : "Completato",
+  statusInProduction: isEn ? "In production" : "In lavorazione",
+  shootingFormat: isEn ? "Format" : "Formato",
+  soundFormat: isEn ? "Sound" : "Suono",
+  aspectRatio: isEn ? "Aspect Ratio" : "Aspect Ratio",
+  musicalRights: isEn ? "Musical Rights" : "Diritti Musicali",
+  spokenLanguage: isEn ? "Language" : "Lingua",
+  subtitles: isEn ? "Subtitles" : "Sottotitoli",
+  duration: isEn ? "Duration" : "Durata",
+};
+
+function statusBadgeClass(s?: string): string {
+  if (!s) return "";
+  if (s === "completed") return "foglio-status foglio-status--stabile";
+  if (s === "in-production" || s === "post-production")
+    return "foglio-status foglio-status--in-lavorazione";
+  return "foglio-status foglio-status--schizzo";
+}
+
+function statusLabel(s?: string): string {
+  if (!s) return "";
+  if (s === "completed") return t.statusCompleted;
+  if (s === "in-production" || s === "post-production") return t.statusInProduction;
+  return s;
+}
+
+const awardsCount = festivals.filter((f) => f.award).length;
+---
+
+<html lang={lang} class="foglio">
+  <head>
+    <BaseHead
+      title={`${title} (${year}) | ${SITE_TITLE}`}
+      description={plot}
+      cover={coverImage}
+      lang={lang}
+    />
+  </head>
+  <body>
+    <FoglioHeader lang={lang} active="films" />
+
+    <header class="ff-head">
+      <div class="ff-eyebrow">
+        <span>{year}</span>
+        <span>{role}</span>
+        {status && (
+          <span class={statusBadgeClass(status)}>{statusLabel(status)}</span>
+        )}
+        {awardsCount > 0 && (
+          <span class="ff-eyebrow-awards">
+            {awardsCount} {isEn ? (awardsCount === 1 ? "award" : "awards") : (awardsCount === 1 ? "premio" : "premi")}
+          </span>
+        )}
+      </div>
+      <h1 class="ff-title"><em>{title}</em></h1>
+      <p class="ff-credit"><em>{role} {isEn ? "by" : "di"} Valerio Narcisi</em></p>
+    </header>
+
+    {coverImage && (
+      <section class="ff-poster">
+        <div
+          class="ff-poster-img"
+          style={`background-image: url('${coverImage}')`}
+          role="img"
+          aria-label={title}
+        ></div>
+      </section>
+    )}
+
+    <section class="ff-body">
+      <div class="ff-synopsis">
+        <h2>{t.synopsis}</h2>
+        <p>{plot}</p>
+        <slot />
+      </div>
+
+      <aside class="ff-aside">
+        {technicalSpecs && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.techSpecs}</h3>
+            <ul>
+              {technicalSpecs.duration && (
+                <li>
+                  <span class="ff-crew-role">{t.duration}</span>
+                  <span class="ff-crew-name">{technicalSpecs.duration}</span>
+                </li>
+              )}
+              {technicalSpecs.shootingFormat && (
+                <li>
+                  <span class="ff-crew-role">{t.shootingFormat}</span>
+                  <span class="ff-crew-name">{technicalSpecs.shootingFormat}</span>
+                </li>
+              )}
+              {technicalSpecs.soundFormat && (
+                <li>
+                  <span class="ff-crew-role">{t.soundFormat}</span>
+                  <span class="ff-crew-name">{technicalSpecs.soundFormat}</span>
+                </li>
+              )}
+              {technicalSpecs.aspectRatio && (
+                <li>
+                  <span class="ff-crew-role">{t.aspectRatio}</span>
+                  <span class="ff-crew-name">{technicalSpecs.aspectRatio}</span>
+                </li>
+              )}
+              {technicalSpecs.spokenLanguage && (
+                <li>
+                  <span class="ff-crew-role">{t.spokenLanguage}</span>
+                  <span class="ff-crew-name">{technicalSpecs.spokenLanguage}</span>
+                </li>
+              )}
+              {technicalSpecs.subtitleLanguages && technicalSpecs.subtitleLanguages.length > 0 && (
+                <li>
+                  <span class="ff-crew-role">{t.subtitles}</span>
+                  <span class="ff-crew-name">{technicalSpecs.subtitleLanguages.join(" · ")}</span>
+                </li>
+              )}
+              {technicalSpecs.musicalRights && (
+                <li>
+                  <span class="ff-crew-role">{t.musicalRights}</span>
+                  <span class="ff-crew-name">{technicalSpecs.musicalRights}</span>
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+
+        {crew.length > 0 && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.crew}</h3>
+            <ul>
+              {crew.map((member) => (
+                <li>
+                  <span class="ff-crew-role">{member.role}</span>
+                  <span class="ff-crew-name">
+                    {member.url
+                      ? <a href={member.url} target="_blank" rel="noopener">{member.name}</a>
+                      : member.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {cast.length > 0 && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.cast}</h3>
+            <ul>
+              {cast.map((actor) => (
+                <li>
+                  <span class="ff-crew-name ff-crew-name--full">
+                    {actor.url
+                      ? <a href={actor.url} target="_blank" rel="noopener">{actor.name}</a>
+                      : actor.name}
+                    {actor.character && <span class="ff-character"> — {actor.character}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {festivals.length > 0 && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.festivals}</h3>
+            <ul class="ff-festival-list">
+              {festivals.map((fest) => (
+                <li class="ff-festival-item">
+                  <span class="ff-festival-name">{fest.name} {fest.year}</span>
+                  {fest.location && <span class="ff-festival-location">{fest.location}</span>}
+                  {fest.award && <span class="ff-festival-award">{fest.award}</span>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {distribution && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.distribution}</h3>
+            <ul>
+              <li>
+                <span class="ff-crew-name ff-crew-name--full">
+                  {distribution.url
+                    ? <a href={distribution.url} target="_blank" rel="noopener">{distribution.name}</a>
+                    : distribution.name}
+                </span>
+              </li>
+            </ul>
+          </div>
+        )}
+
+        {specialThanks.length > 0 && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">{t.specialThanks}</h3>
+            <ul>
+              {specialThanks.map((person) => (
+                <li>
+                  <span class="ff-crew-name ff-crew-name--full">
+                    {person.url
+                      ? <a href={person.url} target="_blank" rel="noopener">{person.name}</a>
+                      : person.name}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {youtubeUrl && (
+          <div class="ff-aside-block">
+            <h3 class="ff-aside-label">YouTube</h3>
+            <ul>
+              <li>
+                <span class="ff-crew-name ff-crew-name--full">
+                  <a href={youtubeUrl} target="_blank" rel="noopener" class="ff-yt-link">
+                    {t.watchOn} YouTube ↗
+                  </a>
+                </span>
+              </li>
+            </ul>
+          </div>
+        )}
+      </aside>
+    </section>
+
+    {images.length > 0 && (
+      <section class="ff-stills">
+        <h2>{t.stills}</h2>
+        <div class="ff-stills-grid">
+          {images.map((img, i) => (
+            <button
+              class="ff-plate"
+              data-src={img.src}
+              aria-label={`${t.openImage} ${i + 1}: ${img.alt}`}
+              style={`background-image: url('${img.src}')`}
+            ></button>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {trailerLocalPath && (
+      <section class="ff-trailer">
+        <video
+          src={trailerLocalPath}
+          controls
+          muted
+          autoplay
+          class="ff-trailer-video"
+        ></video>
+      </section>
+    )}
+
+    <div
+      class="ff-lightbox"
+      id="ff-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t.gallery}
+      hidden
+    >
+      <button class="ff-lightbox-prev" aria-label={t.prev}>←</button>
+      <img class="ff-lightbox-img" alt="" />
+      <button class="ff-lightbox-next" aria-label={t.next}>→</button>
+      <button class="ff-lightbox-close" aria-label={t.close}>✕</button>
+      <div class="ff-lightbox-counter"></div>
+    </div>
+
+    <div class="ff-comments-wrap">
+      <Comments pageId={`films/${slug}`} lang={lang} />
+    </div>
+
+    <FoglioFooter lang={lang} />
+
+    <script is:inline>
+      (function () {
+        var plates = Array.from(document.querySelectorAll(".ff-plate"));
+        var lb = document.getElementById("ff-lightbox");
+        if (!lb || !plates.length) return;
+        var img = lb.querySelector(".ff-lightbox-img");
+        var counter = lb.querySelector(".ff-lightbox-counter");
+        var closeBtn = lb.querySelector(".ff-lightbox-close");
+        var prevBtn = lb.querySelector(".ff-lightbox-prev");
+        var nextBtn = lb.querySelector(".ff-lightbox-next");
+        var idx = 0;
+
+        function show(i) {
+          idx = (i + plates.length) % plates.length;
+          img.src = plates[idx].getAttribute("data-src");
+          img.alt = plates[idx].getAttribute("aria-label") || "";
+          counter.textContent = (idx + 1) + " / " + plates.length;
+        }
+        function open(i) {
+          show(i);
+          lb.hidden = false;
+          lb.classList.add("is-open");
+          document.body.style.overflow = "hidden";
+        }
+        function close() {
+          lb.hidden = true;
+          lb.classList.remove("is-open");
+          document.body.style.overflow = "";
+        }
+
+        plates.forEach(function (b, i) {
+          b.addEventListener("click", function () { open(i); });
+        });
+        prevBtn.addEventListener("click", function () { show(idx - 1); });
+        nextBtn.addEventListener("click", function () { show(idx + 1); });
+        closeBtn.addEventListener("click", close);
+        lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+        document.addEventListener("keydown", function (e) {
+          if (lb.hidden) return;
+          if (e.key === "Escape") close();
+          if (e.key === "ArrowLeft") show(idx - 1);
+          if (e.key === "ArrowRight") show(idx + 1);
+        });
+      })();
+    </script>
+  </body>
+</html>
