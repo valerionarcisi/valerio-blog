@@ -20,6 +20,12 @@ importers:
       '@astrojs/sitemap':
         specifier: ^3.6.1
         version: 3.6.1
+      '@fontsource/eb-garamond':
+        specifier: 5.1.1
+        version: 5.1.1
+      '@fontsource/inter':
+        specifier: 5.1.1
+        version: 5.1.1
       '@fontsource/jetbrains-mono':
         specifier: 5.1.1
         version: 5.1.1
@@ -596,6 +602,12 @@ packages:
 
   '@fastify/busboy@3.1.1':
     resolution: {integrity: sha512-5DGmA8FTdB2XbDeEwc/5ZXBl6UbBAyBOOLlPuBnZ/N1SwdH9Ii+cOX3tBROlDgcTXxjOYnLMVoKk9+FXAw0CJw==}
+
+  '@fontsource/eb-garamond@5.1.1':
+    resolution: {integrity: sha512-fB/T2F+Hvic0f8AU1oZXc64OyWDrce5x01JUafnC+u2OSILMales+g4CtD02CPP7l9x2AydqD4yV/tK7YbKeMg==}
+
+  '@fontsource/inter@5.1.1':
+    resolution: {integrity: sha512-weN3E+rq0Xb3Z93VHJ+Rc7WOQX9ETJPTAJ+gDcaMHtjft67L58sfS65rAjC5tZUXQ2FdZ/V1/sSzCwZ6v05kJw==}
 
   '@fontsource/jetbrains-mono@5.1.1':
     resolution: {integrity: sha512-5rwvmdQQpXev4LlBX1P+7h2dguu6iwW/9Npjde4+DEq+HgpVJI/7QY8DI1NVVFdvLtXZNP+vO2L/5BQED6FUhA==}
@@ -5010,6 +5022,10 @@ snapshots:
   '@fastify/accept-negotiator@2.0.1': {}
 
   '@fastify/busboy@3.1.1': {}
+
+  '@fontsource/eb-garamond@5.1.1': {}
+
+  '@fontsource/inter@5.1.1': {}
 
   '@fontsource/jetbrains-mono@5.1.1': {}
 

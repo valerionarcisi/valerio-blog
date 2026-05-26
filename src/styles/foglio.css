@@ -1,0 +1,240 @@
+/* ============================================
+   FOGLIO — Design system for the redesigned site
+   Italian-editorial / Cinema d'autore / Quaderno raffinato
+   Mobile-first responsive
+
+   Token discipline: terracotta accent appears at most
+   3-4 times per page. Italic ≠ accent. Use .acc class
+   for the rare em that wants emphasis.
+   ============================================ */
+
+:root {
+  /* Palette — light (default) */
+  --foglio-bg: #f6f1e8;
+  --foglio-paper: #fbf7ee;
+  --foglio-paper-2: #f1ebdd;
+  --foglio-ink: #221a12;
+  --foglio-ink-soft: #5e4d3a;
+  --foglio-ink-mute: #8a7c66;
+  --foglio-rule: #d8cebd;
+  --foglio-rule-strong: #b8aa92;
+  --foglio-accent: #a8451a;
+  --foglio-accent-soft: #c8714a;
+  --foglio-shadow: 0 8px 18px -10px rgba(34, 26, 18, 0.18);
+  --foglio-shadow-strong: 0 14px 28px -12px rgba(34, 26, 18, 0.28);
+
+  /* Type stack */
+  --foglio-serif: "EB Garamond", "Iowan Old Style", Georgia, serif;
+  --foglio-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --foglio-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", monospace;
+
+  /* Layout */
+  --foglio-maxw: 1200px;
+  --foglio-maxw-prose: 680px;
+  --foglio-radius-sm: 4px;
+  --foglio-radius-md: 6px;
+  --foglio-radius-lg: 8px;
+}
+
+/* Dark mode — invert the cream */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foglio-bg: #131210;
+    --foglio-paper: #1c1a16;
+    --foglio-paper-2: #232017;
+    --foglio-ink: #ece8de;
+    --foglio-ink-soft: #b8ad95;
+    --foglio-ink-mute: #7a705e;
+    --foglio-rule: #2e2a23;
+    --foglio-rule-strong: #4a4438;
+    --foglio-accent: #d9874e;
+    --foglio-accent-soft: #b86a3a;
+    --foglio-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
+    --foglio-shadow-strong: 0 14px 28px -12px rgba(0, 0, 0, 0.55);
+  }
+}
+
+/* Manual toggle: <html data-theme="dark"> wins over system */
+html[data-theme="dark"] {
+  --foglio-bg: #131210;
+  --foglio-paper: #1c1a16;
+  --foglio-paper-2: #232017;
+  --foglio-ink: #ece8de;
+  --foglio-ink-soft: #b8ad95;
+  --foglio-ink-mute: #7a705e;
+  --foglio-rule: #2e2a23;
+  --foglio-rule-strong: #4a4438;
+  --foglio-accent: #d9874e;
+  --foglio-accent-soft: #b86a3a;
+  --foglio-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
+  --foglio-shadow-strong: 0 14px 28px -12px rgba(0, 0, 0, 0.55);
+}
+html[data-theme="light"] {
+  --foglio-bg: #f6f1e8;
+  --foglio-paper: #fbf7ee;
+  --foglio-paper-2: #f1ebdd;
+  --foglio-ink: #221a12;
+  --foglio-ink-soft: #5e4d3a;
+  --foglio-ink-mute: #8a7c66;
+  --foglio-rule: #d8cebd;
+  --foglio-rule-strong: #b8aa92;
+  --foglio-accent: #a8451a;
+  --foglio-accent-soft: #c8714a;
+  --foglio-shadow: 0 8px 18px -10px rgba(34, 26, 18, 0.18);
+  --foglio-shadow-strong: 0 14px 28px -12px rgba(34, 26, 18, 0.28);
+}
+
+/* Base body scope — applied via .foglio class on body or html */
+.foglio,
+.foglio body {
+  background: var(--foglio-bg);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
+}
+.foglio * { box-sizing: border-box; }
+.foglio a { color: inherit; text-decoration: none; }
+.foglio img { max-width: 100%; display: block; }
+
+/* Italic by default = ink (not accent). Use .acc to opt-in. */
+.foglio em { font-style: italic; }
+.foglio em.acc,
+.foglio .acc { color: var(--foglio-accent); }
+
+/* Shared atoms — nav, footer, eyebrows, etc. */
+.foglio-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 2rem 3rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--foglio-ink-soft);
+}
+.foglio-nav-brand {
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--foglio-ink);
+}
+.foglio-nav-links {
+  display: flex;
+  gap: 1.8rem;
+}
+.foglio-nav-links a {
+  transition: color 0.15s;
+}
+.foglio-nav-links a:hover {
+  color: var(--foglio-accent);
+}
+.foglio-nav-links a.is-active {
+  color: var(--foglio-ink);
+}
+
+.foglio-rule {
+  border-top: 1px solid var(--foglio-rule);
+  margin: 0 3rem;
+}
+
+.foglio-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--foglio-ink-soft);
+}
+
+.foglio-readmore {
+  font-family: var(--foglio-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-accent);
+  border-bottom: 1px solid var(--foglio-accent);
+  padding-bottom: 2px;
+  transition: all 0.15s;
+}
+.foglio-readmore:hover {
+  color: var(--foglio-ink);
+  border-color: var(--foglio-ink);
+}
+
+.foglio-footer {
+  border-top: 1px solid var(--foglio-rule);
+  margin-top: 6rem;
+}
+.foglio-footer-inner {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 3rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--foglio-mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-soft);
+}
+.foglio-footer-inner a:hover {
+  color: var(--foglio-accent);
+}
+.foglio-footer-social {
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Status badges */
+.foglio-status {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 2px;
+  font-family: var(--foglio-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+.foglio-status--stabile {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.foglio-status--in-lavorazione {
+  border: 1px solid var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+.foglio-status--schizzo {
+  border: 1px solid var(--foglio-ink-soft);
+  color: var(--foglio-ink-soft);
+}
+
+/* Mobile-first responsive shared atoms */
+@media (max-width: 767px) {
+  .foglio-nav {
+    padding: 1.2rem 1.4rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .foglio-nav-brand { font-size: 1.1rem; }
+  .foglio-nav-links {
+    gap: 1.2rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+  }
+  .foglio-rule { margin: 0 1.4rem; }
+  .foglio-footer-inner {
+    padding: 2rem 1.4rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .foglio-footer-social { flex-wrap: wrap; gap: 1rem; }
+}
