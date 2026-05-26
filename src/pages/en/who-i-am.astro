@@ -1,162 +1,248 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import Title from "~/components/Title.astro";
-import "~/layouts/BlogPost.css";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import { SITE_TITLE } from "~/consts";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead
-      title={`Who I Am | ${SITE_TITLE}`}
-      description={SITE_DESCRIPTION}
-    />
-  </head>
-  <body>
-    <Header />
-    <main class="BlogPost">
-      <Title title="Who I Am" />
-      <section class="prose">
-        <p>
-          <img class="avatar" src="/img/me.jpg" alt="Valerio" />
-          Greetings! I am Valerio, a seasoned professional with a diverse background
-          spanning web development and filmmaking, currently based Le Marche, Italy.
-          <br />
-        </p>
-        <hr />
-        <h2>Web Development Expertise:</h2>
-        <p>
-          In my current role as a Fullstack Developer at <a
-            href="https://www.cleafy.com/">Cleafy</a
-          >, I focus on refactoring large PHP apps into modern Javascript. Prior
-          to this, I held a Senior Frontend Developer position at <a
-            href="https://www.teamsystem.com/">Teamsystem</a
-          > where i utilized technologies such as Angular, Typescript and Ngrx.
-        </p>
-        <p>
-          During this experience, I had the opportunity to serve as an internal
-          speaker at a conference focused on Flux Architecture, employing Redux
-          Toolkit and Ngrx.
-        </p>
-        <p>
-          I worked as a Senior Software Engineer at <a
-            href="http://fieldtronics.it/">Fieldtronics Srl</a
-          >. Here, I utilized technologies such as Node.js, React, Docker, and
-          Serverless to drive innovation in agricultural solutions.
-        </p>
-        <p>
-          My journey in web development began at <a
-            href="https://www.new-system.it/">New System Srl</a
-          >, where I cultivated my skills as a PHP and WordPress developer.
-        </p>
+<FoglioLayout
+  title={`Who I Am · ${SITE_TITLE}`}
+  description="Valerio Narcisi — filmmaker and developer. Based in Porto Sant'Elpidio, Le Marche. Short films, screenplays, code."
+  lang="en"
+  pageId="about"
+>
+  <header class="about-head">
+    <h1><em class="acc">Who</em><br />I am.</h1>
+    <div class="about-portrait"></div>
+  </header>
 
-        <hr />
+  <article class="about-body">
+    <p>
+      My name is <strong>Valerio Narcisi</strong>, I live in Porto Sant'Elpidio. I make films and write code — more or less at the same hours of the day. <em>Stories come first, though</em>: everything else is the way I try to get them out of my head.
+    </p>
+    <p>
+      Since 2020 I've been part of five short films. The ones I directed are <em>Caramella</em> — winner at the Fano International Film Festival 2025 and the Premio GASP — and <em>Non fa ridere</em>, currently in editing after four days of shooting at Ristorante L'Oasi del Gusto in Piane di Falerone. On <em>Arturo</em> I co-wrote the story and screenplay with the director. On <em>Pochi Istanti</em> and <em>Metanaro</em> I worked as assistant director or screenplay supervisor.
+    </p>
+    <p>
+      I'm also building <em>Oh Writers</em>: a screenplay editor designed for how scripts are actually written in Italy. It's the place where my two things — code and cinema — finally talk to each other.
+    </p>
+    <p>
+      By day I work at <a href="https://www.cleafy.com/">Cleafy</a>, where I've been for six years. I write software — TypeScript, React, design systems. Honestly I'm not sure what to call what I do anymore: with AI the craft is changing as I practice it, and "fullstack developer" no longer covers it. Before that I was at Fieldtronics and New System.
+    </p>
+    <p>
+      Outside of all this there's <strong>Adriana</strong>, and our daughters <strong>Bianca</strong> and <strong>Lea</strong>. That's the thing that keeps me together when everything else moves too fast.
+    </p>
+    <p>
+      If you have a screenplay, a project, an idea you need a second eye on — or just want to say something — <a href="mailto:valerio.narcisi@gmail.com">write to me</a>. I reply to everyone.
+    </p>
+  </article>
 
-        <h2>Personal Insight:</h2>
-        <p>
-          Outside of my professional pursuits, I find fulfillment in the company
-          of my family. Married to Adriana, I am a proud father to two wonderful
-          daughters: Bianca and Lea, who bring joy and balance to my life.
-        </p>
-        <center>
-          <img src="/img/family.jpg" alt="Narcisi Family" />
-        </center>
-        <hr />
+  <section class="cv">
+    <h2>Recent work.</h2>
 
-        <h2>Filmmaking Journey:</h2>
-        <p>
-          Alongside my passion for web development, I have a deep-rooted
-          interest in storytelling through film. With a degree from <a
-            href="https://www.officinemattoli.it/">Officine Mattoli</a
-          >, I have written and directed several short films, and I possess a
-          strong understanding of screenwriting and production organization. As
-          an Assistant Director, I excel in managing on-set logistics, ensuring
-          smooth communication, and maintaining a focused, efficient
-          environment, which allows the creative team to work seamlessly toward
-          the final vision.
-        </p>
-        <h2>Experience:</h2>
-        <ul>
-          <li>
-            Senior Fullstack Developer at <a
-              target="_blank"
-              href="https://www.cleafy.com/">Cleafy</a
-            >, 2022 to present
-          </li>
-          <li>
-            Senior Frontend Developer at <a
-              target="_blank"
-              href="https://www.teamsystem.com/">Teamsystem</a
-            >, 2020 to 2022
-          </li>
-          <li>
-            Senior Software Engineer at <a
-              target="_blank"
-              href="http://fieldtronics.it/">Fieldtronics</a
-            >, 2017 to 2020
-          </li>
-          <li>
-            Wordpress developer at <a
-              target="_blank"
-              href="https://www.fststudio.com/">FST Studio</a
-            >, 2014 to 2016
-          </li>
-          <li>
-            Stage in the <a target="_blank" href="https://skianet.it/"
-              >Skianet</a
-            >, 2014
-          </li>
-          <li>
-            PHP and WordPress Developer at <a
-              target="_blank"
-              href="https://www.new-system.it/">New System</a
-            >, 2010 to 2014
-          </li>
-        </ul>
+    <div class="cv-row">
+      <div class="cv-year">2026 —</div>
+      <div class="cv-content">
+        <h3>Building · <em>Oh Writers</em></h3>
+        <p>Screenplay editor designed for the Italian market. Dashboard, story outline, scene breakdown, budget, locations, schedule in one unified flow.</p>
+      </div>
+    </div>
 
-        <h2>Skills</h2>
-        <ul>
-          <li>JS/TS</li>
-          <li>HTML / CSS / SASS</li>
-          <li>React</li>
-          <li>Redux</li>
-          <li>Cypress</li>
-          <li>Angular</li>
-          <li>Rxjs</li>
-          <li>Ngrx</li>
-          <li>Node.js</li>
-          <li>Serverless</li>
-          <li>Docker</li>
-        </ul>
+    <div class="cv-row">
+      <div class="cv-year">2026 —</div>
+      <div class="cv-content">
+        <h3><em>Non fa ridere</em> · Short Film · <span class="foglio-status foglio-status--in-lavorazione">in progress</span></h3>
+        <p>Written and directed. Four days of shooting at Ristorante L'Oasi del Gusto in Piane di Falerone. Currently in editing.</p>
+      </div>
+    </div>
 
-        <h2>AI & Building</h2>
-        <p>
-          I believe AI is a powerful tool — but the tool, not the builder.
-          I build things with AI, not the opposite. I drive the process, make the decisions,
-          and use artificial intelligence to amplify creativity and productivity,
-          both in code and cinema.
-        </p>
+    <div class="cv-row">
+      <div class="cv-year">2025</div>
+      <div class="cv-content">
+        <h3><em>Caramella</em> · Short Film</h3>
+        <p>Written and directed. Winner at the Fano International Film Festival 2025 and the Premio GASP for best film for social commitment.</p>
+      </div>
+    </div>
 
-        <hr />
-        <h2>Get in touch</h2>
-        <p>
-          You can follow me and message me on <a
-            href="https://bsky.app/profile/valnar.bsky.social"
-          >
-            Bluesky
-          </a>,
-          <a href="https://www.linkedin.com/in/cv-valerio-narcisi/">
-            Linkedin
-          </a>,
-          <a href="https://www.instagram.com/narcisi.valerio/"> Instagram </a> or
-          <a href="https://github.com/valerionarcisi"> Github </a>.
-        </p>
-      </section>
-    </main>
+    <div class="cv-row">
+      <div class="cv-year">2024</div>
+      <div class="cv-content">
+        <h3><em>Metanaro</em> · Sitcom</h3>
+        <p>Screenplay supervisor and assistant director. Set and shot in Le Marche.</p>
+      </div>
+    </div>
 
-    <Footer />
-  </body>
-</html>
+    <div class="cv-row">
+      <div class="cv-year">2024</div>
+      <div class="cv-content">
+        <h3><em>Pochi Istanti</em> · Short Film</h3>
+        <p>Co-writer and assistant director. A drone in the Marche countryside captures unsettling footage.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2020 —</div>
+      <div class="cv-content">
+        <h3>Fullstack Developer · <a href="https://www.cleafy.com/">Cleafy</a></h3>
+        <p>TypeScript, React, design system, real-time fraud detection. Previously: Fieldtronics (Senior Software Engineer), New System.</p>
+      </div>
+    </div>
+
+    <div class="cv-row">
+      <div class="cv-year">2020</div>
+      <div class="cv-content">
+        <h3><em>Arturo</em> · Short Film</h3>
+        <p>Story and screenplay. Two elderly men search for a pig in the deep Marche countryside.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact">
+    <h2>Write to me.</h2>
+    <p>
+      For collaborations, screenplays, ideas, or just to say something.<br />
+      I reply to everyone, same day.
+    </p>
+    <a href="mailto:valerio.narcisi@gmail.com" class="contact-email">valerio.narcisi@gmail.com</a>
+  </section>
+</FoglioLayout>
+
+<style is:global>
+  .about-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 3rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 3rem;
+    align-items: end;
+  }
+  .about-head h1 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: clamp(2.8rem, 5vw, 4rem);
+    line-height: 1;
+    margin: 0;
+  }
+  .about-head h1 em { font-style: italic; }
+  .about-portrait {
+    aspect-ratio: 4 / 5;
+    background: url("/img/me.jpg") center / cover, var(--foglio-paper);
+    border: 1px solid var(--foglio-rule);
+    border-radius: var(--foglio-radius-md);
+  }
+  @media (max-width: 767px) {
+    .about-head {
+      grid-template-columns: 1fr;
+      padding: 3rem 1.4rem;
+      gap: 2rem;
+    }
+    .about-portrait { max-width: 200px; }
+  }
+
+  .about-body {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 3rem;
+    font-family: var(--foglio-serif);
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--foglio-ink);
+  }
+  .about-body p { margin: 0 0 1.4rem; }
+  .about-body p:first-child::first-letter {
+    font-family: var(--foglio-serif);
+    font-size: 2.6rem;
+    font-weight: 500;
+    line-height: 0.95;
+    float: left;
+    margin: 0.25rem 0.4rem 0 0;
+    color: var(--foglio-ink);
+  }
+  .about-body em { font-style: italic; }
+  .about-body strong { color: var(--foglio-ink); font-weight: 600; }
+  .about-body a {
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+  }
+  @media (max-width: 767px) {
+    .about-body { padding: 0 1.4rem; font-size: 1.1rem; }
+  }
+
+  /* CV-style section */
+  .cv {
+    max-width: 880px;
+    margin: 5rem auto 0;
+    padding: 0 3rem;
+  }
+  .cv h2 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-style: italic;
+    font-size: 1.7rem;
+    margin: 0 0 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--foglio-ink);
+  }
+  .cv-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 2rem;
+    padding: 1.4rem 0;
+    border-bottom: 1px solid var(--foglio-rule);
+    align-items: baseline;
+  }
+  .cv-year {
+    font-family: var(--foglio-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--foglio-ink-soft);
+  }
+  .cv-content h3 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: 1.3rem;
+    margin: 0 0 0.3rem;
+  }
+  .cv-content h3 em { font-style: italic; }
+  .cv-content p {
+    font-family: var(--foglio-serif);
+    font-size: 1.05rem;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .cv-content a { color: var(--foglio-accent); }
+  @media (max-width: 767px) {
+    .cv { padding: 0 1.4rem; }
+    .cv-row { grid-template-columns: 1fr; gap: 0.3rem; }
+  }
+
+  .contact {
+    max-width: 720px;
+    margin: 6rem auto 0;
+    padding: 0 3rem;
+    text-align: center;
+  }
+  .contact h2 {
+    font-family: var(--foglio-serif);
+    font-style: italic;
+    font-size: 2rem;
+    margin: 0 0 1rem;
+  }
+  .contact p {
+    font-family: var(--foglio-serif);
+    font-size: 1.2rem;
+    color: var(--foglio-ink-soft);
+    margin: 0 0 2rem;
+  }
+  .contact-email {
+    font-family: var(--foglio-mono);
+    font-size: 0.95rem;
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent);
+    padding-bottom: 2px;
+  }
+  @media (max-width: 767px) {
+    .contact { padding: 0 1.4rem; }
+  }
+</style>

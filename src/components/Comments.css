@@ -379,3 +379,163 @@ button[type="submit"]:disabled,
   border-color: rgba(201, 168, 76, 0.35);
   background: rgba(201, 168, 76, 0.04);
 }
+
+/* ============================================
+   Foglio overrides — cream/terracotta palette
+   Applied when inside a .foglio page
+   ============================================ */
+.foglio .Comments {
+  border-top: 1px solid var(--foglio-rule);
+}
+
+.foglio .Comments h2 {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-style: italic;
+  font-size: 1.5rem;
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments-item {
+  background: var(--foglio-paper);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+}
+
+.foglio .Comments-meta {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-meta strong {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments-date {
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments .Comments-text {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text strong {
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text a {
+  color: var(--foglio-accent);
+  border-bottom: 1px solid var(--foglio-accent-soft);
+}
+
+.foglio .Comments .Comments-text code {
+  background: var(--foglio-paper-2);
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink);
+}
+
+.foglio .Comments .Comments-text pre {
+  background: var(--foglio-paper-2);
+  border-color: var(--foglio-rule);
+}
+
+.foglio .Comments .Comments-text blockquote {
+  border-left-color: var(--foglio-accent-soft);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-empty,
+.foglio .Comments-loading {
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments-form {
+  background: var(--foglio-paper);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+}
+
+.foglio .Comments-form--reply {
+  background: var(--foglio-paper-2);
+  border-color: var(--foglio-rule);
+}
+
+.foglio .Comments-field label {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-soft);
+}
+
+.foglio .Comments-field input,
+.foglio .Comments-field textarea {
+  background: var(--foglio-bg);
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-serif);
+}
+
+.foglio .Comments-field input:focus,
+.foglio .Comments-field textarea:focus {
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-md-hint {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-mute);
+}
+
+.foglio .Comments-message--success {
+  color: var(--foglio-accent);
+}
+
+.foglio .Comments-children {
+  border-left-color: var(--foglio-rule);
+}
+
+.foglio .Comments-children .Comments-item {
+  background: var(--foglio-paper-2);
+}
+
+.foglio .Comments-like,
+.foglio .Comments-reply-btn {
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink-soft);
+  font-family: var(--foglio-mono);
+}
+
+.foglio .Comments-like:hover,
+.foglio .Comments-reply-btn:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-like.is-active {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+  background: rgba(168, 69, 26, 0.07);
+}
+
+.foglio .Comments-cancel {
+  border-color: var(--foglio-rule);
+  color: var(--foglio-ink-soft);
+  font-family: var(--foglio-mono);
+}
+
+.foglio .Comments-cancel:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+
+.foglio .Comments-author-badge {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+
+.foglio .Comments-author-indicator {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-accent);
+}
+
+.foglio .Comments-item:has(.Comments-author-badge) {
+  border-color: rgba(168, 69, 26, 0.3);
+  background: rgba(168, 69, 26, 0.03);
+}
