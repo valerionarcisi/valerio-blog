@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # Body comp PDFs (personal data)
 data/body-comp/*.pdf
+
+.claude/
+.playwright-mcp/

@@ -1,3 +1,0 @@
-[    1780ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://app.netlify.com/access-control/bb-api/api/v1/sites/08368717-fedf-4f00-98c4-388dd1cc2306/deployed-branches:0
-[   11125ms] [ERROR] Access to fetch at 'https://valerionarcisi.me/api/stats/live' from origin 'https://app.netlify.com' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ https://app.netlify.com/projects/infallible-goldwasser-3d3545/deploys:0
-[   11125ms] [ERROR] Failed to load resource: net::ERR_FAILED @ https://valerionarcisi.me/api/stats/live:0

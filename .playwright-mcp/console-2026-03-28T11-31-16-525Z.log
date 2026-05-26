@@ -1,4 +1,0 @@
-[     908ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://valerionarcisi.me/api/training:0
-[   26066ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://valerionarcisi.me/api/training:0
-[   42566ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://valerionarcisi.me/api/stats?period=today:0
-[   52886ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://valerionarcisi.me/api/stats?period=today:0
