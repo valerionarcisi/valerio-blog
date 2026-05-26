@@ -32,7 +32,7 @@ export const GET: APIRoute = async ({ url, request }) => {
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();
 
-  const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}`;
+  const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND (visitor_hash IS NULL OR visitor_hash NOT IN (SELECT hash FROM bot_hashes))${pathnameFilter ? " AND pathname = ?" : ""}`;
   const baseArgs = pathnameFilter
     ? [range.from, range.to, pathnameFilter]
     : [range.from, range.to];
@@ -44,7 +44,7 @@ export const GET: APIRoute = async ({ url, request }) => {
         ? "strftime('%Y-%m', created_at)"
         : "date(created_at)";
 
-  const suspectWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND visitor_hash IS NOT NULL AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)${pathnameFilter ? " AND pathname = ?" : ""}`;
+  const suspectWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND visitor_hash IS NOT NULL AND visitor_hash NOT IN (SELECT hash FROM bot_hashes) AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)${pathnameFilter ? " AND pathname = ?" : ""}`;
 
   const [
     summary,
