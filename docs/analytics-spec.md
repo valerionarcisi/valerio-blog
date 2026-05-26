@@ -78,7 +78,9 @@ Quando l'utente lascia la pagina o la nasconde, lo script invia un secondo beaco
 | `time_on_page` | Timer JS         | Secondi di permanenza (solo tempo con tab visibile) |
 | `scroll_depth` | `window.scrollY` | Percentuale massima raggiunta, arrotondata al 5%    |
 
-Questi vengono inviati con `navigator.sendBeacon()` su `visibilitychange` e collegati al pageview tramite un `page_id` generato client-side (UUID casuale, non persistente).
+Questi vengono inviati con `navigator.sendBeacon()` (fallback `fetch` con `keepalive`) e collegati al pageview tramite un `page_id` generato client-side (random, non persistente).
+
+Il beacon parte sia su `visibilitychange → hidden` (tab nascosta, switch app su mobile) sia su `pagehide` (chiusura tab e navigazioni hard, incluso bfcache). I due trigger sono coperti da un flag `sent` per evitare doppi invii; lato server l'`UPDATE ... WHERE time_on_page IS NULL` è comunque idempotente, quindi un eventuale doppio beacon è innocuo. Usare entrambi gli eventi è necessario perché `visibilitychange` da solo non scatta in modo affidabile su tutte le navigazioni/browser (es. Safari più datati), il che lasciava `time_on_page`/`scroll_depth` a `NULL`.
 
 ---
 
@@ -272,7 +274,7 @@ Script JS leggero (~2KB minificato) da caricare inline su ogni pagina.
 ### Comportamento
 
 1. **Pageview**: al caricamento della pagina, raccoglie i dati e invia `POST /api/collect` con `type: "pageview"`
-2. **Beacon**: su `visibilitychange` (tab nascosta/chiusa), invia `POST /api/collect` con `type: "beacon"` via `sendBeacon()`
+2. **Beacon**: su `visibilitychange → hidden` **e** su `pagehide`, invia `type: "beacon"` via `sendBeacon()` (con flag `sent` anti-doppio-invio)
 3. **SPA support**: override di `history.pushState` per tracciare navigazioni client-side (utile se in futuro il blog usa View Transitions)
 4. **Do Not Track**: se `navigator.doNotTrack === "1"`, non inviare nulla
 5. **Bot detection**: skip se `navigator.webdriver === true`
@@ -403,3 +405,15 @@ Aggiornare entrambe le versioni con testo tipo:
 - **Rate limiting in-memory**: si resetta ad ogni cold start della function. Per un blog personale e sufficiente.
 - **Niente real-time**: la dashboard mostra dati con un piccolo delay (query al DB). Nessun WebSocket.
 - **Chart.js aggiunge ~60KB**: se il peso e un problema, possiamo generare SVG server-side o usare un'alternativa leggera.
+
+### Caveat di accuratezza (come leggere i numeri)
+
+Questi non sono bug: sono conseguenze del modello di misurazione. Vanno tenuti presenti interpretando la dashboard.
+
+- **`time_on_page` / `scroll_depth` dipendono dal beacon.** Se il beacon non arriva (utente offline, browser che non emette né `visibilitychange` né `pagehide`), i due campi restano `NULL`. Gli `AVG` in SQLite ignorano i `NULL`, quindi **tempo medio e scroll medio riflettono solo le visite "ingaggiate"** e tendono a essere leggermente ottimistici. Il trigger su `pagehide` (vedi sopra) riduce molto i NULL ma non li azzera.
+- **`bounce_rate` tende a essere sovrastimato.** È calcolato come quota di unique visitor con `time_on_page < 5` **o `NULL`**: ogni visita senza beacon valido viene contata come rimbalzo.
+- **`visitors` su range multi-giorno = somma degli unici giornalieri.** `is_unique` è calcolato per giorno (l'hash visitatore include la data), e le stats fanno `SUM(is_unique)` sul periodo. Un visitatore che torna in 3 giorni diversi conta 3. Non è il numero di persone uniche sul periodo, ma di visite-uniche-per-giorno (stesso modello per-giorno di Plausible, ma senza dedup sull'intero range).
+- **Confine giornaliero in UTC.** `created_at` usa `datetime('now')` (UTC), quindi unicità e raggruppamenti per giorno seguono UTC, non Europe/Rome: le visite di tarda sera possono cadere nel giorno successivo. Irrilevante sui trend.
+- **`country` da timezone è grezzo e incompleto.** Mapping 1 timezone → 1 paese, con molti paesi non mappati → `country = NULL` (esclusi dal breakdown). Indicativo, non esatto.
+- **"Live" conta pageview attive, non utenti distinti.** `stats/live` fa `COUNT(DISTINCT page_id)` negli ultimi 5 minuti, e `page_id` è per-pageview: chi apre 3 pagine conta 3.
+- **`time_on_page` = tempo fino al primo `hidden`/`pagehide`.** Dopo il primo beacon il flag `sent` blocca invii successivi, quindi il tempo di chi torna sulla tab e poi la chiude non viene sommato.
