@@ -81,11 +81,12 @@ Ogni agente è una Netlify Function indipendente in `netlify/functions/agents/`.
 
 | Aspetto | Dettaglio |
 |---|---|
-| Trigger | Cron ogni 6h |
+| Trigger | Cron ogni 6h, scan Letterboxd RSS |
 | Funzione | `netlify/functions/agents/curator.ts` |
-| Logica | Legge Letterboxd RSS, filtra `<filmTitle>` non già in tabella `reviews_drafted`, per ogni nuovo film genera bozza recensione (100-300 parole) — niente trama, prospettiva personale |
-| Context | Voto da Letterboxd, anno e regista del film, descrizione TMDB per non confondere titoli |
-| Output | Bozza in Telegram. Se approvata, va in clipboard (no API Letterboxd) o pubblica su sito sezione `/visti` |
+| Logica | Per ogni film nuovo non in `reviews_drafted`: notifica Telegram "Vuoi una review per X?". Attende risposta testuale/vocale di Valerio per 24h. Se risponde, genera bozza IT + EN (100-200 parole l'una) usando il suo input come anchor. Se non risponde, archivia. |
+| Context | Voto da Letterboxd, anno e regista, descrizione TMDB, prompt utente, voice profile |
+| Output | 2 messaggi Telegram (IT + EN) con bottoni `[Pubblica IT]` `[Pubblica EN]` `[Pubblica entrambe]` `[Modifica]` `[Scarta]`. "Pubblica" significa preparare testo + link Letterboxd film per copia-incolla manuale (no API scrittura). Cross-post automatico in `/visti` sul sito. |
+| Note | Letterboxd non ha API scrittura ufficiale. Lo stato dell'arte è la copia-incolla. Se in futuro arriva l'API, sostituisce solo questo step. |
 
 ### 4. Analyst (weekly digest)
 
@@ -96,14 +97,16 @@ Ogni agente è una Netlify Function indipendente in `netlify/functions/agents/`.
 | Logica | Aggrega: top 5 post settimana (GSC API + analytics interno), query in crescita, post non pubblicati da >14 giorni in `editorial_ideas`. Genera bullet list più 3 idee suggerite per la settimana che entra |
 | Output | Singolo messaggio Telegram, formato fisso, nessun bottone (informativo) |
 
-### 5. Festival Scout
+### 5. Instagram Story Publisher (opzionale)
 
 | Aspetto | Dettaglio |
 |---|---|
-| Trigger | Cron giornaliero `0 9 * * *` |
-| Funzione | `netlify/functions/agents/festival-scout.ts` |
-| Logica | Scrape FilmFreeway listings con filtro country=Italia + categoria short film. Confronta con `festivals_known` (DB). Per ogni novità: stima rilevanza basata su keyword (auteur, indie, première italiana), se rilevante notifica con: nome, deadline, fee, link |
-| Output | Messaggio Telegram solo se deadline < 30 giorni e rilevanza ≥ soglia |
+| Trigger | Foto in arrivo su Telegram con caption che inizia con `/story` |
+| Funzione | `netlify/functions/agents/ig-story.ts` |
+| Logica | Riceve foto + caption testuale, genera immagine Story 1080×1920 con overlay testo in EB Garamond + palette Foglio (sharp con SVG overlay). Pubblica via Instagram Graph API |
+| Vincoli | Account IG convertito in Creator + Facebook Page collegata + Meta app review approvata |
+| Output | Anteprima in Telegram + bottoni [Pubblica] [Modifica testo overlay] [Scarta] |
+| Non-goal | Feed post e Reels: restano manuali. L'algoritmo IG penalizza AI-feel sui feed. |
 
 ### 6. Drafter (long-form on demand)
 
@@ -158,17 +161,17 @@ Nuove tabelle in Turso:
 | `lesson` | TEXT NULL | Sintesi della correzione (auto-generata da LLM al next training) |
 | `created_at` | TEXT DEFAULT CURRENT_TIMESTAMP | |
 
-### `festivals_known`
+### `media_library`
 
 | Campo | Tipo | Note |
 |---|---|---|
 | `id` | INTEGER PK AUTOINC | |
-| `slug` | TEXT UNIQUE NOT NULL | hash url FilmFreeway |
-| `name` | TEXT NOT NULL | |
-| `deadline` | TEXT | YYYY-MM-DD |
-| `country` | TEXT | |
-| `relevance_score` | INTEGER | 0-100 |
-| `notified_at` | TEXT NULL | quando inviata notifica Telegram |
+| `filename` | TEXT UNIQUE NOT NULL | es. `2026-05-27-001.jpg` |
+| `path` | TEXT NOT NULL | `public/img/uploads/2026-05-27/001.jpg` |
+| `caption` | TEXT NULL | caption ricevuta col Telegram upload |
+| `tags` | TEXT NULL | comma-separated, es. `"set,non-fa-ridere,falerone"` |
+| `source` | TEXT | `telegram`, `manual`, `screenshot` |
+| `used_count` | INTEGER DEFAULT 0 | quante volte usata in un post |
 | `created_at` | TEXT DEFAULT CURRENT_TIMESTAMP | |
 
 ### `reviews_drafted`
@@ -293,13 +296,13 @@ Risultato: il system prompt degli agenti col tempo include osservazioni concrete
 
 | Settimana | Output | Effort stimato |
 |---|---|---|
-| 1 | Idea Catcher (Telegram bot, /idea, /list, voice, forward) + tabella `editorial_ideas` | 8-10h |
-| 2 | Distributor (build hook + draft LinkedIn IT + approval flow + publish a LinkedIn) | 10-12h |
-| 3 | Distributor estesa a Bluesky + Reddit, + Curator (Letterboxd RSS scan + bozza) | 8-10h |
-| 4 | Analyst (weekly digest GSC + analytics) | 5-7h |
-| 5 | Festival Scout (FilmFreeway scrape + rilevanza) | 6-8h |
-| 6 | Drafter (long-form on demand) + voice-distill cron | 6-8h |
-| 7 | Polish: dashboard /admin/editorial-queue (vedi cosa è in coda, storia approvati/scartati) | 4-6h |
+| 1 | Idea Catcher (Telegram bot, `/idea`, `/list`, voice w/ Whisper, forward) + tabelle `editorial_ideas` + `media_library` (upload foto basic) | 8-10h |
+| 2 | Distributor v1: build hook + draft LinkedIn IT + approval flow + publish a LinkedIn (OAuth setup incluso) | 10-12h |
+| 3 | Distributor estesa a Bluesky + Reddit, + Curator (Letterboxd RSS scan + IT/EN bozze) | 8-10h |
+| 4 | Analyst (weekly digest GSC + analytics) + voice-distill cron | 6-8h |
+| 5 (opzionale) | Instagram Story Publisher (richiede Meta setup pre-codice ~7-14gg) | 5-7h dopo approvazione Meta |
+| 6 | Drafter (outline + opening da Telegram, full draft markdown salvato nel repo) | 6-8h |
+| 7 | Polish: dashboard `/admin/editorial-queue` (vedi cosa è in coda, storia approvati/scartati), endpoint diagnostica errori | 4-6h |
 
 Totale ~50-60h spalmate su 7 settimane = 7-9h/settimana. Realistico se metà di queste sono ore del development time (non extra Valerio's).
 
@@ -322,14 +325,46 @@ Totale ~50-60h spalmate su 7 settimane = 7-9h/settimana. Realistico se metà di 
 - Engagement automation (no auto-reply, no auto-like, no follow growth bot)
 - Multi-utente (sistema per il singolo Valerio, no permissioni)
 - Newsletter management (out of scope per v1)
-- Generazione di immagini (out of scope, restano manuali)
+- Generazione di immagini AI (no DALL-E/Midjourney/Replicate). Le immagini sono o di Valerio (foto, screenshot) o template generati lato server con sharp (overlay testo su foto reali, es. Story IG)
+- Festival Scout automatico (eliminato): vai a festival/eventi manualmente, mandi foto al bot, l'agente Instagram Story Publisher gestisce la pubblicazione
+- Instagram Feed e Reels: troppo rischio AI-feel sul feed, l'algoritmo penalizza. Restano manuali.
 
-## Open questions
+## Immagini — flusso
 
-- Vuoi che il Drafter scriva i pillar essay completi, o si limita a outline + opening? La differenza è qualitativa importante (l'AI scrive outline meglio dell'essay).
-- Letterboxd: vuoi pubblicare le review su Letterboxd come post (manualmente, copia-incolla) o vuoi tenerle dentro `/visti` sul tuo sito e linkarle?
-- Vuoi un comando Telegram `/voice` che ti fa testare il tono prima di approvare? Es. "scrivimi 3 modi di dire X" per validazione voice.
-- Soglia rilevanza festival: chi decide cos'è "rilevante"? Lista keyword + lista festival noti manuale + ML semplice?
+```
+TU: foto/screenshot a Telegram (chat col bot)
+  ↓
+BOT: processa con sharp:
+  - resize 1600px lato lungo
+  - JPEG q82
+  - strip EXIF (privacy: niente GPS/timestamp/device)
+  - salva in public/img/uploads/YYYY-MM-DD/<id>.jpg
+  ↓
+BOT: salva record in media_library, risponde con id + chiede tag opzionali
+  ↓
+USO: quando si genera un draft per un canale che usa immagini, l'agente
+     cerca foto con tag pertinenti in media_library OR chiede esplicitamente
+     "vuoi allegare un'immagine? /useimage <id> o salta"
+  ↓
+PUBBLICAZIONE: la foto viene allegata via API (LinkedIn supporta upload
+               diretto, Bluesky idem, Reddit anche)
+```
+
+Comandi bot media:
+- `/media list` — ultime 10 foto con thumbnail
+- `/media tag <id> <tag>` — aggiunge tag a foto esistente
+- `/media delete <id>` — rimuove dal library e dal disk
+- `/useimage <id>` — durante un drafting per allegare a quel draft specifico
+- `/story` — caption che precede una foto = trigger per Instagram Story Publisher
+
+## Decisioni risolte (post brainstorming)
+
+- **Drafter**: produce outline + opening (300-500 parole) via Telegram, poi salva markdown completo in `src/content/blog/it/drafts/<slug>.md`. Valerio completa il drafting da laptop.
+- **Letterboxd**: copia-incolla manuale (no API ufficiale). Sempre genera IT + EN, Valerio sceglie quale pubblicare. Cross-post automatico in `/visti` sul sito.
+- **Voce nativa Telegram**: messaggi vocali Telegram trascritti via Whisper. L'AI interpreta intent: salva idea / genera draft / risposta. Comando esplicito `/voice` non serve, basta il long-press microfono di Telegram.
+- **Festival Scout**: eliminato. Approccio manuale via Instagram Story Publisher quando Valerio è a un evento.
+- **Instagram**: solo Story via Graph API, dopo setup Meta. Feed e Reels restano manuali.
+- **Generazione immagini AI**: no. Solo template server-side con sharp.
 
 ## Roadmap di build incrementale
 
