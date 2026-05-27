@@ -6,7 +6,7 @@ import { sendMessage, getFilePath, downloadFile } from "~/lib/telegram";
 import { transcribe } from "~/lib/whisper";
 import { createIdea, listIdeas, markIdeaStatus } from "~/lib/editorial-ideas";
 import { processUpload, buildUploadPath } from "~/lib/image-processing";
-import { createMedia } from "~/lib/media-library";
+import { createMedia, listMedia, tagMedia } from "~/lib/media-library";
 
 export const prerender = false;
 
@@ -157,6 +157,31 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     }
     await markIdeaStatus(id, "published");
     await sendMessage(message.chat.id, `✅ Idea #${id} archiviata come published.`);
+    return;
+  }
+
+  if (text === "/media list" || text === "/media") {
+    const list = await listMedia(10);
+    if (!list.length) {
+      await sendMessage(message.chat.id, "Nessuna foto in libreria. Mandami uno scatto.");
+      return;
+    }
+    const lines = list.map((m) => `#${m.id} · ${m.filename}${m.caption ? ` — ${m.caption.slice(0, 50)}` : ""}`);
+    await sendMessage(message.chat.id, lines.join("\n"));
+    return;
+  }
+
+  if (text.startsWith("/tag ")) {
+    const rest = text.slice(5).trim();
+    const m = rest.match(/^(\d+)\s+(.+)$/);
+    if (!m) {
+      await sendMessage(message.chat.id, "Uso: /tag <id media> <tag1,tag2,...>");
+      return;
+    }
+    const id = Number(m[1]);
+    const tags = m[2].split(/[,\s]+/).filter(Boolean);
+    await tagMedia(id, tags);
+    await sendMessage(message.chat.id, `🏷️ Foto #${id} taggata: ${tags.join(", ")}`);
     return;
   }
 

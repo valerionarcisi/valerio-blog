@@ -369,3 +369,54 @@ describe("photo upload handler", () => {
     expect((getFilePath as any).mock.calls[0][0]).toBe("large");
   });
 });
+
+describe("/media and /tag handlers", () => {
+  beforeEach(async () => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+    resetMedia();
+  });
+
+  test("/media list empty", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/media list" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((sendMessage as any).mock.calls[0][1]).toContain("Nessuna foto");
+  });
+
+  test("/media list with entries", async () => {
+    const { createMedia } = await import("~/lib/media-library");
+    await createMedia({ filename: "a.jpg", path: "/img/uploads/2026-05-27/a.jpg", source: "telegram" });
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/media list" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const reply = (sendMessage as any).mock.calls[0][1] as string;
+    expect(reply).toContain("a.jpg");
+  });
+
+  test("/tag <id> <tags> updates the row", async () => {
+    const { createMedia, getMedia } = await import("~/lib/media-library");
+    const id = await createMedia({ filename: "a.jpg", path: "/x/a.jpg", source: "telegram" });
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: `/tag ${id} set,falerone` },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const m = await getMedia(id);
+    expect(m?.tags).toBe("set,falerone");
+  });
+});
