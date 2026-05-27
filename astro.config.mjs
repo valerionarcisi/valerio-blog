@@ -16,6 +16,11 @@ const envKeys = [
   "TMDB_API_KEY",
   "LASTFM_API_KEY",
   "RESEND_API_KEY",
+  // Editorial agents (Phase 1 — Telegram Idea Catcher)
+  "TELEGRAM_BOT_TOKEN",
+  "TELEGRAM_SECRET_TOKEN",
+  "TELEGRAM_USER_ID_WHITELIST",
+  "OPENAI_API_KEY",
 ];
 
 // Merge process.env with .env file (process.env takes precedence)
