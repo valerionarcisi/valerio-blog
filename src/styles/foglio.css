@@ -15,7 +15,7 @@
   --foglio-paper-2: #f1ebdd;
   --foglio-ink: #221a12;
   --foglio-ink-soft: #5e4d3a;
-  --foglio-ink-mute: #8a7c66;
+  --foglio-ink-mute: #6d614e;
   --foglio-rule: #d8cebd;
   --foglio-rule-strong: #b8aa92;
   --foglio-accent: #a8451a;
@@ -57,7 +57,7 @@
     --foglio-paper-2: #232017;
     --foglio-ink: #ece8de;
     --foglio-ink-soft: #b8ad95;
-    --foglio-ink-mute: #988b73;
+    --foglio-ink-mute: #b3a48a;
     --foglio-rule: #2e2a23;
     --foglio-rule-strong: #4a4438;
     --foglio-accent: #d9874e;
@@ -74,7 +74,7 @@ html[data-theme="dark"] {
   --foglio-paper-2: #232017;
   --foglio-ink: #ece8de;
   --foglio-ink-soft: #b8ad95;
-  --foglio-ink-mute: #988b73;
+  --foglio-ink-mute: #b3a48a;
   --foglio-rule: #2e2a23;
   --foglio-rule-strong: #4a4438;
   --foglio-accent: #d9874e;
@@ -88,7 +88,7 @@ html[data-theme="light"] {
   --foglio-paper-2: #f1ebdd;
   --foglio-ink: #221a12;
   --foglio-ink-soft: #5e4d3a;
-  --foglio-ink-mute: #8a7c66;
+  --foglio-ink-mute: #6d614e;
   --foglio-rule: #d8cebd;
   --foglio-rule-strong: #b8aa92;
   --foglio-accent: #a8451a;
