@@ -420,3 +420,34 @@ describe("/media and /tag handlers", () => {
     expect(m?.tags).toBe("set,falerone");
   });
 });
+
+describe("forward handler", () => {
+  beforeEach(() => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+  });
+
+  test("forwarded message with URL is saved as idea source=forward", async () => {
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            text: "Check this article: https://example.com/article",
+            forward_from: { id: 999 },
+            entities: [{ type: "url", offset: 21, length: 28, url: "https://example.com/article" }],
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const { listIdeas } = await import("~/lib/editorial-ideas");
+    const ideas = await listIdeas("idea");
+    expect(ideas).toHaveLength(1);
+    expect(ideas[0].source).toBe("forward");
+    expect(ideas[0].text).toContain("https://example.com/article");
+  });
+});

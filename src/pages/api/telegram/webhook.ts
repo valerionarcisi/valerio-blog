@@ -185,9 +185,13 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     return;
   }
 
+  // Plain text or forward → save as idea
   if (!text.startsWith("/")) {
-    const id = await createIdea({ text, source: "manual" });
-    await sendMessage(message.chat.id, `✅ Idea #${id} salvata (testo libero).`);
+    const isForward = !!(message.forward_from || message.forward_from_chat);
+    const source = isForward ? "forward" : "manual";
+    const id = await createIdea({ text, source });
+    const label = isForward ? "📨 Forward salvato" : "✅ Idea salvata";
+    await sendMessage(message.chat.id, `${label} #${id}.`);
     return;
   }
 }
