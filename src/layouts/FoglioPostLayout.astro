@@ -87,6 +87,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
     </script>
 
     <FoglioHeader lang={lang} active="blog" />
+    <main>
 
     <!-- Cover hero -->
     {coverImage && (
@@ -159,6 +160,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
       <RelatedPosts currentSlug={slug} currentTags={tags} lang={lang} />
     </div>
 
+    </main>
     <FoglioFooter lang={lang} />
 
     <!-- marked + DOMPurify for comment rendering -->

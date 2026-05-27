@@ -115,6 +115,7 @@ const awardsCount = festivals.filter((f) => f.award).length;
   </head>
   <body>
     <FoglioHeader lang={lang} active="films" />
+    <main>
 
     <header class="ff-head">
       <div class="ff-eyebrow">
@@ -364,6 +365,7 @@ const awardsCount = festivals.filter((f) => f.award).length;
       <Comments pageId={`films/${slug}`} lang={lang} />
     </div>
 
+    </main>
     <FoglioFooter lang={lang} />
 
     <script is:inline>

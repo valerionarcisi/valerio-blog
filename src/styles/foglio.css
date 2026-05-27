@@ -57,7 +57,7 @@
     --foglio-paper-2: #232017;
     --foglio-ink: #ece8de;
     --foglio-ink-soft: #b8ad95;
-    --foglio-ink-mute: #7a705e;
+    --foglio-ink-mute: #988b73;
     --foglio-rule: #2e2a23;
     --foglio-rule-strong: #4a4438;
     --foglio-accent: #d9874e;
@@ -74,7 +74,7 @@ html[data-theme="dark"] {
   --foglio-paper-2: #232017;
   --foglio-ink: #ece8de;
   --foglio-ink-soft: #b8ad95;
-  --foglio-ink-mute: #7a705e;
+  --foglio-ink-mute: #988b73;
   --foglio-rule: #2e2a23;
   --foglio-rule-strong: #4a4438;
   --foglio-accent: #d9874e;
