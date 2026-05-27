@@ -15,6 +15,10 @@ vi.mock("~/lib/telegram", () => ({
   downloadFile: vi.fn(),
 }));
 
+vi.mock("~/lib/whisper", () => ({
+  transcribe: vi.fn().mockResolvedValue("idea trascritta dalla voce"),
+}));
+
 import { POST } from "./webhook";
 
 function makeRequest(body: object, headers: Record<string, string> = {}): Request {
@@ -202,5 +206,57 @@ describe("/done handler", () => {
       ),
     } as any);
     expect((sendMessage as any).mock.calls[0][1]).toContain("Uso");
+  });
+});
+
+describe("voice message handler", () => {
+  beforeEach(async () => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+    const { getFilePath, downloadFile } = await import("~/lib/telegram");
+    (getFilePath as any).mockResolvedValue("voice/file_1.oga");
+    (downloadFile as any).mockResolvedValue(new ArrayBuffer(100));
+  });
+
+  test("voice message is transcribed and saved as idea (source=voice)", async () => {
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            voice: { file_id: "AwACAg...", duration: 7, mime_type: "audio/ogg" },
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const { listIdeas } = await import("~/lib/editorial-ideas");
+    const ideas = await listIdeas("idea");
+    expect(ideas).toHaveLength(1);
+    expect(ideas[0].text).toBe("idea trascritta dalla voce");
+    expect(ideas[0].source).toBe("voice");
+  });
+
+  test("voice reply quotes the transcription in confirmation", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            voice: { file_id: "AwACAg...", duration: 7 },
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((sendMessage as any).mock.calls[0][1]).toContain("idea trascritta dalla voce");
   });
 });

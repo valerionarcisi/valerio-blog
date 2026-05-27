@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "~/lib/env";
-import { sendMessage } from "~/lib/telegram";
+import { sendMessage, getFilePath, downloadFile } from "~/lib/telegram";
+import { transcribe } from "~/lib/whisper";
 import { createIdea, listIdeas, markIdeaStatus } from "~/lib/editorial-ideas";
 
 export const prerender = false;
@@ -74,6 +75,19 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 async function handleMessage(message: TelegramMessage): Promise<void> {
+  if (message.voice || message.audio) {
+    const fileId = (message.voice ?? message.audio)!.file_id;
+    const filePath = await getFilePath(fileId);
+    const audio = await downloadFile(filePath);
+    const transcript = await transcribe(audio, "voice.oga", "it");
+    const id = await createIdea({ text: transcript, source: "voice" });
+    await sendMessage(
+      message.chat.id,
+      `🎙️ Trascritto: "${transcript}"\n\n✅ Idea #${id} salvata.`,
+    );
+    return;
+  }
+
   const text = (message.text ?? "").trim();
   if (!text) return;
 
