@@ -62,3 +62,77 @@ describe("telegram webhook auth", () => {
     expect(r.status).toBe(200);
   });
 });
+
+import { createClient, type Client } from "@libsql/client";
+
+let db: Client;
+vi.mock("~/lib/turso", () => ({
+  default: () => db,
+}));
+
+import { __resetEnsured as resetIdeas, listIdeas } from "~/lib/editorial-ideas";
+
+describe("/idea handler", () => {
+  beforeEach(() => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+  });
+
+  test("/idea <text> creates an idea and confirms", async () => {
+    const r = await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            text: "/idea Scrivere su Result Pattern in TypeScript",
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect(r.status).toBe(200);
+
+    const ideas = await listIdeas("idea");
+    expect(ideas).toHaveLength(1);
+    expect(ideas[0].text).toBe("Scrivere su Result Pattern in TypeScript");
+    expect(ideas[0].source).toBe("manual");
+  });
+
+  test("/idea without text replies with help", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/idea" },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((sendMessage as any).mock.calls[0][1]).toContain("Uso");
+  });
+
+  test("plain text without leading slash is saved as idea too", async () => {
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            text: "una bella idea sul mestiere doppio",
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const ideas = await listIdeas("idea");
+    expect(ideas).toHaveLength(1);
+    expect(ideas[0].text).toContain("mestiere doppio");
+  });
+});

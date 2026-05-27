@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "~/lib/env";
 import { sendMessage } from "~/lib/telegram";
+import { createIdea } from "~/lib/editorial-ideas";
 
 export const prerender = false;
 
@@ -73,7 +74,32 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 async function handleMessage(message: TelegramMessage): Promise<void> {
-  if (message.text === "/start") {
-    await sendMessage(message.chat.id, "Idea Catcher attivo. /idea <testo> per salvare un'idea.");
+  const text = (message.text ?? "").trim();
+  if (!text) return;
+
+  if (text === "/start") {
+    await sendMessage(
+      message.chat.id,
+      "Idea Catcher attivo.\n\n/idea <testo> — salva un'idea\n/list — vedi le idee in coda\nMessaggio vocale o foto → li gestisco anche da soli.",
+    );
+    return;
+  }
+
+  if (text === "/idea") {
+    await sendMessage(message.chat.id, "Uso: /idea <testo della tua idea>");
+    return;
+  }
+
+  if (text.startsWith("/idea ")) {
+    const ideaText = text.slice(6).trim();
+    const id = await createIdea({ text: ideaText, source: "manual" });
+    await sendMessage(message.chat.id, `✅ Idea #${id} salvata.`);
+    return;
+  }
+
+  if (!text.startsWith("/")) {
+    const id = await createIdea({ text, source: "manual" });
+    await sendMessage(message.chat.id, `✅ Idea #${id} salvata (testo libero).`);
+    return;
   }
 }
