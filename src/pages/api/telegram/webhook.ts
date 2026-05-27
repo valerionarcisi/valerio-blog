@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "~/lib/env";
 import { sendMessage } from "~/lib/telegram";
-import { createIdea } from "~/lib/editorial-ideas";
+import { createIdea, listIdeas } from "~/lib/editorial-ideas";
 
 export const prerender = false;
 
@@ -94,6 +94,17 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     const ideaText = text.slice(6).trim();
     const id = await createIdea({ text: ideaText, source: "manual" });
     await sendMessage(message.chat.id, `✅ Idea #${id} salvata.`);
+    return;
+  }
+
+  if (text === "/list") {
+    const ideas = await listIdeas("idea", 20);
+    if (!ideas.length) {
+      await sendMessage(message.chat.id, "Nessuna idea in coda. Mandane una con /idea o testo libero.");
+      return;
+    }
+    const lines = ideas.map((i) => `#${i.id} · ${i.text.slice(0, 80)}${i.text.length > 80 ? "…" : ""}`);
+    await sendMessage(message.chat.id, lines.join("\n"));
     return;
   }
 

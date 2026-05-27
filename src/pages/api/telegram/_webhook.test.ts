@@ -136,3 +136,39 @@ describe("/idea handler", () => {
     expect(ideas[0].text).toContain("mestiere doppio");
   });
 });
+
+describe("/list handler", () => {
+  beforeEach(() => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+  });
+
+  test("/list with no ideas replies with empty state", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/list" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((sendMessage as any).mock.calls[0][1]).toContain("Nessuna idea");
+  });
+
+  test("/list shows ideas with id and text", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    const { createIdea } = await import("~/lib/editorial-ideas");
+    await createIdea({ text: "scrivere su X", source: "manual" });
+    await createIdea({ text: "altro pezzo", source: "voice" });
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/list" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const reply = (sendMessage as any).mock.calls[0][1] as string;
+    expect(reply).toContain("scrivere su X");
+    expect(reply).toContain("altro pezzo");
+  });
+});
