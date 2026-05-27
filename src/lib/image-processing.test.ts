@@ -13,7 +13,7 @@ async function makeTestPng(width: number, height: number): Promise<ArrayBuffer> 
   })
     .png()
     .toBuffer();
-  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
 }
 
 describe("image-processing", () => {

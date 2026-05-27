@@ -86,7 +86,7 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     const processed = await processUpload(raw);
     const { dir, filename, webPath } = buildUploadPath();
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, filename), processed.buffer);
+    await fs.writeFile(path.join(dir, filename), new Uint8Array(processed.buffer));
     const id = await createMedia({
       filename,
       path: webPath,
