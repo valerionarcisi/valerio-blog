@@ -125,10 +125,23 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
   const text = (message.text ?? "").trim();
   if (!text) return;
 
-  if (text === "/start") {
+  if (text === "/start" || text === "/help") {
     await sendMessage(
       message.chat.id,
-      "Idea Catcher attivo.\n\n/idea <testo> — salva un'idea\n/list — vedi le idee in coda\nMessaggio vocale o foto → li gestisco anche da soli.",
+      [
+        "Idea Catcher · comandi disponibili",
+        "",
+        "/idea <testo> — salva un'idea",
+        "/list — vedi le idee in coda",
+        "/done <id> — archivia un'idea come pubblicata",
+        "/media list — vedi le foto salvate",
+        "/tag <id> <tag1,tag2> — assegna tag a una foto",
+        "",
+        "Messaggio vocale → trascrivo e salvo come idea",
+        "Foto → la archivio in media library",
+        "Forward → la salvo segnandola come spunto esterno",
+        "Testo libero → idea senza fatica",
+      ].join("\n"),
     );
     return;
   }
@@ -190,6 +203,15 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     const tags = m[2].split(/[,\s]+/).filter(Boolean);
     await tagMedia(id, tags);
     await sendMessage(message.chat.id, `🏷️ Foto #${id} taggata: ${tags.join(", ")}`);
+    return;
+  }
+
+  // Catch-all: unknown /command → suggest /help
+  if (text.startsWith("/")) {
+    await sendMessage(
+      message.chat.id,
+      `Comando "${text.split(/\s+/)[0]}" non riconosciuto. Usa /help per la lista.`,
+    );
     return;
   }
 

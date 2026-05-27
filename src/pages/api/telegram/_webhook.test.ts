@@ -109,6 +109,34 @@ describe("telegram webhook auth", () => {
     } as any);
     expect(r.status).toBe(200);
   });
+
+  test("/help replies with the command list (same as /start)", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/help" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const reply = (sendMessage as any).mock.calls[0][1] as string;
+    expect(reply).toContain("/idea");
+    expect(reply).toContain("/list");
+  });
+
+  test("unknown /command replies with helpful catch-all", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/xyz" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const reply = (sendMessage as any).mock.calls[0][1] as string;
+    expect(reply).toContain("non riconosciuto");
+    expect(reply).toContain("/help");
+  });
 });
 
 import { createClient, type Client } from "@libsql/client";
