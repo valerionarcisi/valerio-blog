@@ -1,8 +1,12 @@
 import type { APIRoute } from "astro";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { env } from "~/lib/env";
 import { sendMessage, getFilePath, downloadFile } from "~/lib/telegram";
 import { transcribe } from "~/lib/whisper";
 import { createIdea, listIdeas, markIdeaStatus } from "~/lib/editorial-ideas";
+import { processUpload, buildUploadPath } from "~/lib/image-processing";
+import { createMedia } from "~/lib/media-library";
 
 export const prerender = false;
 
@@ -75,6 +79,28 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 async function handleMessage(message: TelegramMessage): Promise<void> {
+  if (message.photo && message.photo.length > 0) {
+    const largest = message.photo.reduce((a, b) => (a.width * a.height >= b.width * b.height ? a : b));
+    const filePath = await getFilePath(largest.file_id);
+    const raw = await downloadFile(filePath);
+    const processed = await processUpload(raw);
+    const { dir, filename, webPath } = buildUploadPath();
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, filename), processed.buffer);
+    const id = await createMedia({
+      filename,
+      path: webPath,
+      caption: message.caption ?? null,
+      source: "telegram",
+    });
+    await sendMessage(
+      message.chat.id,
+      `📷 Foto #${id} salvata (${processed.width}×${processed.height}).\n\n` +
+        `Aggiungi tag con /tag ${id} <tag1,tag2,...> o usala con /useimage ${id}.`,
+    );
+    return;
+  }
+
   if (message.voice || message.audio) {
     const fileId = (message.voice ?? message.audio)!.file_id;
     const filePath = await getFilePath(fileId);

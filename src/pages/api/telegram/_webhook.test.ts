@@ -19,6 +19,34 @@ vi.mock("~/lib/whisper", () => ({
   transcribe: vi.fn().mockResolvedValue("idea trascritta dalla voce"),
 }));
 
+vi.mock("~/lib/image-processing", async () => {
+  const sharp = (await import("sharp")).default;
+  return {
+    processUpload: vi.fn(async () => {
+      const buf = await sharp({
+        create: { width: 100, height: 100, channels: 3, background: "white" },
+      })
+        .jpeg()
+        .toBuffer();
+      return { buffer: buf, width: 100, height: 100, format: "jpeg" as const };
+    }),
+    buildUploadPath: vi.fn(() => ({
+      dir: "public/img/uploads/2026-05-27",
+      filename: "test123.jpg",
+      webPath: "/img/uploads/2026-05-27/test123.jpg",
+    })),
+  };
+});
+
+vi.mock("node:fs/promises", () => ({
+  default: {
+    mkdir: vi.fn().mockResolvedValue(undefined),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+  },
+  mkdir: vi.fn().mockResolvedValue(undefined),
+  writeFile: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { POST } from "./webhook";
 
 function makeRequest(body: object, headers: Record<string, string> = {}): Request {
@@ -75,6 +103,7 @@ vi.mock("~/lib/turso", () => ({
 }));
 
 import { __resetEnsured as resetIdeas, listIdeas } from "~/lib/editorial-ideas";
+import { __resetEnsured as resetMedia, listMedia } from "~/lib/media-library";
 
 describe("/idea handler", () => {
   beforeEach(() => {
@@ -258,5 +287,85 @@ describe("voice message handler", () => {
       ),
     } as any);
     expect((sendMessage as any).mock.calls[0][1]).toContain("idea trascritta dalla voce");
+  });
+});
+
+describe("photo upload handler", () => {
+  beforeEach(async () => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+    resetMedia();
+    const { getFilePath, downloadFile } = await import("~/lib/telegram");
+    (getFilePath as any).mockResolvedValue("photos/file_1.jpg");
+    (downloadFile as any).mockResolvedValue(new ArrayBuffer(2000));
+  });
+
+  test("photo is processed and stored in media_library", async () => {
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            photo: [
+              { file_id: "small", width: 100, height: 75 },
+              { file_id: "medium", width: 800, height: 600 },
+              { file_id: "large", width: 1600, height: 1200 },
+            ],
+            caption: "set di Falerone",
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const list = await listMedia(10);
+    expect(list).toHaveLength(1);
+    expect(list[0].caption).toBe("set di Falerone");
+    expect(list[0].source).toBe("telegram");
+    expect(list[0].filename).toBe("test123.jpg");
+  });
+
+  test("photo without caption is stored with null caption", async () => {
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            photo: [{ file_id: "x", width: 200, height: 200 }],
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const list = await listMedia(10);
+    expect(list[0].caption).toBeNull();
+  });
+
+  test("photo handler picks the largest photo size from Telegram array", async () => {
+    const { getFilePath } = await import("~/lib/telegram");
+    (getFilePath as any).mockClear();
+    await POST({
+      request: makeRequest(
+        {
+          update_id: 1,
+          message: {
+            message_id: 1,
+            from: { id: 12345 },
+            chat: { id: 12345 },
+            photo: [
+              { file_id: "small", width: 100, height: 75 },
+              { file_id: "large", width: 1600, height: 1200 },
+            ],
+          },
+        },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((getFilePath as any).mock.calls[0][0]).toBe("large");
   });
 });
