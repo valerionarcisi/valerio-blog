@@ -23,6 +23,7 @@ const { page } = Astro.props as any;
 <FoglioListLayout
   posts={page.data}
   lang="it"
+  noindex={page.currentPage > 1}
   pagination={{
     currentPage: page.currentPage,
     lastPage: page.lastPage,

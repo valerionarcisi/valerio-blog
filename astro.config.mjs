@@ -56,7 +56,11 @@ export default defineConfig({
   integrations: [
     icon(),
     sitemap({
-      filter: (page) => !page.includes("/admin/") && !page.includes("/tag/"),
+      filter: (page) =>
+        !page.includes("/admin/") &&
+        !page.includes("/tag/") &&
+        !/\/blog\/\d+\/?$/.test(page) &&
+        !/\/en\/blog\/\d+\/?$/.test(page),
     }),
   ],
   i18n: {
