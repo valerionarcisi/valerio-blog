@@ -1,12 +1,12 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 
 vi.mock("~/lib/env", () => ({
-  env: (key: string) => {
+  env: vi.fn((key: string) => {
     if (key === "TELEGRAM_BOT_TOKEN") return "TEST-TOKEN";
     if (key === "TELEGRAM_SECRET_TOKEN") return "secret-abc";
     if (key === "TELEGRAM_USER_ID_WHITELIST") return "12345";
     return "";
-  },
+  }),
 }));
 
 vi.mock("~/lib/telegram", () => ({
@@ -82,6 +82,22 @@ describe("telegram webhook auth", () => {
       ),
     } as any);
     expect(r.status).toBe(200); // we always return 200 to Telegram to prevent retries
+  });
+
+  test("returns 503 if TELEGRAM_SECRET_TOKEN env is empty (fail-closed)", async () => {
+    const { env } = await import("~/lib/env");
+    const original = (env as any).getMockImplementation?.();
+    vi.mocked(env).mockImplementation((key: string) => {
+      if (key === "TELEGRAM_SECRET_TOKEN") return "";
+      if (key === "TELEGRAM_USER_ID_WHITELIST") return "12345";
+      if (key === "TELEGRAM_BOT_TOKEN") return "TEST-TOKEN";
+      return "";
+    });
+    const r = await POST({
+      request: makeRequest({ update_id: 1 }, { "X-Telegram-Bot-Api-Secret-Token": "" }),
+    } as any);
+    expect(r.status).toBe(503);
+    if (original) vi.mocked(env).mockImplementation(original);
   });
 
   test("accepts message from whitelisted user", async () => {

@@ -46,8 +46,13 @@ function isWhitelisted(userId: number): boolean {
 }
 
 export const POST: APIRoute = async ({ request }) => {
+  const expectedSecret = env("TELEGRAM_SECRET_TOKEN");
+  if (!expectedSecret) {
+    // Fail closed: misconfigured deploy (empty secret) must never accept requests.
+    return new Response("misconfigured", { status: 503 });
+  }
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secret !== env("TELEGRAM_SECRET_TOKEN")) {
+  if (secret !== expectedSecret) {
     return new Response("unauthorized", { status: 401 });
   }
 
@@ -86,6 +91,9 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     const processed = await processUpload(raw);
     const { dir, filename, webPath } = buildUploadPath();
     await fs.mkdir(dir, { recursive: true });
+    // TODO(prod): Netlify Functions filesystem is read-only except /tmp.
+    // This works in dev/local; for production deploy migrate to Netlify Blobs.
+    // See docs/setup/telegram-bot.md "Limitazione importante".
     await fs.writeFile(path.join(dir, filename), new Uint8Array(processed.buffer));
     const id = await createMedia({
       filename,
