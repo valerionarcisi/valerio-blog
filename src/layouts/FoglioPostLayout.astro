@@ -5,6 +5,7 @@ import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import RelatedPosts from "~/components/RelatedPosts.astro";
 import ShareButtons from "~/components/ShareButtons.astro";
+import ReaderMode from "~/components/ReaderMode.astro";
 import { SITE_TITLE } from "~/consts";
 import "~/styles/foglio.css";
 import "./FoglioPostLayout.css";
@@ -87,6 +88,7 @@ const h2Headings = headings.filter((h) => h.depth === 2);
     </script>
 
     <FoglioHeader lang={lang} active="blog" />
+    <ReaderMode lang={lang} />
     <main>
 
     <!-- Cover hero -->

@@ -1,0 +1,383 @@
+---
+interface Props {
+  lang?: "it" | "en";
+}
+const { lang = "it" } = Astro.props;
+const t = lang === "en"
+  ? {
+      open: "Reader mode",
+      close: "Exit reader",
+      size: "Text size",
+      theme: "Theme",
+      width: "Width",
+      themeCream: "Cream",
+      themeWhite: "White",
+      themeSepia: "Sepia",
+      themeDark: "Dark",
+      widthNarrow: "Narrow",
+      widthWide: "Wide",
+      shortcut: "Press R to toggle",
+    }
+  : {
+      open: "Modalità lettura",
+      close: "Esci dal reader",
+      size: "Dimensione testo",
+      theme: "Tema",
+      width: "Larghezza",
+      themeCream: "Crema",
+      themeWhite: "Bianco",
+      themeSepia: "Seppia",
+      themeDark: "Scuro",
+      widthNarrow: "Stretta",
+      widthWide: "Larga",
+      shortcut: "Premi R per attivare",
+    };
+---
+
+<div class="rm-root">
+  <button
+    type="button"
+    class="rm-toggle"
+    id="rm-toggle"
+    aria-label={t.open}
+    aria-pressed="false"
+    title={t.shortcut}
+  >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M4 19V6a2 2 0 0 1 2-2h10l4 4v11"/>
+      <path d="M16 4v4h4"/>
+      <line x1="8" y1="13" x2="16" y2="13"/>
+      <line x1="8" y1="17" x2="14" y2="17"/>
+    </svg>
+    <span class="rm-toggle-label">Aa</span>
+  </button>
+
+  <div class="rm-panel" id="rm-panel" role="dialog" aria-label={t.open} hidden>
+    <div class="rm-row">
+      <span class="rm-label">{t.size}</span>
+      <div class="rm-group" role="group">
+        <button type="button" data-fs="-" class="rm-btn rm-btn-text" aria-label="Diminuisci">A<small>−</small></button>
+        <button type="button" data-fs="reset" class="rm-btn rm-btn-text" aria-label="Reset">A</button>
+        <button type="button" data-fs="+" class="rm-btn rm-btn-text" aria-label="Aumenta">A<small>+</small></button>
+      </div>
+    </div>
+    <div class="rm-row">
+      <span class="rm-label">{t.theme}</span>
+      <div class="rm-group" role="group">
+        <button type="button" data-theme="cream" class="rm-btn rm-swatch" style="--sw:#f6f1e8" aria-label={t.themeCream} title={t.themeCream}></button>
+        <button type="button" data-theme="white" class="rm-btn rm-swatch" style="--sw:#ffffff" aria-label={t.themeWhite} title={t.themeWhite}></button>
+        <button type="button" data-theme="sepia" class="rm-btn rm-swatch" style="--sw:#f1e2c3" aria-label={t.themeSepia} title={t.themeSepia}></button>
+        <button type="button" data-theme="dark" class="rm-btn rm-swatch" style="--sw:#1c1a16" aria-label={t.themeDark} title={t.themeDark}></button>
+      </div>
+    </div>
+    <div class="rm-row">
+      <span class="rm-label">{t.width}</span>
+      <div class="rm-group" role="group">
+        <button type="button" data-width="narrow" class="rm-btn rm-btn-text">{t.widthNarrow}</button>
+        <button type="button" data-width="wide" class="rm-btn rm-btn-text">{t.widthWide}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  function __rmInit() {
+    var STORE = { active: "rm:active", scale: "rm:scale", theme: "rm:theme", width: "rm:width" };
+    var FS_STEP = 0.1, FS_MIN = 0.7, FS_MAX = 2.0, FS_DEF = 1.0;
+    var body = document.body;
+    var toggle = document.getElementById("rm-toggle");
+    var panel = document.getElementById("rm-panel");
+    if (!toggle || !panel) return;
+
+    function get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
+    function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+    function detectSiteTheme() {
+      var htmlAttr = document.documentElement.getAttribute("data-theme");
+      if (htmlAttr === "dark") return "dark";
+      if (htmlAttr === "light") return "cream";
+      try {
+        var stored = localStorage.getItem("foglio-theme");
+        if (stored === "dark") return "dark";
+        if (stored === "light") return "cream";
+      } catch (e) {}
+      if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+      return "cream";
+    }
+
+    function getScale() {
+      var v = parseFloat(get(STORE.scale, String(FS_DEF)));
+      if (isNaN(v)) v = FS_DEF;
+      return Math.max(FS_MIN, Math.min(FS_MAX, v));
+    }
+
+    function setScale(v) {
+      v = Math.round(Math.max(FS_MIN, Math.min(FS_MAX, v)) * 100) / 100;
+      set(STORE.scale, String(v));
+      applyPrefs();
+    }
+
+    function applyPrefs() {
+      var theme = get(STORE.theme, detectSiteTheme());
+      var width = get(STORE.width, "narrow");
+      body.setAttribute("data-reader-theme", theme);
+      body.setAttribute("data-reader-width", width);
+      body.style.setProperty("--rm-fs", String(getScale()));
+      panel.querySelectorAll("[data-theme]").forEach(function (b) {
+        b.classList.toggle("is-active", b.dataset.theme === theme);
+      });
+      panel.querySelectorAll("[data-width]").forEach(function (b) {
+        b.classList.toggle("is-active", b.dataset.width === width);
+      });
+    }
+
+    function setActive(on) {
+      body.classList.toggle("reader-on", on);
+      toggle.setAttribute("aria-pressed", on ? "true" : "false");
+      if (!on) panel.hidden = true;
+      set(STORE.active, on ? "1" : "0");
+      if (on) applyPrefs();
+    }
+
+    toggle.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var isOn = body.classList.contains("reader-on");
+      if (isOn) {
+        setActive(false);
+      } else {
+        setActive(true);
+        panel.hidden = false;
+      }
+    });
+
+    panel.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var b = e.target.closest("button[data-fs], button[data-theme], button[data-width]");
+      if (!b) return;
+      if (b.dataset.fs === "+") setScale(getScale() + FS_STEP);
+      else if (b.dataset.fs === "-") setScale(getScale() - FS_STEP);
+      else if (b.dataset.fs === "reset") setScale(FS_DEF);
+      else {
+        if (b.dataset.theme) set(STORE.theme, b.dataset.theme);
+        if (b.dataset.width) set(STORE.width, b.dataset.width);
+        applyPrefs();
+      }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (panel.hidden) return;
+      if (panel.contains(e.target) || toggle.contains(e.target)) return;
+      panel.hidden = true;
+    });
+
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target && e.target.tagName) || "";
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(tag) || e.target.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        setActive(!body.classList.contains("reader-on"));
+      } else if (e.key === "Escape" && body.classList.contains("reader-on")) {
+        setActive(false);
+      }
+    });
+
+    applyPrefs();
+    if (get(STORE.active, "0") === "1") setActive(true);
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", __rmInit);
+  } else {
+    __rmInit();
+  }
+</script>
+
+<style is:global>
+  /* Floating toggle (always visible on post pages) */
+  .rm-root {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 1.25rem);
+    right: calc(env(safe-area-inset-right, 0px) + 1.25rem);
+    z-index: 60;
+    font-family: var(--foglio-sans, Inter, system-ui, sans-serif);
+  }
+  .rm-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(34, 26, 18, 0.14);
+    background: rgba(251, 247, 238, 0.92);
+    color: #221a12;
+    backdrop-filter: saturate(140%) blur(8px);
+    -webkit-backdrop-filter: saturate(140%) blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    cursor: pointer;
+    font-size: 0.78rem;
+    line-height: 1;
+    transition: transform 0.12s ease, background 0.2s ease;
+  }
+  .rm-toggle:hover { transform: translateY(-1px); }
+  .rm-toggle[aria-pressed="true"],
+  body.reader-on .rm-toggle,
+  body.reader-on[data-reader-theme="dark"] .rm-toggle {
+    background: #a8451a !important;
+    color: #fff !important;
+    border-color: transparent !important;
+    box-shadow: 0 4px 14px rgba(168, 69, 26, 0.35) !important;
+  }
+  .rm-toggle[aria-pressed="true"]:hover,
+  body.reader-on .rm-toggle:hover { background: #8f3a16 !important; }
+  .rm-toggle-label { font-weight: 600; letter-spacing: 0.02em; }
+
+  .rm-panel {
+    position: absolute;
+    bottom: calc(100% + 0.5rem);
+    right: 0;
+    min-width: 240px;
+    padding: 0.75rem;
+    background: rgba(251, 247, 238, 0.98);
+    color: var(--foglio-ink, #221a12);
+    border: 1px solid rgba(34, 26, 18, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    backdrop-filter: saturate(140%) blur(10px);
+    -webkit-backdrop-filter: saturate(140%) blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .rm-panel[hidden] { display: none; }
+  .rm-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+  .rm-label { font-size: 0.72rem; color: var(--foglio-ink-soft, #5e4d3a); text-transform: uppercase; letter-spacing: 0.06em; }
+  .rm-group { display: inline-flex; gap: 0.25rem; }
+  .rm-btn {
+    cursor: pointer;
+    border: 1px solid rgba(34, 26, 18, 0.14);
+    background: transparent;
+    color: inherit;
+    border-radius: 8px;
+    padding: 0.32rem 0.55rem;
+    font-size: 0.78rem;
+    line-height: 1;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .rm-btn:hover { background: rgba(34, 26, 18, 0.06); }
+  .rm-btn.is-active {
+    border-color: var(--foglio-accent, #a8451a);
+    background: rgba(168, 69, 26, 0.1);
+    color: var(--foglio-accent, #a8451a);
+  }
+  .rm-btn-text small { font-size: 0.7em; margin-left: 1px; }
+  .rm-swatch {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--sw);
+    border: 1px solid rgba(34, 26, 18, 0.2);
+  }
+  .rm-swatch.is-active {
+    box-shadow: 0 0 0 2px var(--foglio-accent, #a8451a);
+    border-color: transparent;
+  }
+
+  /* ===== Reader mode active ===== */
+  body.reader-on .foglio-nav,
+  body.reader-on .fp-progress,
+  body.reader-on .fp-toc,
+  body.reader-on .fp-cover-hero,
+  body.reader-on .fp-related,
+  body.reader-on .fp-eyebrow-tag,
+  body.reader-on .fp-eyebrow-sep,
+  body.reader-on .fp-share,
+  body.reader-on .PostClaps,
+  body.reader-on .Comments,
+  body.reader-on .foglio-footer { display: none !important; }
+
+  body.reader-on main { padding-top: 4rem; }
+  body.reader-on .fp-layout {
+    grid-template-columns: 1fr !important;
+    max-width: 760px !important;
+  }
+  body.reader-on .fp-article {
+    max-width: 100% !important;
+  }
+
+  /* Width */
+  body.reader-on[data-reader-width="narrow"] .fp-layout { max-width: 680px !important; }
+  body.reader-on[data-reader-width="wide"] .fp-layout { max-width: 880px !important; }
+
+  /* Dynamic text size via --rm-fs (1.0 = base, ranges 0.7–2.0) */
+  body.reader-on .fp-article,
+  body.reader-on .fp-article p,
+  body.reader-on .fp-article li {
+    font-size: calc(1.1rem * var(--rm-fs, 1)) !important;
+    line-height: 1.75 !important;
+  }
+  body.reader-on .fp-article h2 { font-size: calc(1.6rem * var(--rm-fs, 1)) !important; }
+  body.reader-on .fp-article h3 { font-size: calc(1.3rem * var(--rm-fs, 1)) !important; }
+
+  /* Tighten vertical rhythm between header and article body */
+  body.reader-on main { padding-top: 2.5rem !important; }
+  body.reader-on .fp-head { margin-bottom: 1.5rem !important; padding-bottom: 0 !important; }
+  body.reader-on .fp-layout { margin-top: 0 !important; padding-top: 0 !important; }
+  body.reader-on .fp-article { margin-top: 0 !important; padding-top: 0 !important; }
+  body.reader-on .fp-article > :first-child { margin-top: 0 !important; }
+
+  body.reader-on .fp-title {
+    font-size: clamp(2rem, 4vw, 2.8rem) !important;
+  }
+  body.reader-on .fp-extract { font-size: 1.05rem !important; }
+
+  /* Themes — override foglio tokens at the body level */
+  body.reader-on[data-reader-theme="cream"] {
+    --foglio-bg: #f6f1e8;
+    --foglio-paper: #fbf7ee;
+    --foglio-paper-2: #f1ebdd;
+    --foglio-ink: #221a12;
+    --foglio-ink-soft: #5e4d3a;
+    background: #f6f1e8;
+    color: #221a12;
+  }
+  body.reader-on[data-reader-theme="white"] {
+    --foglio-bg: #ffffff;
+    --foglio-paper: #ffffff;
+    --foglio-paper-2: #f6f6f6;
+    --foglio-ink: #1a1a1a;
+    --foglio-ink-soft: #4a4a4a;
+    background: #ffffff;
+    color: #1a1a1a;
+  }
+  body.reader-on[data-reader-theme="sepia"] {
+    --foglio-bg: #f1e2c3;
+    --foglio-paper: #f4e7cc;
+    --foglio-paper-2: #ead8b2;
+    --foglio-ink: #3a2a16;
+    --foglio-ink-soft: #6b5436;
+    background: #f1e2c3;
+    color: #3a2a16;
+  }
+  body.reader-on[data-reader-theme="dark"] {
+    --foglio-bg: #131210;
+    --foglio-paper: #1c1a16;
+    --foglio-paper-2: #232017;
+    --foglio-ink: #ece8de;
+    --foglio-ink-soft: #b8ad95;
+    background: #131210;
+    color: #ece8de;
+  }
+  body.reader-on[data-reader-theme="dark"] .rm-toggle,
+  body.reader-on[data-reader-theme="dark"] .rm-panel {
+    background: rgba(28, 26, 22, 0.96);
+    color: #ece8de;
+    border-color: rgba(236, 232, 222, 0.14);
+  }
+  body.reader-on[data-reader-theme="dark"] .rm-btn:hover { background: rgba(236, 232, 222, 0.08); }
+  body.reader-on[data-reader-theme="dark"] .rm-label { color: #b8ad95; }
+
+  @media print {
+    .rm-root { display: none !important; }
+  }
+</style>
