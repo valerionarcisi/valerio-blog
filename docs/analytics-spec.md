@@ -2,6 +2,17 @@
 
 Clone privacy-first di Simple Analytics, self-hosted su Turso + Astro + Netlify Functions.
 
+## Recent changes (2026-05-27)
+
+- **Live counter** `/api/stats/live` — `DISTINCT visitor_hash` in ultimi 5 min, esclude bot flaggati. Polling 30s dalla dashboard. Cache-Control `no-store` per evitare stale.
+- **Bot exclusion globale** — `baseWhere` di `/api/stats` ora esclude `visitor_hash IN (SELECT hash FROM bot_hashes)` su TUTTE le query (pageviews, visitors, top pages, ecc.). Prima escludeva solo dal contatore "sospetti", lasciando pageviews gonfi.
+- **Auto-refresh "Visitatori recenti"** — la dashboard ripolla `/api/stats?period=today` ogni 30s quando il period attivo è "Oggi" e la tab è in foreground.
+- **Featured live card UI** — sezione "Visitatori recenti" promossa in posizione 2 (dopo summary stats), wrap in card terracotta-bordered, pallino verde pulsante next al titolo.
+- **Contrast bump** — `--ax-page-ink-soft` da 0.72 → 0.86 alpha, `--ax-page-ink-mute` da 0.45 → 0.66 alpha. Testo piccolo passa WCAG AA con margine.
+- **Removed client-side language redirect** — il vecchio script in `BaseHead.astro` redirigeva non-italiani a `/en/`, gonfiando Speed Index e confondendo Googlebot. Tolto. La selezione lingua resta manuale via header IT/EN.
+
+Il resto di questa spec descrive il sistema base ancora valido. Sezione "Bot detection" qui sotto è ancora autoritativa, ma il punto chiave da ricordare è che il flag mette `is_unique = 0` sulle righe del visitor_hash + aggiunge l'hash a `bot_hashes`, e da lì TUTTE le query stats escludono automaticamente.
+
 ## Obiettivo
 
 Sostituire Simple Analytics ($9/mese) con un sistema self-hosted che:
