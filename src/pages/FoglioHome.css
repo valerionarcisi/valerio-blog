@@ -561,8 +561,15 @@
   }
 
   .fh-portrait {
-    max-width: 220px;
+    max-width: 180px;
+    margin: 0 auto;
     order: -1;
+  }
+
+  .fh-portrait-img {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background-position: center 25%;
   }
 
   .fh-portrait-caption {
