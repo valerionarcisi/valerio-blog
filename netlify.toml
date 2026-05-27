@@ -32,6 +32,41 @@
 # Language redirect handled client-side (see BaseHead.astro)
 # to avoid blocking Googlebot from indexing Italian pages
 
+# IT→EN path mismatches: client-side redirect prepends /en/, but
+# these IT slugs differ from their EN counterparts.
+[[redirects]]
+  from = "/en/visti"
+  to = "/en/watched/"
+  status = 301
+[[redirects]]
+  from = "/en/visti/"
+  to = "/en/watched/"
+  status = 301
+[[redirects]]
+  from = "/en/ascolti"
+  to = "/en/listening/"
+  status = 301
+[[redirects]]
+  from = "/en/ascolti/"
+  to = "/en/listening/"
+  status = 301
+[[redirects]]
+  from = "/en/contatti"
+  to = "/en/contact/"
+  status = 301
+[[redirects]]
+  from = "/en/contatti/"
+  to = "/en/contact/"
+  status = 301
+[[redirects]]
+  from = "/en/chi-sono"
+  to = "/en/who-i-am/"
+  status = 301
+[[redirects]]
+  from = "/en/chi-sono/"
+  to = "/en/who-i-am/"
+  status = 301
+
 [[redirects]]
   from = "/caramella-shortmovie"
   to = "/films/caramella/"

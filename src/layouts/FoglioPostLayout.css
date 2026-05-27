@@ -432,3 +432,13 @@
   }
   .fp-related { padding: 0 1.4rem; }
 }
+
+/* Shiki light-theme contrast fix: github-light uses #E36209 (orange) on white,
+   which falls below 4.5:1. Darken the keyword/type token to a terracotta that
+   matches Foglio accent and clears AA on both white and cream backgrounds. */
+.fp-article .astro-code span[style*="color:#E36209"] {
+  color: #a8451a !important;
+}
+.fp-article .astro-code span[style*="color: #E36209"] {
+  color: #a8451a !important;
+}
