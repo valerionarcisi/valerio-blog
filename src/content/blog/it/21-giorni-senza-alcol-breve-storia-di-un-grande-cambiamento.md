@@ -1,7 +1,7 @@
 ---
 title: 21 Giorni Senza Alcol - Breve storia di un grande cambiamento
 date: "2025-04-01"
-extract: Segui il mio racconto di 21 giorni senza alcol, un viaggio intimo e sincero attraverso le sfide e le scoperte di una vita senza bere. Tra momenti di debolezza e piccole vittorie, scopri come ho riscoperto il benessere e la chiarezza mentale. Leggi la mia storia personale e unisciti a me in questa avventura di cambiamento e crescita.
+extract: "Cosa succede al corpo e alla testa dopo 21 giorni senza alcol. Racconto onesto: i primi giorni difficili, le piccole vittorie, cosa è cambiato davvero."
 tags:
   - "thoughts"
 coverImage: "/img/blog/21-giorni-senza-alcol-breve-storia-di-un-grande-cambiamento/cm8zxole91sgu07liktp4qse4.png"

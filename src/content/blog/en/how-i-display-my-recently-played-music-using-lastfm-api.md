@@ -1,7 +1,7 @@
 ---
-title: How I Display My Recently Played Music Using Last.fm API
+title: "Last.fm API tutorial: display your recently played music on your site"
 date: "2025-09-05"
-extract: "Music is a constant companion in my life, especially during my work as a developer and filmmaker. I wanted to share my musical journey with visitors to my website by automatically displaying what I've been listening to lately, without the hassle of manual updates."
+extract: "Practical guide: how to use the Last.fm (Audioscrobbler) API to fetch your recent tracks and display them on your website. JavaScript examples, no backend needed."
 tags:
   - "lastfm"
   - "javascript"

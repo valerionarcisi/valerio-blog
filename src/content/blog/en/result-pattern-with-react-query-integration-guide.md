@@ -1,7 +1,7 @@
 ---
-title: Result Pattern with React Query Integration Guide
+title: "Result Pattern in TypeScript: a practical guide with React Query"
 date: "2025-09-05"
-extract: The Result Pattern is a functional programming approach to error handling that makes success and error states explicit in your type system. Instead of throwing exceptions, all operations return a Result<T, E> type that can either be Ok<T> (success) or Err<E> (error).
+extract: "How to use the Result Pattern in TypeScript to make success and error explicit in your types, and how to wire it into React Query. Practical examples, no exceptions."
 tags:
   - "result-pattern"
   - "typescript"

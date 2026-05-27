@@ -1,7 +1,7 @@
 ---
-title: Come mostro la musica ascoltata di recente usando le API di Last.fm
+title: "Last.fm API: come mostrare i brani ascoltati di recente sul tuo sito"
 date: "2025-09-05"
-extract: "La musica è una compagna costante nella mia vita, soprattutto durante il mio lavoro come sviluppatore e filmmaker. Volevo condividere il mio percorso musicale con i visitatori del mio sito, mostrando automaticamente cosa ho ascoltato di recente, senza la seccatura degli aggiornamenti manuali."
+extract: "Tutorial pratico: come usare l'API di Last.fm (Audioscrobbler) per leggere i tuoi recent tracks e mostrarli sul sito. Esempi in JavaScript, niente backend."
 tags:
   - "lastfm"
   - "javascript"
