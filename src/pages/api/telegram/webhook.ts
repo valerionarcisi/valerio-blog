@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { env } from "~/lib/env";
 import { sendMessage } from "~/lib/telegram";
-import { createIdea, listIdeas } from "~/lib/editorial-ideas";
+import { createIdea, listIdeas, markIdeaStatus } from "~/lib/editorial-ideas";
 
 export const prerender = false;
 
@@ -105,6 +105,18 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     }
     const lines = ideas.map((i) => `#${i.id} · ${i.text.slice(0, 80)}${i.text.length > 80 ? "…" : ""}`);
     await sendMessage(message.chat.id, lines.join("\n"));
+    return;
+  }
+
+  if (text.startsWith("/done ")) {
+    const idStr = text.slice(6).trim();
+    const id = Number(idStr);
+    if (!Number.isFinite(id) || id <= 0) {
+      await sendMessage(message.chat.id, "Uso: /done <id idea>");
+      return;
+    }
+    await markIdeaStatus(id, "published");
+    await sendMessage(message.chat.id, `✅ Idea #${id} archiviata come published.`);
     return;
   }
 

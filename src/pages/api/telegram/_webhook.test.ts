@@ -172,3 +172,35 @@ describe("/list handler", () => {
     expect(reply).toContain("altro pezzo");
   });
 });
+
+describe("/done handler", () => {
+  beforeEach(() => {
+    db = createClient({ url: ":memory:" });
+    resetIdeas();
+  });
+
+  test("/done <id> marks the idea as published", async () => {
+    const { createIdea, getIdea } = await import("~/lib/editorial-ideas");
+    const id = await createIdea({ text: "test", source: "manual" });
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: `/done ${id}` } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    const idea = await getIdea(id);
+    expect(idea?.status).toBe("published");
+  });
+
+  test("/done with invalid id replies with error", async () => {
+    const { sendMessage } = await import("~/lib/telegram");
+    (sendMessage as any).mockClear();
+    await POST({
+      request: makeRequest(
+        { update_id: 1, message: { message_id: 1, from: { id: 12345 }, chat: { id: 12345 }, text: "/done abc" } },
+        { "X-Telegram-Bot-Api-Secret-Token": "secret-abc" },
+      ),
+    } as any);
+    expect((sendMessage as any).mock.calls[0][1]).toContain("Uso");
+  });
+});
