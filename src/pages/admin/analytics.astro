@@ -459,18 +459,16 @@ if (!isAuthorized) {
         align-items: center;
         gap: 0.6rem;
       }
-      .foglio body.admin .ax-live-dot {
-        display: inline-block;
+      .foglio body.admin .ax-section-head--live h2 .ax-live-dot {
         width: 9px;
         height: 9px;
-        border-radius: 50%;
         background: #2e8b57;
         box-shadow: 0 0 0 0 rgba(46, 139, 87, 0.55);
-        animation: ax-live-pulse 2.4s ease-out infinite;
+        animation: ax-live-pulse-lg 2.4s ease-out infinite;
         position: relative;
         top: 1px;
       }
-      @keyframes ax-live-pulse {
+      @keyframes ax-live-pulse-lg {
         0%   { box-shadow: 0 0 0 0    rgba(46, 139, 87, 0.55); }
         70%  { box-shadow: 0 0 0 12px rgba(46, 139, 87, 0); }
         100% { box-shadow: 0 0 0 0    rgba(46, 139, 87, 0); }
@@ -1185,6 +1183,17 @@ if (!isAuthorized) {
           .catch(function() {});
       }
 
+      function pollRecent() {
+        if (document.hidden) return;
+        if (currentPeriod !== "today") return;
+        fetch("/api/stats?period=today", { headers: AUTH_HEADERS })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d && d.recent_visitors) renderRecentVisitors(d.recent_visitors);
+          })
+          .catch(function() {});
+      }
+
       document.querySelectorAll(".ax-periods button").forEach(function(b) {
         b.addEventListener("click", function() { currentPeriod = b.dataset.period; loadData(b.dataset.period); });
       });
@@ -1224,6 +1233,7 @@ if (!isAuthorized) {
       loadData("today");
       loadLive();
       setInterval(loadLive, 30000);
+      setInterval(pollRecent, 30000);
     </script>
   </body>
 </html>
