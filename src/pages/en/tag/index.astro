@@ -1,0 +1,89 @@
+---
+import { getCollection } from "astro:content";
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import { getLangFromId } from "~/i18n/utils";
+import "~/styles/foglio.css";
+
+const allEntries = await getCollection("blog");
+const langPosts = allEntries.filter((e) => getLangFromId(e.id) === "en");
+const tagCounts = new Map<string, number>();
+for (const p of langPosts) {
+  for (const t of p.data.tags ?? []) {
+    const key = t.toLowerCase().trim();
+    if (!key) continue;
+    tagCounts.set(key, (tagCounts.get(key) ?? 0) + 1);
+  }
+}
+const tags = Array.from(tagCounts.entries()).sort(
+  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+);
+
+function label(tag: string): string {
+  return tag.charAt(0).toUpperCase() + tag.slice(1).replace(/-/g, " ");
+}
+---
+
+<!doctype html>
+<html lang="en" class="foglio">
+  <head>
+    <BaseHead
+      title="Tags | Valerio Narcisi"
+      description="All blog tags: index of the topics covered."
+      lang="en"
+    />
+  </head>
+  <body>
+    <FoglioHeader lang="en" active="blog" />
+
+    <header class="fl-head">
+      <h1><em class="acc">Tags</em>.</h1>
+      <p>All blog topics, ordered by post count.</p>
+    </header>
+
+    <section class="fl-tag-cloud">
+      {tags.map(([tag, count]) => (
+        <a href={`/en/tag/${tag}/`} class="fl-tag-chip">
+          {label(tag)} <span class="fl-tag-count">{count}</span>
+        </a>
+      ))}
+    </section>
+
+    <FoglioFooter lang="en" />
+
+    <style is:global>
+      .fl-tag-cloud {
+        max-width: var(--foglio-maxw);
+        margin: 2rem auto 4rem;
+        padding: 0 3rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+      }
+      .fl-tag-chip {
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--foglio-rule);
+        border-radius: 100px;
+        color: var(--foglio-ink);
+        text-decoration: none;
+        font-family: var(--foglio-mono);
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: border-color 0.15s, color 0.15s;
+      }
+      .fl-tag-chip:hover {
+        border-color: var(--foglio-accent);
+        color: var(--foglio-accent);
+      }
+      .fl-tag-count {
+        margin-left: 0.4rem;
+        color: var(--foglio-ink-soft);
+      }
+      @media (max-width: 767px) {
+        .fl-tag-cloud { padding: 0 1.4rem; }
+      }
+    </style>
+  </body>
+</html>

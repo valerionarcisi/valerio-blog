@@ -5,7 +5,7 @@ extract: Il Result Pattern è un approccio della programmazione funzionale alla 
 tags:
   - "result-pattern"
   - "typescript"
-coverImage: "/img/blog/result-pattern-with-react-query-integration-guide/cmf6ms4bn0unu07jzcgne9ox3.png"
+coverImage: "/img/blog/result-pattern-with-react-query-integration-guide/cover.jpg"
 coverAuthorName: Gemini
 coverDescription: Gemini and his imagination
 ---

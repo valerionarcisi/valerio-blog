@@ -4,7 +4,7 @@ year: 2024
 role: "Co-Sceneggiatore e Assistente alla Regia"
 status: "completed"
 sortOrder: 3
-coverImage: "/img/pochiistanti.png"
+coverImage: "/img/pochiistanti.jpg"
 plot: "Ambientato nella campagna marchigiana nel 2025, la storia segue un giovane che lavora per una startup tecnologica, testando un nuovo drone progettato per analizzare la fertilita' del suolo. Mentre comanda il drone, succede qualcosa di strano: invece di attenersi al compito assegnato, il drone inizia a vagare, catturando immagini inquietanti e misteriose."
 crew:
   - role: "Regia"
@@ -16,13 +16,13 @@ cast: []
 festivals: []
 specialThanks: []
 images:
-  - src: "/img/pochiistanti.png"
+  - src: "/img/pochiistanti.jpg"
     alt: "Pochi Istanti - Screenshot"
-  - src: "/img/pochiistanti1.png"
+  - src: "/img/pochiistanti1.jpg"
     alt: "Pochi Istanti - Screenshot 2"
-  - src: "/img/pochiistanti2.png"
+  - src: "/img/pochiistanti2.jpg"
     alt: "Pochi Istanti - Screenshot 3"
-  - src: "/img/pochiistanti3.png"
+  - src: "/img/pochiistanti3.jpg"
     alt: "Pochi Istanti - Io e mia figlia sull'altalena"
     caption: "Io e mia figlia sull'altalena"
 ---

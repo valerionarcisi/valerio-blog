@@ -5,7 +5,7 @@ extract: The Result Pattern is a functional programming approach to error handli
 tags:
   - "result-pattern"
   - "typescript"
-coverImage: "/img/blog/result-pattern-with-react-query-integration-guide/cmf6ms4bn0unu07jzcgne9ox3.png"
+coverImage: "/img/blog/result-pattern-with-react-query-integration-guide/cover.jpg"
 coverAuthorName: Gemini
 coverDescription: Gemini and his imagination
 ---

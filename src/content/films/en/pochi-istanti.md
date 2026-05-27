@@ -4,7 +4,7 @@ year: 2024
 role: "Co-Written & Assistant Director"
 status: "completed"
 sortOrder: 3
-coverImage: "/img/pochiistanti.png"
+coverImage: "/img/pochiistanti.jpg"
 plot: "Set in the Marche countryside in 2025, the story follows a young man working for a tech startup, testing a new drone designed to analyze soil fertility. As he commands the drone, something strange happens — rather than sticking to the task at hand, the drone begins to wander, capturing unsettling and mysterious footage."
 crew:
   - role: "Director"
@@ -16,13 +16,13 @@ cast: []
 festivals: []
 specialThanks: []
 images:
-  - src: "/img/pochiistanti.png"
+  - src: "/img/pochiistanti.jpg"
     alt: "Pochi Istanti - Screenshot"
-  - src: "/img/pochiistanti1.png"
+  - src: "/img/pochiistanti1.jpg"
     alt: "Pochi Istanti - Screenshot 2"
-  - src: "/img/pochiistanti2.png"
+  - src: "/img/pochiistanti2.jpg"
     alt: "Pochi Istanti - Screenshot 3"
-  - src: "/img/pochiistanti3.png"
+  - src: "/img/pochiistanti3.jpg"
     alt: "Pochi Istanti - Me and my daughter on the swing"
     caption: "Me and my daughter on the swing"
 ---
