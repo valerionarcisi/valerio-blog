@@ -98,15 +98,16 @@ async function restoreUniqueForHashes(
 ) {
   for (const h of hashes) {
     await db.execute({
-      sql: `UPDATE pageviews
-            SET is_unique = CASE WHEN id = (
-              SELECT p2.id FROM pageviews p2
-              WHERE p2.visitor_hash = pageviews.visitor_hash
-                AND date(p2.created_at) = date(pageviews.created_at)
-              ORDER BY p2.created_at ASC, p2.id ASC
-              LIMIT 1
-            ) THEN 1 ELSE 0 END
-            WHERE visitor_hash = ?`,
+      sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
+      args: [h],
+    });
+    await db.execute({
+      sql: `UPDATE pageviews SET is_unique = 1
+            WHERE id IN (
+              SELECT MIN(id) FROM pageviews
+              WHERE visitor_hash = ?
+              GROUP BY date(created_at)
+            )`,
       args: [h],
     });
   }
@@ -217,54 +218,46 @@ export const DELETE: APIRoute = async ({ request }) => {
   return deleteAndRestore(db, [action.hash]);
 };
 
-export const GET: APIRoute = async ({ request, url }) => {
+export const GET: APIRoute = async ({ url }) => {
   const token = url.searchParams.get("token") ?? "";
-  if (token !== env("ADMIN_TOKEN") || token.length === 0) {
+  if (token.length === 0 || token !== env("ADMIN_TOKEN")) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const action = url.searchParams.get("recover");
-  if (action !== "all") {
+  if (url.searchParams.get("recover") !== "all") {
     return new Response(
       "Usage: GET /api/admin/bot?recover=all&token=ADMIN_TOKEN",
       { status: 400, headers: { "Content-Type": "text/plain" } },
     );
   }
 
-  const db = getDb();
-  const all = await db.execute({
-    sql: "SELECT hash FROM bot_hashes",
-    args: [],
-  });
-  const hashes = all.rows.map((r) => String(r.hash));
-  if (hashes.length === 0) {
+  try {
+    const db = getDb();
+    const all = await db.execute({
+      sql: "SELECT hash FROM bot_hashes",
+      args: [],
+    });
+    const hashes = all.rows.map((r) => String(r.hash));
+
+    if (hashes.length > 0) {
+      const placeholders = hashes.map(() => "?").join(",");
+      await db.execute({
+        sql: `DELETE FROM bot_hashes WHERE hash IN (${placeholders})`,
+        args: hashes,
+      });
+      await restoreUniqueForHashes(db, hashes);
+    }
+
+    const dashHref = `/admin/analytics?token=${encodeURIComponent(token)}`;
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>Nothing to unflag</h1><p>bot_hashes è vuota.</p><p><a href="/admin/analytics?token=${token}">→ Torna alla dashboard</a></p></body>`,
+      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a href="${dashHref}">→ Torna alla dashboard</a></p></body>`,
       { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
     );
+  } catch (e) {
+    const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    return new Response(
+      `<!doctype html><meta charset="utf-8"><title>Recover error</title><body style="font-family:system-ui;padding:2rem;max-width:680px"><h1>Errore</h1><pre style="background:#f5f5f5;padding:1rem;overflow:auto">${msg.replace(/[<>&]/g, (c) => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]!))}</pre></body>`,
+      { status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } },
+    );
   }
-
-  await db.execute({
-    sql: `DELETE FROM bot_hashes WHERE hash IN (${hashes.map(() => "?").join(",")})`,
-    args: hashes,
-  });
-  for (const h of hashes) {
-    await db.execute({
-      sql: `UPDATE pageviews
-            SET is_unique = CASE WHEN id = (
-              SELECT p2.id FROM pageviews p2
-              WHERE p2.visitor_hash = pageviews.visitor_hash
-                AND date(p2.created_at) = date(pageviews.created_at)
-              ORDER BY p2.created_at ASC, p2.id ASC
-              LIMIT 1
-            ) THEN 1 ELSE 0 END
-            WHERE visitor_hash = ?`,
-      args: [h],
-    });
-  }
-
-  return new Response(
-    `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a href="/admin/analytics?token=${token}">→ Torna alla dashboard</a></p></body>`,
-    { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
-  );
 };
