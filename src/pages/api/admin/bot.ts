@@ -19,6 +19,11 @@ type BotAction =
   | { type: "bulkHash"; hashes: string[] }
   | { type: "singleHash"; hash: string };
 
+type BotUnflagAction =
+  | { type: "unflagHash"; hash: string }
+  | { type: "unflagHashes"; hashes: string[] }
+  | { type: "unflagRecent"; minutes: number };
+
 function parseBotAction(body: unknown): Result<BotAction> {
   if (!body || typeof body !== "object") return err("Invalid body");
   const b = body as Record<string, unknown>;
@@ -44,6 +49,32 @@ function parseBotAction(body: unknown): Result<BotAction> {
   return err("Invalid hash");
 }
 
+function parseBotUnflagAction(body: unknown): Result<BotUnflagAction> {
+  if (!body || typeof body !== "object") return err("Invalid body");
+  const b = body as Record<string, unknown>;
+
+  if (typeof b.recentMinutes === "number") {
+    const n = Math.floor(b.recentMinutes);
+    if (!Number.isFinite(n) || n <= 0 || n > 1440)
+      return err("recentMinutes must be 1..1440");
+    return ok({ type: "unflagRecent", minutes: n });
+  }
+
+  if (Array.isArray(b.hashes)) {
+    const valid = b.hashes.filter(
+      (h: unknown) => typeof h === "string" && h.length > 0 && h.length <= 32,
+    );
+    if (valid.length === 0) return err("No valid hashes");
+    return ok({ type: "unflagHashes", hashes: valid });
+  }
+
+  if (typeof b.hash === "string" && b.hash.length > 0 && b.hash.length <= 32) {
+    return ok({ type: "unflagHash", hash: b.hash });
+  }
+
+  return err("Invalid input");
+}
+
 async function recalcUniqueForHashes(
   db: ReturnType<typeof getDb>,
   hashes: string[],
@@ -51,6 +82,26 @@ async function recalcUniqueForHashes(
   for (const h of hashes) {
     await db.execute({
       sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
+      args: [h],
+    });
+  }
+}
+
+async function restoreUniqueForHashes(
+  db: ReturnType<typeof getDb>,
+  hashes: string[],
+) {
+  for (const h of hashes) {
+    await db.execute({
+      sql: `UPDATE pageviews
+            SET is_unique = CASE WHEN id = (
+              SELECT p2.id FROM pageviews p2
+              WHERE p2.visitor_hash = pageviews.visitor_hash
+                AND date(p2.created_at) = date(pageviews.created_at)
+              ORDER BY p2.created_at ASC, p2.id ASC
+              LIMIT 1
+            ) THEN 1 ELSE 0 END
+            WHERE visitor_hash = ?`,
       args: [h],
     });
   }
@@ -67,6 +118,19 @@ async function insertAndRecalc(
   });
   await recalcUniqueForHashes(db, hashes);
   return jsonOk({ ok: true, flagged: hashes.length });
+}
+
+async function deleteAndRestore(
+  db: ReturnType<typeof getDb>,
+  hashes: string[],
+): Promise<Response> {
+  const placeholders = hashes.map(() => "?").join(",");
+  await db.execute({
+    sql: `DELETE FROM bot_hashes WHERE hash IN (${placeholders})`,
+    args: hashes,
+  });
+  await restoreUniqueForHashes(db, hashes);
+  return jsonOk({ ok: true, unflagged: hashes.length });
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -98,4 +162,42 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   return insertAndRecalc(db, [action.hash]);
+};
+
+export const DELETE: APIRoute = async ({ request }) => {
+  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const bodyResult = await parseJsonBody(request);
+  if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
+
+  const parsed = parseBotUnflagAction(bodyResult.value);
+  if (!parsed.ok) return jsonErr(parsed.error, 400);
+
+  const db = getDb();
+  const action = parsed.value;
+
+  if (action.type === "unflagRecent") {
+    const cutoff = new Date(Date.now() - action.minutes * 60 * 1000)
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+    const recent = await db.execute({
+      sql: "SELECT hash FROM bot_hashes WHERE created_at >= ?",
+      args: [cutoff],
+    });
+    const hashes = recent.rows.map((r) => String(r.hash));
+    if (hashes.length === 0) return jsonOk({ ok: true, unflagged: 0 });
+    return deleteAndRestore(db, hashes);
+  }
+
+  if (action.type === "unflagHashes") {
+    return deleteAndRestore(db, action.hashes);
+  }
+
+  return deleteAndRestore(db, [action.hash]);
 };
