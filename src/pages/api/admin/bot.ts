@@ -22,7 +22,8 @@ type BotAction =
 type BotUnflagAction =
   | { type: "unflagHash"; hash: string }
   | { type: "unflagHashes"; hashes: string[] }
-  | { type: "unflagRecent"; minutes: number };
+  | { type: "unflagRecent"; minutes: number }
+  | { type: "unflagAll" };
 
 function parseBotAction(body: unknown): Result<BotAction> {
   if (!body || typeof body !== "object") return err("Invalid body");
@@ -52,6 +53,10 @@ function parseBotAction(body: unknown): Result<BotAction> {
 function parseBotUnflagAction(body: unknown): Result<BotUnflagAction> {
   if (!body || typeof body !== "object") return err("Invalid body");
   const b = body as Record<string, unknown>;
+
+  if (b.all === true) {
+    return ok({ type: "unflagAll" });
+  }
 
   if (typeof b.recentMinutes === "number") {
     const n = Math.floor(b.recentMinutes);
@@ -180,6 +185,16 @@ export const DELETE: APIRoute = async ({ request }) => {
 
   const db = getDb();
   const action = parsed.value;
+
+  if (action.type === "unflagAll") {
+    const all = await db.execute({
+      sql: "SELECT hash FROM bot_hashes",
+      args: [],
+    });
+    const hashes = all.rows.map((r) => String(r.hash));
+    if (hashes.length === 0) return jsonOk({ ok: true, unflagged: 0 });
+    return deleteAndRestore(db, hashes);
+  }
 
   if (action.type === "unflagRecent") {
     const cutoff = new Date(Date.now() - action.minutes * 60 * 1000)
