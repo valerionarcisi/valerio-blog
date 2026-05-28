@@ -684,6 +684,7 @@ if (!isAuthorized) {
         <div class="ax-bulk-actions">
           <button class="ax-bulk-flag" id="flag-all-bots">Flag zero-engagement</button>
           <button class="ax-bulk-flag" id="unflag-recent" title="Rimuove dai bot gli hash flaggati nelle ultime 24 ore">Annulla flag fatti oggi</button>
+          <button class="ax-bulk-flag" id="unflag-all" title="Rimuove TUTTI gli hash dalla bot list (paracadute)">Annulla TUTTI</button>
         </div>
       </div>
       <div class="ax-recent-card">
@@ -1235,6 +1236,21 @@ if (!isAuthorized) {
       document.getElementById("nav-prev").addEventListener("click", function() { navigatePeriod(-1); });
       document.getElementById("nav-next").addEventListener("click", function() { navigatePeriod(1); });
       document.getElementById("flag-all-bots").addEventListener("click", flagAllBots);
+      document.getElementById("unflag-all").addEventListener("click", function() {
+        if (!confirm("Rimuovere TUTTI gli hash flaggati come bot? L'azione ricalcolerà is_unique per ogni hash.")) return;
+        var btn = document.getElementById("unflag-all");
+        var orig = btn.textContent;
+        btn.disabled = true; btn.textContent = "Annullamento…";
+        fetch("/api/admin/bot?_=" + Date.now(), { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ all: true }) })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            btn.disabled = false;
+            btn.textContent = d.unflagged > 0 ? d.unflagged + " annullati" : "Nessuno da annullare";
+            setTimeout(function() { btn.textContent = orig; }, 3000);
+            loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : ""));
+          })
+          .catch(function() { btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 3000); });
+      });
       document.getElementById("unflag-recent").addEventListener("click", function() {
         var btn = document.getElementById("unflag-recent");
         var orig = btn.textContent;
