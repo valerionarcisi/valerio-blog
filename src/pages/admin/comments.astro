@@ -77,6 +77,49 @@ if (!isAuthorized) {
         .foglio body.admin .card { padding: 1rem; }
         .foglio body.admin .text-cell { max-width: 180px; }
       }
+
+      @media (max-width: 600px) {
+        .foglio body.admin table,
+        .foglio body.admin tbody,
+        .foglio body.admin tr,
+        .foglio body.admin td { display: block; width: 100%; }
+        .foglio body.admin thead { display: none; }
+        .foglio body.admin tr {
+          border: 1px solid var(--foglio-rule);
+          border-radius: var(--foglio-radius-sm);
+          padding: 0.85rem 0.9rem;
+          margin-bottom: 0.75rem;
+          background: var(--foglio-bg);
+        }
+        .foglio body.admin td {
+          padding: 0.2rem 0;
+          border: none;
+          word-break: break-word;
+        }
+        .foglio body.admin .text-cell {
+          max-width: 100%;
+          white-space: normal;
+          font-size: var(--foglio-fs-md);
+          margin: 0.4rem 0 0.6rem;
+          color: var(--foglio-ink);
+        }
+        .foglio body.admin .email { word-break: break-all; }
+        .foglio body.admin .actions {
+          display: flex;
+          gap: 0.5rem;
+          margin-top: 0.6rem;
+          padding-top: 0.6rem;
+          border-top: 1px dashed var(--foglio-rule);
+        }
+        .foglio body.admin .actions .btn {
+          flex: 1;
+          padding: 0.75rem 0.5rem;
+          min-height: 44px;
+          font-size: var(--foglio-fs-mono);
+        }
+        .foglio body.admin .claps-table .clap-count,
+        .foglio body.admin .claps-table .unique-count { text-align: left; }
+      }
     </style>
   </head>
   <body class="admin">
