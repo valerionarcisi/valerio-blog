@@ -30,10 +30,10 @@ const crew = [
 ];
 
 const stops = [
-  { city: "Trieste", nights: "2 notti", drive: "Da casa · ~510 km · 5h15", icon: "ph:lighthouse" },
-  { city: "Lubiana", nights: "3 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
-  { city: "Wörthersee · Carinzia", nights: "3 notti", drive: "Traforo Caravanche · ~85 km · 1h10", icon: "ph:mountains" },
-  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "~370 km · 3h45", icon: "ph:bed" },
+  { city: "Trieste", nights: "3 notti", drive: "Da casa · ~510 km · 5h15", icon: "ph:lighthouse" },
+  { city: "Lubiana", nights: "2 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
+  { city: "Wörthersee · Carinzia", nights: "3 notti", drive: "Traforo Caravanche · ~140 km · 1h30", icon: "ph:mountains" },
+  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "2 tratte da ~4h (Veneto, poi casa)", icon: "ph:bed" },
 ];
 
 const stays = [
@@ -82,7 +82,7 @@ const timeline = [
   {
     day: "Lun 3/8",
     title: "Casa → Trieste",
-    desc: "Partenza al mattino presto lungo l'A14/A4. Arrivo nel pomeriggio. Prima passeggiata in Piazza Unità d'Italia e Molo Audace al tramonto, gelato di rito.",
+    desc: "Partenza al mattino presto lungo l'A14/A4 (la tratta più lunga, ~5h). Arrivo nel pomeriggio: check-in e niente programma. Solo una passeggiata in Piazza Unità d'Italia e Molo Audace al tramonto, gelato di rito.",
     icon: "ph:car",
     places: [
       { label: "Rotta casa → Trieste", url: mapsDirections("Porto Sant'Elpidio, FM", "Piazza Unità d'Italia, Trieste") },
@@ -91,18 +91,27 @@ const timeline = [
   },
   {
     day: "Mar 4/8",
-    title: "Trieste · Miramare e Grotta Gigante",
-    desc: "Mattina alla Grotta Gigante (visita guidata ~1h, ~500 scalini in discesa). Pomeriggio al Castello di Miramare: parco gratuito sul mare e BioMA, l'acquario sulla biodiversità del Golfo che piace ai bambini.",
+    title: "Trieste · Castello di Miramare e mare",
+    desc: "Mattina al Castello di Miramare: parco gratuito sul mare e BioMA, l'acquario sulla biodiversità del Golfo che piace ai bambini. Pomeriggio tranquillo: bagno e relax sul lungomare di Barcola.",
     icon: "ph:castle-turret",
     places: [
-      { label: "Grotta Gigante", url: mapsSearch("Grotta Gigante Sgonico Trieste") },
       { label: "Castello di Miramare", url: mapsSearch("Castello di Miramare Trieste") },
+      { label: "Barcola (lungomare)", url: mapsSearch("Barcola Trieste lungomare") },
     ],
   },
   {
     day: "Mer 5/8",
+    title: "Trieste · Grotta Gigante + pomeriggio libero",
+    desc: "Mattina alla Grotta Gigante (visita guidata ~1h). Pomeriggio LIBERO per riposare davvero: gelato, piscina o spiaggia, ritmo lento prima di rimettersi in viaggio.",
+    icon: "ph:sun-horizon",
+    places: [
+      { label: "Grotta Gigante", url: mapsSearch("Grotta Gigante Sgonico Trieste") },
+    ],
+  },
+  {
+    day: "Gio 6/8",
     title: "Trieste → Postojna + Predjama → Lubiana",
-    desc: "Tappa clou per le bimbe: Grotte di Postojna, si entra con un trenino dentro la grotta. A pochi minuti il Castello di Predjama incastonato nella roccia. Biglietto combinato, meglio online il giorno prima. Arrivo a Lubiana in serata.",
+    desc: "Spostamento dolce (tappe brevi). Tappa clou per le bimbe: Grotte di Postojna, si entra con un trenino dentro la grotta. A pochi minuti il Castello di Predjama incastonato nella roccia. Biglietto combinato, meglio online il giorno prima. Arrivo a Lubiana nel pomeriggio.",
     icon: "ph:train",
     places: [
       { label: "Grotte di Postojna", url: mapsSearch("Postojna Cave") },
@@ -111,68 +120,57 @@ const timeline = [
     ],
   },
   {
-    day: "Gio 6/8",
-    title: "Lubiana · centro e castello",
-    desc: "Funicolare per il Castello di Lubiana e torre panoramica, discesa a piedi nel centro pedonale. Ponte dei Draghi, mercato centrale e giro in barca sul fiume Ljubljanica. Città piccola, sicura, a misura di bambino.",
+    day: "Ven 7/8",
+    title: "Lubiana · centro, castello e Tivoli",
+    desc: "Città piccola e tutta a piedi, perfetta per un ritmo rilassato. Funicolare per il Castello, centro pedonale, Ponte dei Draghi e giro in barca sul fiume. Pomeriggio al parco Tivoli, con prati e parchi gioco per le bimbe.",
     icon: "ph:buildings",
     places: [
       { label: "Funicolare Castello", url: mapsSearch("Ljubljana Castle funicular") },
-      { label: "Ponte dei Draghi", url: mapsSearch("Dragon Bridge Ljubljana") },
-    ],
-  },
-  {
-    day: "Ven 7/8",
-    title: "Gita al Lago di Bled",
-    desc: "Una delle cartoline più belle d'Europa. Giro in pletna (barca a remi) fino all'isola con la chiesetta, Castello di Bled a picco sul lago e la celebre kremna rezina (millefoglie alla crema).",
-    icon: "ph:boat",
-    places: [
-      { label: "Lago di Bled", url: mapsSearch("Lake Bled") },
-      { label: "Rotta Lubiana → Bled", url: mapsDirections("Ljubljana", "Bled") },
+      { label: "Parco Tivoli", url: mapsSearch("Tivoli Park Ljubljana") },
     ],
   },
   {
     day: "Sab 8/8",
-    title: "Lubiana → Wörthersee (Carinzia)",
-    desc: "Passaggio del traforo delle Caravanche (pedaggio a parte) e arrivo in Austria. Pomeriggio al Wörthersee: bagno in uno degli Strandbad attrezzati, acqua tiepida e balneabile, perfetta per i bambini.",
-    icon: "ph:swimming-pool",
+    title: "Lubiana → Lago di Bled → Wörthersee",
+    desc: "Giornata-cartolina con guida spezzata in tratte corte. Sosta a Bled: giro in pletna fino all'isola con la chiesetta e millefoglie alla crema. Poi traforo delle Caravanche e arrivo in Carinzia, con primo tuffo al Wörthersee.",
+    icon: "ph:boat",
     places: [
-      { label: "Wörthersee", url: mapsSearch("Wörthersee Strandbad") },
-      { label: "Rotta → Klagenfurt", url: mapsDirections("Ljubljana", "Klagenfurt am Wörthersee") },
+      { label: "Lago di Bled", url: mapsSearch("Lake Bled") },
+      { label: "Rotta Bled → Wörthersee", url: mapsDirections("Bled", "Pörtschach am Wörthersee") },
     ],
   },
   {
     day: "Dom 9/8",
-    title: "Minimundus + Reptilienzoo",
-    desc: "Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo, un classico amatissimo. Nelle vicinanze il Reptilienzoo Happ con il giardino dei dinosauri a grandezza naturale.",
+    title: "Carinzia · Minimundus e Pyramidenkogel",
+    desc: "Giornata divertente ma vicino a casa-base. Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo. Pomeriggio alla torre Pyramidenkogel, con dentro lo scivolo coperto più alto d'Europa (52 m): Bianca impazzirà. Ascensore per chi resta con Lea.",
     icon: "ph:globe-hemisphere-east",
     places: [
       { label: "Minimundus", url: mapsSearch("Minimundus Klagenfurt") },
-      { label: "Reptilienzoo Happ", url: mapsSearch("Reptilienzoo Happ Klagenfurt") },
-    ],
-  },
-  {
-    day: "Lun 10/8",
-    title: "Torre Pyramidenkogel e crociera",
-    desc: "Pyramidenkogel: la torre panoramica in legno più alta del mondo, con dentro lo scivolo coperto più alto d'Europa (52 m, ~30 secondi). Bianca impazzirà; ascensore per chi resta con Lea. Possibile crociera sul Wörthersee.",
-    icon: "ph:arrow-fat-line-down",
-    places: [
       { label: "Pyramidenkogel", url: mapsSearch("Pyramidenkogel Keutschach am See") },
     ],
   },
   {
+    day: "Lun 10/8",
+    title: "Wörthersee · giornata di riposo al lago",
+    desc: "Giornata vuota, solo lago: bagni in uno degli Strandbad attrezzati (acqua tiepida e balneabile), prato, gelati e una crociera in battello se ne avete voglia. Il vero giorno di stacco prima di rimettersi in viaggio.",
+    icon: "ph:swimming-pool",
+    places: [
+      { label: "Wörthersee Strandbad", url: mapsSearch("Wörthersee Strandbad Pörtschach") },
+    ],
+  },
+  {
     day: "Mar 11/8",
-    title: "Carinzia → sosta in Veneto",
-    desc: "Rientro a tappe. Opzionale al mattino il fiabesco Castello di Hochosterwitz. Discesa via Tarvisio-Udine e notte in Veneto (zona Venezia/Jesolo) per spezzare il viaggio: spiaggia o assaggio di Venezia.",
+    title: "Carinzia → sosta in Veneto (rientro 1/2)",
+    desc: "Prima delle due tratte di rientro (~3h45), così non si fa tutto in un giorno solo. Discesa via Tarvisio-Udine e notte in Veneto (zona Venezia/Jesolo): pomeriggio in spiaggia o un assaggio di Venezia.",
     icon: "ph:bed",
     places: [
-      { label: "Castello di Hochosterwitz", url: mapsSearch("Burg Hochosterwitz") },
       { label: "Rotta → Venezia", url: mapsDirections("Klagenfurt am Wörthersee", "Mestre, Venezia") },
     ],
   },
   {
     day: "Mer 12/8",
-    title: "Veneto → casa",
-    desc: "Ultima tratta lungo l'A14, rientro a Porto Sant'Elpidio nel pomeriggio. Fine del giro: 10 giorni, 9 notti.",
+    title: "Veneto → casa (rientro 2/2)",
+    desc: "Ultima tratta lungo l'A14 (~4h), rientro a Porto Sant'Elpidio nel pomeriggio. Fine del giro: 10 giorni, 9 notti, con due giorni di puro riposo dentro.",
     icon: "ph:house",
     places: [
       { label: "Rotta → casa", url: mapsDirections("Mestre, Venezia", "Porto Sant'Elpidio, FM") },
@@ -297,13 +295,13 @@ const budget = [
     <AdminNav currentPage="vacanza" token={token} />
     <div class="container">
       <header class="page-header">
-        <div class="page-kicker">Trip · Famiglia Narcisi</div>
+        <div class="page-kicker">Trip · Famiglia Narcisi · ritmo rilassato</div>
         <h1><em class="acc">Vacanza.</em> Trieste · Lubiana · Carinzia</h1>
         <p class="page-subtitle">
           <Icon name="ph:calendar-blank" class="icon-inline" size={16} is:inline />
-          <span>3 – 12 agosto 2026 · 10 giorni / 9 notti</span>
+          <span>3 – 12 agosto 2026 · 10 giorni / 9 notti · 3 basi, 2 giorni di riposo</span>
           <span>·</span>
-          <span class="booking-ref">In auto · ~2.000 km</span>
+          <span class="booking-ref">In auto · rientro in 2 tratte</span>
         </p>
       </header>
 

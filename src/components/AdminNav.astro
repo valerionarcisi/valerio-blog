@@ -3,7 +3,7 @@ import "./AdminNav.css";
 
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "vacanza-salisburgo" | "strava";
+  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava";
 }
 
 const { currentPage, token } = Astro.props;
@@ -30,7 +30,6 @@ const bottomLinks = [
 const tripLinks = [
   { id: "roma" as const, label: "Roma · 11 Apr", short: "Roma", href: `/admin/roma?token=${token}` },
   { id: "vacanza" as const, label: "Vacanza · Agosto", short: "Estate", href: `/admin/vacanza?token=${token}` },
-  { id: "vacanza-salisburgo" as const, label: "Vacanza · Salisburgo", short: "Salzbg", href: `/admin/vacanza-salisburgo?token=${token}` },
 ];
 
 const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];
