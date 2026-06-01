@@ -31,51 +31,10 @@ const crew = [
 
 const stops = [
   { city: "Trieste", nights: "2 notti", drive: "Da casa · ~510 km · 5h15", icon: "ph:lighthouse" },
-  { city: "Lubiana", nights: "3 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
-  { city: "Wörthersee · Carinzia", nights: "3 notti", drive: "Traforo Caravanche · ~85 km · 1h10", icon: "ph:mountains" },
-  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "~370 km · 3h45", icon: "ph:bed" },
-];
-
-const stays = [
-  {
-    city: "Trieste",
-    zona: "Centro · Piazza Unità",
-    icon: "ph:lighthouse",
-    picks: [
-      { name: "Grand Hotel Duchi d'Aosta", note: "4★ in piazza, camere family", rec: true },
-      { name: "Hotel Italia", note: "3★ centrale, saletta giochi per bimbi" },
-      { name: "URBANAUTS Studios (appartamento)", note: "cucina e spazio, a 2 passi dal centro" },
-    ],
-  },
-  {
-    city: "Lubiana",
-    zona: "Città Vecchia (tutto a piedi)",
-    icon: "ph:castle-turret",
-    picks: [
-      { name: "Hotel Cubo", note: "camere comunicanti, babysitting, ottimo", rec: true },
-      { name: "Grand Hotel Union", note: "camere triple e suite a 2 camere" },
-      { name: "Bloom Hotel (appartamenti)", note: "sotto il castello, sul fiume" },
-    ],
-  },
-  {
-    city: "Wörthersee · Carinzia",
-    zona: "Pörtschach / Velden, sul lago",
-    icon: "ph:mountains",
-    picks: [
-      { name: "Parkhotel Pörtschach", note: "spiaggia privata, parco giochi, mini-club da 3 anni", rec: true },
-      { name: "Werzers Resort", note: "4★ con \"children's land\" e wellness" },
-      { name: "Hotel Elisabeth", note: "family & wellness sul lago" },
-    ],
-  },
-  {
-    city: "Veneto (rientro)",
-    zona: "Mestre o Jesolo, comodi all'A4/A57",
-    icon: "ph:bed",
-    picks: [
-      { name: "Hotel a Mestre", note: "pratico per una sola notte di transito", rec: true },
-      { name: "Beach hotel a Jesolo", note: "se volete un ultimo tuffo prima di casa" },
-    ],
-  },
+  { city: "Lubiana", nights: "2 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
+  { city: "Wörthersee · Carinzia", nights: "2 notti", drive: "Via Bled + traforo Caravanche · ~140 km", icon: "ph:mountains" },
+  { city: "Salisburgo", nights: "2 notti", drive: "A10 dei Tauri · ~200 km · 2h15", icon: "ph:music-notes" },
+  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "~430 km · 4h30", icon: "ph:bed" },
 ];
 
 const timeline = [
@@ -113,60 +72,61 @@ const timeline = [
   {
     day: "Gio 6/8",
     title: "Lubiana · centro e castello",
-    desc: "Funicolare per il Castello di Lubiana e torre panoramica, discesa a piedi nel centro pedonale. Ponte dei Draghi, mercato centrale e giro in barca sul fiume Ljubljanica. Città piccola, sicura, a misura di bambino.",
+    desc: "Funicolare per il Castello di Lubiana e torre panoramica, discesa a piedi nel centro pedonale. Ponte dei Draghi, mercato centrale e giro in barca sul fiume Ljubljanica. Pomeriggio al parco Tivoli con i suoi parchi gioco.",
     icon: "ph:buildings",
     places: [
       { label: "Funicolare Castello", url: mapsSearch("Ljubljana Castle funicular") },
-      { label: "Ponte dei Draghi", url: mapsSearch("Dragon Bridge Ljubljana") },
+      { label: "Parco Tivoli", url: mapsSearch("Tivoli Park Ljubljana") },
     ],
   },
   {
     day: "Ven 7/8",
-    title: "Gita al Lago di Bled",
-    desc: "Una delle cartoline più belle d'Europa. Giro in pletna (barca a remi) fino all'isola con la chiesetta, Castello di Bled a picco sul lago e la celebre kremna rezina (millefoglie alla crema).",
+    title: "Lubiana → Lago di Bled → Wörthersee",
+    desc: "Sosta-cartolina al Lago di Bled: giro in pletna fino all'isola con la chiesetta e millefoglie alla crema. Poi traforo delle Caravanche e arrivo in Carinzia: primo bagno al Wörthersee, acqua tiepida e balneabile.",
     icon: "ph:boat",
     places: [
       { label: "Lago di Bled", url: mapsSearch("Lake Bled") },
-      { label: "Rotta Lubiana → Bled", url: mapsDirections("Ljubljana", "Bled") },
+      { label: "Rotta Bled → Wörthersee", url: mapsDirections("Bled", "Pörtschach am Wörthersee") },
     ],
   },
   {
     day: "Sab 8/8",
-    title: "Lubiana → Wörthersee (Carinzia)",
-    desc: "Passaggio del traforo delle Caravanche (pedaggio a parte) e arrivo in Austria. Pomeriggio al Wörthersee: bagno in uno degli Strandbad attrezzati, acqua tiepida e balneabile, perfetta per i bambini.",
-    icon: "ph:swimming-pool",
-    places: [
-      { label: "Wörthersee", url: mapsSearch("Wörthersee Strandbad") },
-      { label: "Rotta → Klagenfurt", url: mapsDirections("Ljubljana", "Klagenfurt am Wörthersee") },
-    ],
-  },
-  {
-    day: "Dom 9/8",
-    title: "Minimundus + Reptilienzoo",
-    desc: "Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo, un classico amatissimo. Nelle vicinanze il Reptilienzoo Happ con il giardino dei dinosauri a grandezza naturale.",
+    title: "Carinzia · Minimundus e Pyramidenkogel",
+    desc: "Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo. Pomeriggio alla torre Pyramidenkogel, con dentro lo scivolo coperto più alto d'Europa (52 m): Bianca impazzirà. Tuffo finale al lago.",
     icon: "ph:globe-hemisphere-east",
     places: [
       { label: "Minimundus", url: mapsSearch("Minimundus Klagenfurt") },
-      { label: "Reptilienzoo Happ", url: mapsSearch("Reptilienzoo Happ Klagenfurt") },
-    ],
-  },
-  {
-    day: "Lun 10/8",
-    title: "Torre Pyramidenkogel e crociera",
-    desc: "Pyramidenkogel: la torre panoramica in legno più alta del mondo, con dentro lo scivolo coperto più alto d'Europa (52 m, ~30 secondi). Bianca impazzirà; ascensore per chi resta con Lea. Possibile crociera sul Wörthersee.",
-    icon: "ph:arrow-fat-line-down",
-    places: [
       { label: "Pyramidenkogel", url: mapsSearch("Pyramidenkogel Keutschach am See") },
     ],
   },
   {
+    day: "Dom 9/8",
+    title: "Carinzia → Salisburgo",
+    desc: "Salita lungo l'A10 dei Tauri (pedaggio speciale a parte) tra le montagne. Arrivo a Salisburgo nel primo pomeriggio: Giardini Mirabell (quelli di Sound of Music), centro storico pedonale e Getreidegasse.",
+    icon: "ph:music-notes",
+    places: [
+      { label: "Giardini Mirabell", url: mapsSearch("Mirabell Gardens Salzburg") },
+      { label: "Rotta Klagenfurt → Salisburgo", url: mapsDirections("Klagenfurt am Wörthersee", "Salzburg Altstadt") },
+    ],
+  },
+  {
+    day: "Lun 10/8",
+    title: "Salisburgo · Fortezza e Hellbrunn",
+    desc: "Funicolare per la Fortezza di Hohensalzburg (54 secondi di salita, vista sulle Alpi). Pomeriggio al Castello di Hellbrunn e ai suoi giochi d'acqua (Wasserspiele): getti a sorpresa che divertono tantissimo i bambini, più parco giochi e zoo accanto. In alternativa, Haus der Natur (acquario, dinosauri).",
+    icon: "ph:cable-car",
+    places: [
+      { label: "Fortezza Hohensalzburg", url: mapsSearch("Hohensalzburg Fortress") },
+      { label: "Hellbrunn · giochi d'acqua", url: mapsSearch("Hellbrunn Palace trick fountains Salzburg") },
+      { label: "Haus der Natur", url: mapsSearch("Haus der Natur Salzburg") },
+    ],
+  },
+  {
     day: "Mar 11/8",
-    title: "Carinzia → sosta in Veneto",
-    desc: "Rientro a tappe. Opzionale al mattino il fiabesco Castello di Hochosterwitz. Discesa via Tarvisio-Udine e notte in Veneto (zona Venezia/Jesolo) per spezzare il viaggio: spiaggia o assaggio di Venezia.",
+    title: "Salisburgo → sosta in Veneto",
+    desc: "Rientro a tappe verso sud, di nuovo via Villach e Tarvisio. Notte in Veneto (zona Venezia/Jesolo) per spezzare il viaggio: spiaggia adriatica o assaggio di Venezia.",
     icon: "ph:bed",
     places: [
-      { label: "Castello di Hochosterwitz", url: mapsSearch("Burg Hochosterwitz") },
-      { label: "Rotta → Venezia", url: mapsDirections("Klagenfurt am Wörthersee", "Mestre, Venezia") },
+      { label: "Rotta Salisburgo → Venezia", url: mapsDirections("Salzburg", "Mestre, Venezia") },
     ],
   },
   {
@@ -180,23 +140,76 @@ const timeline = [
   },
 ];
 
+const stays = [
+  {
+    city: "Trieste",
+    zona: "Centro · Piazza Unità",
+    icon: "ph:lighthouse",
+    picks: [
+      { name: "Grand Hotel Duchi d'Aosta", note: "4★ in piazza, camere family", rec: true },
+      { name: "Hotel Italia", note: "3★ centrale, saletta giochi per bimbi" },
+      { name: "URBANAUTS Studios (appartamento)", note: "cucina e spazio, a 2 passi dal centro" },
+    ],
+  },
+  {
+    city: "Lubiana",
+    zona: "Città Vecchia (tutto a piedi)",
+    icon: "ph:castle-turret",
+    picks: [
+      { name: "Hotel Cubo", note: "camere comunicanti, babysitting, ottimo", rec: true },
+      { name: "Grand Hotel Union", note: "camere triple e suite a 2 camere" },
+      { name: "Bloom Hotel (appartamenti)", note: "sotto il castello, sul fiume" },
+    ],
+  },
+  {
+    city: "Wörthersee · Carinzia",
+    zona: "Pörtschach / Velden, sul lago",
+    icon: "ph:mountains",
+    picks: [
+      { name: "Parkhotel Pörtschach", note: "spiaggia privata, parco giochi, mini-club da 3 anni", rec: true },
+      { name: "Werzers Resort", note: "4★ con \"children's land\" e wellness" },
+      { name: "Hotel Elisabeth", note: "family & wellness sul lago" },
+    ],
+  },
+  {
+    city: "Salisburgo",
+    zona: "Vicino al centro storico",
+    icon: "ph:music-notes",
+    picks: [
+      { name: "IMLAUER Hotel Pitter", note: "vista fortezza, playroom su 2 piani, a piedi dal centro", rec: true },
+      { name: "Hotel am Mirabellplatz", note: "in zona storica, culle e babysitting" },
+      { name: "Altstadt Hotel Hofwirt", note: "family room, inizio zona pedonale" },
+    ],
+  },
+  {
+    city: "Veneto (rientro)",
+    zona: "Mestre o Jesolo, comodi all'A4/A57",
+    icon: "ph:bed",
+    picks: [
+      { name: "Hotel a Mestre", note: "pratico per una sola notte di transito", rec: true },
+      { name: "Beach hotel a Jesolo", note: "se volete un ultimo tuffo prima di casa" },
+    ],
+  },
+];
+
 const practical = [
   { icon: "ph:sticker", title: "Vignetta Slovenia", text: "E-vignetta settimanale ~16 € (copre 7 giorni). Si compra online su evinjeta.dars.si o al confine." },
   { icon: "ph:sticker", title: "Vignetta Austria", text: "Vignetta 10 giorni ~11,50 € (digitale o adesiva). Indispensabile prima di entrare in autostrada." },
   { icon: "ph:car-profile", title: "Traforo Caravanche", text: "Pedaggio a parte ~9 € a tratta (~18 € A/R). Dal 2026 è aperta la seconda canna: traffico più scorrevole." },
-  { icon: "ph:road-horizon", title: "Pedaggi Italia", text: "A14/A4 Porto Sant'Elpidio–Trieste: ~35–40 € a tratta." },
+  { icon: "ph:road-horizon", title: "A10 dei Tauri (Sondermaut)", text: "Sulla Klagenfurt–Salisburgo i trafori Tauri e Katschberg hanno un pedaggio speciale extra (~13–15 € a tratta), separato dalla vignetta. Verifica il prezzo aggiornato." },
+  { icon: "ph:credit-card", title: "Salzburg Card", text: "Ingresso unico a fortezza/musei + trasporti pubblici inclusi: conviene se visiti 2+ attrazioni. In estate costa più del listino invernale, verifica online." },
   { icon: "ph:identification-card", title: "Documenti bimbe", text: "Schengen: basta carta d'identità valida per l'espatrio (anche Bianca e Lea). Verificate le scadenze + tessera sanitaria/TEAM." },
-  { icon: "ph:baby-carriage", title: "Seggiolini", text: "Obbligatori in SLO/AT come in Italia: seggiolino per Lea (4) e rialzo per Bianca (7)." },
 ];
 
 const budget = [
-  { voce: "Carburante (~2.000 km)", costo: "~280–330 €", total: false },
+  { voce: "Carburante (~2.200 km)", costo: "~310–360 €", total: false },
   { voce: "Pedaggi Italia (A/R)", costo: "~75–80 €", total: false },
-  { voce: "Vignette SLO + AT + traforo", costo: "~45 €", total: false },
-  { voce: "Alloggi (9 notti, fascia media)", costo: "~1.300–1.550 €", total: false },
-  { voce: "Ingressi e attività", costo: "~350–450 €", total: false },
-  { voce: "Vitto (~90 €/giorno × 10)", costo: "~900–1.000 €", total: false },
-  { voce: "Totale indicativo", costo: "~3.000–3.450 €", total: true },
+  { voce: "Vignette SLO + AT + traforo Caravanche", costo: "~45 €", total: false },
+  { voce: "Pedaggio A10 dei Tauri (A/R)", costo: "~28 €", total: false },
+  { voce: "Alloggi (9 notti, fascia media)", costo: "~1.400–1.700 €", total: false },
+  { voce: "Ingressi e attività (con Salzburg Card)", costo: "~450–550 €", total: false },
+  { voce: "Vitto (~95 €/giorno × 10)", costo: "~950–1.050 €", total: false },
+  { voce: "Totale indicativo", costo: "~3.250–3.800 €", total: true },
 ];
 ---
 
@@ -207,7 +220,7 @@ const budget = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
-    <title>Vacanza · Trieste · Lubiana · Carinzia · Agosto 2026</title>
+    <title>Vacanza · Trieste · Lubiana · Carinzia · Salisburgo · Agosto 2026</title>
     <style is:global>
       .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
 
@@ -294,16 +307,16 @@ const budget = [
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="vacanza" token={token} />
+    <AdminNav currentPage="vacanza-salisburgo" token={token} />
     <div class="container">
       <header class="page-header">
-        <div class="page-kicker">Trip · Famiglia Narcisi</div>
-        <h1><em class="acc">Vacanza.</em> Trieste · Lubiana · Carinzia</h1>
+        <div class="page-kicker">Trip · Famiglia Narcisi · Variante</div>
+        <h1><em class="acc">Vacanza.</em> Trieste · Lubiana · Carinzia · Salisburgo</h1>
         <p class="page-subtitle">
           <Icon name="ph:calendar-blank" class="icon-inline" size={16} is:inline />
           <span>3 – 12 agosto 2026 · 10 giorni / 9 notti</span>
           <span>·</span>
-          <span class="booking-ref">In auto · ~2.000 km</span>
+          <span class="booking-ref">In auto · ~2.200 km</span>
         </p>
       </header>
 
