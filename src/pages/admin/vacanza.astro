@@ -1,0 +1,352 @@
+---
+import { Icon } from "astro-icon/components";
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+function mapsSearch(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+function mapsDirections(from: string, to: string): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
+}
+
+const crew = [
+  { name: "Valerio", role: "Pilota", icon: "ph:steering-wheel" },
+  { name: "Adriana", role: "Co-pilota", icon: "ph:user" },
+  { name: "Bianca", role: "7 anni", icon: "ph:user-circle" },
+  { name: "Lea", role: "4 anni", icon: "ph:baby" },
+];
+
+const stops = [
+  { city: "Trieste", nights: "2 notti", drive: "Da casa · ~510 km · 5h15", icon: "ph:lighthouse" },
+  { city: "Lubiana", nights: "3 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
+  { city: "Wörthersee · Carinzia", nights: "3 notti", drive: "Traforo Caravanche · ~85 km · 1h10", icon: "ph:mountains" },
+  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "~370 km · 3h45", icon: "ph:bed" },
+];
+
+const timeline = [
+  {
+    day: "Lun 3/8",
+    title: "Casa → Trieste",
+    desc: "Partenza al mattino presto lungo l'A14/A4. Arrivo nel pomeriggio. Prima passeggiata in Piazza Unità d'Italia e Molo Audace al tramonto, gelato di rito.",
+    icon: "ph:car",
+    places: [
+      { label: "Rotta casa → Trieste", url: mapsDirections("Porto Sant'Elpidio, FM", "Piazza Unità d'Italia, Trieste") },
+      { label: "Piazza Unità d'Italia", url: mapsSearch("Piazza Unità d'Italia Trieste") },
+    ],
+  },
+  {
+    day: "Mar 4/8",
+    title: "Trieste · Miramare e Grotta Gigante",
+    desc: "Mattina alla Grotta Gigante (visita guidata ~1h, ~500 scalini in discesa). Pomeriggio al Castello di Miramare: parco gratuito sul mare e BioMA, l'acquario sulla biodiversità del Golfo che piace ai bambini.",
+    icon: "ph:castle-turret",
+    places: [
+      { label: "Grotta Gigante", url: mapsSearch("Grotta Gigante Sgonico Trieste") },
+      { label: "Castello di Miramare", url: mapsSearch("Castello di Miramare Trieste") },
+    ],
+  },
+  {
+    day: "Mer 5/8",
+    title: "Trieste → Postojna + Predjama → Lubiana",
+    desc: "Tappa clou per le bimbe: Grotte di Postojna, si entra con un trenino dentro la grotta. A pochi minuti il Castello di Predjama incastonato nella roccia. Biglietto combinato, meglio online il giorno prima. Arrivo a Lubiana in serata.",
+    icon: "ph:train",
+    places: [
+      { label: "Grotte di Postojna", url: mapsSearch("Postojna Cave") },
+      { label: "Castello di Predjama", url: mapsSearch("Predjama Castle") },
+      { label: "Rotta → Lubiana", url: mapsDirections("Postojna", "Ljubljana") },
+    ],
+  },
+  {
+    day: "Gio 6/8",
+    title: "Lubiana · centro e castello",
+    desc: "Funicolare per il Castello di Lubiana e torre panoramica, discesa a piedi nel centro pedonale. Ponte dei Draghi, mercato centrale e giro in barca sul fiume Ljubljanica. Città piccola, sicura, a misura di bambino.",
+    icon: "ph:buildings",
+    places: [
+      { label: "Funicolare Castello", url: mapsSearch("Ljubljana Castle funicular") },
+      { label: "Ponte dei Draghi", url: mapsSearch("Dragon Bridge Ljubljana") },
+    ],
+  },
+  {
+    day: "Ven 7/8",
+    title: "Gita al Lago di Bled",
+    desc: "Una delle cartoline più belle d'Europa. Giro in pletna (barca a remi) fino all'isola con la chiesetta, Castello di Bled a picco sul lago e la celebre kremna rezina (millefoglie alla crema).",
+    icon: "ph:boat",
+    places: [
+      { label: "Lago di Bled", url: mapsSearch("Lake Bled") },
+      { label: "Rotta Lubiana → Bled", url: mapsDirections("Ljubljana", "Bled") },
+    ],
+  },
+  {
+    day: "Sab 8/8",
+    title: "Lubiana → Wörthersee (Carinzia)",
+    desc: "Passaggio del traforo delle Caravanche (pedaggio a parte) e arrivo in Austria. Pomeriggio al Wörthersee: bagno in uno degli Strandbad attrezzati, acqua tiepida e balneabile, perfetta per i bambini.",
+    icon: "ph:swimming-pool",
+    places: [
+      { label: "Wörthersee", url: mapsSearch("Wörthersee Strandbad") },
+      { label: "Rotta → Klagenfurt", url: mapsDirections("Ljubljana", "Klagenfurt am Wörthersee") },
+    ],
+  },
+  {
+    day: "Dom 9/8",
+    title: "Minimundus + Reptilienzoo",
+    desc: "Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo, un classico amatissimo. Nelle vicinanze il Reptilienzoo Happ con il giardino dei dinosauri a grandezza naturale.",
+    icon: "ph:globe-hemisphere-east",
+    places: [
+      { label: "Minimundus", url: mapsSearch("Minimundus Klagenfurt") },
+      { label: "Reptilienzoo Happ", url: mapsSearch("Reptilienzoo Happ Klagenfurt") },
+    ],
+  },
+  {
+    day: "Lun 10/8",
+    title: "Torre Pyramidenkogel e crociera",
+    desc: "Pyramidenkogel: la torre panoramica in legno più alta del mondo, con dentro lo scivolo coperto più alto d'Europa (52 m, ~30 secondi). Bianca impazzirà; ascensore per chi resta con Lea. Possibile crociera sul Wörthersee.",
+    icon: "ph:arrow-fat-line-down",
+    places: [
+      { label: "Pyramidenkogel", url: mapsSearch("Pyramidenkogel Keutschach am See") },
+    ],
+  },
+  {
+    day: "Mar 11/8",
+    title: "Carinzia → sosta in Veneto",
+    desc: "Rientro a tappe. Opzionale al mattino il fiabesco Castello di Hochosterwitz. Discesa via Tarvisio-Udine e notte in Veneto (zona Venezia/Jesolo) per spezzare il viaggio: spiaggia o assaggio di Venezia.",
+    icon: "ph:bed",
+    places: [
+      { label: "Castello di Hochosterwitz", url: mapsSearch("Burg Hochosterwitz") },
+      { label: "Rotta → Venezia", url: mapsDirections("Klagenfurt am Wörthersee", "Mestre, Venezia") },
+    ],
+  },
+  {
+    day: "Mer 12/8",
+    title: "Veneto → casa",
+    desc: "Ultima tratta lungo l'A14, rientro a Porto Sant'Elpidio nel pomeriggio. Fine del giro: 10 giorni, 9 notti.",
+    icon: "ph:house",
+    places: [
+      { label: "Rotta → casa", url: mapsDirections("Mestre, Venezia", "Porto Sant'Elpidio, FM") },
+    ],
+  },
+];
+
+const practical = [
+  { icon: "ph:sticker", title: "Vignetta Slovenia", text: "E-vignetta settimanale ~16 € (copre 7 giorni). Si compra online su evinjeta.dars.si o al confine." },
+  { icon: "ph:sticker", title: "Vignetta Austria", text: "Vignetta 10 giorni ~11,50 € (digitale o adesiva). Indispensabile prima di entrare in autostrada." },
+  { icon: "ph:car-profile", title: "Traforo Caravanche", text: "Pedaggio a parte ~9 € a tratta (~18 € A/R). Dal 2026 è aperta la seconda canna: traffico più scorrevole." },
+  { icon: "ph:road-horizon", title: "Pedaggi Italia", text: "A14/A4 Porto Sant'Elpidio–Trieste: ~35–40 € a tratta." },
+  { icon: "ph:identification-card", title: "Documenti bimbe", text: "Schengen: basta carta d'identità valida per l'espatrio (anche Bianca e Lea). Verificate le scadenze + tessera sanitaria/TEAM." },
+  { icon: "ph:baby-carriage", title: "Seggiolini", text: "Obbligatori in SLO/AT come in Italia: seggiolino per Lea (4) e rialzo per Bianca (7)." },
+];
+
+const budget = [
+  { voce: "Carburante (~2.000 km)", costo: "~280–330 €", total: false },
+  { voce: "Pedaggi Italia (A/R)", costo: "~75–80 €", total: false },
+  { voce: "Vignette SLO + AT + traforo", costo: "~45 €", total: false },
+  { voce: "Alloggi (9 notti, fascia media)", costo: "~1.300–1.550 €", total: false },
+  { voce: "Ingressi e attività", costo: "~350–450 €", total: false },
+  { voce: "Vitto (~90 €/giorno × 10)", costo: "~900–1.000 €", total: false },
+  { voce: "Totale indicativo", costo: "~3.000–3.450 €", total: true },
+];
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Vacanza · Trieste · Lubiana · Carinzia · Agosto 2026</title>
+    <style is:global>
+      .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
+
+      .foglio body.admin .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .page-kicker { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-header h1 { font-family: var(--foglio-serif); color: var(--foglio-ink); font-size: var(--foglio-fs-4xl); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-subtitle { color: var(--foglio-ink-soft); font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .foglio body.admin .page-subtitle .icon-inline { width: 1rem; height: 1rem; color: var(--foglio-accent); }
+      .foglio body.admin .booking-ref { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.1em; font-style: normal; }
+
+      .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .card-title-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); }
+
+      /* Equipaggio */
+      .foglio body.admin .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+      .foglio body.admin .ticket { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.15rem; position: relative; overflow: hidden; }
+      .foglio body.admin .ticket::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--foglio-accent); }
+      .foglio body.admin .ticket-head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+      .foglio body.admin .ticket-avatar { width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .ticket-avatar svg { width: 1.1rem; height: 1.1rem; }
+      .foglio body.admin .ticket-name { font-family: var(--foglio-serif); font-weight: 500; font-size: var(--foglio-fs-md); color: var(--foglio-ink); }
+      .foglio body.admin .ticket-type { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+
+      /* Tappe */
+      .foglio body.admin .stops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+      .foglio body.admin .stop { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      .foglio body.admin .stop-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.5rem; }
+      .foglio body.admin .stop-icon { width: 1.2rem; height: 1.2rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .stop-city { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
+      .foglio body.admin .stop-nights { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+      .foglio body.admin .stop-drive { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.5; }
+
+      /* Regole / pratiche */
+      .foglio body.admin .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+      .foglio body.admin .rule { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      .foglio body.admin .rule-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.55rem; }
+      .foglio body.admin .rule-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .rule-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
+      .foglio body.admin .rule-text { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.6; }
+
+      /* Timeline */
+      .foglio body.admin .timeline { position: relative; padding-left: 2.5rem; }
+      .foglio body.admin .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--foglio-rule-strong); }
+      .foglio body.admin .step { position: relative; padding-bottom: 1.6rem; }
+      .foglio body.admin .step:last-child { padding-bottom: 0; }
+      .foglio body.admin .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); }
+      .foglio body.admin .step-dot svg { width: 1rem; height: 1rem; }
+      .foglio body.admin .step-time { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); font-weight: 700; letter-spacing: 0.1em; }
+      .foglio body.admin .step-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); margin: 0.1rem 0 0.35rem; }
+      .foglio body.admin .step-desc { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); max-width: 700px; line-height: 1.6; }
+      .foglio body.admin .step-places { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
+      .foglio body.admin .map-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.7rem; border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-sm); background: var(--foglio-paper-2); color: var(--foglio-ink); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+      .foglio body.admin .map-link:hover { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .map-link svg { color: inherit; }
+
+      /* Budget */
+      .foglio body.admin .budget-list { list-style: none; }
+      .foglio body.admin .budget-list li { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--foglio-rule); font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); }
+      .foglio body.admin .budget-list li .b-cost { font-family: var(--foglio-mono); color: var(--foglio-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+      .foglio body.admin .budget-list li.b-total { border-bottom: none; border-top: 2px solid var(--foglio-rule-strong); margin-top: 0.3rem; padding-top: 0.8rem; }
+      .foglio body.admin .budget-list li.b-total .b-voce { font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--foglio-ink); font-weight: 700; }
+      .foglio body.admin .budget-list li.b-total .b-cost { color: var(--foglio-accent); font-weight: 700; font-size: var(--foglio-fs-md); }
+
+      @media (max-width: 720px) {
+        .foglio body.admin .card { padding: 1.15rem; }
+        .foglio body.admin .timeline { padding-left: 2rem; }
+        .foglio body.admin .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
+        .foglio body.admin .timeline::before { left: 0.8rem; }
+      }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="vacanza" token={token} />
+    <div class="container">
+      <header class="page-header">
+        <div class="page-kicker">Trip · Famiglia Narcisi</div>
+        <h1><em class="acc">Vacanza.</em> Trieste · Lubiana · Carinzia</h1>
+        <p class="page-subtitle">
+          <Icon name="ph:calendar-blank" class="icon-inline" size={16} is:inline />
+          <span>3 – 12 agosto 2026 · 10 giorni / 9 notti</span>
+          <span>·</span>
+          <span class="booking-ref">In auto · ~2.000 km</span>
+        </p>
+      </header>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:users-three" class="card-title-icon" size={18} is:inline />
+          Equipaggio
+        </h2>
+        <div class="tickets-grid">
+          {crew.map((c) => (
+            <div class="ticket">
+              <div class="ticket-head">
+                <div class="ticket-avatar"><Icon name={c.icon} size={18} is:inline /></div>
+                <div class="ticket-name">{c.name}</div>
+              </div>
+              <div class="ticket-type">{c.role}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:map-pin-line" class="card-title-icon" size={18} is:inline />
+          Le tappe
+        </h2>
+        <div class="stops-grid">
+          {stops.map((s) => (
+            <div class="stop">
+              <div class="stop-head">
+                <span class="stop-icon"><Icon name={s.icon} size={18} is:inline /></span>
+                <span class="stop-city">{s.city}</span>
+              </div>
+              <div class="stop-nights">{s.nights}</div>
+              <div class="stop-drive">{s.drive}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:path" class="card-title-icon" size={18} is:inline />
+          Itinerario giorno per giorno
+        </h2>
+        <div class="timeline">
+          {timeline.map((step) => (
+            <div class="step">
+              <div class="step-dot"><Icon name={step.icon} is:inline /></div>
+              <div class="step-time">{step.day}</div>
+              <div class="step-title">{step.title}</div>
+              <div class="step-desc">{step.desc}</div>
+              {step.places && step.places.length > 0 && (
+                <div class="step-places">
+                  {step.places.map((p) => (
+                    <a class="map-link" href={p.url} target="_blank" rel="noopener noreferrer">
+                      <Icon name="ph:map-trifold" size={14} is:inline />
+                      <span>{p.label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:info" class="card-title-icon" size={18} is:inline />
+          Info pratiche di guida
+        </h2>
+        <div class="rules-grid">
+          {practical.map((r) => (
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-icon"><Icon name={r.icon} size={18} is:inline /></span>
+                <span class="rule-title">{r.title}</span>
+              </div>
+              <p class="rule-text">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:wallet" class="card-title-icon" size={18} is:inline />
+          Budget indicativo
+        </h2>
+        <ul class="budget-list">
+          {budget.map((b) => (
+            <li class={b.total ? "b-total" : ""}>
+              <span class="b-voce">{b.voce}</span>
+              <span class="b-cost">{b.costo}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  </body>
+</html>
