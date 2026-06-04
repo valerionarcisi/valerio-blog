@@ -151,7 +151,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g riso basmati (cotto ~300g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
+              "120g riso basmati (cotto al cuociriso ~280g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
             ],
           },
           {
@@ -346,7 +346,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g pasta al dente (cotta ~240g) o riso basmati (cotto ~300g) o altro cereale (farro, orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
+              "120g pasta al dente (cotta ~240g) o riso basmati (cotto al cuociriso ~280g) o altro cereale (farro, orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
             ],
           },
           {
@@ -410,7 +410,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g pasta al dente (cotta ~240g) o riso basmati (cotto ~300g) o altro cereale (orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
+              "120g pasta al dente (cotta ~240g) o riso basmati (cotto al cuociriso ~280g) o altro cereale (orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
             ],
           },
           {
@@ -473,7 +473,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g riso basmati (cotto ~300g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
+              "120g riso basmati (cotto al cuociriso ~280g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
             ],
           },
           {
