@@ -5,6 +5,7 @@ import { generateStableVisitorHash } from "~/lib/analytics";
 import { verifyBearerToken } from "~/lib/auth";
 import { env } from "~/lib/env";
 import { AUTHOR_NAME, AUTHOR_EMAIL } from "~/lib/author";
+import { isSpam } from "~/lib/spam-filter";
 import {
   type Result,
   ok,
@@ -166,6 +167,14 @@ export const POST: APIRoute = async ({ request }) => {
   return handlePublicPost(body);
 };
 
+async function hasApprovedCommentForEmail(email: string): Promise<boolean> {
+  const res = await getDb().execute({
+    sql: "SELECT 1 FROM comments WHERE LOWER(email) = LOWER(?) AND approved = 1 LIMIT 1",
+    args: [email],
+  });
+  return res.rows.length > 0;
+}
+
 async function handlePublicPost(body: unknown): Promise<Response> {
   const parsed = parseCommentInput(body);
   if (!parsed.ok) return jsonErr(parsed.error, 400);
@@ -173,25 +182,59 @@ async function handlePublicPost(body: unknown): Promise<Response> {
 
   const { pageId, name, email, text, parentId, lang } = parsed.value;
 
-  let parentName: string | null = null;
+  if (isSpam(text, name)) return jsonOk({ ok: true });
+
+  let parent: ParentRow | null = null;
   if (parentId !== null) {
-    const parent = await loadParent(parentId);
+    parent = await loadParent(parentId);
     if (parent === null) return jsonErr("Parent not found", 400);
     if (parent.page_id !== pageId)
       return jsonErr("Parent belongs to a different page", 400);
     if (parent.approved !== 1)
       return jsonErr("Cannot reply to a pending comment", 400);
-    parentName = parent.name;
   }
 
+  const autoApprove = await hasApprovedCommentForEmail(email);
+
   await getDb().execute({
-    sql: "INSERT INTO comments (page_id, name, email, text, parent_id, lang) VALUES (?, ?, ?, ?, ?, ?)",
-    args: [pageId, name, email, text, parentId, lang],
+    sql: `INSERT INTO comments (page_id, name, email, text, parent_id, lang, approved, notified_approved)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      pageId,
+      name,
+      email,
+      text,
+      parentId,
+      lang,
+      autoApprove ? 1 : 0,
+      autoApprove ? 1 : 0,
+    ],
   });
 
-  notifyNewComment({ pageId, name, email, text, parentId, parentName, lang });
+  if (autoApprove) {
+    if (parent !== null && parent.email.toLowerCase() !== email.toLowerCase()) {
+      notifyReplyToYourComment({
+        pageId,
+        parentName: parent.name,
+        parentEmail: parent.email,
+        replyName: name,
+        replyText: text,
+        lang,
+      });
+    }
+  } else {
+    notifyNewComment({
+      pageId,
+      name,
+      email,
+      text,
+      parentId,
+      parentName: parent?.name ?? null,
+      lang,
+    });
+  }
 
-  return jsonOk({ ok: true }, 201);
+  return jsonOk({ ok: true, approved: autoApprove }, 201);
 }
 
 async function handleAuthorPost(body: unknown): Promise<Response> {

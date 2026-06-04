@@ -264,6 +264,159 @@ describe("POST /api/comments", () => {
     const res = await POST({ request } as never);
     expect(res.status).toBe(400);
   });
+
+  test("silently drops obvious spam (pharmacy keyword)", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Pharma",
+      email: "pharma@example.com",
+      text: "buy viagra cheap online",
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(200);
+    const rows = await db.execute("SELECT COUNT(*) as c FROM comments");
+    expect(Number(rows.rows[0].c)).toBe(0);
+    expect(emailMocks.notifyNewComment).not.toHaveBeenCalled();
+  });
+
+  test("silently drops comment with three or more URLs", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Linky",
+      email: "linky@example.com",
+      text: "https://a.com https://b.com https://c.com",
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(200);
+    const rows = await db.execute("SELECT COUNT(*) as c FROM comments");
+    expect(Number(rows.rows[0].c)).toBe(0);
+  });
+
+  test("auto-approves when email already has an approved comment", async () => {
+    await insertComment({
+      pageId: "another-post",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "first comment, approved manually",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "second comment, should be auto-approved",
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(201);
+    const rows = await db.execute(
+      "SELECT approved, notified_approved FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows.length).toBe(1);
+    expect(rows.rows[0].approved).toBe(1);
+    expect(rows.rows[0].notified_approved).toBe(1);
+    expect(emailMocks.notifyNewComment).not.toHaveBeenCalled();
+  });
+
+  test("email match is case-insensitive", async () => {
+    await insertComment({
+      pageId: "another-post",
+      name: "Ale",
+      email: "Ale@Example.com",
+      text: "first",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ALE@example.COM",
+      text: "second",
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(201);
+    const rows = await db.execute(
+      "SELECT approved FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows[0].approved).toBe(1);
+  });
+
+  test("first-time email stays pending and triggers admin notification", async () => {
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Brand",
+      email: "brand-new@example.com",
+      text: "ciao",
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(201);
+    const rows = await db.execute(
+      "SELECT approved FROM comments WHERE page_id = 'post-1'",
+    );
+    expect(rows.rows[0].approved).toBe(0);
+    expect(emailMocks.notifyNewComment).toHaveBeenCalledOnce();
+  });
+
+  test("auto-approved reply notifies parent author", async () => {
+    await insertComment({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "first by ale",
+      approved: 1,
+    });
+    const parentId = await insertComment({
+      pageId: "post-1",
+      name: "Alice",
+      email: "alice@example.com",
+      text: "Original",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "reply",
+      parentId,
+    });
+    const res = await POST({ request } as never);
+    expect(res.status).toBe(201);
+    expect(emailMocks.notifyReplyToYourComment).toHaveBeenCalledOnce();
+    const call = emailMocks.notifyReplyToYourComment.mock.calls[0][0];
+    expect(call.parentEmail).toBe("alice@example.com");
+    expect(emailMocks.notifyNewComment).not.toHaveBeenCalled();
+  });
+
+  test("auto-approved reply to own comment does not self-notify", async () => {
+    await insertComment({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "first by ale",
+      approved: 1,
+    });
+    const parentId = await insertComment({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "ale parent",
+      approved: 1,
+    });
+    const { POST } = await import("~/pages/api/comments");
+    const { request } = makeRequest({
+      pageId: "post-1",
+      name: "Ale",
+      email: "ale@example.com",
+      text: "self reply",
+      parentId,
+    });
+    await POST({ request } as never);
+    expect(emailMocks.notifyReplyToYourComment).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/comments — author auto-login", () => {
