@@ -1263,13 +1263,26 @@ const t =
     if (ev.key === "ArrowRight") state.keys.right = false;
   });
 
-  canvas.addEventListener("pointerdown", () => maybeStart());
+  function handleStartTap(ev) {
+    if (maybeStart()) ev.preventDefault();
+  }
+  canvas.addEventListener("pointerdown", handleStartTap);
+  // L'overlay di start copre il canvas (z-index 2): su mobile il tap arriva
+  // qui, quindi deve avviare il gioco direttamente.
+  el.overlayStart.addEventListener("pointerdown", handleStartTap);
 
   function bindHold(id, down, up) {
     const btn = document.getElementById(id);
-    btn.addEventListener("pointerdown", (ev) => { ev.preventDefault(); maybeStart(); down(); });
+    btn.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault();
+      // tieni l'evento agganciato al bottone anche se il dito scivola fuori
+      if (btn.setPointerCapture) {
+        try { btn.setPointerCapture(ev.pointerId); } catch (_) {}
+      }
+      maybeStart();
+      down();
+    });
     btn.addEventListener("pointerup", () => up && up());
-    btn.addEventListener("pointerleave", () => up && up());
     btn.addEventListener("pointercancel", () => up && up());
   }
   bindHold("nfr-t-left", () => (state.keys.left = true), () => (state.keys.left = false));
@@ -1375,6 +1388,7 @@ const t =
     color: #f7f2e8;
     backdrop-filter: blur(2px);
     z-index: 2;
+    touch-action: none;
   }
   .nfr-hidden { display: none !important; }
 
