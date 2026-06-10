@@ -3,6 +3,7 @@ import { letterboxdDirectorUrl } from "~/lib/letterboxd-slug";
 
 export interface WatchedMovie {
   title: string;
+  slug: string | null;
   posterPath: string | null;
   budget: number | null;
   revenue: number | null;
@@ -12,19 +13,47 @@ export interface WatchedMovie {
   voteAverage: number | null;
   runtime: number | null;
   rating: string | null;
+  liked: boolean;
   watchedDate: string | null;
+  review: string | null;
   link: string;
 }
 
 export interface CompactOptions {
   locale: string;
   byLabel: string;
+  likedLabel?: string;
+  notLikedLabel?: string;
+}
+
+export interface ReviewLabels {
+  toggle: string;
+  clapCta: string;
+  clapYoursOne: string;
+  clapYours: string;
+  clapCapped: string;
 }
 
 export interface FullOptions {
   locale: string;
   byLabel: string;
   myRatingLabel: (rating: string) => string;
+  likedLabel: string;
+  notLikedLabel: string;
+  review: ReviewLabels;
+}
+
+// Filled heart when liked on Letterboxd, hollow heart otherwise.
+function likeHeart(liked: boolean, likedLabel: string, notLikedLabel: string): HTMLElement {
+  return el(
+    "span",
+    {
+      class: `vw-like${liked ? " is-liked" : ""}`,
+      title: liked ? likedLabel : notLikedLabel,
+      "aria-label": liked ? likedLabel : notLikedLabel,
+    },
+    liked ? "♥" : "♡",
+  );
 }
 
 type Child = Node | string | null | undefined | false;
@@ -66,6 +95,14 @@ function compactItem(m: WatchedMovie, opts: CompactOptions): HTMLElement {
   }
 
   const title = el("div", { class: "fh-lib-title" }, el("em", null, m.title));
+  if (m.liked) {
+    title.append(
+      el("span", { class: "fh-lib-like", title: opts.likedLabel ?? "Mi è piaciuto" }, "♥"),
+    );
+  }
+  if (m.review && m.slug) {
+    title.append(el("span", { class: "fh-lib-review-dot", title: "Ha una recensione" }));
+  }
 
   const b = formatMoneyCompact(m.budget);
   const r = formatMoneyCompact(m.revenue);
@@ -110,6 +147,152 @@ export function renderCompact(
   else block.append(ul);
 }
 
+const CLAP_MAX = 50;
+
+function cloneClapIcons(): DocumentFragment {
+  const tpl = document.getElementById("vw-clap-icons") as HTMLTemplateElement | null;
+  return tpl ? (tpl.content.cloneNode(true) as DocumentFragment) : document.createDocumentFragment();
+}
+
+// Lazy claps: the count is only fetched the first time the review is opened,
+// so a /visti page with many reviewed films makes zero clap requests on load.
+function buildReviewClaps(slug: string, labels: ReviewLabels): HTMLElement {
+  const total = el("span", { class: "PostClaps-total" }, "0");
+  const button = el(
+    "button",
+    { type: "button", class: "PostClaps-button", "aria-label": labels.clapCta },
+    cloneClapIcons(),
+    total,
+  );
+  const yours = el("p", { class: "PostClaps-yours", hidden: "" });
+  const section = el("div", { class: "PostClaps PostClaps--inline" }, button, yours);
+
+  const postId = `review:${slug}`;
+  let mine = 0;
+  let count = 0;
+  let max = CLAP_MAX;
+  let loaded = false;
+  let inflight = 0;
+
+  function render(): void {
+    total.textContent = String(count);
+    button.classList.toggle("is-capped", mine >= max);
+    button.classList.toggle("is-active", mine > 0);
+    button.setAttribute("aria-pressed", mine > 0 ? "true" : "false");
+    if (mine === 0) {
+      yours.hidden = true;
+      yours.textContent = "";
+    } else if (mine >= max) {
+      yours.hidden = false;
+      yours.textContent = labels.clapCapped;
+    } else if (mine === 1) {
+      yours.hidden = false;
+      yours.textContent = labels.clapYoursOne;
+    } else {
+      yours.hidden = false;
+      yours.textContent = labels.clapYours.replace("{n}", String(mine));
+    }
+  }
+
+  function pulse(): void {
+    section.querySelectorAll(".PostClaps-icon").forEach((icon) => {
+      icon.classList.remove("is-pulsing");
+      void (icon as HTMLElement).offsetWidth;
+      icon.classList.add("is-pulsing");
+    });
+  }
+
+  function load(): void {
+    if (loaded) return;
+    loaded = true;
+    fetch(`/api/posts/claps?postId=${encodeURIComponent(postId)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (typeof data.max === "number") max = data.max;
+        mine = Number(data.mine) || 0;
+        count = Number(data.total) || 0;
+        render();
+      })
+      .catch(() => {});
+  }
+
+  button.addEventListener("click", () => {
+    if (mine >= max) return;
+    mine = Math.min(mine + 1, max);
+    count += 1;
+    render();
+    pulse();
+    inflight += 1;
+    fetch("/api/posts/claps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ postId }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        inflight -= 1;
+        if (inflight === 0) {
+          mine = Number(data.mine) || mine;
+          count = Number(data.total) || count;
+          if (typeof data.max === "number") max = data.max;
+          render();
+        }
+      })
+      .catch(() => {
+        inflight -= 1;
+      });
+  });
+
+  (section as HTMLElement & { loadCounts: () => void }).loadCounts = load;
+  return section;
+}
+
+function buildReviewBlock(m: WatchedMovie, opts: FullOptions): HTMLElement | null {
+  if (!m.review || !m.slug) return null;
+
+  const text = el("div", { class: "vw-review-text" });
+  text.innerHTML = m.review;
+
+  const claps = buildReviewClaps(m.slug, opts.review);
+  const actions = el("div", { class: "vw-review-actions" }, claps);
+  const body = el("div", { class: "vw-review-body", hidden: "" }, text, actions);
+
+  const chevron = el("span", { class: "vw-review-chevron", "aria-hidden": "true" }, "▸");
+  const toggle = el(
+    "button",
+    { type: "button", class: "vw-review-toggle", "aria-expanded": "false" },
+    chevron,
+    opts.review.toggle,
+  );
+
+  let clapsLoaded = false;
+  toggle.addEventListener("click", () => {
+    const open = body.hidden;
+    body.hidden = !open;
+    toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    toggle.classList.toggle("is-open", open);
+    if (open && !clapsLoaded) {
+      clapsLoaded = true;
+      (claps as HTMLElement & { loadCounts?: () => void }).loadCounts?.();
+    }
+  });
+
+  return el("div", { class: "vw-review", id: `review-${m.slug}` }, toggle, body);
+}
+
+// When arriving via /visti#review-<slug> (e.g. from the home widget), open
+// that review and bring it into view once the list has been re-rendered.
+function openReviewFromHash(): void {
+  const hash = window.location.hash;
+  if (!hash.startsWith("#review-")) return;
+  const target = document.getElementById(hash.slice(1));
+  if (!target) return;
+  const toggle = target.querySelector<HTMLButtonElement>(".vw-review-toggle");
+  const body = target.querySelector<HTMLElement>(".vw-review-body");
+  if (toggle && body && body.hidden) toggle.click();
+  target.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function fullRow(m: WatchedMovie, opts: FullOptions): HTMLElement {
   const cover = el("div", { class: "vw-cover" });
   if (m.posterPath) {
@@ -138,7 +321,9 @@ function fullRow(m: WatchedMovie, opts: FullOptions): HTMLElement {
     col.append(el("p", { class: "vw-director" }, `${opts.byLabel} `, span));
   }
 
-  if (m.overview) col.append(el("p", { class: "vw-overview" }, m.overview));
+  const reviewBlock = buildReviewBlock(m, opts);
+  if (reviewBlock) col.append(reviewBlock);
+  else if (m.overview) col.append(el("p", { class: "vw-overview" }, m.overview));
 
   const meta = el("div", { class: "vw-meta" });
   if (m.releaseDate) meta.append(el("span", null, m.releaseDate.slice(0, 4)));
@@ -151,6 +336,7 @@ function fullRow(m: WatchedMovie, opts: FullOptions): HTMLElement {
   if (m.rating) {
     meta.append(el("span", { class: "vw-my-rating" }, opts.myRatingLabel(m.rating)));
   }
+  meta.append(likeHeart(m.liked, opts.likedLabel, opts.notLikedLabel));
   col.append(meta);
 
   const side = el("div", { class: "vw-side" });
@@ -235,4 +421,5 @@ export function renderFull(
 
   main.replaceChildren(...sections);
   updateStats(movies);
+  openReviewFromHash();
 }

@@ -3,15 +3,22 @@ import BaseHead from "~/components/BaseHead.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE } from "~/consts";
-import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import {
+  getLetterboxdRss,
+  parseXmlContent,
+  letterboxdFilmSlug,
+  extractReviewHtml,
+} from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { formatMoneyCompact } from "~/lib/format-money";
 import { letterboxdDirectorUrl } from "~/lib/letterboxd-slug";
+import { Icon } from "astro-icon/components";
 import "~/styles/foglio.css";
 import "./Visti.css";
 
 interface WatchedMovie {
   title?: string;
+  slug?: string | null;
   watchedDate?: string;
   rating?: string;
   poster_path?: string;
@@ -22,6 +29,8 @@ interface WatchedMovie {
   vote_average?: number;
   runtime?: number;
   directors?: string[];
+  review?: string | null;
+  liked?: boolean;
 }
 
 const fetchAllWatched = async (): Promise<WatchedMovie[]> => {
@@ -39,8 +48,11 @@ const fetchAllWatched = async (): Promise<WatchedMovie[]> => {
             ...(movie as any),
             directors: extractDirectors(movie),
             title: it["letterboxd:filmTitle"]?.[0],
+            slug: letterboxdFilmSlug(it.link?.[0]),
             watchedDate: it["letterboxd:watchedDate"]?.[0],
             rating: it["letterboxd:memberRating"]?.[0],
+            liked: it["letterboxd:memberLike"]?.[0] === "Yes",
+            review: extractReviewHtml(it.description?.[0]),
           } as WatchedMovie;
         } catch {
           return null;
@@ -173,7 +185,19 @@ if (myRatings.length > 0) {
                           </>
                         ))}</span></p>
                       )}
-                      {m.overview && <p class="vw-overview">{m.overview}</p>}
+                      {m.review && m.slug ? (
+                        <details class="vw-review" id={`review-${m.slug}`}>
+                          <summary class="vw-review-toggle">
+                            <span class="vw-review-chevron" aria-hidden="true">▸</span>
+                            La mia recensione
+                          </summary>
+                          <div class="vw-review-body">
+                            <div class="vw-review-text" set:html={m.review} />
+                          </div>
+                        </details>
+                      ) : (
+                        m.overview && <p class="vw-overview">{m.overview}</p>
+                      )}
                       <div class="vw-meta">
                         {m.release_date && <span>{m.release_date.slice(0, 4)}</span>}
                         {typeof m.runtime === "number" && m.runtime > 0 && (
@@ -183,6 +207,7 @@ if (myRatings.length > 0) {
                           <span>★ {m.vote_average.toFixed(1)}</span>
                         )}
                         {m.rating && <span class="vw-my-rating">il mio: {m.rating}/5</span>}
+                        <span class={`vw-like${m.liked ? " is-liked" : ""}`} title={m.liked ? "Mi è piaciuto" : "Non tra i preferiti"} aria-label={m.liked ? "Mi è piaciuto" : "Non tra i preferiti"}>{m.liked ? "♥" : "♡"}</span>
                       </div>
                     </div>
                     <div class="vw-side">
@@ -206,6 +231,11 @@ if (myRatings.length > 0) {
 
     <FoglioFooter lang="it" />
 
+    <template id="vw-clap-icons">
+      <Icon name="ph:hands-clapping" class="PostClaps-icon" size={20} is:inline aria-hidden="true" />
+      <Icon name="ph:hands-clapping-fill" class="PostClaps-icon PostClaps-icon--solid" size={20} is:inline aria-hidden="true" />
+    </template>
+
     <script>
       import { fetchWatched, renderFull } from "~/scripts/watched-movies";
       const main = document.querySelector<HTMLElement>("[data-watched-main]");
@@ -217,6 +247,15 @@ if (myRatings.length > 0) {
                 locale: "it-IT",
                 byLabel: "di",
                 myRatingLabel: (r) => `il mio: ${r}/5`,
+                likedLabel: "Mi è piaciuto",
+                notLikedLabel: "Non tra i preferiti",
+                review: {
+                  toggle: "La mia recensione",
+                  clapCta: "Applaudi questa recensione",
+                  clapYoursOne: "Hai applaudito 1 volta",
+                  clapYours: "Hai applaudito {n} volte",
+                  clapCapped: "Hai raggiunto il massimo (50)",
+                },
               });
           })
           .catch(() => {});

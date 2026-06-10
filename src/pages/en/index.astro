@@ -4,7 +4,7 @@ import StructuredData from "~/components/StructuredData.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import { getLetterboxdRss, parseXmlContent, extractReviewHtml } from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { formatMoneyCompact } from "~/lib/format-money";
 import { getTopPosts } from "~/lib/top-posts";
@@ -24,7 +24,12 @@ const lastWatchedMovies = async () => {
     .map(async (item: any) => {
       try {
         const movie = await getMovieById(item["tmdb:movieId"][0]);
-        return { ...movie, ...item, directors: extractDirectors(movie) };
+        return {
+          ...movie,
+          ...item,
+          directors: extractDirectors(movie),
+          review: extractReviewHtml(item.description?.[0]),
+        };
       } catch (error) {
         console.error(
           `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
@@ -242,6 +247,8 @@ function formatDate(dateStr: string | Date): string {
                   ></div>
                   <div class="fh-lib-title">
                     <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                    {movie["letterboxd:memberLike"]?.[0] === "Yes" && <span class="fh-lib-like" title="I liked this">♥</span>}
+                    {movie.review && <span class="fh-lib-review-dot" title="Has a review"></span>}
                     {(() => {
                       const b = formatMoneyCompact(movie.budget);
                       const r = formatMoneyCompact(movie.revenue);
@@ -322,7 +329,7 @@ function formatDate(dateStr: string | Date): string {
       if (block) {
         fetchWatched()
           .then((movies) => {
-            if (movies.length > 0) renderCompact(block, movies, { locale: "en-GB", byLabel: "by" });
+            if (movies.length > 0) renderCompact(block, movies, { locale: "en-GB", byLabel: "by", likedLabel: "I liked this" });
           })
           .catch(() => {});
       }
