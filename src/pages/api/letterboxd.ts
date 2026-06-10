@@ -1,5 +1,10 @@
 import type { APIRoute } from "astro";
-import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import {
+  getLetterboxdRss,
+  parseXmlContent,
+  letterboxdFilmSlug,
+  extractReviewHtml,
+} from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 
 export const prerender = false;
@@ -16,8 +21,10 @@ export const GET: APIRoute = async () => {
       items.map(async (it: any) => {
         try {
           const movie: any = await getMovieById(it["tmdb:movieId"][0]);
+          const link = it.link?.[0] ?? "";
           return {
             title: it["letterboxd:filmTitle"]?.[0] ?? movie.title ?? "",
+            slug: letterboxdFilmSlug(link),
             posterPath: movie.poster_path ?? null,
             budget: typeof movie.budget === "number" ? movie.budget : null,
             revenue: typeof movie.revenue === "number" ? movie.revenue : null,
@@ -27,8 +34,10 @@ export const GET: APIRoute = async () => {
             voteAverage: typeof movie.vote_average === "number" ? movie.vote_average : null,
             runtime: typeof movie.runtime === "number" ? movie.runtime : null,
             rating: it["letterboxd:memberRating"]?.[0] ?? null,
+            liked: it["letterboxd:memberLike"]?.[0] === "Yes",
             watchedDate: it["letterboxd:watchedDate"]?.[0] ?? null,
-            link: it.link?.[0] ?? "",
+            review: extractReviewHtml(it.description?.[0]),
+            link,
           };
         } catch {
           return null;

@@ -48,3 +48,28 @@ export async function fetchPostStats(): Promise<PostStats> {
     return { claps: {}, comments: {} };
   }
 }
+
+/**
+ * Clap totals for film reviews, keyed by film slug (the `review:` prefix stripped).
+ * Used by the home page "ultima recensione" widget. Empty map if DB is unreachable.
+ */
+export async function fetchReviewClaps(): Promise<Record<string, number>> {
+  try {
+    const db = getDb();
+    const res = await db.execute(
+      `SELECT post_id, SUM(count) AS total
+       FROM post_claps
+       WHERE post_id LIKE 'review:%'
+       GROUP BY post_id`,
+    );
+    const claps: Record<string, number> = {};
+    for (const row of res.rows) {
+      const slug = String(row.post_id ?? "").replace(/^review:/, "");
+      if (slug) claps[slug] = Number(row.total ?? 0);
+    }
+    return claps;
+  } catch (err) {
+    console.error("[post-stats] review claps DB unreachable:", err);
+    return {};
+  }
+}

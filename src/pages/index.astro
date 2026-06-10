@@ -4,12 +4,17 @@ import StructuredData from "~/components/StructuredData.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import { getLetterboxdRss, parseXmlContent } from "~/services/letterboxd";
+import {
+  getLetterboxdRss,
+  parseXmlContent,
+  extractReviewHtml,
+  letterboxdFilmSlug,
+} from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
 import { formatMoneyCompact } from "~/lib/format-money";
 import { getTopPosts } from "~/lib/top-posts";
-import { fetchPostStats } from "~/lib/post-stats";
+import { fetchPostStats, fetchReviewClaps } from "~/lib/post-stats";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
@@ -24,7 +29,13 @@ const lastWatchedMovies = async () => {
     .map(async (item: any) => {
       try {
         const movie = await getMovieById(item["tmdb:movieId"][0]);
-        return { ...movie, ...item, directors: extractDirectors(movie) };
+        return {
+          ...movie,
+          ...item,
+          directors: extractDirectors(movie),
+          slug: letterboxdFilmSlug(item.link?.[0]),
+          review: extractReviewHtml(item.description?.[0]),
+        };
       } catch (error) {
         console.error(
           `Failed to fetch movie with ID ${item["tmdb:movieId"][0]}`,
@@ -82,10 +93,18 @@ const films = allFilmEntries
     slug: getSlugFromId(e.id),
   }));
 
-const [lastWatched, lastSongs] = await Promise.all([
+const [lastWatched, lastSongs, reviewClaps] = await Promise.all([
   lastWatchedMovies().catch(() => []),
   fetchRecentTracks().catch(() => []),
+  fetchReviewClaps().catch(() => ({}) as Record<string, number>),
 ]);
+
+const reviewedMovies = (lastWatched as any[]).filter((m) => m.review && m.slug);
+const latestReview = reviewedMovies[0] ?? null;
+const latestReviewExcerpt = latestReview
+  ? (latestReview.review.match(/<p>([\s\S]*?)<\/p>/i)?.[1] ?? "").trim()
+  : "";
+const latestReviewClaps = latestReview ? (reviewClaps[latestReview.slug] ?? 0) : 0;
 
 function formatDate(dateStr: string | Date): string {
   const d = new Date(dateStr);
@@ -226,6 +245,48 @@ function formatDate(dateStr: string | Date): string {
       )}
     </section>
 
+    <!-- 4b. Latest film review -->
+    {latestReview && (
+      <section class="fh-review">
+        <div class="fh-review-inner">
+          <p class="fh-review-eyebrow">La mia ultima recensione</p>
+          <div class="fh-review-grid">
+            <a class="fh-review-poster" href={`/visti#review-${latestReview.slug}`}
+              style={latestReview.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w342/${latestReview.poster_path}')` : ""}
+              aria-label={latestReview["letterboxd:filmTitle"]?.[0]}
+            ></a>
+            <div class="fh-review-body">
+              <h3 class="fh-review-filmtitle">{latestReview["letterboxd:filmTitle"]?.[0]}</h3>
+              {latestReview.directors?.length > 0 && (
+                <p class="fh-review-dir">di {latestReview.directors.join(", ")}</p>
+              )}
+              <div class="fh-review-meta">
+                {latestReview.release_date && <span>{latestReview.release_date.slice(0, 4)}</span>}
+                {typeof latestReview.runtime === "number" && latestReview.runtime > 0 && (
+                  <span>{latestReview.runtime}′</span>
+                )}
+                {latestReview["letterboxd:watchedDate"]?.[0] && (
+                  <span>visto il {formatDate(latestReview["letterboxd:watchedDate"][0])}</span>
+                )}
+                {latestReview["letterboxd:memberLike"]?.[0] === "Yes" && (
+                  <span class="rating">♥ mi è piaciuto</span>
+                )}
+              </div>
+              {latestReviewExcerpt && (
+                <p class="fh-review-quote" set:html={latestReviewExcerpt} />
+              )}
+              <div class="fh-review-actions">
+                <a href={`/visti#review-${latestReview.slug}`} class="foglio-readmore">Leggi su Visti →</a>
+                {latestReviewClaps > 0 && (
+                  <span class="fh-review-claps">♥ {latestReviewClaps} applausi</span>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    )}
+
     <!-- 5. Library -->
     <section class="fh-library">
       <div class="fh-library-inner">
@@ -241,6 +302,8 @@ function formatDate(dateStr: string | Date): string {
                   ></div>
                   <div class="fh-lib-title">
                     <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                    {movie["letterboxd:memberLike"]?.[0] === "Yes" && <span class="fh-lib-like" title="Mi è piaciuto">♥</span>}
+                    {movie.review && <span class="fh-lib-review-dot" title="Ha una recensione"></span>}
                     {(() => {
                       const b = formatMoneyCompact(movie.budget);
                       const r = formatMoneyCompact(movie.revenue);
@@ -321,7 +384,7 @@ function formatDate(dateStr: string | Date): string {
       if (block) {
         fetchWatched()
           .then((movies) => {
-            if (movies.length > 0) renderCompact(block, movies, { locale: "it-IT", byLabel: "di" });
+            if (movies.length > 0) renderCompact(block, movies, { locale: "it-IT", byLabel: "di", likedLabel: "Mi è piaciuto" });
           })
           .catch(() => {});
       }

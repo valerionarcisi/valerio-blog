@@ -118,6 +118,126 @@
   margin-top: 1rem;
 }
 
+/* ── Latest film review widget ── */
+.fh-review {
+  background: var(--foglio-paper);
+  border-top: 1px solid var(--foglio-rule);
+  border-bottom: 1px solid var(--foglio-rule);
+}
+.fh-review-inner {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 4rem 3rem;
+}
+.fh-review-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--foglio-accent);
+  margin: 0 0 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.fh-review-eyebrow::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--foglio-rule);
+}
+.fh-review-grid {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 2.5rem;
+  align-items: start;
+}
+.fh-review-poster {
+  display: block;
+  width: 130px;
+  aspect-ratio: 2 / 3;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--foglio-paper-2);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  box-shadow: var(--foglio-shadow);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.fh-review-poster:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--foglio-shadow-strong);
+}
+.fh-review-body {
+  max-width: 40em;
+}
+.fh-review-filmtitle {
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: 1.9rem;
+  line-height: 1.1;
+  margin: 0 0 0.3rem;
+}
+.fh-review-dir {
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 0.5rem;
+}
+.fh-review-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--foglio-ink-mute);
+  margin-bottom: 1.4rem;
+}
+.fh-review-meta .rating {
+  color: var(--foglio-accent);
+}
+.fh-review-quote {
+  font-family: var(--foglio-serif);
+  font-size: 1.3rem;
+  line-height: 1.55;
+  color: var(--foglio-ink);
+  margin: 0 0 1.5rem;
+  position: relative;
+  padding-top: 1.2rem;
+}
+.fh-review-quote::before {
+  content: "\201C";
+  font-size: 3.4rem;
+  line-height: 1;
+  color: var(--foglio-accent);
+  opacity: 0.35;
+  position: absolute;
+  left: -0.2rem;
+  top: -0.5rem;
+  z-index: 0;
+  font-family: var(--foglio-serif);
+  pointer-events: none;
+}
+.fh-review-quote > * { position: relative; z-index: 1; }
+.fh-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.fh-review-claps {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--foglio-accent);
+}
+
 /* ── Section head (shared) ── */
 .fh-section-head {
   display: flex;
@@ -488,6 +608,24 @@
   color: var(--foglio-accent);
 }
 
+.fh-lib-review-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--foglio-accent);
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  opacity: 0.75;
+}
+
+.fh-lib-like {
+  color: var(--foglio-accent);
+  font-size: 0.8rem;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
 .fh-lib-director {
   display: block;
   font-family: var(--foglio-serif);
@@ -659,6 +797,27 @@
   .fh-lib-detail {
     grid-column: 2;
     font-size: 0.62rem;
+  }
+
+  .fh-review-inner {
+    padding: 2.5rem 1.4rem;
+  }
+
+  .fh-review-grid {
+    grid-template-columns: 88px 1fr;
+    gap: 1.4rem;
+  }
+
+  .fh-review-poster {
+    width: 88px;
+  }
+
+  .fh-review-filmtitle {
+    font-size: 1.5rem;
+  }
+
+  .fh-review-quote {
+    font-size: 1.1rem;
   }
 
   .fh-about-strip {
