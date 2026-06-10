@@ -42,7 +42,7 @@ Spawn favours the front (≈72% from ahead). Music is procedural punk (WebAudio)
 | Tea (mini-boss) | kitchen guardian, 6 HP | 100 |
 | Giulio | **final boss**, 24 HP, chases Filippo and enrages (faster + dashes) under 40% HP ("te tiro dentro a lu forno!") | 600 |
 
-Bosses show a name label (TEA / GIULIO) over their health bar. **Giulio's head is the real actor's face** — cropped from a backstage photo, treated to a warm sepia duotone + grain, circular-masked (`public/img/non-fa-ridere/giulio-face.png`), drawn over his pixel body. The other characters are pixel sprites.
+Bosses show a name label (TEA / GIULIO) over their health bar. **Filippo (player) and Giulio (final boss) wear the real people's faces** — cropped from photos, treated to a warm sepia duotone + grain, circular-masked, and drawn as a head over the pixel body (`public/img/non-fa-ridere/filippo-face.png` from the site portrait `me.jpg`; `giulio-face.png` from a backstage close-up). The other characters are pixel sprites.
 
 ## Leaderboard
 

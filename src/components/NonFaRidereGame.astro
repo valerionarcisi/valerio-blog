@@ -510,11 +510,16 @@ const t =
 
   const pSize = spriteSize(SPRITES.filippo);
 
-  // Volto reale di Giulio (boss finale), trattato in duotone — caricato una volta
+  // Volti reali trattati in duotone (caricati una volta): Giulio boss e Filippo player
   const giulioFace = new Image();
   let giulioFaceReady = false;
   giulioFace.onload = () => { giulioFaceReady = true; };
   giulioFace.src = "/img/non-fa-ridere/giulio-face.png";
+
+  const filippoFace = new Image();
+  let filippoFaceReady = false;
+  filippoFace.onload = () => { filippoFaceReady = true; };
+  filippoFace.src = "/img/non-fa-ridere/filippo-face.png";
 
   // ── Musica punk: WebAudio procedurale, chitarra + batteria ──────
   const music = {
@@ -1407,9 +1412,9 @@ const t =
     // Giulio: testa = volto reale trattato sopra il corpo pixel
     const isGiulio = e.def.boss && !e.def.teaBoss;
     if (isGiulio && giulioFaceReady) {
-      const fw = e.w * 1.35;
+      const fw = e.w * 1.15;
       const fx = ex + e.w / 2 - fw / 2;
-      const fy = e.y - fw * 0.18; // copre la testa pixel
+      const fy = e.y - fw * 0.46; // testa in cima al corpo pixel
       ctx.imageSmoothingEnabled = true;
       ctx.drawImage(giulioFace, fx, fy, fw, fw);
       ctx.imageSmoothingEnabled = false;
@@ -1480,7 +1485,15 @@ const t =
     for (const e of state.enemies) drawEnemy(e);
     for (const z of state.pizzas) drawPizzaShot(z);
     const flash = p.hurtT > 0 && Math.floor(state.tick / 4) % 2 === 0;
-    if (!flash) drawSprite(SPRITES.filippo, p.x - state.camX, p.y - pSize.h, p.dir < 0, 1);
+    if (!flash) {
+      const px = p.x - state.camX;
+      drawSprite(SPRITES.filippo, px, p.y - pSize.h, p.dir < 0, 1);
+      // testa = volto reale trattato di Filippo, in cima al corpo pixel
+      if (filippoFaceReady) {
+        const fw = pSize.w * 1.05;
+        ctx.drawImage(filippoFace, px + pSize.w / 2 - fw / 2, p.y - pSize.h - fw * 0.46, fw, fw);
+      }
+    }
     drawParticles();
     drawPopups();
     ctx.restore();
