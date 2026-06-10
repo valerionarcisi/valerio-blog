@@ -35,7 +35,7 @@ Spawn favours the front (≈72% from ahead). Music is procedural punk (WebAudio)
 | Vecchia | slow, common ("Gemma… signore mio!") | 10 |
 | Rider | fast (the late delivery driver) | 15 |
 | Comico | 2 HP, hops | 25 |
-| Ubriaco | staggers (bar level) | 30 |
+| Michele (il comico) | staggers, mic in hand (bar level) | 30 |
 | Cuoco | 2 HP (kitchen level) | 20 |
 | Nonno | floats low, killable by pizza/stomp, harmless on contact | 50 |
 | Tea | **friend** — hitting her costs a life and points; let her pass | — |

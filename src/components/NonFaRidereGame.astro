@@ -383,16 +383,16 @@ const t =
         "...bb..bb...",
       ],
     },
-    // Ubriaco del bar (livello 2): camicia aperta, bicchiere in mano
-    ubriaco: {
-      colors: { h: "#6a4a2a", S: "#e0b48a", b: "#221a12", C: "#c9b8d0", P: "#3a3f55", G: "#f0d98a", r: "#b85a3a" },
+    // Michele, il comico della storia (livello 2 — il bar): microfono in mano
+    michele: {
+      colors: { h: "#2a2018", S: "#e0b48a", b: "#221a12", C: "#7a3b46", P: "#2e2a32", M: "#3a3a40", m: "#8a8a92" },
       rows: [
         "....hhhh....",
         "...hhhhhh...",
-        "....SSSS..G.",
-        "....SrSb..G.",
-        "....SSSS..G.",
-        "...CCCCCC...",
+        "....SSSS..m.",
+        "....SbSb..M.",
+        "....SSSS..M.",
+        "...CCCCCC.M.",
         "..CCCCCCCC..",
         ".SCCCCCCCCS.",
         "..CCCCCCCC..",
@@ -434,7 +434,7 @@ const t =
     tea: ["Movete Filì!", "Vanni a piglià l'ordini!", "E zittu cristo santo!"],
     teaBoss: ["Aho! Che fai in cucina?!", "Filì vai in sala!", "Tocca a me!", "Levate dai piedi!"],
     cuoco: ["Chi sei?", "A cucina mia!", "Esci da qua!", "Zio, ma che fai?"],
-    ubriaco: ["Un altro giro!", "Embe'?", "Sa' chi sso io?", "Famme 'n cicchetto!", "Aho, Filì!"],
+    michele: ["Grazie, grazie!", "Questa la sapete?", "C'è gente de Fermo?", "So' Michele!", "Ridi, Filì!"],
     giulio: ["Non se coce! Non se coce!", "Te tiro dentro a lu forno!", "Come l'antichi!", "Open Grezzo forever!"],
     teaHit: "Aoh! Che vai cerchenne?!",
     lvl2Intro: ["Aho! Sei in cucina!", "A cucina mia!", "Filì, esci!"],
@@ -447,8 +447,8 @@ const t =
     comico:  { hp: 2, speed: 0.9, points: 25, hops: true },
     nonno:   { hp: 1, speed: 0.8, points: 50, ghost: true },
     tea:     { hp: 1, speed: 0.9, points: 0, friend: true },
-    // Livello 2 (bar)
-    ubriaco: { hp: 1, speed: 0.7, points: 30, wobble: true },
+    // Livello 2 (bar) — Michele, il comico
+    michele: { hp: 1, speed: 0.7, points: 30, wobble: true },
     // Livello 3 (cucina)
     cuoco:   { hp: 2, speed: 1.1, points: 20 },
     teaBoss: { hp: 6, speed: 0.7, points: 100, boss: true, teaBoss: true },
@@ -772,10 +772,10 @@ const t =
         else type = "vecchia";
       }
     } else if (lv === 2) {
-      // Bar: ubriachi, qualche vecchia e rider, e ogni tanto il nonno.
+      // Bar: Michele il comico, qualche vecchia e rider, e ogni tanto il nonno.
       const r = Math.random();
       if (r < 0.10) type = "nonno";
-      else if (r < 0.50) type = "ubriaco";
+      else if (r < 0.50) type = "michele";
       else if (r < 0.72) type = "rider";
       else type = "vecchia";
     } else {
@@ -953,7 +953,7 @@ const t =
     const ramp = 1 + state.score / 4000;
     for (const e of state.enemies) {
       e.x += e.vx * ramp;
-      // l'ubriaco barcolla: ondeggia avanti e indietro mentre cammina
+      // Michele si dondola da comico mentre cammina verso di te
       if (e.def.wobble) e.x += Math.sin((state.tick + e.seed * 30) / 11) * 1.3;
       if (e.def.ghost) {
         // vola basso abbastanza da poterlo colpire con pizza o salto
