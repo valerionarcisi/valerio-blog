@@ -795,7 +795,10 @@ const t =
     const fromLeft = Math.random() < 0.28;
     let x = fromLeft ? state.camX - size.w - 30 : state.camX + W + 30;
     x = Math.max(-size.w - 40, Math.min(WORLD_W + 40, x));
-    if (def.boss) x = Math.min(WORLD_W - size.w - 20, state.camX + W + 30);
+    if (def.boss) {
+      // Giulio entra dal bordo destro dell'arena (palco a schermo fisso)
+      x = state.level === 4 ? W - size.w - 16 : Math.min(WORLD_W - size.w - 20, state.camX + W + 30);
+    }
 
     const lines = type === "teaBoss" ? LINES.teaBoss : (LINES[type] || LINES.cuoco);
     const e = {
@@ -917,10 +920,15 @@ const t =
     state.tick += 1;
     const p = state.player;
 
+    // Il palco (L4) è un'arena a schermo fisso: niente scroll, Filippo si
+    // muove dentro lo schermo e il microfono resta al suo posto.
+    const arena = state.level === 4;
+    const maxX = (arena ? W : WORLD_W) - pSize.w;
+
     let vx = 0;
     if (state.keys.left) { vx = -RUN_V; p.dir = -1; }
     if (state.keys.right) { vx = RUN_V; p.dir = 1; }
-    p.x = Math.max(0, Math.min(WORLD_W - pSize.w, p.x + vx));
+    p.x = Math.max(0, Math.min(maxX, p.x + vx));
 
     p.vy += GRAVITY;
     p.y += p.vy;
@@ -929,7 +937,7 @@ const t =
     else p.onGround = false;
     if (p.hurtT > 0) p.hurtT -= 1;
 
-    state.camX = Math.max(0, Math.min(WORLD_W - W, p.x + pSize.w / 2 - W / 2));
+    state.camX = arena ? 0 : Math.max(0, Math.min(WORLD_W - W, p.x + pSize.w / 2 - W / 2));
 
     state.spawnTimer += 1;
     // L4 (palco): nessun nuovo spawn, c'è solo Giulio. Cucina/bar più fitti.
@@ -982,7 +990,7 @@ const t =
         }
         const dashing = e.dashT > 0;
         e.vx = dir * chase * (dashing ? 3.2 : 1);
-        e.x = Math.max(20, Math.min(WORLD_W - e.w - 20, e.x));
+        e.x = Math.max(20, Math.min(W - e.w - 20, e.x));
       }
       if (e.def.teaBoss) {
         // Tea difende il bancone della cucina
@@ -1383,25 +1391,12 @@ const t =
     ctx.fillStyle = C.ink; ctx.fillText(e.bubble, bx + 5, by + 11);
   }
 
-  function drawShadow(cx, groundYpos, w, alpha) {
-    ctx.save();
-    ctx.globalAlpha = alpha ?? 0.2;
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.ellipse(cx, groundYpos - 1, w * 0.42, 4, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
   function drawEnemy(e) {
     const ex = e.x - state.camX;
     if (ex < -e.w - 20 || ex > W + 20) return;
     const blink = e.def.ghost && Math.floor(state.tick / 16) % 3 === 0;
     let alpha = e.def.ghost ? 0.75 : 1;
     if (blink) alpha = 0.3;
-    // ombra a terra (per il fantasma proiettata sul pavimento sotto di lui)
-    const shY = e.def.ghost ? groundY(e.x + e.w / 2) : e.y + e.h;
-    drawShadow(ex + e.w / 2, shY, e.w, e.def.ghost ? 0.1 : 0.2);
     drawSprite(e.sprite, ex, e.y, e.vx > 0, alpha);
     if (e.def.boss) {
       const ratio = Math.max(0, e.hp / e.def.hp);
@@ -1459,17 +1454,6 @@ const t =
     ctx.textAlign = "left";
   }
 
-  // Vignetta: angoli scuriti per dare profondità e atmosfera (cache)
-  let vignette = null;
-  function getVignette() {
-    if (vignette) return vignette;
-    const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.78);
-    g.addColorStop(0, "rgba(0,0,0,0)");
-    g.addColorStop(1, "rgba(20,12,6,0.42)");
-    vignette = g;
-    return g;
-  }
-
   function render() {
     ctx.save();
     if (state.shake > 0) {
@@ -1477,8 +1461,6 @@ const t =
     }
     drawBackground();
     const p = state.player;
-    // ombra del giocatore a terra
-    drawShadow(p.x - state.camX + pSize.w / 2, groundY(p.x + pSize.w / 2), pSize.w, 0.22);
     for (const e of state.enemies) drawEnemy(e);
     for (const z of state.pizzas) drawPizzaShot(z);
     const flash = p.hurtT > 0 && Math.floor(state.tick / 4) % 2 === 0;
@@ -1486,9 +1468,6 @@ const t =
     drawParticles();
     drawPopups();
     ctx.restore();
-    // vignetta sopra la scena (fuori dallo shake, ancorata allo schermo)
-    ctx.fillStyle = getVignette();
-    ctx.fillRect(0, 0, W, H);
     drawComboBadge();
   }
 
