@@ -10,8 +10,9 @@ const t =
         tapToStart: "Tap / Space to start",
         move: "← → run · ↑ jump · Space throws a pizza · stomp like Mario",
         level1Name: "The Dining Room",
-        level2Name: "The Kitchen",
-        level3Name: "The Stage",
+        level2Name: "The Bar",
+        level3Name: "The Kitchen",
+        level4Name: "The Stage",
         levelClear: "Level clear!",
         nextLevel: "Next level →",
         gameOver: "Closing time",
@@ -36,15 +37,16 @@ const t =
         howTouchVal: "use the on-screen buttons (also in fullscreen)",
         howGoal: "Goal",
         howGoalVal: "knock down each character with a pizza, or jump on their head Mario-style. Don't hit Tea — she's on your side!",
-        howLevels: "Three levels",
-        howLevelsVal: "the dining room → the kitchen (beat Tea) → the stage (beat Giulio).",
+        howLevels: "Four levels",
+        howLevelsVal: "dining room → bar → kitchen (beat Tea) → stage (beat Giulio).",
       }
     : {
         tapToStart: "Tocca / Spazio per iniziare",
         move: "← → corri · ↑ salta · Spazio tira la pizza · salta in testa tipo Mario",
         level1Name: "La Sala",
-        level2Name: "La Cucina",
-        level3Name: "Il Palco",
+        level2Name: "Il Bar",
+        level3Name: "La Cucina",
+        level4Name: "Il Palco",
         levelClear: "Livello completato!",
         nextLevel: "Avanti →",
         gameOver: "È ora di chiudere",
@@ -69,8 +71,8 @@ const t =
         howTouchVal: "usa i tasti a schermo (funzionano anche a tutto schermo)",
         howGoal: "Obiettivo",
         howGoalVal: "abbatti ogni personaggio con una pizza, oppure saltagli in testa tipo Mario. Non colpire Tea — sta dalla tua parte!",
-        howLevels: "Tre livelli",
-        howLevelsVal: "la sala → la cucina (batti Tea) → il palco (batti Giulio).",
+        howLevels: "Quattro livelli",
+        howLevelsVal: "la sala → il bar → la cucina (batti Tea) → il palco (batti Giulio).",
       };
 ---
 
@@ -157,6 +159,7 @@ const t =
   level1Name: t.level1Name,
   level2Name: t.level2Name,
   level3Name: t.level3Name,
+  level4Name: t.level4Name,
   levelClearMsg: t.levelClear,
   nextLevelMsg: t.nextLevel,
   levelLabel: t.levelLabel,
@@ -186,8 +189,9 @@ const t =
   // Progressione livelli — kill necessari per completare ognuno.
   // Livello 1: 20 clienti in sala. Livello 2: 16 cuochi + Tea mini-boss.
   // Livello 3: solo Giulio boss finale (10 HP). ~25-35 min totali.
-  const LEVEL_KILLS_TO_CLEAR = { 1: 12, 2: 10 };
-  // Livello 2: Tea entra come mini-boss dopo questi kill.
+  // Kill per completare: L1 sala, L2 bar, L3 cucina (poi Tea). L4 = boss Giulio.
+  const LEVEL_KILLS_TO_CLEAR = { 1: 10, 2: 10, 3: 10 };
+  // Livello 3 (cucina): Tea entra come mini-boss dopo questi kill.
   const TEA_BOSS_AT = 6;
 
   const C = {
@@ -214,11 +218,14 @@ const t =
   };
 
   function groundY(x) {
-    if (state.level === 3) return FLOOR;
-    if (state.level === 2) {
+    // L1 sala: piccolo palco rialzato · L3 cucina: bancone · L2 bar e L4 palco: piatto
+    if (state.level === 1) {
+      return x > STAGE_X && x < STAGE_X + STAGE_W ? FLOOR - STAGE_H : FLOOR;
+    }
+    if (state.level === 3) {
       return x > COUNTER_X && x < COUNTER_X + COUNTER_W ? FLOOR - COUNTER_H : FLOOR;
     }
-    return x > STAGE_X && x < STAGE_X + STAGE_W ? FLOOR - STAGE_H : FLOOR;
+    return FLOOR;
   }
 
   // ── Sprite pixel maps ────────────────────────────────────────────
@@ -376,6 +383,25 @@ const t =
         "...bb..bb...",
       ],
     },
+    // Ubriaco del bar (livello 2): camicia aperta, bicchiere in mano
+    ubriaco: {
+      colors: { h: "#6a4a2a", S: "#e0b48a", b: "#221a12", C: "#c9b8d0", P: "#3a3f55", G: "#f0d98a", r: "#b85a3a" },
+      rows: [
+        "....hhhh....",
+        "...hhhhhh...",
+        "....SSSS..G.",
+        "....SrSb..G.",
+        "....SSSS..G.",
+        "...CCCCCC...",
+        "..CCCCCCCC..",
+        ".SCCCCCCCCS.",
+        "..CCCCCCCC..",
+        "..CCCCCCCC..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...bb..bb...",
+      ],
+    },
   };
 
   function spriteSize(def) {
@@ -408,6 +434,7 @@ const t =
     tea: ["Movete Filì!", "Vanni a piglià l'ordini!", "E zittu cristo santo!"],
     teaBoss: ["Aho! Che fai in cucina?!", "Filì vai in sala!", "Tocca a me!", "Levate dai piedi!"],
     cuoco: ["Chi sei?", "A cucina mia!", "Esci da qua!", "Zio, ma che fai?"],
+    ubriaco: ["Un altro giro!", "Embe'?", "Sa' chi sso io?", "Famme 'n cicchetto!", "Aho, Filì!"],
     giulio: ["Non se coce! Non se coce!", "Te tiro dentro a lu forno!", "Come l'antichi!", "Open Grezzo forever!"],
     teaHit: "Aoh! Che vai cerchenne?!",
     lvl2Intro: ["Aho! Sei in cucina!", "A cucina mia!", "Filì, esci!"],
@@ -420,10 +447,12 @@ const t =
     comico:  { hp: 2, speed: 0.9, points: 25, hops: true },
     nonno:   { hp: 1, speed: 0.8, points: 50, ghost: true },
     tea:     { hp: 1, speed: 0.9, points: 0, friend: true },
-    // Livello 2
+    // Livello 2 (bar)
+    ubriaco: { hp: 1, speed: 0.7, points: 30, wobble: true },
+    // Livello 3 (cucina)
     cuoco:   { hp: 2, speed: 1.1, points: 20 },
     teaBoss: { hp: 6, speed: 0.7, points: 100, boss: true, teaBoss: true },
-    // Livello 3
+    // Livello 4 (palco)
     giulio:  { hp: 10, speed: 0.45, points: 300, boss: true },
   };
 
@@ -447,6 +476,11 @@ const t =
     player: { x: 80, y: FLOOR, vy: 0, dir: 1, onGround: true, hurtT: 0 },
     pizzas: [],
     enemies: [],
+    popups: [],
+    particles: [],
+    combo: 0,
+    comboT: 0,
+    shake: 0,
     spawnTimer: 0,
     keys: { left: false, right: false },
     best: Number(localStorage.getItem("nfr-best") || 0),
@@ -482,15 +516,15 @@ const t =
     timer: null, nextTime: 0, step: 0,
     muted: localStorage.getItem("nfr-muted") === "1",
     bpm: 172,
-    // Livello 1: giro da garage A-D-G-D
-    // Livello 2: più veloce, tono più teso E-A-B-A
-    // Livello 3: massima velocità, giro di potere
+    // L1 sala: garage A-D-G-D · L2 bar: groove dondolante E-G-A · L3 cucina:
+    // teso E-A-B · L4 palco: massima velocità, giro di potenza.
     riffs: {
       1: [110, 110, 146.83, 146.83, 196, 196, 146.83, 146.83],
-      2: [82.4, 82.4, 110, 110, 123.47, 123.47, 110, 110],
-      3: [82.4, 110, 82.4, 110, 123.47, 164.81, 123.47, 110],
+      2: [82.4, 98, 82.4, 110, 98, 110, 130.81, 110],
+      3: [82.4, 82.4, 110, 110, 123.47, 123.47, 110, 110],
+      4: [82.4, 110, 82.4, 110, 123.47, 164.81, 123.47, 110],
     },
-    bpms: { 1: 172, 2: 192, 3: 210 },
+    bpms: { 1: 172, 2: 178, 3: 196, 4: 212 },
   };
 
   function audioInit() {
@@ -635,23 +669,27 @@ const t =
 
   // ── Game flow ──────────────────────────────────────────────────
   function levelNames() {
-    return [level1Name, level2Name, level3Name];
+    return [level1Name, level2Name, level3Name, level4Name];
   }
 
   function syncHud() {
     el.score.textContent = String(state.score);
     el.lives.textContent = String(state.lives);
     let progress = "";
-    if (state.level === 1) {
-      const left = Math.max(0, LEVEL_KILLS_TO_CLEAR[1] - state.killCount);
+    if (state.level === 1 || state.level === 2) {
+      const left = Math.max(0, LEVEL_KILLS_TO_CLEAR[state.level] - state.killCount);
       progress = left > 0 ? ` · ${left}` : " · →";
-    } else if (state.level === 2) {
+    } else if (state.level === 3) {
       if (!state.teaDefeated) progress = state.bossAlive ? " · TEA" : ` · ${Math.max(0, TEA_BOSS_AT - state.killCount)}`;
-      else progress = ` · ${Math.max(0, LEVEL_KILLS_TO_CLEAR[2] - state.killCount)}`;
+      else progress = ` · ${Math.max(0, LEVEL_KILLS_TO_CLEAR[3] - state.killCount)}`;
     } else {
       progress = " · GIULIO";
     }
-    el.levelLabel.textContent = `${levelLabel} ${state.level} — ${levelNames()[state.level - 1]}${progress}`;
+    // Su mobile l'etichetta è corta (il nome livello toglierebbe spazio al
+    // contatore); su desktop mostra anche il nome della scena.
+    el.levelLabel.textContent = isTouch
+      ? `${levelLabel} ${state.level}${progress}`
+      : `${levelLabel} ${state.level} — ${levelNames()[state.level - 1]}${progress}`;
   }
 
   function resetLevel(lvl) {
@@ -665,10 +703,17 @@ const t =
     state.levelTransition = false;
     state.pizzas = [];
     state.enemies = [];
+    state.popups = [];
+    state.particles = [];
+    state.combo = 0;
+    state.comboT = 0;
+    state.shake = 0;
     state.spawnTimer = 0;
     state.player = { x: 80, y: groundY(80), vy: 0, dir: 1, onGround: true, hurtT: 0 };
     musicStart();
     syncHud();
+    // Livello 4 (palco): niente attesa, Giulio entra subito.
+    if (lvl === 4) spawnEnemy();
   }
 
   function reset() {
@@ -705,18 +750,19 @@ const t =
     let type;
     const lv = state.level;
 
-    if (lv === 3) {
+    if (lv === 4) {
+      // Palco: solo Giulio, una volta.
       if (state.giulioDefeated) return;
       if (!state.bossAlive) {
         type = "giulio";
         state.bossAlive = true;
       } else return;
-    } else if (lv === 2) {
+    } else if (lv === 3) {
+      // Cucina: cuochi, poi Tea mini-boss.
       if (state.killCount >= TEA_BOSS_AT && !state.teaDefeated && !state.bossAlive) {
         type = "teaBoss";
         state.bossAlive = true;
       } else if (state.teaDefeated) {
-        // dopo Tea, ancora qualche cuoco fino alla quota
         const r = Math.random();
         type = r < 0.6 ? "cuoco" : "rider";
       } else {
@@ -725,7 +771,15 @@ const t =
         else if (r < 0.75) type = "rider";
         else type = "vecchia";
       }
+    } else if (lv === 2) {
+      // Bar: ubriachi, qualche vecchia e rider, e ogni tanto il nonno.
+      const r = Math.random();
+      if (r < 0.10) type = "nonno";
+      else if (r < 0.50) type = "ubriaco";
+      else if (r < 0.72) type = "rider";
+      else type = "vecchia";
     } else {
+      // Sala
       const r = Math.random();
       if (r < 0.08) type = "nonno";
       else if (r < 0.16) type = "tea";
@@ -737,7 +791,8 @@ const t =
     const def = ENEMIES[type];
     const sprite = SPRITES[type === "teaBoss" ? "tea" : type];
     const size = spriteSize(sprite);
-    const fromLeft = Math.random() < 0.45;
+    // la maggior parte arriva dal fronte (destra, dove avanzi): meno colpi a sorpresa da dietro
+    const fromLeft = Math.random() < 0.28;
     let x = fromLeft ? state.camX - size.w - 30 : state.camX + W + 30;
     x = Math.max(-size.w - 40, Math.min(WORLD_W + 40, x));
     if (def.boss) x = Math.min(WORLD_W - size.w - 20, state.camX + W + 30);
@@ -763,14 +818,19 @@ const t =
     state.pizzas.push({
       x: state.player.x + pSize.w / 2 + state.player.dir * 14,
       y: state.player.y - pSize.h + 16,
-      vx: state.player.dir * 5,
-      vy: -2, r: 7,
+      vx: state.player.dir * 6.4,
+      vy: -1.2, r: 7,
     });
   }
 
   function loseLife() {
     state.lives -= 1;
     state.player.hurtT = 70;
+    state.combo = 0;
+    state.comboT = 0;
+    state.shake = Math.max(state.shake, 9);
+    const p = state.player;
+    addPopup(p.x - state.camX + pSize.w / 2, p.y - pSize.h, "Ahia!", C.accent);
     syncHud();
     if (state.lives <= 0) gameOver();
   }
@@ -792,10 +852,42 @@ const t =
     if (isTouch) exitGameView();
   }
 
+  // ── Effetti (juice) ────────────────────────────────────────────
+  function addPopup(x, y, text, color) {
+    state.popups.push({ x, y, text, color: color || C.accent, t: 0, life: 48 });
+  }
+  function addSplat(x, y, color) {
+    for (let i = 0; i < 8; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = 1 + Math.random() * 3;
+      state.particles.push({
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp - 1.5,
+        t: 0, life: 24 + (Math.random() * 12 | 0),
+        color: color || C.cheese,
+        s: 2 + (Math.random() * 2 | 0),
+      });
+    }
+  }
+
   function killEnemy(e) {
     e.dead = true;
     if (!e.def.friend) {
-      state.score += e.def.points;
+      // combo: uccisioni ravvicinate valgono di più
+      if (state.comboT > 0) state.combo += 1; else state.combo = 1;
+      state.comboT = 90;
+      const mult = state.combo >= 3 ? 1 + (state.combo - 2) * 0.25 : 1;
+      const gained = Math.round(e.def.points * mult);
+      state.score += gained;
+
+      const cx = e.x - state.camX + e.w / 2;
+      const cy = e.y - 6;
+      addPopup(cx, cy, "+" + gained, e.def.boss ? C.accent : C.ink);
+      addSplat(e.x - state.camX + e.w / 2, e.y + e.h / 2, e.def.boss ? C.accent : C.cheese);
+      if (state.combo >= 3) addPopup(cx, cy - 16, "COMBO ×" + state.combo, C.accent);
+      if (e.def.boss) state.shake = Math.max(state.shake, 6);
+
       if (e.def.boss) {
         state.bossAlive = false;
         if (e.def.teaBoss) state.teaDefeated = true;
@@ -811,9 +903,11 @@ const t =
     const lv = state.level;
     if (lv === 1 && state.killCount >= LEVEL_KILLS_TO_CLEAR[1]) {
       showLevelTransition(2);
-    } else if (lv === 2 && state.teaDefeated && state.killCount >= LEVEL_KILLS_TO_CLEAR[2]) {
+    } else if (lv === 2 && state.killCount >= LEVEL_KILLS_TO_CLEAR[2]) {
       showLevelTransition(3);
-    } else if (lv === 3 && state.giulioDefeated) {
+    } else if (lv === 3 && state.teaDefeated && state.killCount >= LEVEL_KILLS_TO_CLEAR[3]) {
+      showLevelTransition(4);
+    } else if (lv === 4 && state.giulioDefeated) {
       setTimeout(gameOver, 1000);
     }
   }
@@ -838,8 +932,9 @@ const t =
     state.camX = Math.max(0, Math.min(WORLD_W - W, p.x + pSize.w / 2 - W / 2));
 
     state.spawnTimer += 1;
-    const baseCadence = state.level === 3 ? 999 : state.level === 2 ? 70 : 100;
-    const cadence = Math.max(40, baseCadence - Math.floor(state.score / 30));
+    // L4 (palco): nessun nuovo spawn, c'è solo Giulio. Cucina/bar più fitti.
+    const baseCadence = state.level === 4 ? 99999 : state.level === 3 ? 70 : state.level === 2 ? 84 : 100;
+    const cadence = Math.max(38, baseCadence - Math.floor(state.score / 30));
     if (state.spawnTimer >= cadence) {
       state.spawnTimer = 0;
       spawnEnemy();
@@ -858,8 +953,11 @@ const t =
     const ramp = 1 + state.score / 4000;
     for (const e of state.enemies) {
       e.x += e.vx * ramp;
+      // l'ubriaco barcolla: ondeggia avanti e indietro mentre cammina
+      if (e.def.wobble) e.x += Math.sin((state.tick + e.seed * 30) / 11) * 1.3;
       if (e.def.ghost) {
-        e.y = FLOOR - e.h - 60 + Math.sin((state.tick + e.seed * 40) / 30) * 26;
+        // vola basso abbastanza da poterlo colpire con pizza o salto
+        e.y = FLOOR - e.h - 22 + Math.sin((state.tick + e.seed * 40) / 30) * 16;
       } else if (e.def.hops) {
         e.vy += GRAVITY;
         e.y += e.vy;
@@ -891,6 +989,7 @@ const t =
         if (e.dead) continue;
         if (z.x + z.r > e.x && z.x - z.r < e.x + e.w && z.y + z.r > e.y && z.y - z.r < e.y + e.h) {
           z.dead = true;
+          addSplat(z.x - state.camX, z.y, C.cheese);
           if (e.def.friend) {
             e.dead = true;
             say(e, LINES.teaHit);
@@ -899,6 +998,7 @@ const t =
           } else {
             e.hp -= 1;
             if (e.hp <= 0) killEnemy(e);
+            else state.shake = Math.max(state.shake, 3); // colpito ma vivo (boss)
           }
           break;
         }
@@ -910,7 +1010,7 @@ const t =
     const px1 = p.x + 6, px2 = p.x + pSize.w - 6;
     const pTop = p.y - pSize.h, pBot = p.y;
     for (const e of state.enemies) {
-      if (e.dead || e.def.ghost) continue;
+      if (e.dead) continue;
       const overlapX = px2 > e.x + 4 && px1 < e.x + e.w - 4;
       if (!overlapX) continue;
       const stomping = p.vy > 1 && pBot > e.y && pBot < e.y + e.h * 0.6;
@@ -920,7 +1020,8 @@ const t =
         if (e.def.boss) { e.hp -= 1; if (e.hp <= 0) killEnemy(e); }
         else killEnemy(e);
       } else if (pBot > e.y + 4 && pTop < e.y + e.h - 4) {
-        if (e.def.friend) continue;
+        // il nonno (ghost) attraversa senza fare danno; lo si batte solo a pizza/salto
+        if (e.def.friend || e.def.ghost) continue;
         if (p.hurtT === 0) {
           if (!e.def.boss) e.dead = true;
           loseLife();
@@ -928,6 +1029,18 @@ const t =
       }
     }
     state.enemies = state.enemies.filter((e) => !e.dead);
+
+    // ── Effetti ──
+    if (state.comboT > 0) { state.comboT -= 1; if (state.comboT === 0) state.combo = 0; }
+    if (state.shake > 0) state.shake *= 0.85;
+    if (state.shake < 0.4) state.shake = 0;
+    for (const pp of state.popups) { pp.t += 1; pp.y -= 0.7; }
+    state.popups = state.popups.filter((pp) => pp.t < pp.life);
+    for (const pt of state.particles) {
+      pt.t += 1; pt.vy += 0.35; pt.x += pt.vx; pt.y += pt.vy;
+    }
+    state.particles = state.particles.filter((pt) => pt.t < pt.life);
+
     syncHud();
   }
 
@@ -1149,17 +1262,83 @@ const t =
     ctx.beginPath(); ctx.arc(W - 42, FLOOR - STAGE_H - 25, 9, 0, Math.PI * 2); ctx.fill();
   }
 
+  function drawBgBar() {
+    const cam = state.camX;
+    // parete calda da bar
+    ctx.fillStyle = "#3a2c20";
+    ctx.fillRect(0, 0, W, FLOOR);
+
+    // mensole con bottiglie lungo tutta la parete (parallasse leggera)
+    const shelfY = [70, 116];
+    for (const sy of shelfY) {
+      ctx.fillStyle = "#2a1d14";
+      ctx.fillRect(0, sy + 26, W, 4);
+      const off = (cam * 0.6) % 22;
+      for (let i = -22; i < W + 22; i += 22) {
+        const bx = i - off;
+        const hue = (Math.floor((i + sy) / 22) % 4);
+        ctx.fillStyle = ["#5e7d4a", "#7a3a2a", "#c9b06a", "#3a5a72"][hue];
+        ctx.fillRect(bx + 6, sy + 6, 7, 20);
+        ctx.fillStyle = "#1f1610";
+        ctx.fillRect(bx + 8, sy, 3, 7);
+      }
+    }
+
+    // lavagna dei liquori (come "PECORINO AMARO" del set)
+    const lbx = 150 - cam;
+    if (lbx > -180 && lbx < W) {
+      ctx.fillStyle = "#1a1410";
+      ctx.fillRect(lbx, 150, 180, 56);
+      ctx.strokeStyle = "#5e4a32"; ctx.lineWidth = 2; ctx.strokeRect(lbx, 150, 180, 56);
+      ctx.fillStyle = "#d8c8a8";
+      ctx.font = '9px "JetBrains Mono", monospace';
+      ctx.fillText("PECORINO  AMARO", lbx + 14, 168);
+      ctx.fillText("NOCINO   GRAPPA", lbx + 14, 182);
+      ctx.fillStyle = C.accent;
+      ctx.fillText("· OPEN GREZZO ·", lbx + 20, 198);
+    }
+
+    // bancone del bar (decorativo, non calpestabile: il pavimento è piatto)
+    const barX = 560 - cam;
+    if (barX < W && barX + 360 > 0) {
+      ctx.fillStyle = "#5a3a22";
+      ctx.fillRect(barX, FLOOR - 30, 360, 30);
+      ctx.fillStyle = "#6e4828";
+      ctx.fillRect(barX, FLOOR - 34, 360, 5);
+      // bicchieri sul bancone
+      for (let i = 0; i < 5; i++) {
+        ctx.fillStyle = "rgba(240,217,138,0.55)";
+        ctx.fillRect(barX + 30 + i * 70, FLOOR - 44, 8, 10);
+      }
+    }
+
+    // lampade a sospensione calde
+    for (let i = 0; i < 4; i++) {
+      const lx = (i * 200 - (cam * 0.8) % 200) % (W + 200);
+      ctx.fillStyle = "#2a1d14";
+      ctx.fillRect(lx + 40, 0, 2, 26);
+      ctx.fillStyle = "#caa15a";
+      ctx.beginPath(); ctx.ellipse(lx + 41, 30, 22, 9, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "rgba(240,200,120,0.18)";
+      ctx.beginPath(); ctx.arc(lx + 41, 36, 30, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
   function drawBackground() {
     if (state.level === 1) drawBgSala();
-    else if (state.level === 2) drawBgCucina();
+    else if (state.level === 2) drawBgBar();
+    else if (state.level === 3) drawBgCucina();
     else drawBgPalco();
 
-    // pavimento
-    const floorColor = state.level === 2 ? C.floorKitchen : state.level === 3 ? C.floorStage : C.floor;
+    // pavimento per livello
+    const floorColor = state.level === 3 ? C.floorKitchen
+      : state.level === 4 ? C.floorStage
+      : state.level === 2 ? "#7a5230"
+      : C.floor;
     ctx.fillStyle = floorColor;
     ctx.fillRect(0, FLOOR, W, H - FLOOR);
-    if (state.level !== 3) {
-      ctx.fillStyle = state.level === 2 ? "#6a5048" : C.floorDark;
+    if (state.level !== 4) {
+      ctx.fillStyle = state.level === 3 ? "#6a5048" : state.level === 2 ? "#5e3e22" : C.floorDark;
       const cam = state.camX;
       for (let i = -((cam | 0) % 32); i < W; i += 32) ctx.fillRect(i, FLOOR, 1, H - FLOOR);
     }
@@ -1211,13 +1390,57 @@ const t =
     drawBubble(e);
   }
 
+  function drawParticles() {
+    for (const pt of state.particles) {
+      ctx.globalAlpha = Math.max(0, 1 - pt.t / pt.life);
+      ctx.fillStyle = pt.color;
+      ctx.fillRect(pt.x | 0, pt.y | 0, pt.s, pt.s);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawPopups() {
+    ctx.textAlign = "center";
+    for (const pp of state.popups) {
+      ctx.globalAlpha = Math.max(0, 1 - pp.t / pp.life);
+      ctx.font = 'bold 12px "JetBrains Mono", monospace';
+      ctx.fillStyle = "#fbf7ee";
+      ctx.fillText(pp.text, pp.x + 1, pp.y + 1);
+      ctx.fillStyle = pp.color;
+      ctx.fillText(pp.text, pp.x, pp.y);
+    }
+    ctx.globalAlpha = 1;
+    ctx.textAlign = "left";
+  }
+
+  function drawComboBadge() {
+    if (state.combo < 2) return;
+    ctx.save();
+    ctx.textAlign = "center";
+    const pulse = 1 + Math.sin(state.tick / 4) * 0.06;
+    ctx.font = `bold ${Math.round(16 * pulse)}px "JetBrains Mono", monospace`;
+    ctx.fillStyle = C.accent;
+    ctx.globalAlpha = Math.min(1, state.comboT / 30);
+    ctx.fillText("COMBO ×" + state.combo, W / 2, 28);
+    ctx.restore();
+    ctx.textAlign = "left";
+  }
+
   function render() {
+    ctx.save();
+    if (state.shake > 0) {
+      ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
+    }
     drawBackground();
     for (const e of state.enemies) drawEnemy(e);
     for (const z of state.pizzas) drawPizzaShot(z);
     const p = state.player;
     const flash = p.hurtT > 0 && Math.floor(state.tick / 4) % 2 === 0;
     if (!flash) drawSprite(SPRITES.filippo, p.x - state.camX, p.y - pSize.h, p.dir < 0, 1);
+    drawParticles();
+    drawPopups();
+    ctx.restore();
+    drawComboBadge();
   }
 
   function loop() {
@@ -1611,9 +1834,16 @@ const t =
        non nasconde nulla di essenziale (camera centrata su Filippo). */
     #nfr-canvas { object-fit: cover; object-position: center bottom; }
 
-    /* HUD leggibile, niente etichetta livello lunga */
-    .nfr-hud { padding: 0.5rem 0.7rem; font-size: 0.66rem; }
-    .nfr-hud-level { display: none; }
+    /* HUD compatto: il progresso resta visibile anche su mobile */
+    .nfr-hud { padding: 0.5rem 0.6rem; font-size: 0.6rem; gap: 0.4rem; }
+    .nfr-hud-level {
+      flex: 0 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 42vw;
+      text-align: center;
+    }
 
     /* Tasti di sistema più grandi, sotto l'HUD */
     .nfr-sysbtns { top: 2.1rem; right: 0.5rem; gap: 0.35rem; }

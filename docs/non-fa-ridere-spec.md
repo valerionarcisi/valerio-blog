@@ -4,27 +4,43 @@ Coming-soon page for the short film **Non Fa Ridere** (written/directed by Valer
 
 ## Routes
 
-- `/non-fa-ridere/` (it) and `/en/non-fa-ridere/` (en) — `FoglioLayout`, logline + embedded game + leaderboard. Public and indexed (in sitemap).
+- `/non-fa-ridere/` (it) and `/en/non-fa-ridere/` (en) — film-detail layout (`ff-*` from `FoglioFilmLayout.css`): cover, single-column plot, embedded game + leaderboard, backstage stills gallery with lightbox. Public and indexed (in sitemap). Also listed as an in-production film at `/films/non-fa-ridere/`.
 - `GET/POST /api/non-fa-ridere/scores` — leaderboard endpoint (`prerender = false`).
 
 ## The game
 
-Fixed single-screen arcade (Space-Invaders shaped). Filippo the pizza maker is stuck behind the counter; customers/characters descend from the top. Throw pizzas to clear them before they reach the floor.
+Side-scrolling platformer (Super-Mario shaped). Filippo the pizza maker runs through the night, throwing pizzas and stomping the characters from the script across **four levels**.
 
-- **Controls**: `←`/`→` move, `Space`/tap to throw. Touch: tap moves Filippo to that x and throws.
-- **Lives**: 3. Lose one when a non-friend/non-bonus enemy reaches the floor, or when you hit Tea.
-- **Difficulty**: spawn cadence and fall speed ramp with score.
+- **Controls**: `←`/`→` run, `↑` jump, `Space` throw a pizza. Touch: on-screen round buttons (◀▶ left, jump/pizza right) inside the stage.
+- **Kill**: hit an enemy with a pizza, or jump on its head Mario-style. Tea is a friend — hitting her costs a life.
+- **Lives**: 3. Lose one on contact with an enemy (70-tick i-frames).
+- **Mobile**: the game enters fullscreen on start and exits on game over. Native fullscreen where available, CSS `position:fixed` fallback for iOS Safari. Canvas centred (`contain`).
+- **Juice**: floating score popups, mozzarella splat particles, a combo multiplier (consecutive kills within ~90 ticks, ×1.25 per extra), screen shake on hits/damage.
+
+### Levels
+
+| # | Scene | Goal |
+|---|---|---|
+| 1 | La Sala | clear 10 clients |
+| 2 | Il Bar | clear 10 (drunks, bottle shelves, "PECORINO AMARO" chalkboard) |
+| 3 | La Cucina | clear 10 cooks; **Tea** mini-boss (6 HP) enters after 6 kills |
+| 4 | Il Palco (Open Grezzo) | beat **Giulio**, the final boss (10 HP) |
+
+Spawn favours the front (≈72% from ahead). Music is procedural punk (WebAudio), faster/tenser per level (172→178→196→212 BPM).
 
 ### Cast (enemies) — from the script
 
 | Character | Behaviour | Points |
 |---|---|---|
-| Vecchia | slow, common ("Gianna! Non Gemma!") | 10 |
-| Rider | fast (the angry delivery crowd) | 15 |
-| Comico (John/Milco/Luca) | 2 HP, zig-zags | 25 |
-| Nonno | ghost, blinks, **bonus** — no penalty if it reaches the floor | 50 |
-| Tea | **friend** — hitting her costs a life and points; let her pass safely | — |
-| Giulio | **final boss**, 8 HP, appears once score ≥ 400 ("te tiro dentro a lu forno!") | 200 |
+| Vecchia | slow, common ("Gemma… signore mio!") | 10 |
+| Rider | fast (the late delivery driver) | 15 |
+| Comico | 2 HP, hops | 25 |
+| Ubriaco | staggers (bar level) | 30 |
+| Cuoco | 2 HP (kitchen level) | 20 |
+| Nonno | floats low, killable by pizza/stomp, harmless on contact | 50 |
+| Tea | **friend** — hitting her costs a life and points; let her pass | — |
+| Tea (mini-boss) | kitchen guardian, 6 HP | 100 |
+| Giulio | **final boss**, 10 HP ("te tiro dentro a lu forno!") | 300 |
 
 ## Leaderboard
 
