@@ -40,7 +40,9 @@ Spawn favours the front (≈72% from ahead). Music is procedural punk (WebAudio)
 | Nonno | floats low, killable by pizza/stomp, harmless on contact | 50 |
 | Tea | **friend** — hitting her costs a life and points; let her pass | — |
 | Tea (mini-boss) | kitchen guardian, 6 HP | 100 |
-| Giulio | **final boss**, 10 HP ("te tiro dentro a lu forno!") | 300 |
+| Giulio | **final boss**, 24 HP, chases Filippo and enrages (faster + dashes) under 40% HP ("te tiro dentro a lu forno!") | 600 |
+
+Bosses show a name label (TEA / GIULIO) over their health bar. Rendering uses ground shadows under every sprite and an edge vignette for depth.
 
 ## Leaderboard
 

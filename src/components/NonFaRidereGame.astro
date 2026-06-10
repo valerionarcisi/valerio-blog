@@ -434,8 +434,8 @@ const t =
     tea: ["Movete Filì!", "Vanni a piglià l'ordini!", "E zittu cristo santo!"],
     teaBoss: ["Aho! Che fai in cucina?!", "Filì vai in sala!", "Tocca a me!", "Levate dai piedi!"],
     cuoco: ["Chi sei?", "A cucina mia!", "Esci da qua!", "Zio, ma che fai?"],
-    michele: ["Grazie, grazie!", "Questa la sapete?", "C'è gente de Fermo?", "So' Michele!", "Ridi, Filì!"],
-    giulio: ["Non se coce! Non se coce!", "Te tiro dentro a lu forno!", "Come l'antichi!", "Open Grezzo forever!"],
+    michele: ["Lu core! Lu core!", "Ma do sso capitato?", "Ah lo stupeto!"],
+    giulio: ["Non se coce! Non se coce!", "Te tiro dentro a lu forno!", "Come l'antichi!"],
     teaHit: "Aoh! Che vai cerchenne?!",
     lvl2Intro: ["Aho! Sei in cucina!", "A cucina mia!", "Filì, esci!"],
     lvl3Intro: ["Sul palco!", "Open Grezzo!", "Giulio!"],
@@ -452,8 +452,8 @@ const t =
     // Livello 3 (cucina)
     cuoco:   { hp: 2, speed: 1.1, points: 20 },
     teaBoss: { hp: 6, speed: 0.7, points: 100, boss: true, teaBoss: true },
-    // Livello 4 (palco)
-    giulio:  { hp: 10, speed: 0.45, points: 300, boss: true },
+    // Livello 4 (palco) — boss finale tosto
+    giulio:  { hp: 24, speed: 0.7, points: 600, boss: true },
   };
 
   const GRAVITY = 0.38;
@@ -970,10 +970,19 @@ const t =
       if ((e.vx < 0 && e.x < -e.w - 60) || (e.vx > 0 && e.x > WORLD_W + 60)) e.dead = true;
 
       if (e.def.boss && !e.def.teaBoss) {
-        // Giulio presidia il palco
-        if (e.x < STAGE_X - 120) e.vx = Math.abs(e.vx);
-        if (e.x > WORLD_W - e.w - 10) e.vx = -Math.abs(e.vx);
-        if (state.tick % 220 === 0) say(e, LINES.giulio[Math.floor(Math.random() * LINES.giulio.length)]);
+        // Giulio insegue Filippo per tutto il palco; più veloce quando è ferito
+        const enraged = e.hp <= e.def.hp * 0.4;
+        const chase = (enraged ? 1.7 : 1) * e.def.speed;
+        const dir = (p.x + pSize.w / 2) > (e.x + e.w / 2) ? 1 : -1;
+        // scatto improvviso ogni tanto (più frequente da arrabbiato)
+        e.dashT = (e.dashT || 0) - 1;
+        if (e.dashT <= 0 && state.tick % (enraged ? 95 : 150) === 0) {
+          e.dashT = 26;
+          say(e, LINES.giulio[Math.floor(Math.random() * LINES.giulio.length)]);
+        }
+        const dashing = e.dashT > 0;
+        e.vx = dir * chase * (dashing ? 3.2 : 1);
+        e.x = Math.max(20, Math.min(WORLD_W - e.w - 20, e.x));
       }
       if (e.def.teaBoss) {
         // Tea difende il bancone della cucina
@@ -1374,18 +1383,42 @@ const t =
     ctx.fillStyle = C.ink; ctx.fillText(e.bubble, bx + 5, by + 11);
   }
 
+  function drawShadow(cx, groundYpos, w, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha ?? 0.2;
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(cx, groundYpos - 1, w * 0.42, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
   function drawEnemy(e) {
     const ex = e.x - state.camX;
     if (ex < -e.w - 20 || ex > W + 20) return;
     const blink = e.def.ghost && Math.floor(state.tick / 16) % 3 === 0;
     let alpha = e.def.ghost ? 0.75 : 1;
     if (blink) alpha = 0.3;
+    // ombra a terra (per il fantasma proiettata sul pavimento sotto di lui)
+    const shY = e.def.ghost ? groundY(e.x + e.w / 2) : e.y + e.h;
+    drawShadow(ex + e.w / 2, shY, e.w, e.def.ghost ? 0.1 : 0.2);
     drawSprite(e.sprite, ex, e.y, e.vx > 0, alpha);
     if (e.def.boss) {
-      const ratio = e.hp / e.def.hp;
-      ctx.fillStyle = "#00000022"; ctx.fillRect(ex, e.y - 10, e.w, 4);
-      ctx.fillStyle = e.def.teaBoss ? "#5e8d7a" : C.accent;
-      ctx.fillRect(ex, e.y - 10, e.w * ratio, 4);
+      const ratio = Math.max(0, e.hp / e.def.hp);
+      const bw = Math.max(e.w, 60);
+      const bx = ex + e.w / 2 - bw / 2;
+      const by = e.y - 18;
+      // nome del boss
+      ctx.font = 'bold 8px "JetBrains Mono", monospace';
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#fbf7ee";
+      ctx.fillText(e.def.teaBoss ? "TEA" : "GIULIO", ex + e.w / 2, by - 2);
+      ctx.textAlign = "left";
+      // barra vita
+      ctx.fillStyle = "#00000044"; ctx.fillRect(bx, by, bw, 4);
+      ctx.fillStyle = e.def.teaBoss ? "#5e8d7a" : (ratio < 0.4 ? "#d23a1a" : C.accent);
+      ctx.fillRect(bx, by, bw * ratio, 4);
+      ctx.strokeStyle = "#00000055"; ctx.lineWidth = 1; ctx.strokeRect(bx, by, bw, 4);
     }
     drawBubble(e);
   }
@@ -1426,20 +1459,36 @@ const t =
     ctx.textAlign = "left";
   }
 
+  // Vignetta: angoli scuriti per dare profondità e atmosfera (cache)
+  let vignette = null;
+  function getVignette() {
+    if (vignette) return vignette;
+    const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.35, W / 2, H / 2, H * 0.78);
+    g.addColorStop(0, "rgba(0,0,0,0)");
+    g.addColorStop(1, "rgba(20,12,6,0.42)");
+    vignette = g;
+    return g;
+  }
+
   function render() {
     ctx.save();
     if (state.shake > 0) {
       ctx.translate((Math.random() - 0.5) * state.shake, (Math.random() - 0.5) * state.shake);
     }
     drawBackground();
+    const p = state.player;
+    // ombra del giocatore a terra
+    drawShadow(p.x - state.camX + pSize.w / 2, groundY(p.x + pSize.w / 2), pSize.w, 0.22);
     for (const e of state.enemies) drawEnemy(e);
     for (const z of state.pizzas) drawPizzaShot(z);
-    const p = state.player;
     const flash = p.hurtT > 0 && Math.floor(state.tick / 4) % 2 === 0;
     if (!flash) drawSprite(SPRITES.filippo, p.x - state.camX, p.y - pSize.h, p.dir < 0, 1);
     drawParticles();
     drawPopups();
     ctx.restore();
+    // vignetta sopra la scena (fuori dallo shake, ancorata allo schermo)
+    ctx.fillStyle = getVignette();
+    ctx.fillRect(0, 0, W, H);
     drawComboBadge();
   }
 
