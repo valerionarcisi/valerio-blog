@@ -1488,10 +1488,21 @@ const t =
     if (!flash) {
       const px = p.x - state.camX;
       drawSprite(SPRITES.filippo, px, p.y - pSize.h, p.dir < 0, 1);
-      // testa = volto reale trattato di Filippo, in cima al corpo pixel
+      // testa = volto reale trattato di Filippo (profilo con bandana), in cima
+      // al corpo. La foto guarda a sinistra: la specchio quando va a destra.
       if (filippoFaceReady) {
         const fw = pSize.w * 1.05;
-        ctx.drawImage(filippoFace, px + pSize.w / 2 - fw / 2, p.y - pSize.h - fw * 0.46, fw, fw);
+        const fx = px + pSize.w / 2 - fw / 2;
+        const fy = p.y - pSize.h - fw * 0.46;
+        if (p.dir >= 0) {
+          ctx.save();
+          ctx.translate(fx + fw, fy);
+          ctx.scale(-1, 1);
+          ctx.drawImage(filippoFace, 0, 0, fw, fw);
+          ctx.restore();
+        } else {
+          ctx.drawImage(filippoFace, fx, fy, fw, fw);
+        }
       }
     }
     drawParticles();
