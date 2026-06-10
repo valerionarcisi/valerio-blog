@@ -604,10 +604,33 @@ const t =
   });
   syncMuteBtn();
 
-  if (!document.fullscreenEnabled) el.fs.style.display = "none";
+  // Fullscreen cross-platform. iOS Safari blocca requestFullscreen sugli
+  // elementi non-video, quindi usiamo un fallback CSS (position: fixed).
+  const isTouch = window.matchMedia("(pointer: coarse)").matches;
+
+  function nativeFsAvailable() {
+    return !!(el.stage.requestFullscreen || el.stage.webkitRequestFullscreen);
+  }
+  function enterGameView() {
+    if (nativeFsAvailable()) {
+      const req = el.stage.requestFullscreen || el.stage.webkitRequestFullscreen;
+      const p = req.call(el.stage);
+      if (p && p.catch) p.catch(() => el.stage.classList.add("nfr-fs-fallback"));
+    } else {
+      el.stage.classList.add("nfr-fs-fallback");
+    }
+  }
+  function exitGameView() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    }
+    el.stage.classList.remove("nfr-fs-fallback");
+  }
+
   el.fs.addEventListener("click", () => {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else el.stage.requestFullscreen().catch(() => {});
+    const inFs = document.fullscreenElement || document.webkitFullscreenElement || el.stage.classList.contains("nfr-fs-fallback");
+    if (inFs) exitGameView();
+    else enterGameView();
   });
 
   // ── Game flow ──────────────────────────────────────────────────
@@ -660,6 +683,8 @@ const t =
     el.overlayStart.classList.add("nfr-hidden");
     el.overlayEnd.classList.add("nfr-hidden");
     el.overlayLevel.classList.add("nfr-hidden");
+    // Su mobile il gioco va a tutto schermo per essere giocabile.
+    if (isTouch) enterGameView();
   }
 
   function showLevelTransition(nextLvl) {
@@ -763,6 +788,8 @@ const t =
     el.submitBtn.disabled = false;
     el.submitBtn.textContent = submitMsg;
     el.overlayEnd.classList.remove("nfr-hidden");
+    // Fine partita su mobile: si esce dal fullscreen, tornando alla pagina.
+    if (isTouch) exitGameView();
   }
 
   function killEnemy(e) {
@@ -1324,10 +1351,36 @@ const t =
     box-shadow: var(--foglio-shadow);
     background: #221a12;
   }
-  .nfr-stage:fullscreen {
+  .nfr-stage:fullscreen,
+  .nfr-stage:-webkit-full-screen {
     border: none;
     border-radius: 0;
     aspect-ratio: auto;
+  }
+
+  /* Fallback fullscreen per iOS (requestFullscreen bloccato): lo stage
+     copre l'intero viewport. */
+  .nfr-stage.nfr-fs-fallback {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    aspect-ratio: auto;
+    border: none;
+    border-radius: 0;
+    z-index: 9999;
+  }
+
+  /* In fullscreen su mobile (portrait): il canvas 16:9 sta tutto in vista,
+     centrato verticalmente, così Filippo e il pavimento sono sempre
+     visibili e l'azione resta al centro dello schermo. */
+  .nfr-stage:fullscreen #nfr-canvas,
+  .nfr-stage:-webkit-full-screen #nfr-canvas,
+  .nfr-stage.nfr-fs-fallback #nfr-canvas {
+    object-fit: contain;
+    object-position: center center;
   }
 
   #nfr-canvas {
