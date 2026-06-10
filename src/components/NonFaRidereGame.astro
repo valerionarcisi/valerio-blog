@@ -1,0 +1,1528 @@
+---
+interface Props {
+  lang?: "it" | "en";
+}
+const { lang = "it" } = Astro.props;
+
+const t =
+  lang === "en"
+    ? {
+        tapToStart: "Tap / Space to start",
+        move: "← → run · ↑ jump · Space throws a pizza · stomp like Mario",
+        level1Name: "The Dining Room",
+        level2Name: "The Kitchen",
+        level3Name: "The Stage",
+        levelClear: "Level clear!",
+        nextLevel: "Next level →",
+        gameOver: "Closing time",
+        score: "Score",
+        best: "Best",
+        again: "Play again",
+        submit: "Submit score",
+        namePlaceholder: "Your name",
+        submitting: "Submitting…",
+        submitted: "On the board!",
+        leaderboard: "Leaderboard",
+        loading: "Loading…",
+        empty: "No scores yet. Be the first.",
+        lives: "Lives",
+        jump: "Jump",
+        throw: "Pizza",
+        levelLabel: "Lv",
+        howTitle: "How to play",
+        howKeys: "Desktop",
+        howKeysVal: "← → to run · ↑ to jump · Space to throw a pizza",
+        howTouch: "Mobile",
+        howTouchVal: "use the on-screen buttons (also in fullscreen)",
+        howGoal: "Goal",
+        howGoalVal: "knock down each character with a pizza, or jump on their head Mario-style. Don't hit Tea — she's on your side!",
+        howLevels: "Three levels",
+        howLevelsVal: "the dining room → the kitchen (beat Tea) → the stage (beat Giulio).",
+      }
+    : {
+        tapToStart: "Tocca / Spazio per iniziare",
+        move: "← → corri · ↑ salta · Spazio tira la pizza · salta in testa tipo Mario",
+        level1Name: "La Sala",
+        level2Name: "La Cucina",
+        level3Name: "Il Palco",
+        levelClear: "Livello completato!",
+        nextLevel: "Avanti →",
+        gameOver: "È ora di chiudere",
+        score: "Punti",
+        best: "Record",
+        again: "Jochemo n'atra ota",
+        submit: "Salva il punteggio",
+        namePlaceholder: "Il tuo nome",
+        submitting: "Invio…",
+        submitted: "Sei in classifica!",
+        leaderboard: "Classifica",
+        loading: "Carico…",
+        empty: "Ancora nessun punteggio. Inizia tu.",
+        lives: "Vite",
+        jump: "Salta",
+        throw: "Pizza",
+        levelLabel: "Lv",
+        howTitle: "Come si gioca",
+        howKeys: "Desktop",
+        howKeysVal: "← → per correre · ↑ per saltare · Spazio per tirare la pizza",
+        howTouch: "Mobile",
+        howTouchVal: "usa i tasti a schermo (funzionano anche a tutto schermo)",
+        howGoal: "Obiettivo",
+        howGoalVal: "abbatti ogni personaggio con una pizza, oppure saltagli in testa tipo Mario. Non colpire Tea — sta dalla tua parte!",
+        howLevels: "Tre livelli",
+        howLevelsVal: "la sala → la cucina (batti Tea) → il palco (batti Giulio).",
+      };
+---
+
+<div class="nfr-game" data-lang={lang}>
+  <div class="nfr-main">
+    <div class="nfr-stage" id="nfr-stage">
+      <canvas id="nfr-canvas" width="640" height="360" aria-label="Non Fa Ridere mini-game"></canvas>
+
+      <div class="nfr-hud">
+        <span class="nfr-hud-item"><b id="nfr-score">0</b> {t.score}</span>
+        <span class="nfr-hud-item nfr-hud-level" id="nfr-level-label"></span>
+        <span class="nfr-hud-item">{t.lives} <b id="nfr-lives">3</b></span>
+      </div>
+
+      <div class="nfr-sysbtns">
+        <button class="nfr-sysbtn" id="nfr-mute" aria-label="audio">♪</button>
+        <button class="nfr-sysbtn" id="nfr-fs" aria-label="fullscreen">⛶</button>
+      </div>
+
+      <div class="nfr-overlay" id="nfr-overlay-start">
+        <p class="nfr-title">NON FA RIDERE</p>
+        <p class="nfr-cta">{t.tapToStart}</p>
+        <p class="nfr-help">{t.move}</p>
+      </div>
+
+      <div class="nfr-overlay nfr-hidden" id="nfr-overlay-level">
+        <p class="nfr-level-clear" id="nfr-level-clear-text"></p>
+        <p class="nfr-level-name" id="nfr-level-next-name"></p>
+        <button class="nfr-restart" id="nfr-next-level-btn">{t.nextLevel}</button>
+      </div>
+
+      <div class="nfr-overlay nfr-hidden" id="nfr-overlay-end">
+        <p class="nfr-title">{t.gameOver}</p>
+        <p class="nfr-final"><span id="nfr-final-score">0</span> {t.score}</p>
+        <form class="nfr-submit" id="nfr-submit-form">
+          <input
+            type="text"
+            id="nfr-name"
+            maxlength="24"
+            placeholder={t.namePlaceholder}
+            autocomplete="off"
+          />
+          <button type="submit" id="nfr-submit-btn">{t.submit}</button>
+        </form>
+        <p class="nfr-submitted nfr-hidden" id="nfr-submitted">{t.submitted}</p>
+        <button class="nfr-restart" id="nfr-restart">{t.again}</button>
+      </div>
+
+      <div class="nfr-touch" id="nfr-touch">
+        <div class="nfr-touch-group">
+          <button class="nfr-tbtn" id="nfr-t-left" aria-label="left">◀</button>
+          <button class="nfr-tbtn" id="nfr-t-right" aria-label="right">▶</button>
+        </div>
+        <div class="nfr-touch-group">
+          <button class="nfr-tbtn" id="nfr-t-jump">{t.jump}</button>
+          <button class="nfr-tbtn nfr-tbtn-acc" id="nfr-t-throw">{t.throw}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="nfr-howto">
+      <h3 class="nfr-howto-title">{t.howTitle}</h3>
+      <dl class="nfr-howto-list">
+        <dt>{t.howKeys}</dt><dd>{t.howKeysVal}</dd>
+        <dt>{t.howTouch}</dt><dd>{t.howTouchVal}</dd>
+        <dt>{t.howGoal}</dt><dd>{t.howGoalVal}</dd>
+        <dt>{t.howLevels}</dt><dd>{t.howLevelsVal}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <aside class="nfr-board">
+    <h3 class="nfr-board-title">{t.leaderboard}</h3>
+    <ol class="nfr-board-list" id="nfr-board-list">
+      <li class="nfr-board-loading">{t.loading}</li>
+    </ol>
+  </aside>
+</div>
+
+<script define:vars={{
+  emptyMsg: t.empty,
+  submittingMsg: t.submitting,
+  submitMsg: t.submit,
+  level1Name: t.level1Name,
+  level2Name: t.level2Name,
+  level3Name: t.level3Name,
+  levelClearMsg: t.levelClear,
+  nextLevelMsg: t.nextLevel,
+  levelLabel: t.levelLabel,
+}}>
+  const canvas = document.getElementById("nfr-canvas");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width;
+  const H = canvas.height;
+  const FLOOR = H - 36;
+  const SCALE = 3;
+
+  // Livello 1: sala (scorrevole sinistra-destra)
+  // Livello 2: cucina (scorrevole, Tea mini-boss difende i fornelli)
+  // Livello 3: palco Open Grezzo (fisso, solo Giulio boss finale)
+  const WORLD_W = 1280;
+
+  // Palco livello 1 e 3
+  const STAGE_X = 770;
+  const STAGE_W = 440;
+  const STAGE_H = 44;
+
+  // Fornelli livello 2 (piano di lavoro cucina)
+  const COUNTER_X = 600;
+  const COUNTER_W = 600;
+  const COUNTER_H = 32;
+
+  // Progressione livelli — kill necessari per completare ognuno.
+  // Livello 1: 20 clienti in sala. Livello 2: 16 cuochi + Tea mini-boss.
+  // Livello 3: solo Giulio boss finale (10 HP). ~25-35 min totali.
+  const LEVEL_KILLS_TO_CLEAR = { 1: 12, 2: 10 };
+  // Livello 2: Tea entra come mini-boss dopo questi kill.
+  const TEA_BOSS_AT = 6;
+
+  const C = {
+    bg: "#f1ebdd",
+    bgKitchen: "#e8dfc8",
+    bgStage: "#1a1410",
+    wall: "#e9e2d0",
+    wallDark: "#ddd2ba",
+    wallKitchen: "#d8c8a8",
+    floor: "#caa15a",
+    floorKitchen: "#8a7060",
+    floorStage: "#6e4520",
+    floorDark: "#a8824a",
+    ink: "#221a12",
+    accent: "#a8451a",
+    crust: "#caa15a",
+    cheese: "#f0d98a",
+    wood: "#8a5a2a",
+    woodDark: "#6e4520",
+    tile: "#d4c8b0",
+    tileDark: "#b8aa90",
+    steel: "#8a9098",
+    steelDark: "#6a7080",
+  };
+
+  function groundY(x) {
+    if (state.level === 3) return FLOOR;
+    if (state.level === 2) {
+      return x > COUNTER_X && x < COUNTER_X + COUNTER_W ? FLOOR - COUNTER_H : FLOOR;
+    }
+    return x > STAGE_X && x < STAGE_X + STAGE_W ? FLOOR - STAGE_H : FLOOR;
+  }
+
+  // ── Sprite pixel maps ────────────────────────────────────────────
+  const SPRITES = {
+    filippo: {
+      colors: { W: "#f7f2e8", S: "#e8c9a0", b: "#221a12", A: "#e9e2d2", P: "#4a4438" },
+      rows: [
+        "....WWWW....",
+        "...WWWWWW...",
+        "...WWWWWW...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...AAAAAA...",
+        "..AAAAAAAA..",
+        ".SAAAAAAAAS.",
+        "..AAAAAAAA..",
+        "..AAAAAAAA..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...PP..PP...",
+        "...bb..bb...",
+        "...bb..bb...",
+      ],
+    },
+    vecchia: {
+      colors: { g: "#b8b2c4", S: "#e3c4a0", b: "#221a12", D: "#8a7a93", N: "#6b5d75" },
+      rows: [
+        "....gggg....",
+        "...gggggg...",
+        "...gggggg...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...DDDDDD...",
+        "..DDDDDDDD..",
+        ".SDDDDDDDDS.",
+        "..DDDDDDDD..",
+        "..DDDDDDDD..",
+        "..NNNNNNNN..",
+        "..NNNNNNNN..",
+        "...bb..bb...",
+      ],
+    },
+    rider: {
+      colors: { H: "#2c3148", S: "#d8b890", b: "#221a12", J: "#3a3f55", G: "#f0a030", P: "#2a2d3a" },
+      rows: [
+        "....HHHH....",
+        "...HHHHHH...",
+        "...HHHHHH...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...JJJJJJ...",
+        "..JGGGGGGJ..",
+        ".SJGGGGGGJS.",
+        "..JJJJJJJJ..",
+        "..JJJJJJJJ..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...bb..bb...",
+      ],
+    },
+    comico: {
+      colors: { h: "#5a4630", S: "#e8c9a0", b: "#221a12", T: "#b06a2f", M: "#444444", P: "#4a4438" },
+      rows: [
+        "....hhhh....",
+        "...hhhhhh...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...TTTTTT...",
+        "..TTTTTTTT..",
+        ".STTTTTTTM..",
+        "..TTTTTTTM..",
+        "..TTTTTTTT..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...bb..bb...",
+      ],
+    },
+    nonno: {
+      colors: { c: "#8a9bb5", S: "#dfe6ef", b: "#5a6a80", V: "#9bb0c9", P: "#7e92ac" },
+      rows: [
+        "....cccc....",
+        "...cccccc...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...VVVVVV...",
+        "..VVVVVVVV..",
+        ".SVVVVVVVVS.",
+        "..VVVVVVVV..",
+        "..VVVVVVVV..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+      ],
+    },
+    tea: {
+      colors: { h: "#3d2c1c", S: "#e8c9a0", b: "#221a12", A: "#5e8d7a", P: "#3f3a30" },
+      rows: [
+        "....hhhh....",
+        "...hhhhhh...",
+        "..hh.SSSS...",
+        "..hh.SbSb...",
+        ".....SSSS...",
+        "...AAAAAA...",
+        "..AAAAAAAA..",
+        ".SAAAAAAAAS.",
+        "..AAAAAAAA..",
+        "..AAAAAAAA..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...bb..bb...",
+      ],
+    },
+    giulio: {
+      colors: { N: "#1a4a8a", S: "#dfb088", b: "#221a12", J: "#2a5ca0", W: "#f7f2e8", P: "#3a3428", L: "#caa15a" },
+      rows: [
+        ".....NNNNNN.....",
+        "....NNNNNNNN....",
+        "....NNNNNNNN....",
+        ".....SSSSSS.....",
+        ".....SbSSbS.....",
+        ".....SSSSSS.....",
+        ".....SWWWWS.....",
+        "....JJJJJJJJ...L",
+        "...JJJJJJJJJJ..L",
+        "..SJJJJJJJJJJS.L",
+        "...JJJJJJJJJJLLL",
+        "...JJJJJJJJJJ..L",
+        "...JJJJJJJJJJ...",
+        "...PPPPPPPPPP...",
+        "....PPP..PPP....",
+        "....PPP..PPP....",
+        "....bbb..bbb....",
+      ],
+    },
+    // Cuoco (nemico livello 2)
+    cuoco: {
+      colors: { W: "#f5f0e8", S: "#e8c9a0", b: "#221a12", A: "#d4c8b0", P: "#5a4438", R: "#c0392b" },
+      rows: [
+        "....WWWW....",
+        "...WWWWWW...",
+        "....SSSS....",
+        "....SbSb....",
+        "....SSSS....",
+        "...AAAAAA...",
+        "..ARRRRRRA..",
+        ".SARRRRRRRAS",
+        "..ARRRRRRA..",
+        "..AAAAAAAA..",
+        "..PPPPPPPP..",
+        "...PP..PP...",
+        "...bb..bb...",
+      ],
+    },
+  };
+
+  function spriteSize(def) {
+    return { w: def.rows[0].length * SCALE, h: def.rows.length * SCALE };
+  }
+
+  function drawSprite(def, sx, sy, flip, alpha) {
+    ctx.globalAlpha = alpha ?? 1;
+    const cols = def.rows[0].length;
+    for (let r = 0; r < def.rows.length; r++) {
+      const row = def.rows[r];
+      for (let c = 0; c < cols; c++) {
+        const ch = row[flip ? cols - 1 - c : c];
+        if (ch === ".") continue;
+        const color = def.colors[ch];
+        if (!color) continue;
+        ctx.fillStyle = color;
+        ctx.fillRect(Math.round(sx + c * SCALE), Math.round(sy + r * SCALE), SCALE, SCALE);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Dialetto autentico dalla sceneggiatura ──────────────────────
+  const LINES = {
+    vecchia: ["Ma tu non sei Filì?", "Poretta me!", "Scì scì, che tragedia!", "Gemma... signore mio!"],
+    rider: ["Allora? È pronto?", "Sono due ore che aspetto!", "Te devi sbrigà!"],
+    comico: ["Lu core! Lu core!", "Ma do sso capitato?", "Ah lo stupeto!"],
+    nonno: ["Coccu de nonnu...", "C'hai le zambe.", "Venni qua."],
+    tea: ["Movete Filì!", "Vanni a piglià l'ordini!", "E zittu cristo santo!"],
+    teaBoss: ["Aho! Che fai in cucina?!", "Filì vai in sala!", "Tocca a me!", "Levate dai piedi!"],
+    cuoco: ["Chi sei?", "A cucina mia!", "Esci da qua!", "Zio, ma che fai?"],
+    giulio: ["Non se coce! Non se coce!", "Te tiro dentro a lu forno!", "Come l'antichi!", "Open Grezzo forever!"],
+    teaHit: "Aoh! Che vai cerchenne?!",
+    lvl2Intro: ["Aho! Sei in cucina!", "A cucina mia!", "Filì, esci!"],
+    lvl3Intro: ["Sul palco!", "Open Grezzo!", "Giulio!"],
+  };
+
+  const ENEMIES = {
+    vecchia: { hp: 1, speed: 0.5, points: 10 },
+    rider:   { hp: 1, speed: 1.7, points: 15 },
+    comico:  { hp: 2, speed: 0.9, points: 25, hops: true },
+    nonno:   { hp: 1, speed: 0.8, points: 50, ghost: true },
+    tea:     { hp: 1, speed: 0.9, points: 0, friend: true },
+    // Livello 2
+    cuoco:   { hp: 2, speed: 1.1, points: 20 },
+    teaBoss: { hp: 6, speed: 0.7, points: 100, boss: true, teaBoss: true },
+    // Livello 3
+    giulio:  { hp: 10, speed: 0.45, points: 300, boss: true },
+  };
+
+  const GRAVITY = 0.38;
+  const JUMP_V = -7.6;
+  const RUN_V = 2.7;
+  const MAX_PIZZAS = 3;
+
+  const state = {
+    running: false,
+    score: 0,
+    lives: 3,
+    tick: 0,
+    camX: 0,
+    level: 1,
+    killCount: 0,
+    bossAlive: false,
+    teaDefeated: false,
+    giulioDefeated: false,
+    levelTransition: false,
+    player: { x: 80, y: FLOOR, vy: 0, dir: 1, onGround: true, hurtT: 0 },
+    pizzas: [],
+    enemies: [],
+    spawnTimer: 0,
+    keys: { left: false, right: false },
+    best: Number(localStorage.getItem("nfr-best") || 0),
+  };
+
+  const el = {
+    score: document.getElementById("nfr-score"),
+    lives: document.getElementById("nfr-lives"),
+    levelLabel: document.getElementById("nfr-level-label"),
+    overlayStart: document.getElementById("nfr-overlay-start"),
+    overlayEnd: document.getElementById("nfr-overlay-end"),
+    overlayLevel: document.getElementById("nfr-overlay-level"),
+    levelClearText: document.getElementById("nfr-level-clear-text"),
+    levelNextName: document.getElementById("nfr-level-next-name"),
+    nextLevelBtn: document.getElementById("nfr-next-level-btn"),
+    finalScore: document.getElementById("nfr-final-score"),
+    boardList: document.getElementById("nfr-board-list"),
+    submitForm: document.getElementById("nfr-submit-form"),
+    nameInput: document.getElementById("nfr-name"),
+    submitBtn: document.getElementById("nfr-submit-btn"),
+    submitted: document.getElementById("nfr-submitted"),
+    restart: document.getElementById("nfr-restart"),
+    stage: document.getElementById("nfr-stage"),
+    mute: document.getElementById("nfr-mute"),
+    fs: document.getElementById("nfr-fs"),
+  };
+
+  const pSize = spriteSize(SPRITES.filippo);
+
+  // ── Musica punk: WebAudio procedurale, chitarra + batteria ──────
+  const music = {
+    ac: null, master: null, distortion: null,
+    timer: null, nextTime: 0, step: 0,
+    muted: localStorage.getItem("nfr-muted") === "1",
+    bpm: 172,
+    // Livello 1: giro da garage A-D-G-D
+    // Livello 2: più veloce, tono più teso E-A-B-A
+    // Livello 3: massima velocità, giro di potere
+    riffs: {
+      1: [110, 110, 146.83, 146.83, 196, 196, 146.83, 146.83],
+      2: [82.4, 82.4, 110, 110, 123.47, 123.47, 110, 110],
+      3: [82.4, 110, 82.4, 110, 123.47, 164.81, 123.47, 110],
+    },
+    bpms: { 1: 172, 2: 192, 3: 210 },
+  };
+
+  function audioInit() {
+    if (music.ac) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    music.ac = new AC();
+    music.master = music.ac.createGain();
+    music.master.gain.value = music.muted ? 0 : 0.16;
+    music.master.connect(music.ac.destination);
+    const curve = new Float32Array(256);
+    for (let i = 0; i < 256; i++) curve[i] = Math.tanh((i / 128 - 1) * 8);
+    music.distortion = music.ac.createWaveShaper();
+    music.distortion.curve = curve;
+    const lp = music.ac.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 2400;
+    music.distortion.connect(lp);
+    lp.connect(music.master);
+  }
+
+  function chug(time, rootHz) {
+    const ac = music.ac;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.linearRampToValueAtTime(0.55, time + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.13);
+    g.connect(music.distortion);
+    for (const mult of [1, 1.5, 2]) {
+      const o = ac.createOscillator();
+      o.type = "sawtooth";
+      o.frequency.value = rootHz * mult;
+      o.detune.value = (Math.random() - 0.5) * 18;
+      o.connect(g);
+      o.start(time);
+      o.stop(time + 0.16);
+    }
+  }
+
+  function snare(time) {
+    const ac = music.ac;
+    const len = 0.12;
+    const buf = ac.createBuffer(1, ac.sampleRate * len, ac.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ac.createBufferSource();
+    src.buffer = buf;
+    const bp = ac.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 1800;
+    bp.Q.value = 0.8;
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.5, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + len);
+    src.connect(bp);
+    bp.connect(g);
+    g.connect(music.master);
+    src.start(time);
+  }
+
+  function kick(time) {
+    const ac = music.ac;
+    const o = ac.createOscillator();
+    o.type = "sine";
+    o.frequency.setValueAtTime(120, time);
+    o.frequency.exponentialRampToValueAtTime(42, time + 0.12);
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.7, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.14);
+    o.connect(g);
+    g.connect(music.master);
+    o.start(time);
+    o.stop(time + 0.15);
+  }
+
+  function musicStart() {
+    audioInit();
+    if (!music.ac) return;
+    music.ac.resume();
+    if (music.timer) clearInterval(music.timer);
+    const bpm = music.bpms[state.level] || 172;
+    const stepDur = 60 / bpm / 2;
+    music.nextTime = music.ac.currentTime + 0.05;
+    music.step = 0;
+    music.timer = setInterval(() => {
+      const riff = music.riffs[state.level] || music.riffs[1];
+      while (music.nextTime < music.ac.currentTime + 0.12) {
+        const s = music.step % 8;
+        chug(music.nextTime, riff[s]);
+        if (s === 0 || s === 4) kick(music.nextTime);
+        if (s === 2 || s === 6) snare(music.nextTime);
+        music.step += 1;
+        music.nextTime += stepDur;
+      }
+    }, 30);
+  }
+
+  function musicStop() {
+    if (music.timer) { clearInterval(music.timer); music.timer = null; }
+  }
+
+  function syncMuteBtn() {
+    el.mute.textContent = music.muted ? "✕" : "♪";
+    el.mute.classList.toggle("nfr-sysbtn-off", music.muted);
+  }
+  el.mute.addEventListener("click", () => {
+    music.muted = !music.muted;
+    localStorage.setItem("nfr-muted", music.muted ? "1" : "0");
+    if (music.master) music.master.gain.value = music.muted ? 0 : 0.16;
+    syncMuteBtn();
+  });
+  syncMuteBtn();
+
+  if (!document.fullscreenEnabled) el.fs.style.display = "none";
+  el.fs.addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else el.stage.requestFullscreen().catch(() => {});
+  });
+
+  // ── Game flow ──────────────────────────────────────────────────
+  function levelNames() {
+    return [level1Name, level2Name, level3Name];
+  }
+
+  function syncHud() {
+    el.score.textContent = String(state.score);
+    el.lives.textContent = String(state.lives);
+    let progress = "";
+    if (state.level === 1) {
+      const left = Math.max(0, LEVEL_KILLS_TO_CLEAR[1] - state.killCount);
+      progress = left > 0 ? ` · ${left}` : " · →";
+    } else if (state.level === 2) {
+      if (!state.teaDefeated) progress = state.bossAlive ? " · TEA" : ` · ${Math.max(0, TEA_BOSS_AT - state.killCount)}`;
+      else progress = ` · ${Math.max(0, LEVEL_KILLS_TO_CLEAR[2] - state.killCount)}`;
+    } else {
+      progress = " · GIULIO";
+    }
+    el.levelLabel.textContent = `${levelLabel} ${state.level} — ${levelNames()[state.level - 1]}${progress}`;
+  }
+
+  function resetLevel(lvl) {
+    state.level = lvl;
+    state.tick = 0;
+    state.camX = 0;
+    state.killCount = 0;
+    state.bossAlive = false;
+    state.teaDefeated = false;
+    state.giulioDefeated = false;
+    state.levelTransition = false;
+    state.pizzas = [];
+    state.enemies = [];
+    state.spawnTimer = 0;
+    state.player = { x: 80, y: groundY(80), vy: 0, dir: 1, onGround: true, hurtT: 0 };
+    musicStart();
+    syncHud();
+  }
+
+  function reset() {
+    state.score = 0;
+    state.lives = 3;
+    resetLevel(1);
+  }
+
+  function start() {
+    reset();
+    state.running = true;
+    el.overlayStart.classList.add("nfr-hidden");
+    el.overlayEnd.classList.add("nfr-hidden");
+    el.overlayLevel.classList.add("nfr-hidden");
+  }
+
+  function showLevelTransition(nextLvl) {
+    state.running = false;
+    state.levelTransition = true;
+    musicStop();
+    el.levelClearText.textContent = levelClearMsg;
+    el.levelNextName.textContent = levelNames()[nextLvl - 1];
+    el.overlayLevel.classList.remove("nfr-hidden");
+  }
+
+  function say(e, text) {
+    e.bubble = text;
+    e.bubbleT = 130;
+  }
+
+  function spawnEnemy() {
+    let type;
+    const lv = state.level;
+
+    if (lv === 3) {
+      if (state.giulioDefeated) return;
+      if (!state.bossAlive) {
+        type = "giulio";
+        state.bossAlive = true;
+      } else return;
+    } else if (lv === 2) {
+      if (state.killCount >= TEA_BOSS_AT && !state.teaDefeated && !state.bossAlive) {
+        type = "teaBoss";
+        state.bossAlive = true;
+      } else if (state.teaDefeated) {
+        // dopo Tea, ancora qualche cuoco fino alla quota
+        const r = Math.random();
+        type = r < 0.6 ? "cuoco" : "rider";
+      } else {
+        const r = Math.random();
+        if (r < 0.5) type = "cuoco";
+        else if (r < 0.75) type = "rider";
+        else type = "vecchia";
+      }
+    } else {
+      const r = Math.random();
+      if (r < 0.08) type = "nonno";
+      else if (r < 0.16) type = "tea";
+      else if (r < 0.40) type = "rider";
+      else if (r < 0.62) type = "comico";
+      else type = "vecchia";
+    }
+
+    const def = ENEMIES[type];
+    const sprite = SPRITES[type === "teaBoss" ? "tea" : type];
+    const size = spriteSize(sprite);
+    const fromLeft = Math.random() < 0.45;
+    let x = fromLeft ? state.camX - size.w - 30 : state.camX + W + 30;
+    x = Math.max(-size.w - 40, Math.min(WORLD_W + 40, x));
+    if (def.boss) x = Math.min(WORLD_W - size.w - 20, state.camX + W + 30);
+
+    const lines = type === "teaBoss" ? LINES.teaBoss : (LINES[type] || LINES.cuoco);
+    const e = {
+      type, def, sprite, w: size.w, h: size.h,
+      x,
+      y: def.ghost ? FLOOR - size.h - 60 : groundY(x) - size.h,
+      vx: (x < state.player.x ? 1 : -1) * def.speed,
+      vy: 0,
+      hp: def.hp,
+      seed: Math.random() * Math.PI * 2,
+      bubble: null, bubbleT: 0,
+    };
+    say(e, lines[Math.floor(Math.random() * lines.length)]);
+    state.enemies.push(e);
+  }
+
+  function throwPizza() {
+    if (!state.running) return;
+    if (state.pizzas.length >= MAX_PIZZAS) return;
+    state.pizzas.push({
+      x: state.player.x + pSize.w / 2 + state.player.dir * 14,
+      y: state.player.y - pSize.h + 16,
+      vx: state.player.dir * 5,
+      vy: -2, r: 7,
+    });
+  }
+
+  function loseLife() {
+    state.lives -= 1;
+    state.player.hurtT = 70;
+    syncHud();
+    if (state.lives <= 0) gameOver();
+  }
+
+  function gameOver() {
+    state.running = false;
+    musicStop();
+    if (state.score > state.best) {
+      state.best = state.score;
+      localStorage.setItem("nfr-best", String(state.best));
+    }
+    el.finalScore.textContent = String(state.score);
+    el.submitted.classList.add("nfr-hidden");
+    el.submitForm.classList.remove("nfr-hidden");
+    el.submitBtn.disabled = false;
+    el.submitBtn.textContent = submitMsg;
+    el.overlayEnd.classList.remove("nfr-hidden");
+  }
+
+  function killEnemy(e) {
+    e.dead = true;
+    if (!e.def.friend) {
+      state.score += e.def.points;
+      if (e.def.boss) {
+        state.bossAlive = false;
+        if (e.def.teaBoss) state.teaDefeated = true;
+        else state.giulioDefeated = true;
+      } else {
+        state.killCount += 1;
+      }
+    }
+    checkLevelProgress();
+  }
+
+  function checkLevelProgress() {
+    const lv = state.level;
+    if (lv === 1 && state.killCount >= LEVEL_KILLS_TO_CLEAR[1]) {
+      showLevelTransition(2);
+    } else if (lv === 2 && state.teaDefeated && state.killCount >= LEVEL_KILLS_TO_CLEAR[2]) {
+      showLevelTransition(3);
+    } else if (lv === 3 && state.giulioDefeated) {
+      setTimeout(gameOver, 1000);
+    }
+  }
+
+  // ── Update ─────────────────────────────────────────────────────
+  function update() {
+    state.tick += 1;
+    const p = state.player;
+
+    let vx = 0;
+    if (state.keys.left) { vx = -RUN_V; p.dir = -1; }
+    if (state.keys.right) { vx = RUN_V; p.dir = 1; }
+    p.x = Math.max(0, Math.min(WORLD_W - pSize.w, p.x + vx));
+
+    p.vy += GRAVITY;
+    p.y += p.vy;
+    const gy = groundY(p.x + pSize.w / 2);
+    if (p.y >= gy) { p.y = gy; p.vy = 0; p.onGround = true; }
+    else p.onGround = false;
+    if (p.hurtT > 0) p.hurtT -= 1;
+
+    state.camX = Math.max(0, Math.min(WORLD_W - W, p.x + pSize.w / 2 - W / 2));
+
+    state.spawnTimer += 1;
+    const baseCadence = state.level === 3 ? 999 : state.level === 2 ? 70 : 100;
+    const cadence = Math.max(40, baseCadence - Math.floor(state.score / 30));
+    if (state.spawnTimer >= cadence) {
+      state.spawnTimer = 0;
+      spawnEnemy();
+    }
+
+    for (const z of state.pizzas) {
+      z.x += z.vx;
+      z.vy += 0.3;
+      z.y += z.vy;
+      const zgy = groundY(z.x) + 8;
+      if (z.y > zgy) { z.y = zgy; z.vy = -4.2; }
+      if (z.x < -20 || z.x > WORLD_W + 20) z.dead = true;
+    }
+    state.pizzas = state.pizzas.filter((z) => !z.dead);
+
+    const ramp = 1 + state.score / 4000;
+    for (const e of state.enemies) {
+      e.x += e.vx * ramp;
+      if (e.def.ghost) {
+        e.y = FLOOR - e.h - 60 + Math.sin((state.tick + e.seed * 40) / 30) * 26;
+      } else if (e.def.hops) {
+        e.vy += GRAVITY;
+        e.y += e.vy;
+        const egy = groundY(e.x + e.w / 2) - e.h;
+        if (e.y >= egy) { e.y = egy; e.vy = Math.random() < 0.5 ? -5.5 : 0; }
+      } else {
+        e.y = groundY(e.x + e.w / 2) - e.h;
+      }
+      if (e.bubbleT > 0) e.bubbleT -= 1;
+      if ((e.vx < 0 && e.x < -e.w - 60) || (e.vx > 0 && e.x > WORLD_W + 60)) e.dead = true;
+
+      if (e.def.boss && !e.def.teaBoss) {
+        // Giulio presidia il palco
+        if (e.x < STAGE_X - 120) e.vx = Math.abs(e.vx);
+        if (e.x > WORLD_W - e.w - 10) e.vx = -Math.abs(e.vx);
+        if (state.tick % 220 === 0) say(e, LINES.giulio[Math.floor(Math.random() * LINES.giulio.length)]);
+      }
+      if (e.def.teaBoss) {
+        // Tea difende il bancone della cucina
+        if (e.x < COUNTER_X - 80) e.vx = Math.abs(e.vx);
+        if (e.x > COUNTER_X + COUNTER_W - e.w + 30) e.vx = -Math.abs(e.vx);
+        if (state.tick % 180 === 0) say(e, LINES.teaBoss[Math.floor(Math.random() * LINES.teaBoss.length)]);
+      }
+    }
+
+    // Pizza ↔ nemico
+    for (const z of state.pizzas) {
+      for (const e of state.enemies) {
+        if (e.dead) continue;
+        if (z.x + z.r > e.x && z.x - z.r < e.x + e.w && z.y + z.r > e.y && z.y - z.r < e.y + e.h) {
+          z.dead = true;
+          if (e.def.friend) {
+            e.dead = true;
+            say(e, LINES.teaHit);
+            state.score = Math.max(0, state.score - 30);
+            loseLife();
+          } else {
+            e.hp -= 1;
+            if (e.hp <= 0) killEnemy(e);
+          }
+          break;
+        }
+      }
+    }
+    state.pizzas = state.pizzas.filter((z) => !z.dead);
+
+    // Player ↔ nemico: stomp o danno contatto
+    const px1 = p.x + 6, px2 = p.x + pSize.w - 6;
+    const pTop = p.y - pSize.h, pBot = p.y;
+    for (const e of state.enemies) {
+      if (e.dead || e.def.ghost) continue;
+      const overlapX = px2 > e.x + 4 && px1 < e.x + e.w - 4;
+      if (!overlapX) continue;
+      const stomping = p.vy > 1 && pBot > e.y && pBot < e.y + e.h * 0.6;
+      if (stomping) {
+        p.vy = JUMP_V * 0.75;
+        if (e.def.friend) continue;
+        if (e.def.boss) { e.hp -= 1; if (e.hp <= 0) killEnemy(e); }
+        else killEnemy(e);
+      } else if (pBot > e.y + 4 && pTop < e.y + e.h - 4) {
+        if (e.def.friend) continue;
+        if (p.hurtT === 0) {
+          if (!e.def.boss) e.dead = true;
+          loseLife();
+        }
+      }
+    }
+    state.enemies = state.enemies.filter((e) => !e.dead);
+    syncHud();
+  }
+
+  // ── Render backgrounds ─────────────────────────────────────────
+  function drawTable(wx) {
+    const x = wx - state.camX;
+    ctx.fillStyle = "#fbf7ee";
+    ctx.beginPath();
+    ctx.moveTo(x, FLOOR - 34); ctx.lineTo(x + 64, FLOOR - 34);
+    ctx.lineTo(x + 58, FLOOR - 12); ctx.lineTo(x + 6, FLOOR - 12);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = "#d8cebd"; ctx.stroke();
+    ctx.fillStyle = C.woodDark;
+    ctx.fillRect(x + 12, FLOOR - 12, 4, 12);
+    ctx.fillRect(x + 48, FLOOR - 12, 4, 12);
+    ctx.fillStyle = "#3f6e3a";
+    ctx.fillRect(x + 28, FLOOR - 46, 5, 12);
+  }
+
+  function drawBgSala() {
+    const cam = state.camX;
+    ctx.fillStyle = C.wall;
+    ctx.fillRect(0, 0, W, FLOOR);
+
+    // forno a legna
+    const ox = 26 - cam;
+    if (ox > -120 && ox < W) {
+      ctx.fillStyle = "#b8743a";
+      ctx.fillRect(ox, FLOOR - 82, 96, 82);
+      ctx.fillStyle = C.ink;
+      ctx.beginPath(); ctx.arc(ox + 48, FLOOR - 32, 25, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = C.accent;
+      ctx.beginPath(); ctx.arc(ox + 48, FLOOR - 32, 17, Math.PI, 0); ctx.fill();
+      ctx.fillStyle = "#f0a030";
+      const f = Math.sin(state.tick / 5) * 3;
+      ctx.fillRect(ox + 42, FLOOR - 38 + f, 5, 6);
+      ctx.fillRect(ox + 50, FLOOR - 41 - f, 4, 8);
+    }
+    drawTable(200); drawTable(420);
+
+    const lx = 600 - cam;
+    if (lx > -60 && lx < W) {
+      ctx.fillStyle = "#fbf7ee";
+      ctx.fillRect(lx, 80, 44, 60);
+      ctx.strokeStyle = C.ink; ctx.strokeRect(lx, 80, 44, 60);
+      ctx.fillStyle = "#e8c9a0"; ctx.fillRect(lx + 12, 90, 20, 20);
+      ctx.fillStyle = C.ink;
+      ctx.font = '6px "JetBrains Mono", monospace';
+      ctx.fillText("OPEN", lx + 11, 122);
+      ctx.fillText("GREZZO", lx + 7, 130);
+      ctx.fillStyle = C.accent; ctx.fillText("21:30", lx + 11, 137);
+    }
+    const dx = 700 - cam;
+    if (dx > -40 && dx < W) {
+      ctx.fillStyle = C.wallDark;
+      ctx.fillRect(dx, FLOOR - 110, 8, 110);
+      ctx.font = '8px "JetBrains Mono", monospace';
+      ctx.fillStyle = C.accent;
+      ctx.fillText("PALCO →", dx - 26, FLOOR - 116);
+    }
+
+    // palco
+    const sx = STAGE_X - cam;
+    if (sx < W && sx + STAGE_W > 0) {
+      ctx.fillStyle = "#e9dfc8";
+      ctx.fillRect(sx + 60, 26, STAGE_W - 120, 38);
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1;
+      ctx.strokeRect(sx + 60, 26, STAGE_W - 120, 38);
+      ctx.fillStyle = C.ink;
+      ctx.font = '14px "JetBrains Mono", monospace'; ctx.textAlign = "center";
+      ctx.fillText("OPEN GREZZO", sx + STAGE_W / 2, 45);
+      ctx.font = '8px "JetBrains Mono", monospace';
+      ctx.fillText("un open mic provinciale", sx + STAGE_W / 2, 57);
+      ctx.textAlign = "left";
+      ctx.globalAlpha = 0.12 + Math.sin(state.tick / 40) * 0.03;
+      ctx.fillStyle = "#f0d98a";
+      ctx.beginPath(); ctx.moveTo(sx + 90, 0); ctx.lineTo(sx + 150, FLOOR - STAGE_H); ctx.lineTo(sx + 230, FLOOR - STAGE_H); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(sx + STAGE_W - 90, 0); ctx.lineTo(sx + STAGE_W - 230, FLOOR - STAGE_H); ctx.lineTo(sx + STAGE_W - 150, FLOOR - STAGE_H); ctx.closePath(); ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = C.wood; ctx.fillRect(sx, FLOOR - STAGE_H, STAGE_W, 6);
+      ctx.fillStyle = C.woodDark; ctx.fillRect(sx, FLOOR - STAGE_H + 6, STAGE_W, STAGE_H - 6);
+      ctx.fillStyle = "#00000022";
+      for (let i = 0; i < STAGE_W; i += 26) ctx.fillRect(sx + i, FLOOR - STAGE_H + 6, 2, STAGE_H - 6);
+      const mx = sx + STAGE_W / 2;
+      ctx.fillStyle = C.ink; ctx.fillRect(mx, FLOOR - STAGE_H - 52, 2, 52);
+      ctx.beginPath(); ctx.arc(mx + 1, FLOOR - STAGE_H - 54, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.fillRect(sx + 24, FLOOR - STAGE_H - 26, 30, 26);
+    }
+  }
+
+  function drawBgCucina() {
+    const cam = state.camX;
+    ctx.fillStyle = C.wallKitchen;
+    ctx.fillRect(0, 0, W, FLOOR);
+
+    // piastrelle a griglia
+    ctx.strokeStyle = C.tileDark;
+    ctx.lineWidth = 0.5;
+    for (let tx = -((cam | 0) % 24); tx < W; tx += 24) {
+      ctx.beginPath(); ctx.moveTo(tx, 0); ctx.lineTo(tx, FLOOR); ctx.stroke();
+    }
+    for (let ty = 0; ty < FLOOR; ty += 24) {
+      ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(W, ty); ctx.stroke();
+    }
+
+    // cappa + cappe aspirazione
+    ctx.fillStyle = C.steelDark;
+    ctx.fillRect(-((cam | 0) % 380) + 100, 0, 220, 38);
+    ctx.fillRect(-((cam | 0) % 380) + 500, 0, 220, 38);
+    ctx.fillStyle = C.steel;
+    ctx.fillRect(-((cam | 0) % 380) + 104, 4, 212, 30);
+    ctx.fillRect(-((cam | 0) % 380) + 504, 4, 212, 30);
+
+    // bancone-fornelli (il piano su cui si cammina)
+    const cx = COUNTER_X - cam;
+    if (cx < W && cx + COUNTER_W > 0) {
+      // fronte del bancone
+      ctx.fillStyle = C.steelDark;
+      ctx.fillRect(cx, FLOOR - COUNTER_H, COUNTER_W, COUNTER_H);
+      ctx.fillStyle = C.steel;
+      ctx.fillRect(cx, FLOOR - COUNTER_H, COUNTER_W, 4);
+      // fornelli sopra il bancone
+      for (let fi = 0; fi < 6; fi++) {
+        const fx = cx + 40 + fi * 90;
+        const fy = FLOOR - COUNTER_H - 10;
+        ctx.fillStyle = "#555";
+        ctx.beginPath(); ctx.arc(fx, fy, 14, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = fi === 2 || fi === 4 ? "#c0392b" : "#333";
+        ctx.beginPath(); ctx.arc(fx, fy, 9, 0, Math.PI * 2); ctx.fill();
+        if (fi === 2 || fi === 4) {
+          ctx.fillStyle = "#f0a030";
+          const ff = Math.sin(state.tick / 4 + fi) * 2;
+          ctx.fillRect(fx - 3, fy - 8 + ff, 2, 5);
+          ctx.fillRect(fx + 1, fy - 9 - ff, 2, 6);
+        }
+      }
+      // pentole
+      ctx.fillStyle = C.steelDark;
+      ctx.fillRect(cx + 155, FLOOR - COUNTER_H - 28, 38, 20);
+      ctx.fillRect(cx + 355, FLOOR - COUNTER_H - 28, 38, 20);
+    }
+
+    // cartelli appesi
+    const s1x = 80 - cam;
+    if (s1x > -60 && s1x < W) {
+      ctx.fillStyle = "#fbf7ee"; ctx.fillRect(s1x, 60, 54, 32);
+      ctx.strokeStyle = C.accent; ctx.lineWidth = 1; ctx.strokeRect(s1x, 60, 54, 32);
+      ctx.fillStyle = C.accent;
+      ctx.font = '7px "JetBrains Mono", monospace';
+      ctx.fillText("CUCINA", s1x + 4, 77);
+      ctx.fillText("RISERVATA", s1x + 2, 86);
+    }
+    const s2x = 400 - cam;
+    if (s2x > -60 && s2x < W) {
+      ctx.fillStyle = "#fbf7ee"; ctx.fillRect(s2x, 60, 54, 32);
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 1; ctx.strokeRect(s2x, 60, 54, 32);
+      ctx.fillStyle = C.ink;
+      ctx.font = '6px "JetBrains Mono", monospace';
+      ctx.fillText("ORDINI", s2x + 8, 77);
+      ctx.fillText(String(Math.floor(state.tick / 60) % 20 + 10), s2x + 18, 86);
+    }
+  }
+
+  function drawBgPalco() {
+    // Sfondo scuro, luci di scena
+    ctx.fillStyle = C.bgStage;
+    ctx.fillRect(0, 0, W, FLOOR);
+
+    // tenda di fondo
+    ctx.fillStyle = "#2a1e14";
+    ctx.fillRect(0, 0, W, FLOOR);
+    for (let i = 0; i < W; i += 28) {
+      ctx.fillStyle = i % 56 === 0 ? "#241a10" : "#2e2218";
+      ctx.fillRect(i, 0, 28, FLOOR);
+    }
+
+    // striscione OPEN GREZZO
+    ctx.fillStyle = "#e9dfc8";
+    ctx.fillRect(80, 22, W - 160, 44);
+    ctx.strokeStyle = C.accent; ctx.lineWidth = 2; ctx.strokeRect(80, 22, W - 160, 44);
+    ctx.fillStyle = C.ink;
+    ctx.font = 'bold 18px "JetBrains Mono", monospace'; ctx.textAlign = "center";
+    ctx.fillText("OPEN GREZZO", W / 2, 46);
+    ctx.font = '9px "JetBrains Mono", monospace'; ctx.fillStyle = C.accent;
+    ctx.fillText("● LIVE TONIGHT ●", W / 2, 60);
+    ctx.textAlign = "left";
+
+    // Occhi di bue pulsanti
+    const a1 = 0.18 + Math.sin(state.tick / 30) * 0.07;
+    const a2 = 0.18 + Math.sin(state.tick / 30 + Math.PI) * 0.07;
+    ctx.globalAlpha = a1;
+    ctx.fillStyle = "#f0d98a";
+    ctx.beginPath(); ctx.moveTo(60, 0); ctx.lineTo(0, FLOOR - STAGE_H); ctx.lineTo(220, FLOOR - STAGE_H); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = a2;
+    ctx.beginPath(); ctx.moveTo(W - 60, 0); ctx.lineTo(W - 220, FLOOR - STAGE_H); ctx.lineTo(W, FLOOR - STAGE_H); ctx.closePath(); ctx.fill();
+    ctx.globalAlpha = 1;
+
+    // Pedana legno
+    ctx.fillStyle = C.wood; ctx.fillRect(0, FLOOR - STAGE_H, W, 6);
+    ctx.fillStyle = C.woodDark; ctx.fillRect(0, FLOOR - STAGE_H + 6, W, STAGE_H - 6);
+    ctx.fillStyle = "#00000030";
+    for (let i = 0; i < W; i += 26) ctx.fillRect(i, FLOOR - STAGE_H + 6, 2, STAGE_H - 6);
+
+    // Asta microfono centro palco
+    ctx.fillStyle = "#e8c9a0";
+    ctx.fillRect(W / 2 - 1, FLOOR - STAGE_H - 60, 2, 60);
+    ctx.beginPath(); ctx.arc(W / 2, FLOOR - STAGE_H - 62, 5, 0, Math.PI * 2); ctx.fill();
+
+    // Amplificatori ai lati
+    ctx.fillStyle = "#1a1410";
+    ctx.fillRect(20, FLOOR - STAGE_H - 42, 44, 42);
+    ctx.fillRect(W - 64, FLOOR - STAGE_H - 42, 44, 42);
+    ctx.fillStyle = "#333";
+    ctx.fillRect(26, FLOOR - STAGE_H - 36, 32, 22);
+    ctx.fillRect(W - 58, FLOOR - STAGE_H - 36, 32, 22);
+    // speaker cone
+    ctx.fillStyle = "#555";
+    ctx.beginPath(); ctx.arc(42, FLOOR - STAGE_H - 25, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(W - 42, FLOOR - STAGE_H - 25, 9, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function drawBackground() {
+    if (state.level === 1) drawBgSala();
+    else if (state.level === 2) drawBgCucina();
+    else drawBgPalco();
+
+    // pavimento
+    const floorColor = state.level === 2 ? C.floorKitchen : state.level === 3 ? C.floorStage : C.floor;
+    ctx.fillStyle = floorColor;
+    ctx.fillRect(0, FLOOR, W, H - FLOOR);
+    if (state.level !== 3) {
+      ctx.fillStyle = state.level === 2 ? "#6a5048" : C.floorDark;
+      const cam = state.camX;
+      for (let i = -((cam | 0) % 32); i < W; i += 32) ctx.fillRect(i, FLOOR, 1, H - FLOOR);
+    }
+    ctx.fillRect(0, FLOOR, W, 2);
+
+    // grana punk
+    ctx.fillStyle = "rgba(34,26,18,0.045)";
+    for (let i = 0; i < 50; i++) ctx.fillRect((Math.random() * W) | 0, (Math.random() * H) | 0, 2, 2);
+    ctx.fillStyle = "rgba(34,26,18,0.035)";
+    for (let y = 0; y < H; y += 4) ctx.fillRect(0, y, W, 1);
+  }
+
+  function drawPizzaShot(z) {
+    const x = z.x - state.camX;
+    if (x < -20 || x > W + 20) return;
+    ctx.beginPath();
+    ctx.fillStyle = C.cheese;
+    ctx.arc(x, z.y, z.r, 0, Math.PI * 2); ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = C.crust; ctx.stroke();
+    ctx.fillStyle = C.accent;
+    ctx.fillRect(x - 3, z.y - 2, 2, 2); ctx.fillRect(x + 1, z.y + 1, 2, 2);
+  }
+
+  function drawBubble(e) {
+    if (!e.bubble || e.bubbleT <= 0) return;
+    const ex = e.x - state.camX;
+    ctx.font = '9px "JetBrains Mono", monospace';
+    const tw = ctx.measureText(e.bubble).width;
+    const bx = Math.max(4, Math.min(W - tw - 14, ex + e.w / 2 - tw / 2 - 5));
+    const by = e.y - 22;
+    ctx.fillStyle = "#fbf7ee"; ctx.strokeStyle = C.ink; ctx.lineWidth = 1;
+    ctx.fillRect(bx, by, tw + 10, 15); ctx.strokeRect(bx, by, tw + 10, 15);
+    ctx.fillStyle = C.ink; ctx.fillText(e.bubble, bx + 5, by + 11);
+  }
+
+  function drawEnemy(e) {
+    const ex = e.x - state.camX;
+    if (ex < -e.w - 20 || ex > W + 20) return;
+    const blink = e.def.ghost && Math.floor(state.tick / 16) % 3 === 0;
+    let alpha = e.def.ghost ? 0.75 : 1;
+    if (blink) alpha = 0.3;
+    drawSprite(e.sprite, ex, e.y, e.vx > 0, alpha);
+    if (e.def.boss) {
+      const ratio = e.hp / e.def.hp;
+      ctx.fillStyle = "#00000022"; ctx.fillRect(ex, e.y - 10, e.w, 4);
+      ctx.fillStyle = e.def.teaBoss ? "#5e8d7a" : C.accent;
+      ctx.fillRect(ex, e.y - 10, e.w * ratio, 4);
+    }
+    drawBubble(e);
+  }
+
+  function render() {
+    drawBackground();
+    for (const e of state.enemies) drawEnemy(e);
+    for (const z of state.pizzas) drawPizzaShot(z);
+    const p = state.player;
+    const flash = p.hurtT > 0 && Math.floor(state.tick / 4) % 2 === 0;
+    if (!flash) drawSprite(SPRITES.filippo, p.x - state.camX, p.y - pSize.h, p.dir < 0, 1);
+  }
+
+  function loop() {
+    if (state.running) { update(); render(); }
+    else if (!state.levelTransition) render();
+    requestAnimationFrame(loop);
+  }
+
+  // ── Leaderboard ────────────────────────────────────────────────
+  async function loadBoard() {
+    try {
+      const res = await fetch("/api/non-fa-ridere/scores");
+      const data = await res.json();
+      renderBoard(data.scores || []);
+    } catch { el.boardList.innerHTML = `<li class="nfr-board-loading">—</li>`; }
+  }
+
+  function escapeHtml(s) {
+    const d = document.createElement("div"); d.textContent = s; return d.innerHTML;
+  }
+
+  function renderBoard(scores) {
+    if (!scores.length) {
+      el.boardList.innerHTML = `<li class="nfr-board-empty">${escapeHtml(emptyMsg)}</li>`;
+      return;
+    }
+    el.boardList.innerHTML = scores.map((s, i) =>
+      `<li><span class="nfr-rank">${i + 1}</span><span class="nfr-name">${escapeHtml(s.name)}</span><span class="nfr-pts">${s.score}</span></li>`
+    ).join("");
+  }
+
+  async function submitScore(name) {
+    el.submitBtn.disabled = true;
+    el.submitBtn.textContent = submittingMsg;
+    try {
+      const res = await fetch("/api/non-fa-ridere/scores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, score: state.score }),
+      });
+      const data = await res.json();
+      renderBoard(data.scores || []);
+      el.submitForm.classList.add("nfr-hidden");
+      el.submitted.classList.remove("nfr-hidden");
+    } catch {
+      el.submitBtn.disabled = false;
+      el.submitBtn.textContent = submitMsg;
+    }
+  }
+
+  // ── Input ──────────────────────────────────────────────────────
+  function jump() { if (state.player.onGround) state.player.vy = JUMP_V; }
+
+  function maybeStart() {
+    if (!state.running && el.overlayEnd.classList.contains("nfr-hidden") && el.overlayLevel.classList.contains("nfr-hidden")) {
+      start(); return true;
+    }
+    return false;
+  }
+
+  window.addEventListener("keydown", (ev) => {
+    if (ev.target === el.nameInput) return;
+    if (ev.key === "ArrowLeft") { state.keys.left = true; ev.preventDefault(); }
+    if (ev.key === "ArrowRight") { state.keys.right = true; ev.preventDefault(); }
+    if (ev.key === "ArrowUp" || ev.key === "w") { ev.preventDefault(); if (!maybeStart()) jump(); }
+    if (ev.key === " " || ev.code === "Space") { ev.preventDefault(); if (!maybeStart()) throwPizza(); }
+  });
+  window.addEventListener("keyup", (ev) => {
+    if (ev.key === "ArrowLeft") state.keys.left = false;
+    if (ev.key === "ArrowRight") state.keys.right = false;
+  });
+
+  canvas.addEventListener("pointerdown", () => maybeStart());
+
+  function bindHold(id, down, up) {
+    const btn = document.getElementById(id);
+    btn.addEventListener("pointerdown", (ev) => { ev.preventDefault(); maybeStart(); down(); });
+    btn.addEventListener("pointerup", () => up && up());
+    btn.addEventListener("pointerleave", () => up && up());
+    btn.addEventListener("pointercancel", () => up && up());
+  }
+  bindHold("nfr-t-left", () => (state.keys.left = true), () => (state.keys.left = false));
+  bindHold("nfr-t-right", () => (state.keys.right = true), () => (state.keys.right = false));
+  bindHold("nfr-t-jump", jump);
+  bindHold("nfr-t-throw", throwPizza);
+
+  el.nextLevelBtn.addEventListener("click", () => {
+    const nextLvl = state.level + 1;
+    el.overlayLevel.classList.add("nfr-hidden");
+    resetLevel(nextLvl);
+    state.running = true;
+  });
+
+  el.submitForm.addEventListener("submit", (ev) => { ev.preventDefault(); submitScore(el.nameInput.value); });
+  el.restart.addEventListener("click", start);
+
+  loadBoard();
+  requestAnimationFrame(loop);
+  render();
+</script>
+
+<style>
+  .nfr-game {
+    display: block;
+    margin: 2rem 0;
+  }
+  .nfr-main {
+    width: 100%;
+  }
+
+  .nfr-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 640 / 360;
+    border: 1px solid var(--foglio-rule-strong);
+    border-radius: var(--foglio-radius-md);
+    overflow: hidden;
+    box-shadow: var(--foglio-shadow);
+    background: #221a12;
+  }
+  .nfr-stage:fullscreen {
+    border: none;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  #nfr-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    touch-action: none;
+    image-rendering: pixelated;
+  }
+
+  .nfr-hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0.8rem;
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #5e4d3a;
+    pointer-events: none;
+  }
+  .nfr-hud b { color: var(--foglio-accent); }
+  .nfr-hud-level {
+    font-size: 0.65rem;
+    opacity: 0.8;
+  }
+
+  .nfr-sysbtns {
+    position: absolute;
+    top: 1.9rem;
+    right: 0.6rem;
+    display: flex;
+    gap: 0.4rem;
+  }
+  .nfr-sysbtn {
+    width: 34px; height: 34px;
+    font-family: var(--foglio-mono);
+    font-size: 0.9rem;
+    border: 1px solid rgba(34, 26, 18, 0.3);
+    border-radius: var(--foglio-radius-sm);
+    background: rgba(251, 247, 238, 0.7);
+    color: #221a12;
+    cursor: pointer;
+  }
+  .nfr-sysbtn-off { opacity: 0.5; text-decoration: line-through; }
+
+  .nfr-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0.8rem; padding: 1.5rem; text-align: center;
+    background: rgba(34, 26, 18, 0.82);
+    color: #f7f2e8;
+    backdrop-filter: blur(2px);
+    z-index: 2;
+  }
+  .nfr-hidden { display: none !important; }
+
+  .nfr-title {
+    font-family: var(--foglio-serif);
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    letter-spacing: 0.04em; margin: 0;
+  }
+  .nfr-cta {
+    font-family: var(--foglio-mono);
+    font-size: 0.85rem; letter-spacing: 0.1em; margin: 0;
+  }
+  .nfr-help {
+    font-family: var(--foglio-mono);
+    font-size: 0.65rem; opacity: 0.7; margin: 0; max-width: 34em;
+  }
+  .nfr-level-clear {
+    font-family: var(--foglio-mono);
+    font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--foglio-accent-soft); margin: 0;
+  }
+  .nfr-level-name {
+    font-family: var(--foglio-serif);
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-style: italic; margin: 0;
+  }
+  .nfr-final {
+    font-family: var(--foglio-serif); font-size: 1.4rem; margin: 0;
+  }
+  .nfr-final span { color: var(--foglio-accent-soft); font-weight: 600; }
+
+  .nfr-submit {
+    display: flex; flex-direction: column;
+    gap: 0.5rem; width: 100%; max-width: 260px;
+  }
+  .nfr-submit input {
+    width: 100%; box-sizing: border-box;
+    padding: 0.5rem 0.7rem;
+    font-family: var(--foglio-mono); font-size: 0.8rem;
+    border: 1px solid var(--foglio-rule-strong);
+    border-radius: var(--foglio-radius-sm);
+    background: #f7f2e8; color: #221a12;
+  }
+  .nfr-submit button, .nfr-restart {
+    font-family: var(--foglio-mono); font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 0.5rem 0.9rem; border: none;
+    border-radius: var(--foglio-radius-sm);
+    background: var(--foglio-accent); color: #f7f2e8;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+  .nfr-submit button:hover, .nfr-restart:hover { opacity: 0.85; }
+  .nfr-submit button:disabled { opacity: 0.5; cursor: default; }
+  .nfr-restart { background: transparent; border: 1px solid #f7f2e8; }
+  .nfr-submitted {
+    font-family: var(--foglio-mono); font-size: 0.8rem;
+    color: var(--foglio-accent-soft); margin: 0;
+  }
+
+  .nfr-touch {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: none; justify-content: space-between;
+    align-items: flex-end; padding: 0.6rem;
+    pointer-events: none; z-index: 1;
+  }
+  .nfr-touch-group { display: flex; gap: 0.5rem; }
+  .nfr-tbtn {
+    pointer-events: auto;
+    font-family: var(--foglio-mono); font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    min-width: 58px; min-height: 52px;
+    padding: 0.5rem 0.8rem;
+    border: 1px solid rgba(247, 242, 232, 0.4);
+    border-radius: var(--foglio-radius-md);
+    background: rgba(34, 26, 18, 0.55); color: #f7f2e8;
+    cursor: pointer; user-select: none;
+    -webkit-user-select: none; touch-action: none;
+  }
+  .nfr-tbtn:active { background: rgba(34, 26, 18, 0.8); }
+  .nfr-tbtn-acc { background: rgba(168, 69, 26, 0.75); border-color: rgba(168, 69, 26, 0.9); }
+  @media (pointer: coarse) { .nfr-touch { display: flex; } }
+
+  .nfr-howto {
+    margin-top: 1.6rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--foglio-rule);
+  }
+  .nfr-howto-title {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--foglio-ink-soft);
+    font-weight: 400; margin: 0 0 1rem;
+  }
+  .nfr-howto-list {
+    margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0.55rem 1.4rem;
+    align-items: baseline;
+  }
+  .nfr-howto-list dt {
+    font-family: var(--foglio-mono);
+    font-size: 0.66rem; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--foglio-accent);
+    white-space: nowrap;
+  }
+  .nfr-howto-list dd {
+    margin: 0;
+    font-family: var(--foglio-serif);
+    font-size: 0.98rem; line-height: 1.45;
+    color: var(--foglio-ink-soft);
+  }
+
+  .nfr-board {
+    font-family: var(--foglio-mono);
+    margin-top: 1.8rem;
+    padding-top: 1.6rem;
+    border-top: 1px solid var(--foglio-rule);
+  }
+  .nfr-board-title {
+    font-size: 0.72rem; text-transform: uppercase;
+    letter-spacing: 0.14em; color: var(--foglio-ink-soft);
+    font-weight: 400; margin: 0 0 1rem;
+  }
+  .nfr-board-list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 2.5rem;
+  }
+  .nfr-board-list li {
+    display: grid; grid-template-columns: 1.6rem 1fr auto;
+    gap: 0.6rem; align-items: baseline;
+    padding: 0.45rem 0; border-bottom: 1px solid var(--foglio-rule);
+    font-size: 0.82rem;
+  }
+  .nfr-board-list .nfr-rank { color: var(--foglio-ink-soft); }
+  .nfr-board-list .nfr-name { color: var(--foglio-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nfr-board-list .nfr-pts { color: var(--foglio-accent); font-weight: 600; }
+  .nfr-board-loading, .nfr-board-empty {
+    display: block !important; grid-template-columns: none !important;
+    grid-column: 1 / -1;
+    color: var(--foglio-ink-soft); font-size: 0.78rem; border-bottom: none !important;
+  }
+
+  @media (max-width: 600px) {
+    .nfr-board-list { grid-template-columns: 1fr; }
+    .nfr-howto-list { grid-template-columns: 1fr; gap: 0.15rem 0; }
+    .nfr-howto-list dt { margin-top: 0.6rem; }
+  }
+</style>

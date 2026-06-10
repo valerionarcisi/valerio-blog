@@ -3,7 +3,7 @@ title: "Pochi Istanti"
 year: 2024
 role: "Co-Written & Assistant Director"
 status: "completed"
-sortOrder: 3
+sortOrder: 4
 coverImage: "/img/pochiistanti.jpg"
 plot: "Set in the Marche countryside in 2025, the story follows a young man working for a tech startup, testing a new drone designed to analyze soil fertility. As he commands the drone, something strange happens — rather than sticking to the task at hand, the drone begins to wander, capturing unsettling and mysterious footage."
 crew:

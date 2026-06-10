@@ -3,7 +3,7 @@ title: "Metanaro"
 year: 2024
 role: "Supervisore della Sceneggiatura e Assistente alla Regia"
 status: "completed"
-sortOrder: 2
+sortOrder: 3
 coverImage: "/img/metano.jpg"
 plot: "Metanaro e' una sitcom ambientata e girata nelle Marche. Segue Nicola e i suoi amici mentre affrontano le sfide della vita di provincia."
 crew:

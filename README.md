@@ -36,6 +36,7 @@ Live: <https://valerionarcisi.me>. Built with **Astro 5** on **Netlify**, conten
 | `/ascolti/` | Music listening from Last.FM (top albums, top artists, recent scrobbles) |
 | `/tag/` `/tag/[tag]/[...page]` | Tag index + per-tag archive (all tag pages noindex,follow) |
 | `/who-i-am/` `/contatti/` `/privacy-policy/` | About, contact, privacy |
+| `/non-fa-ridere/` | Coming-soon page for the short film, with a Canvas mini-game (Filippo throws pizzas at the cast) + global Turso leaderboard |
 | `/en/...` | English mirror |
 
 The home → film/blog/visti/ascolti → post/film detail flow uses the **Foglio** design system: `src/styles/foglio.css` defines the token vocabulary (`--foglio-*` for colors, fluid type scale, layout), individual layouts compose them.
@@ -60,6 +61,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `GET/POST /api/comments` — public comments (nested replies via `parentId`; author auto-login via Bearer token)
 - `POST /api/comments/like` — toggle like on a comment (visitor hash anti-double-vote)
 - `GET/POST /api/posts/claps` — Medium-style claps on blog posts (max 50 per visitor)
+- `GET/POST /api/non-fa-ridere/scores` — global leaderboard for the "Non Fa Ridere" mini-game (top 10, best score per name, server-side score clamping)
 - `GET /api/letterboxd` `GET /api/lastfm` `GET /api/strava` `GET /api/training` `GET /api/contact` — data fetchers + form
 - `GET /api/search.json` — full-text site search
 - `POST /api/e` — privacy-first analytics tracker (no cookies, anonymous visitor hash)
@@ -234,7 +236,8 @@ Feature-level specs are in `docs/`. Each adds context that a future developer (o
 | `telegram-bot-spec.md` | Idea Catcher Telegram bot details |
 | `editorial-strategy.md` | Editorial constitution (audience, columns, cadence) |
 | `voice-profile.md` | Voice profile loaded by agents at runtime |
-| `non-fa-ridere-game-spec.md` | Spec for the upcoming `/non-fa-ridere/` interactive vignette |
+| `non-fa-ridere-spec.md` | `/non-fa-ridere/` coming-soon page + arcade mini-game + leaderboard (as built) |
+| `non-fa-ridere-game-spec.md` | Superseded early brainstorm (interactive-fiction concept) |
 | `porting-foglio-plan.md` | Migration plan to the Foglio design system |
 | `setup/telegram-bot.md` | Telegram bot setup walkthrough |
 | `superpowers/specs/` | Larger system designs |

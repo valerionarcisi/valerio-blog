@@ -1,0 +1,187 @@
+---
+import BaseHead from "~/components/BaseHead.astro";
+import FoglioHeader from "~/components/FoglioHeader.astro";
+import FoglioFooter from "~/components/FoglioFooter.astro";
+import NonFaRidereGame from "~/components/NonFaRidereGame.astro";
+import { SITE_TITLE } from "~/consts";
+import "~/styles/foglio.css";
+import "~/layouts/FoglioFilmLayout.css";
+
+const cover = "/img/blog/non-fa-ridere-backstage/open-grezzo-palco.jpg";
+const plot =
+  "Filippo è il pizzaiolo del ristorante L'Oasi del Gusto a Piane di Falerone. Una sera, mentre le comande non finiscono mai, il locale ospita un open mic improvvisato. Tra clienti che non lo riconoscono, un rider in ritardo, il nonno del paese e Giulio che prende il microfono senza chiederlo — Filippo deve sopravvivere alla serata.";
+
+const stills = [
+  { src: "/img/blog/non-fa-ridere-backstage/pizzaioli-vetro.jpg", alt: "I pizzaioli dietro al vetro della pizzeria" },
+  { src: "/img/blog/non-fa-ridere-backstage/filippo-mic.jpg", alt: "Filippo al microfono durante l'open mic" },
+  { src: "/img/blog/non-fa-ridere-backstage/set-signore.jpg", alt: "Filippo, il boom e le signore al tavolo" },
+  { src: "/img/blog/non-fa-ridere-backstage/forno-troupe.jpg", alt: "La troupe davanti al forno" },
+  { src: "/img/blog/non-fa-ridere-backstage/attori-tavolo.jpg", alt: "Gli attori al tavolo" },
+  { src: "/img/blog/non-fa-ridere-backstage/pizzaiolo-ritratto.jpg", alt: "Il pizzaiolo, ritratto dietro al banco" },
+  { src: "/img/blog/non-fa-ridere-backstage/signore-tavolo.jpg", alt: "Le signore al tavolo in sala" },
+  { src: "/img/blog/non-fa-ridere-backstage/operatore-camera.jpg", alt: "L'operatore prepara la camera" },
+  { src: "/img/blog/non-fa-ridere-backstage/monitor-camera.jpg", alt: "Il monitor della camera durante una ripresa" },
+  { src: "/img/blog/non-fa-ridere-backstage/tavolo-risate.jpg", alt: "Risate al tavolo durante le riprese" },
+];
+---
+
+<html lang="it" class="foglio">
+  <head>
+    <BaseHead
+      title={`Non Fa Ridere (2026) | ${SITE_TITLE}`}
+      description={plot}
+      cover={cover}
+      lang="it"
+    />
+  </head>
+  <body>
+    <FoglioHeader lang="it" active="films" />
+    <main>
+
+    <header class="ff-head">
+      <div class="ff-eyebrow">
+        <span>2026</span>
+        <span>Diretto da Valerio Narcisi</span>
+        <span class="foglio-status foglio-status--in-lavorazione">In lavorazione</span>
+      </div>
+      <h1 class="ff-title">Non Fa Ridere</h1>
+      <p class="ff-credit"><em>Scritto da Valerio Narcisi e Stefano Teodori · Diretto da Valerio Narcisi</em></p>
+    </header>
+
+    <section class="ff-poster">
+      <div
+        class="ff-poster-img"
+        style={`background-image: url('${cover}')`}
+        role="img"
+        aria-label="Non Fa Ridere"
+      ></div>
+    </section>
+
+    <section class="ff-body ff-body--single">
+      <div class="ff-synopsis">
+        <h2>Trama.</h2>
+        <p>{plot}</p>
+        <p>
+          Il corto è in dialetto marchigiano fermano. È stato girato in quattro
+          giorni al Ristorante L'Oasi del Gusto a Piane di Falerone, con sessanta
+          persone sul set. Ora è in montaggio.
+        </p>
+      </div>
+    </section>
+
+    <section class="ff-stills nfr-game-block">
+      <h2>Nell'attesa, gioca.</h2>
+      <p class="nfr-game-intro">
+        Filippo tira pizze contro tutti i personaggi della sceneggiatura. Tre
+        livelli: la sala, la cucina, il palco.
+      </p>
+      <NonFaRidereGame lang="it" />
+    </section>
+
+    <section class="ff-stills">
+      <h2>Dal set.</h2>
+      <div class="ff-stills-grid">
+        {stills.map((img, i) => (
+          <button
+            class="ff-plate"
+            data-src={img.src}
+            aria-label={`Apri immagine ${i + 1}: ${img.alt}`}
+            style={`background-image: url('${img.src}')`}
+          ></button>
+        ))}
+      </div>
+      <a href="/blog/non-fa-ridere-backstage/" class="nfr-readmore">
+        Leggi il racconto del backstage →
+      </a>
+    </section>
+
+    <div class="ff-lightbox" id="ff-lightbox" role="dialog" aria-modal="true" aria-label="Galleria dal set" hidden>
+      <button class="ff-lightbox-prev" aria-label="Precedente">←</button>
+      <img class="ff-lightbox-img" alt="" />
+      <button class="ff-lightbox-next" aria-label="Successivo">→</button>
+      <button class="ff-lightbox-close" aria-label="Chiudi">✕</button>
+      <div class="ff-lightbox-counter"></div>
+    </div>
+
+    </main>
+    <FoglioFooter lang="it" />
+
+    <script is:inline>
+      (function () {
+        var plates = Array.from(document.querySelectorAll(".ff-plate"));
+        var lb = document.getElementById("ff-lightbox");
+        if (!lb || !plates.length) return;
+        var img = lb.querySelector(".ff-lightbox-img");
+        var counter = lb.querySelector(".ff-lightbox-counter");
+        var closeBtn = lb.querySelector(".ff-lightbox-close");
+        var prevBtn = lb.querySelector(".ff-lightbox-prev");
+        var nextBtn = lb.querySelector(".ff-lightbox-next");
+        var idx = 0;
+        function show(i) {
+          idx = (i + plates.length) % plates.length;
+          img.src = plates[idx].getAttribute("data-src");
+          img.alt = plates[idx].getAttribute("aria-label") || "";
+          counter.textContent = (idx + 1) + " / " + plates.length;
+        }
+        function open(i) {
+          show(i);
+          lb.hidden = false;
+          lb.classList.add("is-open");
+          document.body.style.overflow = "hidden";
+        }
+        function close() {
+          lb.hidden = true;
+          lb.classList.remove("is-open");
+          document.body.style.overflow = "";
+        }
+        plates.forEach(function (b, i) {
+          b.addEventListener("click", function () { open(i); });
+        });
+        prevBtn.addEventListener("click", function () { show(idx - 1); });
+        nextBtn.addEventListener("click", function () { show(idx + 1); });
+        closeBtn.addEventListener("click", close);
+        lb.addEventListener("click", function (e) { if (e.target === lb) close(); });
+        document.addEventListener("keydown", function (e) {
+          if (lb.hidden) return;
+          if (e.key === "Escape") close();
+          if (e.key === "ArrowLeft") show(idx - 1);
+          if (e.key === "ArrowRight") show(idx + 1);
+        });
+      })();
+    </script>
+  </body>
+</html>
+
+<style>
+  .ff-body--single {
+    grid-template-columns: 1fr;
+  }
+  .ff-body--single .ff-synopsis {
+    max-width: 760px;
+  }
+
+  .nfr-game-block {
+    margin-top: 5rem;
+  }
+
+  .nfr-game-intro {
+    font-family: var(--foglio-serif);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--foglio-ink-soft);
+    margin: -1rem 0 1.5rem;
+  }
+
+  .nfr-readmore {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-family: var(--foglio-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+    padding-bottom: 2px;
+    text-decoration: none;
+  }
+</style>

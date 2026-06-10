@@ -1,5 +1,14 @@
 # Non fa ridere — Game spec
 
+> **Superseded (2026-06-10).** This was an early brainstorm proposing a
+> Twine-style multiple-choice interactive fiction built from set photos. The
+> `/non-fa-ridere/` page that actually shipped is a different concept — a
+> fixed-screen arcade game (Filippo throws pizzas at the cast) with a global
+> Turso leaderboard. See **`non-fa-ridere-spec.md`** for the as-built spec.
+> Kept here for the design reasoning and the reusable-engine idea, which may
+> still apply to a future interactive-fiction piece.
+
+
 ## Obiettivo
 
 Un piccolo gioco-vignetta in browser, ospitato su `/non-fa-ridere/` (o `/films/non-fa-ridere/play`), che funzioni come **promo interattivo** del cortometraggio omonimo. Non è il film. Non è un trailer. È un *side artifact* — qualcosa che il pubblico può attraversare in 3-5 minuti, che lascia un sapore, e che (idealmente) genera curiosità sul corto, sul regista, sul progetto Oh Writers.

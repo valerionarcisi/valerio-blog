@@ -11,7 +11,7 @@ Personal blog and portfolio site for Valerio Narcisi (filmmaker, sceneggiatore, 
 - **Styling**: Plain CSS, co-located CSS files next to components. No CSS framework.
 - **Design system**: **Foglio** — cream paper (`#f6f1e8`), EB Garamond serif (display + prose), Inter sans (body fallback), JetBrains Mono, terracotta accent (`#a8451a`). Tokens in `src/styles/foglio.css` (`--foglio-*`).
 - **Deployment**: Netlify (static pages + serverless functions). Auto-deploy on push to `main`.
-- **Database**: Turso (libsql) for comments, claps, analytics, meditation, editorial agents queue.
+- **Database**: Turso (libsql) for comments, claps, analytics, meditation, editorial agents queue, game leaderboard (`/non-fa-ridere/`).
 
 ## i18n
 

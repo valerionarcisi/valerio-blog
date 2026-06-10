@@ -162,11 +162,6 @@
   border: 1px solid var(--foglio-rule);
   border-radius: var(--foglio-radius-md);
   box-shadow: var(--foglio-shadow);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.fh-review-poster:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--foglio-shadow-strong);
 }
 .fh-review-body {
   max-width: 40em;
@@ -253,6 +248,110 @@
   font-weight: 500;
   font-size: 1.7rem;
   margin: 0;
+}
+
+/* ── Non Fa Ridere promo strip ── */
+.fh-nfr {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 5rem 3rem 1rem;
+}
+
+.fh-nfr-inner {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.fh-nfr-figure {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--foglio-radius-lg, 10px);
+  box-shadow: var(--foglio-shadow);
+}
+
+.fh-nfr-img {
+  background-image: url('/img/blog/non-fa-ridere-backstage/open-grezzo-palco.jpg');
+  background-size: cover;
+  background-position: center 42%;
+  aspect-ratio: 3 / 2;
+  filter: contrast(1.04) saturate(0.9);
+}
+
+.fh-nfr-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-right: 1rem;
+}
+
+.fh-nfr-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.fh-nfr-eyebrow::before {
+  content: "";
+  width: 1.8rem;
+  height: 1px;
+  background: var(--foglio-accent);
+}
+
+.fh-nfr-body h2 {
+  font-family: var(--foglio-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(2.2rem, 3.4vw, 3.4rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin: 0 0 1.2rem;
+  color: var(--foglio-ink);
+}
+
+.fh-nfr-lede {
+  font-family: var(--foglio-serif);
+  font-size: 1.12rem;
+  line-height: 1.6;
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1.8rem;
+  max-width: 30ch;
+}
+
+.fh-nfr-cta {
+  font-family: var(--foglio-mono);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--foglio-accent);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 3px;
+  transition: border-color 0.18s ease;
+}
+
+.fh-nfr-cta .fh-nfr-arrow {
+  transition: transform 0.22s ease;
+}
+
+.fh-nfr-inner:hover .fh-nfr-cta {
+  border-bottom-color: var(--foglio-accent-soft);
+}
+
+.fh-nfr-inner:hover .fh-nfr-arrow {
+  transform: translateX(5px);
 }
 
 /* ── Films ── */
@@ -691,6 +790,30 @@
 }
 
 /* ── Responsive ── */
+@media (max-width: 767px) {
+  .fh-nfr {
+    padding: 3rem 1.4rem 1rem;
+  }
+
+  .fh-nfr-inner {
+    grid-template-columns: 1fr;
+    gap: 1.8rem;
+    padding-top: 2.5rem;
+  }
+
+  .fh-nfr-img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .fh-nfr-body {
+    padding-right: 0;
+  }
+
+  .fh-nfr-lede {
+    max-width: none;
+  }
+}
+
 @media (max-width: 767px) {
   .fh-hero {
     padding: 2.5rem 1.4rem 4rem;

@@ -3,7 +3,7 @@ title: "Arturo"
 year: 2020
 role: "Soggetto e Sceneggiatura"
 status: "completed"
-sortOrder: 4
+sortOrder: 5
 coverImage: "/img/arturo/frame-300s.jpg"
 youtubeUrl: "https://youtu.be/7TpiIvEq5l8"
 trailerLocalPath: "/videos/Arturo.mp4"

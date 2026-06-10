@@ -3,7 +3,7 @@ title: "Pochi Istanti"
 year: 2024
 role: "Co-Sceneggiatore e Assistente alla Regia"
 status: "completed"
-sortOrder: 3
+sortOrder: 4
 coverImage: "/img/pochiistanti.jpg"
 plot: "Ambientato nella campagna marchigiana nel 2025, la storia segue un giovane che lavora per una startup tecnologica, testando un nuovo drone progettato per analizzare la fertilita' del suolo. Mentre comanda il drone, succede qualcosa di strano: invece di attenersi al compito assegnato, il drone inizia a vagare, catturando immagini inquietanti e misteriose."
 crew:

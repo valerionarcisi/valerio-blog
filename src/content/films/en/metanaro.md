@@ -3,7 +3,7 @@ title: "Metanaro"
 year: 2024
 role: "Supervisor of Screenwriting & Assistant Director"
 status: "completed"
-sortOrder: 2
+sortOrder: 3
 coverImage: "/img/metano1.jpg"
 plot: "Metanaro is a sitcom based and shot in Le Marche, Italy. It follows Nicola and his friends as they navigate the challenges of life in the countryside."
 crew:
