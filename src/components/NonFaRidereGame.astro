@@ -510,6 +510,12 @@ const t =
 
   const pSize = spriteSize(SPRITES.filippo);
 
+  // Volto reale di Giulio (boss finale), trattato in duotone — caricato una volta
+  const giulioFace = new Image();
+  let giulioFaceReady = false;
+  giulioFace.onload = () => { giulioFaceReady = true; };
+  giulioFace.src = "/img/non-fa-ridere/giulio-face.png";
+
   // ── Musica punk: WebAudio procedurale, chitarra + batteria ──────
   const music = {
     ac: null, master: null, distortion: null,
@@ -1398,6 +1404,16 @@ const t =
     let alpha = e.def.ghost ? 0.75 : 1;
     if (blink) alpha = 0.3;
     drawSprite(e.sprite, ex, e.y, e.vx > 0, alpha);
+    // Giulio: testa = volto reale trattato sopra il corpo pixel
+    const isGiulio = e.def.boss && !e.def.teaBoss;
+    if (isGiulio && giulioFaceReady) {
+      const fw = e.w * 1.35;
+      const fx = ex + e.w / 2 - fw / 2;
+      const fy = e.y - fw * 0.18; // copre la testa pixel
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(giulioFace, fx, fy, fw, fw);
+      ctx.imageSmoothingEnabled = false;
+    }
     if (e.def.boss) {
       const ratio = Math.max(0, e.hp / e.def.hp);
       const bw = Math.max(e.w, 60);
