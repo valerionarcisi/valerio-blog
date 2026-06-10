@@ -1,5 +1,5 @@
 ---
-title: "Non Fa Ridere"
+title: "It's Not Funny"
 year: 2026
 role: "Directed"
 status: "in-production"
@@ -24,8 +24,8 @@ technicalSpecs:
     - "English"
 ---
 
-Non Fa Ridere was shot over four days at Ristorante L'Oasi del Gusto in Piane di Falerone, with sixty people on set.
+It's Not Funny was shot over four days at Ristorante L'Oasi del Gusto in Piane di Falerone, with sixty people on set.
 
 Currently in post-production.
 
-While you wait, you can [play the Non Fa Ridere mini-game](/en/non-fa-ridere/) — Filippo throws pizzas at every character from the script. Three levels: the dining room, the kitchen, the stage.
+While you wait, you can [play the It's Not Funny mini-game](/en/non-fa-ridere/) — Filippo throws pizzas at every character from the script. Three levels: the dining room, the kitchen, the stage.

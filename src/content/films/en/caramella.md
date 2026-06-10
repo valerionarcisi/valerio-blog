@@ -1,5 +1,5 @@
 ---
-title: "Caramella"
+title: "Candy"
 year: 2025
 role: "Written & Directed"
 status: "completed"
@@ -100,27 +100,27 @@ specialThanks:
     url: "https://malloni.com/"
 images:
   - src: "/img/caramella/Locandina_jpeg.jpg"
-    alt: "Caramella Short Movie 2025 Poster"
+    alt: "Candy Short Movie 2025 Poster"
   - src: "/img/caramella/STILL_00.jpg"
-    alt: "Still from Caramella - Scene 1"
+    alt: "Still from Candy - Scene 1"
   - src: "/img/caramella/STILL_01.jpg"
-    alt: "Still from Caramella - Scene 2"
+    alt: "Still from Candy - Scene 2"
   - src: "/img/caramella/STILL_02.jpg"
-    alt: "Still from Caramella - Scene 3"
+    alt: "Still from Candy - Scene 3"
   - src: "/img/caramella/STILL_03.jpg"
-    alt: "Still from Caramella - Scene 4"
+    alt: "Still from Candy - Scene 4"
   - src: "/img/caramella/corto-valerio8.jpg"
-    alt: "Caramella Backstage 8"
+    alt: "Candy Backstage 8"
   - src: "/img/caramella/corto-valerio9.jpg"
-    alt: "Caramella Backstage 9"
+    alt: "Candy Backstage 9"
   - src: "/img/caramella/corto-valerio10.jpg"
-    alt: "Caramella Backstage 10"
+    alt: "Candy Backstage 10"
   - src: "/img/caramella/corto-valerio11.jpg"
-    alt: "Caramella Backstage 11"
+    alt: "Candy Backstage 11"
   - src: "/img/caramella/corto-valerio12.jpg"
-    alt: "Caramella Backstage 12"
+    alt: "Candy Backstage 12"
 ---
 
-Caramella is my diploma short film from Officine Mattoli.
+Candy is my diploma short film from Officine Mattoli.
 
 All graphics and trailer by [Stefano Teodori](https://www.instagram.com/tommypecorari/).
