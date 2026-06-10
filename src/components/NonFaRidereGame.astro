@@ -1539,4 +1539,55 @@ const t =
     .nfr-howto-list { grid-template-columns: 1fr; gap: 0.15rem 0; }
     .nfr-howto-list dt { margin-top: 0.6rem; }
   }
+
+  /* ── Mobile: layout verticale ottimizzato per il tocco ── */
+  @media (max-width: 700px) {
+    .nfr-game { margin: 1.2rem 0; }
+
+    /* Il gioco è 16:9 e scorre in orizzontale: su mobile lo teniamo a
+       tutta larghezza col suo rapporto (contain), così si vede l'intera
+       altezza dell'azione e i tasti stanno sopra senza coprire i piedi. */
+    .nfr-stage {
+      aspect-ratio: 16 / 10;
+      border-radius: var(--foglio-radius-sm);
+    }
+    #nfr-canvas { object-fit: contain; }
+
+    /* HUD più leggibile, niente etichetta livello lunga */
+    .nfr-hud {
+      padding: 0.5rem 0.7rem;
+      font-size: 0.66rem;
+    }
+    .nfr-hud-level { display: none; }
+
+    /* Tasti di sistema più grandi e più in alto per non coprire l'HUD */
+    .nfr-sysbtns { top: 2.2rem; right: 0.5rem; gap: 0.35rem; }
+    .nfr-sysbtn { width: 40px; height: 40px; font-size: 1rem; }
+
+    /* Controlli touch grandi, ben separati, dentro la safe-area */
+    .nfr-touch {
+      padding: 0.7rem calc(0.7rem + env(safe-area-inset-right, 0px))
+               calc(0.9rem + env(safe-area-inset-bottom, 0px))
+               calc(0.7rem + env(safe-area-inset-left, 0px));
+    }
+    .nfr-touch-group { gap: 0.6rem; }
+    .nfr-tbtn {
+      min-width: 64px; min-height: 64px;
+      font-size: 0.8rem;
+      border-radius: 50%;
+      background: rgba(34, 26, 18, 0.62);
+      border-color: rgba(247, 242, 232, 0.5);
+    }
+    /* Salta e Pizza in colonna a destra, comodi per il pollice */
+    .nfr-touch-group:last-child {
+      flex-direction: column-reverse;
+    }
+
+    /* Overlay: testo e form a misura di telefono */
+    .nfr-overlay { padding: 1.2rem; gap: 0.7rem; }
+    .nfr-help { font-size: 0.7rem; max-width: 24em; }
+    .nfr-cta { font-size: 0.95rem; }
+    .nfr-submit, .nfr-submit input, .nfr-submit button { max-width: 280px; font-size: 0.9rem; }
+    .nfr-restart { font-size: 0.85rem; padding: 0.7rem 1.1rem; }
+  }
 </style>
