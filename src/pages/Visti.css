@@ -109,6 +109,14 @@
   border-radius: var(--foglio-radius-sm);
 }
 
+a.vw-cover-link {
+  display: block;
+  transition: box-shadow 0.18s ease;
+}
+a.vw-cover-link:hover {
+  box-shadow: var(--foglio-shadow);
+}
+
 .vw-title {
   font-family: var(--foglio-serif);
   font-weight: 500;
@@ -120,6 +128,16 @@
 .vw-title em {
   font-style: italic;
   color: var(--foglio-accent);
+}
+.vw-title-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.vw-title-link:hover {
+  color: var(--foglio-accent);
+  border-bottom-color: var(--foglio-accent-soft);
 }
 .vw-director {
   font-family: var(--foglio-serif);

@@ -1,5 +1,5 @@
 import { formatMoneyCompact } from "~/lib/format-money";
-import { letterboxdDirectorUrl } from "~/lib/letterboxd-slug";
+import { letterboxdDirectorUrl, letterboxdFilmUrl } from "~/lib/letterboxd-slug";
 
 export interface WatchedMovie {
   title: string;
@@ -88,13 +88,29 @@ export async function fetchWatched(): Promise<WatchedMovie[]> {
   return Array.isArray(data) ? (data as WatchedMovie[]) : [];
 }
 
+function lbxdLink(m: WatchedMovie): string | null {
+  return letterboxdFilmUrl(m.slug);
+}
+
 function compactItem(m: WatchedMovie, opts: CompactOptions): HTMLElement {
-  const cover = el("div", { class: "fh-lib-cover" });
+  const href = lbxdLink(m);
+  const cover = href
+    ? el("a", {
+        class: "fh-lib-cover fh-lib-cover-link",
+        href,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        "aria-label": `${m.title} su Letterboxd`,
+      })
+    : el("div", { class: "fh-lib-cover" });
   if (m.posterPath) {
-    cover.style.backgroundImage = `url('https://image.tmdb.org/t/p/w92/${m.posterPath}')`;
+    (cover as HTMLElement).style.backgroundImage = `url('https://image.tmdb.org/t/p/w92/${m.posterPath}')`;
   }
 
-  const title = el("div", { class: "fh-lib-title" }, el("em", null, m.title));
+  const titleNode = href
+    ? el("a", { class: "fh-lib-title-link", href, target: "_blank", rel: "noopener noreferrer" }, el("em", null, m.title))
+    : el("em", null, m.title);
+  const title = el("div", { class: "fh-lib-title" }, titleNode);
   if (m.liked) {
     title.append(
       el("span", { class: "fh-lib-like", title: opts.likedLabel ?? "Mi è piaciuto" }, "♥"),
@@ -294,12 +310,24 @@ function openReviewFromHash(): void {
 }
 
 function fullRow(m: WatchedMovie, opts: FullOptions): HTMLElement {
-  const cover = el("div", { class: "vw-cover" });
+  const href = lbxdLink(m);
+  const cover = href
+    ? el("a", {
+        class: "vw-cover vw-cover-link",
+        href,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        "aria-label": `${m.title} su Letterboxd`,
+      })
+    : el("div", { class: "vw-cover" });
   if (m.posterPath) {
-    cover.style.backgroundImage = `url('https://image.tmdb.org/t/p/w185/${m.posterPath}')`;
+    (cover as HTMLElement).style.backgroundImage = `url('https://image.tmdb.org/t/p/w185/${m.posterPath}')`;
   }
 
-  const col = el("div", { class: "vw-main-col" }, el("h3", { class: "vw-title" }, m.title));
+  const titleNode = href
+    ? el("h3", { class: "vw-title" }, el("a", { class: "vw-title-link", href, target: "_blank", rel: "noopener noreferrer" }, m.title))
+    : el("h3", { class: "vw-title" }, m.title);
+  const col = el("div", { class: "vw-main-col" }, titleNode);
 
   if (m.directors.length > 0) {
     const span = el("span");

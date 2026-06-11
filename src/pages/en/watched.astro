@@ -11,7 +11,7 @@ import {
 } from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { formatMoneyCompact } from "~/lib/format-money";
-import { letterboxdDirectorUrl } from "~/lib/letterboxd-slug";
+import { letterboxdDirectorUrl, letterboxdFilmUrl } from "~/lib/letterboxd-slug";
 import { Icon } from "astro-icon/components";
 import "~/styles/foglio.css";
 import "../Visti.css";
@@ -166,12 +166,27 @@ if (myRatings.length > 0) {
                 const hasMoney = b || r;
                 return (
                   <li class="vw-row">
-                    <div
-                      class="vw-cover"
-                      style={m.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w185/${m.poster_path}')` : ""}
-                    />
+                    {letterboxdFilmUrl(m.slug) ? (
+                      <a
+                        class="vw-cover vw-cover-link"
+                        href={letterboxdFilmUrl(m.slug)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={m.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w185/${m.poster_path}')` : ""}
+                        aria-label={`${m.title} on Letterboxd`}
+                      />
+                    ) : (
+                      <div
+                        class="vw-cover"
+                        style={m.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w185/${m.poster_path}')` : ""}
+                      />
+                    )}
                     <div class="vw-main-col">
-                      <h3 class="vw-title">{m.title}</h3>
+                      <h3 class="vw-title">
+                        {letterboxdFilmUrl(m.slug) ? (
+                          <a class="vw-title-link" href={letterboxdFilmUrl(m.slug)} target="_blank" rel="noopener noreferrer">{m.title}</a>
+                        ) : m.title}
+                      </h3>
                       {m.directors && m.directors.length > 0 && (
                         <p class="vw-director">by <span>{m.directors.map((d, i) => (
                           <>

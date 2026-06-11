@@ -12,3 +12,7 @@ export function letterboxdDirectorSlug(name: string): string {
 export function letterboxdDirectorUrl(name: string): string {
   return `https://letterboxd.com/director/${letterboxdDirectorSlug(name)}/`;
 }
+
+export function letterboxdFilmUrl(slug: string | null | undefined): string | null {
+  return slug ? `https://letterboxd.com/film/${slug}/` : null;
+}

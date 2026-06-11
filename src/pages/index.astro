@@ -13,6 +13,7 @@ import {
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
 import { formatMoneyCompact } from "~/lib/format-money";
+import { letterboxdFilmUrl } from "~/lib/letterboxd-slug";
 import { getTopPosts } from "~/lib/top-posts";
 import { fetchPostStats, fetchReviewClaps } from "~/lib/post-stats";
 import { getCollection } from "astro:content";
@@ -271,7 +272,11 @@ function formatDate(dateStr: string | Date): string {
               aria-label={latestReview["letterboxd:filmTitle"]?.[0]}
             ></a>
             <div class="fh-review-body">
-              <h3 class="fh-review-filmtitle">{latestReview["letterboxd:filmTitle"]?.[0]}</h3>
+              <h3 class="fh-review-filmtitle">
+                {letterboxdFilmUrl(latestReview.slug) ? (
+                  <a class="fh-review-lbxd" href={letterboxdFilmUrl(latestReview.slug)} target="_blank" rel="noopener noreferrer">{latestReview["letterboxd:filmTitle"]?.[0]}</a>
+                ) : latestReview["letterboxd:filmTitle"]?.[0]}
+              </h3>
               {latestReview.directors?.length > 0 && (
                 <p class="fh-review-dir">di {latestReview.directors.join(", ")}</p>
               )}
@@ -311,12 +316,27 @@ function formatDate(dateStr: string | Date): string {
             <ul class="fh-lib-list fh-lib-list--films" data-watched-list>
               {(lastWatched as any[]).slice(0, 5).map((movie: any) => (
                 <li>
-                  <div
-                    class="fh-lib-cover"
-                    style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
-                  ></div>
+                  {letterboxdFilmUrl(movie.slug) ? (
+                    <a
+                      class="fh-lib-cover fh-lib-cover-link"
+                      href={letterboxdFilmUrl(movie.slug)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
+                      aria-label={`${movie["letterboxd:filmTitle"]?.[0]} su Letterboxd`}
+                    ></a>
+                  ) : (
+                    <div
+                      class="fh-lib-cover"
+                      style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
+                    ></div>
+                  )}
                   <div class="fh-lib-title">
-                    <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                    {letterboxdFilmUrl(movie.slug) ? (
+                      <a class="fh-lib-title-link" href={letterboxdFilmUrl(movie.slug)} target="_blank" rel="noopener noreferrer"><em>{movie["letterboxd:filmTitle"]?.[0]}</em></a>
+                    ) : (
+                      <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                    )}
                     {movie["letterboxd:memberLike"]?.[0] === "Yes" && <span class="fh-lib-like" title="Mi è piaciuto">♥</span>}
                     {movie.review && <span class="fh-lib-review-dot" title="Ha una recensione"></span>}
                     {(() => {
