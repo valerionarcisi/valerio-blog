@@ -84,17 +84,24 @@ function fmtDate(raw?: string): string {
 
 const totalCount = all.length;
 const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
 const lastWeekCount = all.filter((m) => {
   if (!m.watchedDate) return false;
   const t = new Date(m.watchedDate).getTime();
   return Number.isFinite(t) && t >= oneWeekAgo;
 }).length;
-
-const totalMinutes = all.reduce(
-  (s, m) => s + (typeof m.runtime === "number" && m.runtime > 0 ? m.runtime : 0),
-  0,
+const lastMonth = all.filter((m) => {
+  if (!m.watchedDate) return false;
+  const t = new Date(m.watchedDate).getTime();
+  return Number.isFinite(t) && t >= oneMonthAgo;
+});
+const lastMonthCount = lastMonth.length;
+const lastMonthHours = Math.round(
+  lastMonth.reduce(
+    (s, m) => s + (typeof m.runtime === "number" && m.runtime > 0 ? m.runtime : 0),
+    0,
+  ) / 60,
 );
-const totalHours = Math.round(totalMinutes / 60);
 
 const myRatings = all
   .map((m) => (m.rating ? Number(m.rating) : NaN))
@@ -139,16 +146,16 @@ if (myRatings.length > 0) {
 
       <dl class="vw-stats">
         <div class="vw-stat">
-          <dt>Latest watched</dt>
-          <dd data-stat="total">{totalCount}</dd>
-        </div>
-        <div class="vw-stat">
           <dt>Last 7 days</dt>
           <dd data-stat="week">{lastWeekCount}</dd>
         </div>
         <div class="vw-stat">
-          <dt>Hours watched</dt>
-          <dd data-stat="hours">{totalHours} h</dd>
+          <dt>Last 30 days</dt>
+          <dd data-stat="month">{lastMonthCount}</dd>
+        </div>
+        <div class="vw-stat">
+          <dt>Hours last 30d</dt>
+          <dd data-stat="month-hours">{lastMonthHours} h</dd>
         </div>
         <div class="vw-stat">
           <dt>Average rating</dt>
