@@ -510,16 +510,20 @@ const t =
 
   const pSize = spriteSize(SPRITES.filippo);
 
-  // Volti reali trattati in duotone (caricati una volta): Giulio boss e Filippo player
-  const giulioFace = new Image();
-  let giulioFaceReady = false;
-  giulioFace.onload = () => { giulioFaceReady = true; };
-  giulioFace.src = "/img/non-fa-ridere/giulio-face.png";
-
-  const filippoFace = new Image();
-  let filippoFaceReady = false;
-  filippoFace.onload = () => { filippoFaceReady = true; };
-  filippoFace.src = "/img/non-fa-ridere/filippo-face.png";
+  // Volti reali trattati in duotone (caricati una volta) — dal film
+  function loadFace(src) {
+    const img = new Image();
+    img.ready = false;
+    img.onload = () => { img.ready = true; };
+    img.src = src;
+    return img;
+  }
+  const filippoFace = loadFace("/img/non-fa-ridere/filippo-face.png");
+  const giulioFace = loadFace("/img/non-fa-ridere/giulio-face.png");
+  const teaFace = loadFace("/img/non-fa-ridere/tea-face.png");
+  const nonnoFace = loadFace("/img/non-fa-ridere/nonno-face.png");
+  // mappa personaggio → volto reale (gli altri restano pixel)
+  const ENEMY_FACES = { giulio: giulioFace, tea: teaFace, teaBoss: teaFace, nonno: nonnoFace };
 
   // ── Musica punk: WebAudio procedurale, chitarra + batteria ──────
   const music = {
@@ -1409,14 +1413,17 @@ const t =
     let alpha = e.def.ghost ? 0.75 : 1;
     if (blink) alpha = 0.3;
     drawSprite(e.sprite, ex, e.y, e.vx > 0, alpha);
-    // Giulio: testa = volto reale trattato sopra il corpo pixel
-    const isGiulio = e.def.boss && !e.def.teaBoss;
-    if (isGiulio && giulioFaceReady) {
-      const fw = e.w * 1.15;
+    // Volto reale (dal film) come testa sopra il corpo pixel, se disponibile
+    const face = ENEMY_FACES[e.type];
+    if (face && face.ready) {
+      const big = e.def.boss;
+      const fw = e.w * (big ? 1.15 : 1.05);
       const fx = ex + e.w / 2 - fw / 2;
-      const fy = e.y - fw * 0.46; // testa in cima al corpo pixel
+      const fy = e.y - fw * 0.46;
       ctx.imageSmoothingEnabled = true;
-      ctx.drawImage(giulioFace, fx, fy, fw, fw);
+      ctx.globalAlpha = alpha;
+      ctx.drawImage(face, fx, fy, fw, fw);
+      ctx.globalAlpha = 1;
       ctx.imageSmoothingEnabled = false;
     }
     if (e.def.boss) {
@@ -1490,7 +1497,7 @@ const t =
       drawSprite(SPRITES.filippo, px, p.y - pSize.h, p.dir < 0, 1);
       // testa = volto reale trattato di Filippo (profilo con bandana), in cima
       // al corpo. La foto guarda a sinistra: la specchio quando va a destra.
-      if (filippoFaceReady) {
+      if (filippoFace.ready) {
         const fw = pSize.w * 1.05;
         const fx = px + pSize.w / 2 - fw / 2;
         const fy = p.y - pSize.h - fw * 0.46;

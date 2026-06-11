@@ -42,7 +42,7 @@ Spawn favours the front (≈72% from ahead). Music is procedural punk (WebAudio)
 | Tea (mini-boss) | kitchen guardian, 6 HP | 100 |
 | Giulio | **final boss**, 24 HP, chases Filippo and enrages (faster + dashes) under 40% HP ("te tiro dentro a lu forno!") | 600 |
 
-Bosses show a name label (TEA / GIULIO) over their health bar. **Filippo (player) and Giulio (final boss) wear the real people's faces** — cropped from photos, treated to a warm sepia duotone + grain, circular-masked, and drawn as a head over the pixel body (`filippo-face.png` = actor **Giacomo Bottoni** in character — bandana, at the open-mic — from a set photo, a profile that flips with movement direction; `giulio-face.png` from a backstage close-up of the actor playing Giulio). The other characters are pixel sprites.
+Bosses show a name label (TEA / GIULIO) over their health bar. **Filippo (player) and Giulio (final boss) wear the real people's faces** — cropped from photos, treated to a warm sepia duotone + grain, circular-masked, and drawn as a head over the pixel body **Filippo, Giulio, Tea and Nonno** all wear the real actors' faces, treated the same way. Filippo from a set photo (bandana profile, flips with direction); Giulio, Tea and Nonno are frames pulled from the film cut and treated. `ENEMY_FACES` maps character → treated face (`giulio/tea/nonno-face.png`); the rest stay pixel. (`filippo-face.png` = **Giacomo Bottoni** in character.). The other characters are pixel sprites.
 
 ## Leaderboard
 
