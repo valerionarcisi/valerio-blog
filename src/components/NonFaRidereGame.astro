@@ -1542,9 +1542,13 @@ const t =
       el.boardList.innerHTML = `<li class="nfr-board-empty">${escapeHtml(emptyMsg)}</li>`;
       return;
     }
-    el.boardList.innerHTML = scores.map((s, i) =>
-      `<li><span class="nfr-rank">${i + 1}</span><span class="nfr-name">${escapeHtml(s.name)}</span><span class="nfr-pts">${s.score}</span></li>`
-    ).join("");
+    const medals = ["①", "②", "③"];
+    el.boardList.innerHTML = scores.slice(0, 10).map((s, i) => {
+      const top = i < 3 ? ` nfr-row--top nfr-row--${i + 1}` : "";
+      const rank = i < 3 ? medals[i] : (i + 1);
+      const pts = Number(s.score).toLocaleString("it-IT");
+      return `<li class="nfr-row${top}"><span class="nfr-rank">${rank}</span><span class="nfr-name">${escapeHtml(s.name)}</span><span class="nfr-pts">${pts}</span></li>`;
+    }).join("");
   }
 
   async function submitScore(name) {
@@ -1854,12 +1858,12 @@ const t =
   }
 
   .nfr-board {
-    font-family: var(--foglio-mono);
     margin-top: 1.8rem;
     padding-top: 1.6rem;
     border-top: 1px solid var(--foglio-rule);
   }
   .nfr-board-title {
+    font-family: var(--foglio-mono);
     font-size: 0.72rem; text-transform: uppercase;
     letter-spacing: 0.14em; color: var(--foglio-ink-soft);
     font-weight: 400; margin: 0 0 1rem;
@@ -1867,26 +1871,56 @@ const t =
   .nfr-board-list {
     list-style: none; margin: 0; padding: 0;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    column-gap: 2.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 3rem;
   }
-  .nfr-board-list li {
-    display: grid; grid-template-columns: 1.6rem 1fr auto;
-    gap: 0.6rem; align-items: baseline;
-    padding: 0.45rem 0; border-bottom: 1px solid var(--foglio-rule);
-    font-size: 0.82rem;
+  /* Righe iniettate via JS: usano :global perché Astro non scopa il runtime */
+  :global(.nfr-row) {
+    display: grid;
+    grid-template-columns: 1.8rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid var(--foglio-rule);
+    border-radius: var(--foglio-radius-sm);
   }
-  .nfr-board-list .nfr-rank { color: var(--foglio-ink-soft); }
-  .nfr-board-list .nfr-name { color: var(--foglio-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .nfr-board-list .nfr-pts { color: var(--foglio-accent); font-weight: 600; }
-  .nfr-board-loading, .nfr-board-empty {
-    display: block !important; grid-template-columns: none !important;
+  :global(.nfr-row .nfr-rank) {
+    font-family: var(--foglio-mono);
+    font-size: 0.9rem;
+    color: var(--foglio-ink-mute);
+    text-align: center;
+  }
+  :global(.nfr-row .nfr-name) {
+    font-family: var(--foglio-serif);
+    font-size: 1.02rem;
+    color: var(--foglio-ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  :global(.nfr-row .nfr-pts) {
+    font-family: var(--foglio-mono);
+    font-size: 0.92rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--foglio-accent);
+    font-weight: 600;
+    justify-self: end;
+  }
+  /* Podio — primi tre evidenziati */
+  :global(.nfr-row--top) { background: color-mix(in srgb, var(--foglio-accent) 6%, transparent); }
+  :global(.nfr-row--top .nfr-rank) { font-size: 1.15rem; color: var(--foglio-accent); }
+  :global(.nfr-row--1 .nfr-name) { font-weight: 600; }
+  :global(.nfr-row--1) { background: color-mix(in srgb, var(--foglio-accent) 12%, transparent); }
+
+  :global(.nfr-board-loading), :global(.nfr-board-empty) {
     grid-column: 1 / -1;
-    color: var(--foglio-ink-soft); font-size: 0.78rem; border-bottom: none !important;
+    font-family: var(--foglio-mono);
+    color: var(--foglio-ink-soft); font-size: 0.82rem;
+    padding: 0.5rem 0;
   }
 
-  @media (max-width: 600px) {
+  @media (max-width: 700px) {
     .nfr-board-list { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
     .nfr-howto-list { grid-template-columns: 1fr; gap: 0.15rem 0; }
     .nfr-howto-list dt { margin-top: 0.6rem; }
   }
