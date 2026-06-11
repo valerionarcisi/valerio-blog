@@ -118,7 +118,7 @@ if (myRatings.length > 0) {
   <head>
     <BaseHead
       title={`Visti · ${SITE_TITLE}`}
-      description="Lista completa dei film visti, con date, budget e incassi al box office. Dati Letterboxd + TMDB."
+      description="Ultime visioni dal feed Letterboxd con date, budget e incassi al box office. Diario completo su Letterboxd."
     />
   </head>
   <body>
@@ -131,10 +131,15 @@ if (myRatings.length > 0) {
         Cosa ho guardato di recente — feed Letterboxd, metadata da TMDB.
         Budget e box office quando disponibili.
       </p>
+      <p class="vw-letterboxd-cta">
+        <a href="https://letterboxd.com/valenar/" target="_blank" rel="noopener noreferrer">
+          Diario completo su Letterboxd →
+        </a>
+      </p>
 
       <dl class="vw-stats">
         <div class="vw-stat">
-          <dt>Film</dt>
+          <dt>Ultimi visti</dt>
           <dd data-stat="total">{totalCount}</dd>
         </div>
         <div class="vw-stat">
