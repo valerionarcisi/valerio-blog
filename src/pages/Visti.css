@@ -32,8 +32,22 @@
   line-height: 1.55;
   color: var(--foglio-ink-soft);
   max-width: 38em;
+  margin: 0 0 1rem;
+}
+.vw-letterboxd-cta {
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   margin: 0 0 2.5rem;
 }
+.vw-letterboxd-cta a {
+  color: var(--foglio-accent);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: opacity 0.15s;
+}
+.vw-letterboxd-cta a:hover { opacity: 0.7; }
 .vw-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

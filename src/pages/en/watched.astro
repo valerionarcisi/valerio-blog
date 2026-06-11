@@ -118,7 +118,7 @@ if (myRatings.length > 0) {
   <head>
     <BaseHead
       title={`Watched · ${SITE_TITLE}`}
-      description="Full list of films I've watched recently, with dates, budget and box office revenue. Data from Letterboxd + TMDB."
+      description="Latest viewings from my Letterboxd feed, with dates, budget and box office. Full diary on Letterboxd."
     />
   </head>
   <body>
@@ -131,10 +131,15 @@ if (myRatings.length > 0) {
         What I've watched recently — Letterboxd feed, metadata from TMDB.
         Budget and box office when available.
       </p>
+      <p class="vw-letterboxd-cta">
+        <a href="https://letterboxd.com/valenar/" target="_blank" rel="noopener noreferrer">
+          Full diary on Letterboxd →
+        </a>
+      </p>
 
       <dl class="vw-stats">
         <div class="vw-stat">
-          <dt>Films</dt>
+          <dt>Latest watched</dt>
           <dd data-stat="total">{totalCount}</dd>
         </div>
         <div class="vw-stat">
