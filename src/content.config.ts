@@ -27,6 +27,7 @@ const films = defineCollection({
     trailerLocalPath: z.string().optional(),
     trailerUrl: z.string().optional(),
     youtubeUrl: z.string().optional(),
+    letterboxdUrl: z.string().optional(),
     plot: z.string(),
     technicalSpecs: z
       .object({

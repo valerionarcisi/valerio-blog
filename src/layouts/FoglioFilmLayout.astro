@@ -27,6 +27,7 @@ interface Props {
   youtubeUrl?: string;
   trailerLocalPath?: string;
   trailerUrl?: string;
+  letterboxdUrl?: string;
   technicalSpecs?: TechnicalSpecs;
   crew: Array<{ role: string; name: string; url?: string }>;
   cast: Array<{ name: string; url?: string; character?: string }>;
@@ -47,6 +48,7 @@ const {
   coverImage,
   youtubeUrl,
   trailerLocalPath,
+  letterboxdUrl,
   technicalSpecs,
   crew,
   cast,
@@ -130,18 +132,40 @@ const awardsCount = festivals.filter((f) => f.award).length;
           </span>
         )}
       </div>
-      <h1 class="ff-title" set:html={title} />
+      {letterboxdUrl ? (
+        <h1 class="ff-title">
+          <a class="ff-lbxd-title" href={letterboxdUrl} target="_blank" rel="noopener" set:html={title} />
+        </h1>
+      ) : (
+        <h1 class="ff-title" set:html={title} />
+      )}
       <p class="ff-credit"><em>{role} {isEn ? "by" : (/\b(Scritto|Diretto|Montato|Prodotto|Sceneggiato|Girato)\b/i.test(role) ? "da" : "di")} Valerio Narcisi</em></p>
+      {letterboxdUrl && (
+        <a class="ff-lbxd-link" href={letterboxdUrl} target="_blank" rel="noopener">
+          {isEn ? "On Letterboxd ↗" : "Su Letterboxd ↗"}
+        </a>
+      )}
     </header>
 
     {coverImage && (
       <section class="ff-poster">
-        <div
-          class="ff-poster-img"
-          style={`background-image: url('${coverImage}')`}
-          role="img"
-          aria-label={title}
-        ></div>
+        {letterboxdUrl ? (
+          <a
+            class="ff-poster-img ff-poster-link"
+            href={letterboxdUrl}
+            target="_blank"
+            rel="noopener"
+            style={`background-image: url('${coverImage}')`}
+            aria-label={`${title} ${isEn ? "on Letterboxd" : "su Letterboxd"}`}
+          ></a>
+        ) : (
+          <div
+            class="ff-poster-img"
+            style={`background-image: url('${coverImage}')`}
+            role="img"
+            aria-label={title}
+          ></div>
+        )}
       </section>
     )}
 
