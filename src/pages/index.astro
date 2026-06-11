@@ -87,6 +87,7 @@ const posts = postsByDate.slice(0, 5);
 const allFilmEntries = await getCollection("films");
 const films = allFilmEntries
   .filter((e) => getLangFromId(e.id) === "it")
+  .filter((e) => getSlugFromId(e.id) !== "non-fa-ridere")
   .sort((a, b) => (a.data.sortOrder ?? 99) - (b.data.sortOrder ?? 99))
   .slice(0, 4)
   .map((e) => ({
