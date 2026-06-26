@@ -58,7 +58,7 @@ interface DayPlan {
 
 ```typescript
 interface SnackSection {
-  name: string;        // "Pre-Allenamento" | "Mattino Post-Allenamento" | "Mattino (no allenamento)" | "Pomeriggio"
+  name: string;        // "Pre-Allenamento" | "Mattino e Pomeriggio"
   options: string[][]; // ogni opzione e un array di stringhe (alimenti combinabili con "+")
 }
 ```
@@ -67,7 +67,7 @@ interface SnackSection {
 
 - **7 giorni** (lun-dom), ognuno con 3-4 pasti
 - Ogni pasto ha 1-3 opzioni (la prima e quella principale)
-- **4 sezioni spuntini** separate dai giorni, con 3-11 opzioni ciascuna
+- **2 sezioni spuntini** separate dai giorni, con 3-11 opzioni ciascuna
 - La domenica ha una struttura speciale: colazione libera, pranzo con 3 opzioni, spuntino dedicato, cena libera (pizza o ristorante)
 
 ## Componenti UI

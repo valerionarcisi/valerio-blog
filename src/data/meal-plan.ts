@@ -35,59 +35,7 @@ export const snacks: SnackSection[] = [
     ],
   },
   {
-    name: "Mattino Post-Allenamento",
-    options: [
-      [
-        "80g pane integrale o ai cereali / 5 gallette di riso o altro cereale + 1 cucchiaio colmo di crema 100% arachidi",
-      ],
-      [
-        "80g pane integrale o ai cereali / 5 gallette di riso o altro cereale + 2 cucchiaini di olio EVO a crudo + poco sale + origano",
-      ],
-      [
-        "80g pane integrale o ai cereali / 5 gallette di riso o altro cereale + 30g parmigiano stagionato",
-      ],
-      [
-        "1 yogurt greco 0% bianco (150g) + 2 cucchiaini di miele + 3-4 mandorle/nocciole non pelate + 150g frutti di bosco o frutta di stagione / 30g biscotti secchi (es. 6 oro saiwa / 3 osvego) spezzettati",
-      ],
-      [
-        "80g pane integrale o ai cereali / 5 gallette di riso o altro cereale + 40g affettato magro (crudo, cotto, fesa di tacchino/pollo, bresaola, speck sgrassato)",
-      ],
-    ],
-  },
-  {
-    name: "Mattino (no allenamento)",
-    options: [
-      [
-        "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 50g affettato magro",
-      ],
-      [
-        "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 1 cucchiaio raso colmo crema 100% arachidi",
-      ],
-      [
-        "1 pacchetto crackers magri (es. Magretti Galbusera) + 13 mandorle/nocciole non pelate",
-      ],
-      [
-        "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 2 cucchiaini miele o marmellata a ridotto tenore di zuccheri + 5g granella mandorle/nocciole",
-      ],
-      ["1 barretta proteica da circa 200 kcal"],
-      [
-        "1 dessert proteico (170-200g; es. Milk, Milbona, Stuffer) + 1 frutto fresco di stagione",
-      ],
-      [
-        "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 1 cucchiaio raso di patè di olive",
-      ],
-      [
-        "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 1 cucchiaio raso di patè di olive o hummus di ceci",
-      ],
-      [
-        "1 yogurt kefyr bianco da bere (500g; es. Milk) + 15 mandorle/nocciole non pelate",
-      ],
-      ["1 dessert proteico (170-200g; es. Milk, Milbona, Dolciando, Stuffer)"],
-      ["1 yogurt greco 0% alla frutta (150g; es. fage, pathos, delta)"],
-    ],
-  },
-  {
-    name: "Pomeriggio",
+    name: "Mattino e Pomeriggio",
     options: [
       [
         "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 50g affettato magro (crudo, cotto, fesa di tacchino/pollo, bresaola)",
@@ -103,7 +51,7 @@ export const snacks: SnackSection[] = [
       ],
       ["1 barretta proteica da circa 200 kcal"],
       [
-        "1 dessert proteico (170-200g; es. milk, milbona, stuffer) + 1 frutto fresco di stagione",
+        "1 dessert proteico (170-200g; es. Milk, Milbona, Stuffer) + 1 frutto fresco di stagione",
       ],
       [
         "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 1 cucchiaio raso di patè di olive",
@@ -151,14 +99,14 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g riso basmati (cotto al cuociriso ~280g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
+              "100g riso basmati (cotto ~230g) o pasta al dente (cotta ~200g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
               "240g ceci/lenticchie in scatola ben sciacquate condite con circa 100g di fonte proteica (es. macinata magra) + verdure a piacimento",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -171,7 +119,7 @@ export const days: DayPlan[] = [
             items: [
               "200g carne magra (coniglio, pollo, tacchino, struzzo, faraona) / 200g carne rossa magra (fesa, noce, scamone, girello di vitello, manzo magro, bufalo) / 250g pesce magro (merluzzo, platessa, spigola, sogliola, persico, cernia, orata, trota, rombo)",
               "Verdure a sazietà",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
@@ -179,7 +127,7 @@ export const days: DayPlan[] = [
             items: [
               "250g pesce spada fresco / acciughe o aringhe fresche / 200g sgombro fresco / tonno fresco (anche al naturale, già cotti)",
               "Verdure a sazietà",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -216,14 +164,13 @@ export const days: DayPlan[] = [
             oil: "4 cucchiaini olio EVO a crudo",
             items: [
               "Insalatona con verdure a foglia verde (lattuga, indivia, scarola, iceberg, rucola, valeriana) + 3 scatolette da 80g di tonno al naturale ben sgocciolate / 150g petto di pollo alla piastra a striscioline + sedano/finocchio/valeriana + carote o pomodorini a piacimento + 1 cucchiaio di semi di lino/zucca/girasole",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
             oil: "2 cucchiaini olio EVO a crudo",
             items: [
               "2 friselle integrali da circa 60g l'una (o 4 fette pane tostato) con 100g mozzarella light (Galbani Santa Lucia o Granarolo da 100g) + 1 scatoletta da 80g tonno al naturale ben sgocciolata + pomodorini/funghi + verdure a piacimento + sale ed origano o altre spezie a piacere",
-              "1 frutto fresco di stagione",
             ],
           },
         ],
@@ -236,7 +183,7 @@ export const days: DayPlan[] = [
             items: [
               "3 uova intere alla coque o in camicia (più digeribili) o sode o all'occhio di bue o in frittata con verdure a piacimento",
               "Verdure a sazietà (prediligi i cucchiaini di olio sulla verdura)",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
@@ -281,7 +228,7 @@ export const days: DayPlan[] = [
             oil: "2 cucchiaini olio EVO a crudo",
             items: [
               "200g sgombro/salmone al naturale (es. Nixe, Ondina, Riomare cotto al vapore, circa 110g sgocciolato a confezione) o sgombro/salmone fresco bollito o al vapore o al forno + verdure a scelta (rucola, valeriana, lattuga, iceberg) + carote/pomodorini + 10g noci secche/pinoli",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
@@ -301,15 +248,15 @@ export const days: DayPlan[] = [
             items: [
               "Hamburger di carne magra: 180g macinata magra o bianca magra, aggiunta al max di albume come amalgama + verdure (oppure dal macellaio di fiducia acquista 200g hamburgers di carne magra, meglio senza parmigiano o uovo, puoi prenderli anche con verdure o spezie o aromi aggiunti)",
               "Verdure a sazietà (es. zucchine alla piastra)",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
-            oil: "1 cucchiaino olio EVO a crudo",
+            oil: "2 cucchiaini olio EVO a crudo",
             items: [
-              "150g galantina",
-              "Verdure a sazietà (prediligi il cucchiaino di olio sulle verdure)",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "150g crudo magro sgrassato + 350g melone estivo",
+              "Verdure a sazietà (prediligi i cucchiaini di olio sulle verdure)",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -346,14 +293,14 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g pasta al dente (cotta ~240g) o riso basmati (cotto al cuociriso ~280g) o altro cereale (farro, orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
+              "100g pasta al dente (cotta ~200g) o riso basmati (cotto ~230g) o altro cereale (farro, orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "3 uova intere alla coque o in camicia (più digeribili) o sode o all'occhio di bue o in frittata con verdure a piacimento",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "Insalata con 250g melone estivo + 80g ceci/fagioli in scatola ben sciacquati + 10g noci secche o altra frutta secca + verdure a scelta (puoi aggiungere basilico o altri aromi) + salsa yogurt fatta con 3 cucchiai colmi di yogurt greco 0% bianco + erba cipollina o altra spezia + succo di limone (in base al gusto) + olio (senza sforare la dose di olio prevista dal piano)",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -365,7 +312,7 @@ export const days: DayPlan[] = [
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
               "Pollo al curry: 200g petto di pollo a cubetti marinato con 3 cucchiaini di olio, 1 cucchiaio colmo di curry, succo di mezzo limone, pepe e sale. Lasciare in macera almeno un'ora. Rosolare in padella, sfumare con vino bianco secco, cuocere 10-15 min. Salsa: yogurt greco 0% bianco con cucchiaio di curry",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
@@ -373,7 +320,7 @@ export const days: DayPlan[] = [
             items: [
               "200g carne magra (coniglio, pollo, tacchino, struzzo, faraona) / 200g carne rossa magra (fesa, noce, scamone, girello di vitello, manzo magro, bufalo) / 250g pesce magro (merluzzo, platessa, spigola, sogliola, persico, cernia, orata, trota, rombo)",
               "Verdure a sazietà",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -410,14 +357,14 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g pasta al dente (cotta ~240g) o riso basmati (cotto al cuociriso ~280g) o altro cereale (orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
+              "100g pasta al dente (cotta ~200g) o riso basmati (cotto ~230g) o altro cereale (orzo, miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, affettato magro, salmone affumicato)",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
               "Piadina fatta in casa con 100g farina di avena o tipo 1 o tipo 2 o integrale o mix + olio + acqua qb per rendere l'impasto malleabile (oppure acquistane direttamente integrale da max 350 kcal); farcita con 100g fonte proteica (affettato magro, gamberetti, tonno al naturale) o crema di legumi con 80g legumi in scatola ben sciacquati + spezie/aromi + verdure di stagione o con mezzo avocado e yogurt greco 0%",
-              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + formaggio magro spalmabile (es. Exquisa Fitline / Philadelphia Protein)",
+              "1 fetta pane integrale (30g) / 2 gallette / 2 fette wasa + formaggio magro spalmabile (es. Exquisa Fitline / Philadelphia Protein)",
             ],
           },
         ],
@@ -430,14 +377,14 @@ export const days: DayPlan[] = [
             items: [
               "2 burger vegetali (es. Bio Appetì lupino agli spinaci, Valsoia burger vegetali, Ecor spinaci piselli ed avena, Kioene burger vegetale alle melanzane, Granarolo seitan e spinaci)",
               "Verdure a sazietà (da accompagnare ai burgers)",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
               "Caesar salad: 200g petto di pollo cotto alla piastra + zucchine + salsa yogurt (100g yogurt greco 0% bianco + erba cipollina o altra spezia + succo di limone a piacere) + 1 cucchiaio di semi di lino/zucca/girasole (senza sforare la dose di olio prevista dal piano)",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -473,14 +420,14 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "120g riso basmati (cotto al cuociriso ~280g) o pasta al dente (cotta ~240g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
+              "100g riso basmati (cotto ~230g) o pasta al dente (cotta ~200g) o altro cereale (miglio, grano saraceno, quinoa, amaranto, sorgo, teff, cous cous) condito con verdure di stagione in abbondanza + circa 100g fonte proteica (es. 2 scatolette da 80g di tonno al naturale ben sgocciolate, macinata magra, legumi in scatola ben sciacquati)",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "240g ceci/lenticchie in scatola ben sciacquate condite con circa 100g di fonte proteica (es. macinata magra) + verdure a piacimento",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "Insalata con 250g melone estivo + carote crude + 15g noci secche + verdure a scelta (puoi aggiungere basilico o altri aromi) + 100g formaggio magro (es. linea Osella, primo sale, bianconanni, mozzarella light) / 100g salmone affumicato + erba cipollina + pizzico di sale + altra spezia a piacere",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -493,14 +440,15 @@ export const days: DayPlan[] = [
             items: [
               "100g salmone affumicato + 4 cucchiai di formaggio magro spalmabile (es. Exquisa Fitline / Philadelphia Protein) con una manciata di olive nere e valeriana/songino",
               "Verdure a sazietà",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
               "100g mozzarella light (es. Granarolo o Galbani Santa Lucia da 100g) + 2 scatolette da 80g di tonno al naturale ben sgocciolate + verdure a scelta",
-              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
+              "Verdure a sazietà",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
