@@ -21,6 +21,11 @@ function mapsSearch(query: string): string {
 function mapsDirections(from: string, to: string): string {
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}`;
 }
+function commons(file: string, w = 1000): string {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=${w}`;
+}
+
+const heroPhoto = commons("Lake bled 2021.jpg", 1400);
 
 const crew = [
   { name: "Valerio", role: "Pilota", icon: "ph:steering-wheel" },
@@ -30,171 +35,123 @@ const crew = [
 ];
 
 const stops = [
-  { city: "Trieste", nights: "3 notti", drive: "Da casa · ~510 km · 5h15", icon: "ph:lighthouse" },
-  { city: "Lubiana", nights: "2 notti", drive: "Via Postojna · ~110 km", icon: "ph:castle-turret" },
-  { city: "Wörthersee · Carinzia", nights: "3 notti", drive: "Traforo Caravanche · ~140 km · 1h30", icon: "ph:mountains" },
-  { city: "Rientro · sosta Veneto", nights: "1 notte", drive: "2 tratte da ~4h (Veneto, poi casa)", icon: "ph:bed" },
-];
-
-const stays = [
-  {
-    city: "Trieste",
-    zona: "Centro · Piazza Unità",
-    icon: "ph:lighthouse",
-    picks: [
-      { name: "Grand Hotel Duchi d'Aosta", note: "4★ in piazza, camere family", rec: true },
-      { name: "Hotel Italia", note: "3★ centrale, saletta giochi per bimbi" },
-      { name: "URBANAUTS Studios (appartamento)", note: "cucina e spazio, a 2 passi dal centro" },
-    ],
-  },
-  {
-    city: "Lubiana",
-    zona: "Città Vecchia (tutto a piedi)",
-    icon: "ph:castle-turret",
-    picks: [
-      { name: "Hotel Cubo", note: "camere comunicanti, babysitting, ottimo", rec: true },
-      { name: "Grand Hotel Union", note: "camere triple e suite a 2 camere" },
-      { name: "Bloom Hotel (appartamenti)", note: "sotto il castello, sul fiume" },
-    ],
-  },
-  {
-    city: "Wörthersee · Carinzia",
-    zona: "Pörtschach / Velden, sul lago",
-    icon: "ph:mountains",
-    picks: [
-      { name: "Parkhotel Pörtschach", note: "spiaggia privata, parco giochi, mini-club da 3 anni", rec: true },
-      { name: "Werzers Resort", note: "4★ con \"children's land\" e wellness" },
-      { name: "Hotel Elisabeth", note: "family & wellness sul lago" },
-    ],
-  },
-  {
-    city: "Veneto (rientro)",
-    zona: "Mestre o Jesolo, comodi all'A4/A57",
-    icon: "ph:bed",
-    picks: [
-      { name: "Hotel a Mestre", note: "pratico per una sola notte di transito", rec: true },
-      { name: "Beach hotel a Jesolo", note: "se volete un ultimo tuffo prima di casa" },
-    ],
-  },
+  { city: "Lubiana", nights: "6 notti · base unica", drive: "Da casa · ~600 km · 6h", icon: "ph:castle-turret", photo: commons("Downtown Ljubljana.JPG", 900) },
+  { city: "Postojna + Predjama", nights: "gita in giornata", drive: "Da Lubiana · ~45 min", icon: "ph:train", photo: commons("Postojna Cave - Slovenia.jpg", 900) },
+  { city: "Lago di Bled", nights: "gita in giornata", drive: "Da Lubiana · ~45 min", icon: "ph:boat", photo: commons("Lake bled 2021.jpg", 900) },
+  { city: "Bohinj + Vintgar", nights: "gita in giornata", drive: "Da Lubiana · ~1h", icon: "ph:mountains", photo: commons("Church of st. John the Baptist at Lake Bohinj, next to the bridge.jpg", 900) },
 ];
 
 const timeline = [
   {
-    day: "Lun 3/8",
-    title: "Casa → Trieste",
-    desc: "Partenza al mattino presto lungo l'A14/A4 (la tratta più lunga, ~5h). Arrivo nel pomeriggio: check-in e niente programma. Solo una passeggiata in Piazza Unità d'Italia e Molo Audace al tramonto, gelato di rito.",
+    day: "Mer 5/8",
+    title: "Casa → Lubiana",
+    desc: "Dopo due giorni per fare le valigie con calma (il 3 e 4), si parte. Tratta più lunga (~6h) con sosta pranzo verso Trieste. Arrivo a Lubiana nel pomeriggio: check-in nella base unica e prima passeggiata in centro, gelato sul fiume.",
     icon: "ph:car",
     places: [
-      { label: "Rotta casa → Trieste", url: mapsDirections("Porto Sant'Elpidio, FM", "Piazza Unità d'Italia, Trieste") },
-      { label: "Piazza Unità d'Italia", url: mapsSearch("Piazza Unità d'Italia Trieste") },
-    ],
-  },
-  {
-    day: "Mar 4/8",
-    title: "Trieste · Castello di Miramare e mare",
-    desc: "Mattina al Castello di Miramare: parco gratuito sul mare e BioMA, l'acquario sulla biodiversità del Golfo che piace ai bambini. Pomeriggio tranquillo: bagno e relax sul lungomare di Barcola.",
-    icon: "ph:castle-turret",
-    places: [
-      { label: "Castello di Miramare", url: mapsSearch("Castello di Miramare Trieste") },
-      { label: "Barcola (lungomare)", url: mapsSearch("Barcola Trieste lungomare") },
-    ],
-  },
-  {
-    day: "Mer 5/8",
-    title: "Trieste · Grotta Gigante + pomeriggio libero",
-    desc: "Mattina alla Grotta Gigante (visita guidata ~1h). Pomeriggio LIBERO per riposare davvero: gelato, piscina o spiaggia, ritmo lento prima di rimettersi in viaggio.",
-    icon: "ph:sun-horizon",
-    places: [
-      { label: "Grotta Gigante", url: mapsSearch("Grotta Gigante Sgonico Trieste") },
+      { label: "Rotta casa → Lubiana", url: mapsDirections("Porto Sant'Elpidio, FM", "Ljubljana") },
+      { label: "Centro di Lubiana", url: mapsSearch("Ljubljana old town") },
     ],
   },
   {
     day: "Gio 6/8",
-    title: "Trieste → Postojna + Predjama → Lubiana",
-    desc: "Spostamento dolce (tappe brevi). Tappa clou per le bimbe: Grotte di Postojna, si entra con un trenino dentro la grotta. A pochi minuti il Castello di Predjama incastonato nella roccia. Biglietto combinato, meglio online il giorno prima. Arrivo a Lubiana nel pomeriggio.",
-    icon: "ph:train",
+    title: "Lubiana · castello, centro e Tivoli",
+    desc: "Città piccola e tutta a piedi, perfetta col ritmo dei bambini. Mattina: funicolare per il Castello, centro pedonale, Ponte dei Draghi e giro in barca sul fiume. Pomeriggio senza fretta al parco Tivoli e allo zoo, con prati e parchi gioco.",
+    icon: "ph:buildings",
     places: [
-      { label: "Grotte di Postojna", url: mapsSearch("Postojna Cave") },
-      { label: "Castello di Predjama", url: mapsSearch("Predjama Castle") },
-      { label: "Rotta → Lubiana", url: mapsDirections("Postojna", "Ljubljana") },
+      { label: "Funicolare Castello", url: mapsSearch("Ljubljana Castle funicular") },
+      { label: "Parco Tivoli e Zoo", url: mapsSearch("Tivoli Park Ljubljana Zoo") },
     ],
   },
   {
     day: "Ven 7/8",
-    title: "Lubiana · centro, castello e Tivoli",
-    desc: "Città piccola e tutta a piedi, perfetta per un ritmo rilassato. Funicolare per il Castello, centro pedonale, Ponte dei Draghi e giro in barca sul fiume. Pomeriggio al parco Tivoli, con prati e parchi gioco per le bimbe.",
-    icon: "ph:buildings",
+    title: "Gita · Postojna + Castello di Predjama",
+    desc: "45 minuti da Lubiana e siamo alla tappa clou per le bimbe: Grotte di Postojna, si entra con un trenino dentro la grotta. A pochi minuti il Castello di Predjama incastonato nella roccia. Biglietto combinato, meglio online il giorno prima. In grotta ci sono ~10°C: portate una felpa anche d'estate.",
+    icon: "ph:train",
     places: [
-      { label: "Funicolare Castello", url: mapsSearch("Ljubljana Castle funicular") },
-      { label: "Parco Tivoli", url: mapsSearch("Tivoli Park Ljubljana") },
+      { label: "Grotte di Postojna", url: mapsSearch("Postojna Cave") },
+      { label: "Castello di Predjama", url: mapsSearch("Predjama Castle") },
     ],
   },
   {
     day: "Sab 8/8",
-    title: "Lubiana → Lago di Bled → Wörthersee",
-    desc: "Giornata-cartolina con guida spezzata in tratte corte. Sosta a Bled: giro in pletna fino all'isola con la chiesetta e millefoglie alla crema. Poi traforo delle Caravanche e arrivo in Carinzia, con primo tuffo al Wörthersee.",
+    title: "Gita · Lago di Bled",
+    desc: "Una delle cartoline più belle d'Europa, a 45 minuti. Giro in pletna (barca a remi) fino all'isola con la chiesetta, Castello di Bled a picco sul lago e la celebre millefoglie alla crema. Rientro serale a Lubiana.",
     icon: "ph:boat",
     places: [
       { label: "Lago di Bled", url: mapsSearch("Lake Bled") },
-      { label: "Rotta Bled → Wörthersee", url: mapsDirections("Bled", "Pörtschach am Wörthersee") },
+      { label: "Castello di Bled", url: mapsSearch("Bled Castle") },
     ],
   },
   {
     day: "Dom 9/8",
-    title: "Carinzia · Minimundus e Pyramidenkogel",
-    desc: "Giornata divertente ma vicino a casa-base. Minimundus a Klagenfurt: oltre 160 modelli in miniatura dei monumenti del mondo. Pomeriggio alla torre Pyramidenkogel, con dentro lo scivolo coperto più alto d'Europa (52 m): Bianca impazzirà. Ascensore per chi resta con Lea.",
-    icon: "ph:globe-hemisphere-east",
+    title: "Gita · Lago di Bohinj e Gola di Vintgar",
+    desc: "Giornata natura da dosare a piacere: bagno nell'acqua limpida del più selvaggio lago di Bohinj, e/o la Gola di Vintgar con le passerelle di legno sull'acqua smeraldo (per Lea meglio il marsupio). Ritmo lento, tanto verde.",
+    icon: "ph:mountains",
     places: [
-      { label: "Minimundus", url: mapsSearch("Minimundus Klagenfurt") },
-      { label: "Pyramidenkogel", url: mapsSearch("Pyramidenkogel Keutschach am See") },
+      { label: "Lago di Bohinj", url: mapsSearch("Lake Bohinj") },
+      { label: "Gola di Vintgar", url: mapsSearch("Vintgar Gorge") },
     ],
   },
   {
     day: "Lun 10/8",
-    title: "Wörthersee · giornata di riposo al lago",
-    desc: "Giornata vuota, solo lago: bagni in uno degli Strandbad attrezzati (acqua tiepida e balneabile), prato, gelati e una crociera in battello se ne avete voglia. Il vero giorno di stacco prima di rimettersi in viaggio.",
-    icon: "ph:swimming-pool",
+    title: "Lubiana · giornata libera e riposo",
+    desc: "Giorno di puro relax nella base: mercato centrale, gelato lungo la Ljubljanica, un altro giro al Tivoli o shopping tranquillo. Nessun programma, per ricaricarsi prima del rientro.",
+    icon: "ph:sun-horizon",
     places: [
-      { label: "Wörthersee Strandbad", url: mapsSearch("Wörthersee Strandbad Pörtschach") },
+      { label: "Mercato Centrale", url: mapsSearch("Ljubljana Central Market") },
     ],
   },
   {
     day: "Mar 11/8",
-    title: "Carinzia → sosta in Veneto (rientro 1/2)",
-    desc: "Prima delle due tratte di rientro (~3h45), così non si fa tutto in un giorno solo. Discesa via Tarvisio-Udine e notte in Veneto (zona Venezia/Jesolo): pomeriggio in spiaggia o un assaggio di Venezia.",
-    icon: "ph:bed",
+    title: "Lubiana → casa",
+    desc: "Rientro con calma (~6h) ben prima dell'esodo di Ferragosto. Arrivo a Porto Sant'Elpidio nel pomeriggio. Restano il 12, 13, 14, 15 e 16 liberi a casa come margine, senza traffico.",
+    icon: "ph:house",
     places: [
-      { label: "Rotta → Venezia", url: mapsDirections("Klagenfurt am Wörthersee", "Mestre, Venezia") },
+      { label: "Rotta → casa", url: mapsDirections("Ljubljana", "Porto Sant'Elpidio, FM") },
+    ],
+  },
+];
+
+const stays = [
+  {
+    city: "Lubiana — base unica",
+    zona: "Centro / Città Vecchia (tutto a piedi)",
+    icon: "ph:castle-turret",
+    picks: [
+      { name: "Hotel Cubo", note: "camere comunicanti, babysitting, ottimo per famiglie", rec: true },
+      { name: "Grand Hotel Union", note: "camere triple e suite a 2 camere" },
+      { name: "Bloom Hotel (appartamenti)", note: "sotto il castello, sul fiume, con cucina" },
     ],
   },
   {
-    day: "Mer 12/8",
-    title: "Veneto → casa (rientro 2/2)",
-    desc: "Ultima tratta lungo l'A14 (~4h), rientro a Porto Sant'Elpidio nel pomeriggio. Fine del giro: 10 giorni, 9 notti, con due giorni di puro riposo dentro.",
-    icon: "ph:house",
-    places: [
-      { label: "Rotta → casa", url: mapsDirections("Mestre, Venezia", "Porto Sant'Elpidio, FM") },
+    city: "In alternativa: base sul lago",
+    zona: "Bled, se preferite dormire in riva",
+    icon: "ph:mountains",
+    picks: [
+      { name: "Hotel Kompas Bled", note: "kids club, piscine, sul lago", rec: true },
+      { name: "Hotel Lovec", note: "family suite con 2 camere" },
+      { name: "Bohinj ECO Hotel", note: "con aquapark, per la quiete di Bohinj" },
     ],
   },
 ];
 
 const practical = [
-  { icon: "ph:sticker", title: "Vignetta Slovenia", text: "E-vignetta settimanale ~16 € (copre 7 giorni). Si compra online su evinjeta.dars.si o al confine." },
-  { icon: "ph:sticker", title: "Vignetta Austria", text: "Vignetta 10 giorni ~11,50 € (digitale o adesiva). Indispensabile prima di entrare in autostrada." },
-  { icon: "ph:car-profile", title: "Traforo Caravanche", text: "Pedaggio a parte ~9 € a tratta (~18 € A/R). Dal 2026 è aperta la seconda canna: traffico più scorrevole." },
-  { icon: "ph:road-horizon", title: "Pedaggi Italia", text: "A14/A4 Porto Sant'Elpidio–Trieste: ~35–40 € a tratta." },
-  { icon: "ph:identification-card", title: "Documenti bimbe", text: "Schengen: basta carta d'identità valida per l'espatrio (anche Bianca e Lea). Verificate le scadenze + tessera sanitaria/TEAM." },
-  { icon: "ph:baby-carriage", title: "Seggiolini", text: "Obbligatori in SLO/AT come in Italia: seggiolino per Lea (4) e rialzo per Bianca (7)." },
+  { icon: "ph:sticker", title: "Vignetta Slovenia", text: "E-vignetta settimanale ~16 € (copre 7 giorni): è l'unica che serve. Si compra online su evinjeta.dars.si o al confine." },
+  { icon: "ph:road-horizon", title: "Pedaggi Italia", text: "A14/A4 Porto Sant'Elpidio verso il confine: ~35–40 € a tratta." },
+  { icon: "ph:warning-circle", title: "Traffico Ferragosto", text: "Rientro fissato a martedì 11, molto prima del grande esodo del 14–15 agosto. Dal 12 al 16 restate a casa con calma, senza code." },
+  { icon: "ph:thermometer-cold", title: "Grotte fresche", text: "A Postojna ci sono ~10 °C tutto l'anno: felpa e scarpe chiuse per tutti, anche in piena estate." },
+  { icon: "ph:identification-card", title: "Documenti bimbe", text: "Slovenia e Italia sono UE/Schengen: basta carta d'identità valida per l'espatrio (anche Bianca e Lea). Verificate le scadenze + tessera sanitaria/TEAM." },
+  { icon: "ph:baby-carriage", title: "Seggiolini", text: "Obbligatori in Slovenia come in Italia: seggiolino per Lea (4) e rialzo per Bianca (7)." },
 ];
 
 const budget = [
-  { voce: "Carburante (~2.000 km)", costo: "~280–330 €", total: false },
-  { voce: "Pedaggi Italia (A/R)", costo: "~75–80 €", total: false },
-  { voce: "Vignette SLO + AT + traforo", costo: "~45 €", total: false },
-  { voce: "Alloggi (9 notti, fascia media)", costo: "~1.300–1.550 €", total: false },
-  { voce: "Ingressi e attività", costo: "~350–450 €", total: false },
-  { voce: "Vitto (~90 €/giorno × 10)", costo: "~900–1.000 €", total: false },
-  { voce: "Totale indicativo", costo: "~3.000–3.450 €", total: true },
+  { voce: "Carburante (~1.500 km)", costo: "~220–270 €", total: false },
+  { voce: "Pedaggi Italia (A/R)", costo: "~75–90 €", total: false },
+  { voce: "Vignetta Slovenia (settimanale)", costo: "~16 €", total: false },
+  { voce: "Alloggio Lubiana (6 notti, fascia media)", costo: "~800–1.050 €", total: false },
+  { voce: "Ingressi e attività", costo: "~300–400 €", total: false },
+  { voce: "Vitto (~90 €/giorno × 7)", costo: "~650–800 €", total: false },
+  { voce: "Totale indicativo", costo: "~2.100–2.650 €", total: true },
 ];
 ---
 
@@ -205,16 +162,20 @@ const budget = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
-    <title>Vacanza · Trieste · Lubiana · Carinzia · Agosto 2026</title>
+    <title>Vacanza · Slovenia · Agosto 2026</title>
     <style is:global>
       .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
 
-      .foglio body.admin .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .page-header { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
       .foglio body.admin .page-kicker { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
       .foglio body.admin .page-header h1 { font-family: var(--foglio-serif); color: var(--foglio-ink); font-size: var(--foglio-fs-4xl); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin-bottom: 0.5rem; }
       .foglio body.admin .page-subtitle { color: var(--foglio-ink-soft); font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
       .foglio body.admin .page-subtitle .icon-inline { width: 1rem; height: 1rem; color: var(--foglio-accent); }
       .foglio body.admin .booking-ref { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.1em; font-style: normal; }
+
+      /* Foto */
+      .foglio body.admin .hero-photo { width: 100%; height: 300px; object-fit: cover; border-radius: var(--foglio-radius-md); margin: 0 0 0.4rem; display: block; background: var(--foglio-paper-2); }
+      .foglio body.admin .photo-credit { font-family: var(--foglio-mono); font-size: 0.62rem; color: var(--foglio-ink-mute); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1.6rem; }
 
       .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--foglio-rule); }
       .foglio body.admin .card-title-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); }
@@ -229,9 +190,11 @@ const budget = [
       .foglio body.admin .ticket-name { font-family: var(--foglio-serif); font-weight: 500; font-size: var(--foglio-fs-md); color: var(--foglio-ink); }
       .foglio body.admin .ticket-type { color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-family: var(--foglio-mono); text-transform: uppercase; letter-spacing: 0.1em; }
 
-      /* Tappe */
-      .foglio body.admin .stops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-      .foglio body.admin .stop { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      /* Tappe con foto */
+      .foglio body.admin .stops-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
+      .foglio body.admin .stop { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); overflow: hidden; }
+      .foglio body.admin .stop-photo { width: 100%; height: 140px; object-fit: cover; display: block; background: var(--foglio-paper); }
+      .foglio body.admin .stop-body { padding: 1rem 1.1rem 1.15rem; }
       .foglio body.admin .stop-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.5rem; }
       .foglio body.admin .stop-icon { width: 1.2rem; height: 1.2rem; color: var(--foglio-accent); flex-shrink: 0; }
       .foglio body.admin .stop-city { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
@@ -285,6 +248,7 @@ const budget = [
 
       @media (max-width: 720px) {
         .foglio body.admin .card { padding: 1.15rem; }
+        .foglio body.admin .hero-photo { height: 200px; }
         .foglio body.admin .timeline { padding-left: 2rem; }
         .foglio body.admin .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
         .foglio body.admin .timeline::before { left: 0.8rem; }
@@ -295,15 +259,18 @@ const budget = [
     <AdminNav currentPage="vacanza" token={token} />
     <div class="container">
       <header class="page-header">
-        <div class="page-kicker">Trip · Famiglia Narcisi · ritmo rilassato</div>
-        <h1><em class="acc">Vacanza.</em> Trieste · Lubiana · Carinzia</h1>
+        <div class="page-kicker">Trip · Famiglia Narcisi · tutta Slovenia</div>
+        <h1><em class="acc">Vacanza.</em> Slovenia · base a Lubiana</h1>
         <p class="page-subtitle">
           <Icon name="ph:calendar-blank" class="icon-inline" size={16} is:inline />
-          <span>3 – 12 agosto 2026 · 10 giorni / 9 notti · 3 basi, 2 giorni di riposo</span>
+          <span>5 – 11 agosto 2026 · 7 giorni / 6 notti · base unica, gite in giornata</span>
           <span>·</span>
-          <span class="booking-ref">In auto · rientro in 2 tratte</span>
+          <span class="booking-ref">Rientro l'11, prima dell'esodo di Ferragosto</span>
         </p>
       </header>
+
+      <img class="hero-photo" src={heroPhoto} alt="Lago di Bled con l'isola e la chiesetta" loading="lazy" />
+      <div class="photo-credit">Foto: Wikimedia Commons</div>
 
       <section class="card">
         <h2 class="card-title">
@@ -326,17 +293,20 @@ const budget = [
       <section class="card">
         <h2 class="card-title">
           <Icon name="ph:map-pin-line" class="card-title-icon" size={18} is:inline />
-          Le tappe
+          Base e gite
         </h2>
         <div class="stops-grid">
           {stops.map((s) => (
             <div class="stop">
-              <div class="stop-head">
-                <span class="stop-icon"><Icon name={s.icon} size={18} is:inline /></span>
-                <span class="stop-city">{s.city}</span>
+              <img class="stop-photo" src={s.photo} alt={s.city} loading="lazy" />
+              <div class="stop-body">
+                <div class="stop-head">
+                  <span class="stop-icon"><Icon name={s.icon} size={18} is:inline /></span>
+                  <span class="stop-city">{s.city}</span>
+                </div>
+                <div class="stop-nights">{s.nights}</div>
+                <div class="stop-drive">{s.drive}</div>
               </div>
-              <div class="stop-nights">{s.nights}</div>
-              <div class="stop-drive">{s.drive}</div>
             </div>
           ))}
         </div>
