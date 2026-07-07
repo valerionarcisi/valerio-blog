@@ -29,6 +29,7 @@ type Item = {
   whereWhen?: string;
   probability?: number | null;
   tags?: string[];
+  status?: string;
 };
 
 const RADAR_PATH = "public/radar.json";
@@ -71,12 +72,27 @@ function fitLine(p: number | null | undefined): string {
   return `🎯 <b>Fit con te:</b> ${p}% ${dot}`;
 }
 
-function deadlineLine(deadline: string | null): string {
+function deadlineLine(deadline: string | null, status?: string): string {
   const dl = daysLeft(deadline);
-  if (dl === null) return "🗓 <b>Scadenza:</b> <i>senza scadenza</i>";
+  if (dl === null) {
+    if (status === "in-arrivo")
+      return "🗓 <b>Scadenza:</b> <i>in arrivo (prossima call)</i>";
+    return "🗓 <b>Scadenza:</b> <i>senza scadenza</i>";
+  }
   if (dl < 0) return `🗓 <b>Scadenza:</b> ${esc(deadline!)} <i>(scaduta)</i>`;
   if (dl === 0) return "🗓 <b>Scadenza:</b> <b>oggi</b>";
   return `🗓 <b>Scadenza:</b> ${esc(deadline!)} (tra ${dl} giorn${dl === 1 ? "o" : "i"})`;
+}
+
+/**
+ * Solo opportunità a cui puoi ancora partecipare: niente scadute
+ * (status "scaduta" o deadline passata). In-arrivo e senza-scadenza restano.
+ */
+function isParticipable(it: Item): boolean {
+  if (it.status === "scaduta") return false;
+  const dl = daysLeft(it.deadline);
+  if (dl !== null && dl < 0) return false;
+  return true;
 }
 
 function itemBlock(it: Item): string {
@@ -84,7 +100,7 @@ function itemBlock(it: Item): string {
   const src = it.source ? ` · <i>${esc(it.source)}</i>` : "";
   lines.push(`🎬 <b>${esc(it.title)}</b>${src}`);
   lines.push(fitLine(it.probability));
-  lines.push(deadlineLine(it.deadline));
+  lines.push(deadlineLine(it.deadline, it.status));
   if (it.whereWhen) lines.push(`📍 ${esc(it.whereWhen)}`);
   if (it.forWho) lines.push(`👤 <b>Per chi:</b> ${esc(it.forWho)}`);
   if (it.why) lines.push(`💡 <b>Perché:</b> ${esc(it.why)}`);
@@ -195,6 +211,19 @@ function selftest(): void {
   const total = msgs.join("").split("🎬").length - 1;
   console.assert(total === 40, `attesi 40 item impaginati, trovati ${total}`);
   console.assert(!msgs[0].includes("<0>"), "titolo con < deve essere escapato");
+
+  // Filtro partecipabili: fuori scadute/deadline-passata, dentro aperte/in-arrivo.
+  const mix: Item[] = [
+    { id: "a", title: "X", deadline: "2020-01-01", link: "", status: "aperta" },
+    { id: "b", title: "Y", deadline: null, link: "", status: "scaduta" },
+    { id: "c", title: "Z", deadline: "2099-01-01", link: "", status: "aperta" },
+    { id: "d", title: "W", deadline: null, link: "", status: "in-arrivo" },
+  ];
+  const part = mix.filter(isParticipable).map((i) => i.id);
+  console.assert(
+    JSON.stringify(part) === JSON.stringify(["c", "d"]),
+    `partecipabili attesi [c,d], ottenuti ${JSON.stringify(part)}`,
+  );
   console.log("radar-notify selftest OK");
 }
 
@@ -203,9 +232,12 @@ async function main(): Promise<void> {
     selftest();
     return;
   }
-  const fresh = newItems(previousRadar(), readFileSync(RADAR_PATH, "utf8"));
+  const fresh = newItems(
+    previousRadar(),
+    readFileSync(RADAR_PATH, "utf8"),
+  ).filter(isParticipable); // mai scadute; le già-inviate sono escluse dal diff
   if (fresh.length === 0) {
-    console.log("Nessuna nuova opportunità, nessuna notifica.");
+    console.log("Nessuna nuova opportunità partecipabile, nessuna notifica.");
     return;
   }
   await notify(fresh);
