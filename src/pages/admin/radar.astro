@@ -41,6 +41,12 @@ if (!isAuthorized) {
       .rd-head {
         margin-bottom: 1.25rem;
       }
+      @media (max-width: 768px) {
+        /* lascia spazio all'hamburger fisso della sidebar admin */
+        .rd-head {
+          padding-left: 3.4rem;
+        }
+      }
       .rd-head h1 {
         margin-bottom: 0.15rem;
       }
@@ -85,12 +91,15 @@ if (!isAuthorized) {
         display: flex;
         flex-direction: column;
         gap: 0.7rem;
+        min-width: 0; /* consenti alla card di restringersi nel track della griglia */
+        overflow-wrap: anywhere; /* spezza URL/parole lunghe invece di sforare */
       }
       .rd-card-top {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         gap: 0.6rem;
+        flex-wrap: wrap; /* la fonte va a capo se il titolo è lungo */
       }
       .rd-title {
         font-family: var(--foglio-serif);
