@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T09:00:00+02:00",
+  "updatedAt": "2026-07-07T10:03:44.293Z",
   "items": [
     {
       "id": "talentbridge-cyprus-2026",
@@ -13,7 +13,10 @@
       "action": "Candidati sul Google Form linkato.",
       "link": "https://tportmarket.com/talentbridge-2026",
       "source": "OnlyFUNDS",
-      "tags": ["in-person", "a-pagamento"],
+      "tags": [
+        "in-person",
+        "a-pagamento"
+      ],
       "status": "aperta"
     },
     {
@@ -26,24 +29,30 @@
       "probability": 45,
       "why": "Molto competitivo; serve un progetto già solido in trattamento.",
       "action": "Invia trattamento (max 3 pagine) + note di regia via il portale NISI MASA.",
-      "link": "https://www.nisimasa.com/european-short-pitch",
-      "source": "European Short Pitch",
-      "tags": ["hybrid", "gratis"],
+      "link": "https://www.europeanshortpitch.org/",
+      "source": "European Short Pitch / NISI MASA",
+      "tags": [
+        "hybrid",
+        "gratis"
+      ],
       "status": "aperta"
     },
     {
-      "id": "creative-europe-media-dev-2026",
-      "title": "Creative Europe MEDIA — Development Single Project",
-      "what": "Fondo di sviluppo per singola opera (fiction, doc, animazione).",
-      "forWho": "Case di produzione con un'opera precedente qualificante.",
+      "id": "creative-europe-media-codev-2026",
+      "title": "Creative Europe MEDIA — European Co-Development",
+      "what": "Fondo per lo sviluppo di singolo progetto in coproduzione internazionale (almeno 2 produttori da 2 Paesi MEDIA).",
+      "forWho": "Case di produzione europee con partner internazionali per opera singola di fiction/doc/animazione.",
       "deadline": null,
       "whereWhen": "Bando UE, gestione online",
-      "probability": 20,
-      "why": "Richiede una società di produzione ammissibile: serve un partner produttore.",
-      "action": "Verifica ammissibilità e cerca un produttore ospite prima della prossima call.",
+      "probability": 25,
+      "why": "Richiede coproduzione internazionale e partner consolidati; appena indicato per regista sola.",
+      "action": "Struttura partnership europea; verifica ammissibilità. Prossima call tipicamente febbraio 2027.",
       "link": "https://culture.ec.europa.eu/creative-europe/media",
-      "source": "Creative Europe MEDIA",
-      "tags": ["online", "gratis"],
+      "source": "Creative Europe MEDIA 2021-2027",
+      "tags": [
+        "online",
+        "gratis"
+      ],
       "status": "in-arrivo"
     },
     {
@@ -56,9 +65,174 @@
       "probability": 35,
       "why": "Deadline già passata: tenuta come riferimento per l'edizione 2027.",
       "action": "Segna la data e prepara il DCP per la call 2027.",
-      "link": "https://www.shorto.it/open-call",
+      "link": "https://shorto.centrodelcorto.it/the-2026-calls-for-projects-are-open/",
       "source": "ShorTO",
-      "tags": ["in-person", "gratis"],
+      "tags": [
+        "in-person",
+        "gratis"
+      ],
+      "status": "scaduta"
+    },
+    {
+      "id": "sentiero-film-lab-bridges-2026",
+      "title": "Sentiero Film Lab – Bridges",
+      "what": "Programma internazionale di sviluppo cortometraggi con residenza intensiva in Toscana e accesso al mercato internazionale.",
+      "forWho": "Registi emergenti europei con progetto di corto in fase di sviluppo; regista + produttore prioritario.",
+      "deadline": null,
+      "whereWhen": "Poggibonsi/Firenze, 17-24 settembre 2026 (residenza + industry days)",
+      "probability": 55,
+      "why": "Profilo azzeccato; orientato al mercato europeo con reali opportunità di produzione e distribuzione.",
+      "action": "Verifica bando on FilmFreeway; candidatura con soggetto + note di regia + eventuale sceneggiatura parziale.",
+      "link": "https://filmfreeway.com/sentierofilmlab",
+      "source": "Sentiero Film Factory / Cineuropa",
+      "tags": [
+        "in-person",
+        "gratis"
+      ],
+      "status": "aperta"
+    },
+    {
+      "id": "shorto-film-market-2026-almost-famous",
+      "title": "ShorTO Film Market 2026 — Almost Famous (Distribuzione)",
+      "what": "Forum internazionale di pitching per corti finiti/quasi finiti in cerca di distribuzione. Partnership con Lights On.",
+      "forWho": "Registi/produttori con corto 30 min max, last phase postprod, rough cut o finito, senza deal distributivo.",
+      "deadline": "2026-08-31",
+      "whereWhen": "Torino, 28-30 novembre 2026 (TFI Torino Film Industry 9)",
+      "probability": 50,
+      "why": "Accesso diretto a distributore internazionale (Lights On); premio contratto 2 anni.",
+      "action": "Candidati con 2-min excerpt + pitch deck. Se selezionato, accredito + one-to-one meetings.",
+      "link": "https://shorto.centrodelcorto.it/the-2026-calls-for-projects-are-open/",
+      "source": "ShorTO / Lights On Distribution",
+      "tags": [
+        "in-person",
+        "gratis"
+      ],
+      "status": "aperta"
+    },
+    {
+      "id": "ministero-cultura-cortometraggi-2026",
+      "title": "Ministero Cultura — Produzione Cortometraggi 2026",
+      "what": "Bando per contributi selettivi per la produzione di cortometraggi italiani (€900k totali disponibili).",
+      "forWho": "Case di produzione italiane con diritti creativi su opera. Importanti limiti: richiede società con fatturato/bilancio.",
+      "deadline": "2026-10-15",
+      "whereWhen": "Italia, gestione DGCA",
+      "probability": 15,
+      "why": "Regista senza società di produzione costituita non è eleggibile; necessita partnership produttiva italiana.",
+      "action": "Se in partnership con produttore: prepara dossier tecnico-finanziario. Altrimenti non idoneo.",
+      "link": "https://cinema.cultura.gov.it/cosa-facciamo/sostegni-economici/linee-di-sostegno/contributi-selettivi/selettivi-produzione/",
+      "source": "DGCA Direzione Generale Cinema",
+      "tags": [
+        "online",
+        "gratis"
+      ],
+      "status": "aperta"
+    },
+    {
+      "id": "premio-condor-incanto-2026",
+      "title": "Premio Condor — Incanto Film Festival",
+      "what": "Percorso di sviluppo sceneggiature (luglio-settembre): masterclass, tutoring, competizione soggetto.",
+      "forWho": "Giovani autori/registi italiani o residenti in Italia; soggetto breve 2-3 pagine → sviluppo 10-15 pagine.",
+      "deadline": "2026-07-09",
+      "whereWhen": "Online + finale Pesaro settembre 2026",
+      "probability": 60,
+      "why": "Profilo azzeccato; scadenza imminente (9 luglio); max 8 opere selezionate; mentoring dedicato.",
+      "action": "CANDIDATI SUBITO: soggetto breve + nota biografica via form. Deadline 9 luglio 2026.",
+      "link": "https://collettivoincendio.substack.com/p/luglio-2026",
+      "source": "Collettivo Incendio / Incanto Film Festival",
+      "tags": [
+        "hybrid",
+        "gratis"
+      ],
+      "status": "aperta"
+    },
+    {
+      "id": "riff-pitch-lab-2026",
+      "title": "RIFF Pitch Lab 2026 — Documentari",
+      "what": "Laboratorio di sviluppo per doc a impatto sociale: mentoring, script coaching, pitch prep.",
+      "forWho": "Registi europei under 35 con progetto doc già prodotto da società produzione europea maggioritaria.",
+      "deadline": null,
+      "whereWhen": "Online mentoring + finale Sestri Levante (Riviera Film Festival), settembre 2026",
+      "probability": 35,
+      "why": "Se regista doc emergente: interessante; ma richiede partner produttore europeo confermato.",
+      "action": "Verifica bando 2026 su Riviera International Film Festival o Collettivo Incendio.",
+      "link": "https://collettivoincendio.substack.com/p/marzo-2026",
+      "source": "Collettivo Incendio / Riviera Film Festival",
+      "tags": [
+        "hybrid",
+        "gratis"
+      ],
+      "status": "in-arrivo"
+    },
+    {
+      "id": "figari-short-film-fest-2026",
+      "title": "Figari International Short Film Fest 2026",
+      "what": "Festival di cortometraggi + market: pitching per production/distribution/broadcast.",
+      "forWho": "Registi emergenti con cortometraggi in sviluppo o completati.",
+      "deadline": null,
+      "whereWhen": "Golfo Aranci (Sardegna), giugno 2026",
+      "probability": 60,
+      "why": "Festival consolidato con network europeo; mercato reale tra buyers, broadcaster, distributori.",
+      "action": "Verifica call 2027 tra marzo-aprile 2026; prepara portfolio corti + note regista.",
+      "link": "https://www.artribune.com/arti-performative/cinema/2026/07/cortometraggio-potenzialita-limiti-intervista-matteo-pianezzi-figari-short-film-fest/",
+      "source": "Cineuropa / Figari International",
+      "tags": [
+        "in-person",
+        "a-pagamento"
+      ],
+      "status": "in-arrivo"
+    },
+    {
+      "id": "we-frame-short-film-fest-2026",
+      "title": "WE Frame Short Film Festival 2026",
+      "what": "Festival europeo su uguaglianza di genere: call per 8 registi emergenti, laboratori, produzione + proiezione.",
+      "forWho": "Giovani filmmaker europei under 35 interessati a tematiche di genere e diritti.",
+      "deadline": null,
+      "whereWhen": "Ferrara (European Projects Festival), autunno 2026",
+      "probability": 65,
+      "why": "Progetto europeo CERV finanziato; opportunità di produzione gratuita di corto originale.",
+      "action": "Verifica call apertura (tipicamente primavera 2026) su sito European Projects Festival.",
+      "link": "https://www.europeanprojectsfestival.eu/",
+      "source": "European Projects Festival / WE Frame",
+      "tags": [
+        "hybrid",
+        "gratis"
+      ],
+      "status": "in-arrivo"
+    },
+    {
+      "id": "cortisonici-2026",
+      "title": "Cortisonici 2026 — Festival Cortometraggi",
+      "what": "Festival competitivo per corti; premio pubblico e premi speciali; ingresso gratuito.",
+      "forWho": "Registi con cortometraggi realizzati dopo 1 gennaio 2025, max 15 min.",
+      "deadline": "2025-12-31",
+      "whereWhen": "Varese, aprile 2026",
+      "probability": 50,
+      "why": "Festival affermato; ingresso gratuito; visibilità nazionale italiana.",
+      "action": "Candidatura già passata per edizione 2026. Annota per edizione 2027 (tipicamente ottobre-novembre).",
+      "link": "https://cortisonici.org/bando-2026",
+      "source": "Cortisonici / Associazione Cortisonici",
+      "tags": [
+        "in-person",
+        "gratis"
+      ],
+      "status": "scaduta"
+    },
+    {
+      "id": "short-out-festival-2026",
+      "title": "Short Out Festival 2026",
+      "what": "Festival internazionale cortometraggi; montepremi: Best Short Film €1500, Best National €750, Best International €750.",
+      "forWho": "Registi con corti di qualunque genere, nessun limite tematico.",
+      "deadline": "2026-04-30",
+      "whereWhen": "Lainate (Milano), 7-12 luglio 2026",
+      "probability": 45,
+      "why": "Festival giovane ma in crescita; premi cash interessanti; pernotto + vitto per finalisti.",
+      "action": "DEADLINE PASSATA per 2026. Annota per 2027 (apertura tipicamente gennaio).",
+      "link": "https://www.shortoutfestival.com/",
+      "source": "Short Out Festival",
+      "tags": [
+        "in-person",
+        "a-pagamento"
+      ],
       "status": "scaduta"
     }
   ]
