@@ -1,16 +1,17 @@
 #!/usr/bin/env -S node --import tsx
 /**
  * Confronta public/radar.json (working tree) con la versione in HEAD e,
- * se ci sono item con id nuovi, manda una DM Telegram all'owner.
+ * se ci sono item con id nuovi, manda una DM Telegram all'owner —
+ * impaginata (HTML) con fit %, per chi, perché, azione, scadenza, link.
  *
- * L'agente giornaliero lo chiama DOPO aver scritto radar.json e PRIMA del commit,
+ * L'agente lo chiama DOPO aver scritto radar.json e PRIMA del commit,
  * così `git show HEAD:...` è ancora la versione precedente.
  *
  * Usage:
  *   TELEGRAM_BOT_TOKEN=xxx TELEGRAM_USER_ID_WHITELIST=123 \
- *   pnpm tsx scripts/radar-notify.ts
+ *   npx tsx scripts/radar-notify.ts
  *
- *   pnpm tsx scripts/radar-notify.ts --selftest   # verifica la diff, niente rete
+ *   npx tsx scripts/radar-notify.ts --selftest   # diff + impaginazione, niente rete
  */
 
 import { execSync } from "node:child_process";
@@ -21,9 +22,17 @@ type Item = {
   title: string;
   deadline: string | null;
   link: string;
+  source?: string;
+  forWho?: string;
+  why?: string;
+  action?: string;
+  whereWhen?: string;
+  probability?: number | null;
+  tags?: string[];
 };
 
 const RADAR_PATH = "public/radar.json";
+const TG_LIMIT = 3500; // sotto il tetto Telegram (4096) con margine
 
 function idsOf(json: string): Item[] {
   try {
@@ -40,11 +49,83 @@ export function newItems(prevJson: string, currJson: string): Item[] {
   return idsOf(currJson).filter((i) => i.id && !prevIds.has(i.id));
 }
 
+function esc(s: string): string {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function daysLeft(deadline: string | null | undefined): number | null {
+  if (!deadline) return null;
+  const d = new Date(deadline + "T00:00:00");
+  if (Number.isNaN(d.getTime())) return null;
+  const n = new Date();
+  const today = new Date(n.getFullYear(), n.getMonth(), n.getDate()).getTime();
+  return Math.round((d.getTime() - today) / 86400000);
+}
+
+function fitLine(p: number | null | undefined): string {
+  if (p === null || p === undefined) return "🎯 <b>Fit con te:</b> —";
+  const dot = p >= 55 ? "🟢" : p >= 30 ? "🟡" : "⚪";
+  return `🎯 <b>Fit con te:</b> ${p}% ${dot}`;
+}
+
+function deadlineLine(deadline: string | null): string {
+  const dl = daysLeft(deadline);
+  if (dl === null) return "🗓 <b>Scadenza:</b> <i>senza scadenza</i>";
+  if (dl < 0) return `🗓 <b>Scadenza:</b> ${esc(deadline!)} <i>(scaduta)</i>`;
+  if (dl === 0) return "🗓 <b>Scadenza:</b> <b>oggi</b>";
+  return `🗓 <b>Scadenza:</b> ${esc(deadline!)} (tra ${dl} giorn${dl === 1 ? "o" : "i"})`;
+}
+
+function itemBlock(it: Item): string {
+  const lines: string[] = [];
+  const src = it.source ? ` · <i>${esc(it.source)}</i>` : "";
+  lines.push(`🎬 <b>${esc(it.title)}</b>${src}`);
+  lines.push(fitLine(it.probability));
+  lines.push(deadlineLine(it.deadline));
+  if (it.whereWhen) lines.push(`📍 ${esc(it.whereWhen)}`);
+  if (it.forWho) lines.push(`👤 <b>Per chi:</b> ${esc(it.forWho)}`);
+  if (it.why) lines.push(`💡 <b>Perché:</b> ${esc(it.why)}`);
+  if (it.action) lines.push(`✅ <b>Azione:</b> ${esc(it.action)}`);
+  if (it.tags?.length) lines.push(`🏷 ${it.tags.map(esc).join(" · ")}`);
+  if (it.link) lines.push(`🔗 <a href="${esc(it.link)}">Apri il bando</a>`);
+  return lines.join("\n");
+}
+
+function bySortDeadline(a: Item, b: Item): number {
+  const da = daysLeft(a.deadline);
+  const db = daysLeft(b.deadline);
+  if (da === null && db === null) return 0;
+  if (da === null) return 1;
+  if (db === null) return -1;
+  return da - db;
+}
+
+/** Uno o più messaggi HTML pronti per Telegram (spezzati sotto il limite). */
+export function buildMessages(fresh: Item[]): string[] {
+  const header = `📡 <b>Radar opportunità</b> — ${fresh.length} nuove\n<i>ordinate per scadenza</i>`;
+  const blocks = [...fresh].sort(bySortDeadline).map(itemBlock);
+  const messages: string[] = [];
+  let cur = header;
+  for (const b of blocks) {
+    const cand = `${cur}\n\n${b}`;
+    if (cand.length > TG_LIMIT) {
+      messages.push(cur);
+      cur = b;
+    } else {
+      cur = cand;
+    }
+  }
+  messages.push(cur);
+  return messages;
+}
+
 function previousRadar(): string {
   try {
     return execSync(`git show HEAD:${RADAR_PATH}`, { encoding: "utf8" });
   } catch {
-    // Primo giro: il file non è ancora in HEAD → nessun "precedente".
     return '{"items":[]}';
   }
 }
@@ -61,22 +142,26 @@ function ownerChatId(): number {
 async function notify(fresh: Item[]): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw new Error("TELEGRAM_BOT_TOKEN mancante");
-  const lines = fresh.map((i) => {
-    const when = i.deadline ? ` — scad. ${i.deadline}` : "";
-    return `• ${i.title}${when}\n${i.link}`;
-  });
-  const text = `📡 Radar: ${fresh.length} nuova/e opportunità\n\n${lines.join("\n\n")}`;
-  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id: ownerChatId(),
-      text,
-      disable_web_page_preview: true,
-    }),
-  });
-  if (!res.ok) {
-    throw new Error(`Telegram sendMessage ${res.status}: ${await res.text()}`);
+  const chatId = ownerChatId();
+  for (const text of buildMessages(fresh)) {
+    const res = await fetch(
+      `https://api.telegram.org/bot${token}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        }),
+      },
+    );
+    if (!res.ok) {
+      throw new Error(
+        `Telegram sendMessage ${res.status}: ${await res.text()}`,
+      );
+    }
   }
 }
 
@@ -88,10 +173,28 @@ function selftest(): void {
     JSON.stringify(fresh) === JSON.stringify(["c", "d"]),
     `atteso [c,d], ottenuto ${JSON.stringify(fresh)}`,
   );
-  // Nessun precedente ⇒ tutti nuovi.
   console.assert(newItems('{"items":[]}', curr).length === 3, "empty prev ⇒ 3");
-  // Nessuna novità ⇒ vuoto.
   console.assert(newItems(curr, curr).length === 0, "same ⇒ 0");
+
+  // Impaginazione: escaping + chunking sotto il limite, nessun item perso.
+  const many: Item[] = Array.from({ length: 40 }, (_, i) => ({
+    id: `x${i}`,
+    title: `Bando <${i}> & C.`,
+    deadline: "2026-09-01",
+    link: "https://e.x/a",
+    forWho: "Registi emergenti",
+    why: "Fit alto",
+    probability: 60,
+  }));
+  const msgs = buildMessages(many);
+  console.assert(msgs.length > 1, "40 item ⇒ più messaggi");
+  console.assert(
+    msgs.every((m) => m.length <= 4096),
+    "ogni messaggio sotto 4096",
+  );
+  const total = msgs.join("").split("🎬").length - 1;
+  console.assert(total === 40, `attesi 40 item impaginati, trovati ${total}`);
+  console.assert(!msgs[0].includes("<0>"), "titolo con < deve essere escapato");
   console.log("radar-notify selftest OK");
 }
 
