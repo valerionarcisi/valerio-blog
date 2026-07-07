@@ -1,0 +1,65 @@
+{
+  "updatedAt": "2026-07-07T09:00:00+02:00",
+  "items": [
+    {
+      "id": "talentbridge-cyprus-2026",
+      "title": "TalentBridge Cyprus 2026",
+      "what": "Workshop di 2 giorni su carriera e mercato, dentro l'ISFFC.",
+      "forWho": "Registi emergenti con 1-3 corti completati.",
+      "deadline": "2026-07-25",
+      "whereWhen": "Limassol, 11-12 ott 2026 (arrivo 10, partenza 13)",
+      "probability": 70,
+      "why": "Profilo azzeccato; ostacolo: priorità Cipro/Mediterraneo orientale.",
+      "action": "Candidati sul Google Form linkato.",
+      "link": "https://tportmarket.com/talentbridge-2026",
+      "source": "OnlyFUNDS",
+      "tags": ["in-person", "a-pagamento"],
+      "status": "aperta"
+    },
+    {
+      "id": "european-short-pitch-2027",
+      "title": "European Short Pitch 2027",
+      "what": "Residenza di scrittura + pitching forum per corti europei in sviluppo.",
+      "forWho": "Registi/sceneggiatori con un progetto di corto di finzione.",
+      "deadline": "2026-09-15",
+      "whereWhen": "Online (script lab) + forum a Bruxelles, feb-mar 2027",
+      "probability": 45,
+      "why": "Molto competitivo; serve un progetto già solido in trattamento.",
+      "action": "Invia trattamento (max 3 pagine) + note di regia via il portale NISI MASA.",
+      "link": "https://www.nisimasa.com/european-short-pitch",
+      "source": "European Short Pitch",
+      "tags": ["hybrid", "gratis"],
+      "status": "aperta"
+    },
+    {
+      "id": "creative-europe-media-dev-2026",
+      "title": "Creative Europe MEDIA — Development Single Project",
+      "what": "Fondo di sviluppo per singola opera (fiction, doc, animazione).",
+      "forWho": "Case di produzione con un'opera precedente qualificante.",
+      "deadline": null,
+      "whereWhen": "Bando UE, gestione online",
+      "probability": 20,
+      "why": "Richiede una società di produzione ammissibile: serve un partner produttore.",
+      "action": "Verifica ammissibilità e cerca un produttore ospite prima della prossima call.",
+      "link": "https://culture.ec.europa.eu/creative-europe/media",
+      "source": "Creative Europe MEDIA",
+      "tags": ["online", "gratis"],
+      "status": "in-arrivo"
+    },
+    {
+      "id": "shorto-open-call-2026",
+      "title": "ShorTO Short Film Award — Open Call",
+      "what": "Premio per cortometraggi con montepremi e distribuzione festival.",
+      "forWho": "Corti di finzione o doc completati dopo gennaio 2025.",
+      "deadline": "2026-06-30",
+      "whereWhen": "Torino, cerimonia nov 2026",
+      "probability": 35,
+      "why": "Deadline già passata: tenuta come riferimento per l'edizione 2027.",
+      "action": "Segna la data e prepara il DCP per la call 2027.",
+      "link": "https://www.shorto.it/open-call",
+      "source": "ShorTO",
+      "tags": ["in-person", "gratis"],
+      "status": "scaduta"
+    }
+  ]
+}

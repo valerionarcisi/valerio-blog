@@ -1,0 +1,43 @@
+name: Radar — aggiornamento settimanale
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # lunedì 08:00 UTC
+  workflow_dispatch: {} # run manuale dalla tab Actions
+
+permissions:
+  contents: write # per committare/pushare public/radar.json
+
+jobs:
+  update-radar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ricerca opportunità → radar.json
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node scripts/radar-update.mjs
+
+      - name: Notifica Telegram se ci sono novità
+        continue-on-error: true # una notifica fallita non deve bloccare la pubblicazione
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_USER_ID_WHITELIST: ${{ secrets.TELEGRAM_USER_ID_WHITELIST }}
+        run: npx --yes tsx scripts/radar-notify.ts
+
+      - name: Commit & push se cambiato
+        run: |
+          if git diff --quiet -- public/radar.json; then
+            echo "Nessuna modifica."
+            exit 0
+          fi
+          git config user.name "radar-bot"
+          git config user.email "radar-bot@users.noreply.github.com"
+          git add public/radar.json
+          git commit -m "radar: aggiornamento settimanale opportunità"
+          git push
