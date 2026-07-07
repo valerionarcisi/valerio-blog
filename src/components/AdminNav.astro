@@ -3,7 +3,7 @@ import "./AdminNav.css";
 
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava";
+  currentPage: "analytics" | "comments" | "radar" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava";
 }
 
 const { currentPage, token } = Astro.props;
@@ -11,6 +11,7 @@ const { currentPage, token } = Astro.props;
 const topLinks = [
   { id: "analytics" as const, label: "Analytics", short: "Stats", href: `/admin/analytics?token=${token}` },
   { id: "comments" as const, label: "Comments", short: "Msg", href: `/admin/comments?token=${token}` },
+  { id: "radar" as const, label: "Radar", short: "Radar", href: `/admin/radar?token=${token}` },
 ];
 
 const dietaLinks = [

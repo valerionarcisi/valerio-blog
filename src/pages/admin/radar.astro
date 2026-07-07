@@ -1,6 +1,7 @@
 ---
 import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
@@ -221,6 +222,7 @@ if (!isAuthorized) {
     </style>
   </head>
   <body class="admin">
+    <AdminNav currentPage="radar" token={token} />
     <div class="rd-wrap">
       <header class="rd-head">
         <h1>Radar <em class="acc">opportunità</em></h1>
