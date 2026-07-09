@@ -139,8 +139,13 @@ export function buildMessages(fresh: Item[]): string[] {
 }
 
 function previousRadar(): string {
+  // Baseline di confronto: HEAD di default; override per la notifica manuale
+  // (es. HEAD~1 = "notifica ciò che l'ultimo commit ha aggiunto").
+  const base = process.env.RADAR_BASE_REF || "HEAD";
+  if (!/^[\w./~^@-]+$/.test(base))
+    throw new Error(`RADAR_BASE_REF non valido: ${base}`);
   try {
-    return execSync(`git show HEAD:${RADAR_PATH}`, { encoding: "utf8" });
+    return execSync(`git show ${base}:${RADAR_PATH}`, { encoding: "utf8" });
   } catch {
     return '{"items":[]}';
   }

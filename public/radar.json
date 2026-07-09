@@ -2,6 +2,21 @@
   "updatedAt": "2026-07-07T10:14:32.257Z",
   "items": [
     {
+      "id": "berlinale-talents-2027",
+      "title": "Berlinale Talents 2027",
+      "what": "Summit di 6 giorni alla Berlinale: masterclass, workshop e networking con ~200 filmmaker da tutto il mondo, in 15+ discipline del cinema.",
+      "forWho": "Filmmaker con un percorso professionale avviato (registi, sceneggiatori e 15+ discipline). Non per studenti/esordienti assoluti: serve un corpus di opere.",
+      "deadline": "2026-09-02",
+      "whereWhen": "Berlino, 12-17 feb 2027 (in presenza, durante la Berlinale)",
+      "probability": 35,
+      "why": "Prestigio e network internazionale altissimi, molto selettivo (~200 su migliaia di candidati). Sei eleggibile: hai un corpus (Caramella + altri). Costo simbolico.",
+      "action": "Candidati su berlinale-talents.de. Early Bird €10 entro il 18 ago 2026; deadline finale 2 set 2026 ore 12:00 CEST. Verifica la disciplina col tool sul sito.",
+      "link": "https://www.berlinale-talents.de/bt/page/c/apply",
+      "source": "Berlinale Talents",
+      "tags": ["in-person", "a-pagamento"],
+      "status": "aperta"
+    },
+    {
       "id": "premio-condor-incanto-2026",
       "title": "Premio Condor — Incanto Film Festival",
       "what": "Percorso di sviluppo sceneggiature (luglio-settembre): masterclass, tutoring, competizione soggetto.",
@@ -13,10 +28,7 @@
       "action": "CANDIDATI IMMEDIATAMENTE: soggetto breve + nota biografica. Scadenza 9 luglio 2026 ore 24:00.",
       "link": "https://collettivoincendio.substack.com/p/luglio-2026",
       "source": "Collettivo Incendio / Incanto Film Festival",
-      "tags": [
-        "hybrid",
-        "gratis"
-      ],
+      "tags": ["hybrid", "gratis"],
       "status": "aperta"
     },
     {
@@ -31,10 +43,7 @@
       "action": "Candidati sul Google Form linkato.",
       "link": "https://tportmarket.com/talentbridge-2026",
       "source": "OnlyFUNDS",
-      "tags": [
-        "in-person",
-        "a-pagamento"
-      ],
+      "tags": ["in-person", "a-pagamento"],
       "status": "aperta"
     },
     {
@@ -49,10 +58,7 @@
       "action": "Candidati su FilmFreeway entro 20 luglio: soggetto + note regia + eventuale sceneggiatura parziale. Fee €10.",
       "link": "https://filmfreeway.com/sentierofilmlab",
       "source": "Sentiero Film Factory / Cineuropa",
-      "tags": [
-        "in-person",
-        "gratis"
-      ],
+      "tags": ["in-person", "gratis"],
       "status": "aperta"
     },
     {
@@ -67,10 +73,7 @@
       "action": "Candidati con 2-min excerpt + pitch deck. Fee €40 (regular deadline 25 agosto). Se selezionato, accredito + one-to-one meetings.",
       "link": "https://shorto.centrodelcorto.it/the-2026-calls-for-projects-are-open/",
       "source": "ShorTO / Lights On Distribution",
-      "tags": [
-        "in-person",
-        "gratis"
-      ],
+      "tags": ["in-person", "gratis"],
       "status": "aperta"
     },
     {
@@ -85,10 +88,7 @@
       "action": "Candidati su FilmFreeway con progetto d'animazione. Fee €35 (regular) o €50 (late 31 agosto).",
       "link": "https://shorto.centrodelcorto.it/the-2026-calls-for-projects-are-open/",
       "source": "ShorTO / TFI Torino Film Industry",
-      "tags": [
-        "in-person",
-        "a-pagamento"
-      ],
+      "tags": ["in-person", "a-pagamento"],
       "status": "aperta"
     },
     {
@@ -103,10 +103,7 @@
       "action": "Invia trattamento (max 3 pagine) + note di regia via il portale NISI MASA (P.O.V. Push Other Visions).",
       "link": "https://www.europeanshortpitch.org/",
       "source": "European Short Pitch / P.O.V. Push Other Visions",
-      "tags": [
-        "hybrid",
-        "gratis"
-      ],
+      "tags": ["hybrid", "gratis"],
       "status": "aperta"
     },
     {
@@ -121,10 +118,7 @@
       "action": "Struttura partnership europea; prepara dossier per febbraio 2027. Deadline 2026 è scaduta (25 feb).",
       "link": "https://culture.ec.europa.eu/creative-europe/media",
       "source": "Creative Europe MEDIA 2021-2027 / EU Funding Portal",
-      "tags": [
-        "online",
-        "gratis"
-      ],
+      "tags": ["online", "gratis"],
       "status": "scaduta"
     },
     {
@@ -139,10 +133,7 @@
       "action": "Se in partnership con produttore: prepara dossier tecnico-finanziario. Altrimenti non idoneo.",
       "link": "https://cinema.cultura.gov.it/cosa-facciamo/sostegni-economici/linee-di-sostegno/contributi-selettivi/selettivi-produzione/",
       "source": "DGCA Direzione Generale Cinema",
-      "tags": [
-        "online",
-        "gratis"
-      ],
+      "tags": ["online", "gratis"],
       "status": "aperta"
     },
     {
@@ -157,10 +148,7 @@
       "action": "Verifica se sei iscritto IMAIE. Se sì, candidati alle sessioni aperte 2026 (Portale Bandi IMAIE).",
       "link": "https://www.nuovoimaie.it/audiovisivo-bando-cortometraggi-2026/",
       "source": "NUOVO IMAIE",
-      "tags": [
-        "online",
-        "gratis"
-      ],
+      "tags": ["online", "gratis"],
       "status": "in-arrivo"
     },
     {
@@ -175,10 +163,7 @@
       "action": "Prepara portfolio corti per edizione 2027 (call tipicamente novembre 2026).",
       "link": "https://www.maremetraggio.com/en/news-en/shorts-international-film-festival-2026-calling/",
       "source": "ShorTS IFF / Maremetraggio",
-      "tags": [
-        "in-person",
-        "a-pagamento"
-      ],
+      "tags": ["in-person", "a-pagamento"],
       "status": "scaduta"
     },
     {
@@ -193,10 +178,7 @@
       "action": "Verifica bando 2026 su Riviera International Film Festival o Collettivo Incendio (prossimi mesi).",
       "link": "https://collettivoincendio.substack.com/p/marzo-2026",
       "source": "Collettivo Incendio / Riviera Film Festival",
-      "tags": [
-        "hybrid",
-        "gratis"
-      ],
+      "tags": ["hybrid", "gratis"],
       "status": "in-arrivo"
     },
     {
@@ -211,10 +193,7 @@
       "action": "Prepara portfolio corti per edizione 2027 (call tipicamente febbraio-marzo).",
       "link": "https://cineuropa.org/it/",
       "source": "Cineuropa / Figari International",
-      "tags": [
-        "in-person",
-        "a-pagamento"
-      ],
+      "tags": ["in-person", "a-pagamento"],
       "status": "scaduta"
     },
     {
@@ -229,10 +208,7 @@
       "action": "Verifica apertura call 2026 su sito European Projects Festival (tipicamente primavera).",
       "link": "https://www.europeanprojectsfestival.eu/",
       "source": "European Projects Festival / WE Frame",
-      "tags": [
-        "hybrid",
-        "gratis"
-      ],
+      "tags": ["hybrid", "gratis"],
       "status": "in-arrivo"
     },
     {
@@ -247,10 +223,7 @@
       "action": "Annota per 2027 (apertura call tipicamente gennaio).",
       "link": "https://www.shortoutfestival.com/",
       "source": "Short Out Festival",
-      "tags": [
-        "in-person",
-        "a-pagamento"
-      ],
+      "tags": ["in-person", "a-pagamento"],
       "status": "scaduta"
     },
     {
@@ -265,10 +238,7 @@
       "action": "Annota per edizione 2027 (call tipicamente ottobre-novembre 2026).",
       "link": "https://cortisonici.org/bando-2026",
       "source": "Cortisonici / Associazione Cortisonici",
-      "tags": [
-        "in-person",
-        "gratis"
-      ],
+      "tags": ["in-person", "gratis"],
       "status": "scaduta"
     }
   ]

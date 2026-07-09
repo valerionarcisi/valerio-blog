@@ -1,0 +1,35 @@
+name: Radar — notifica manuale
+
+# Manda la DM Telegram per le opportunità aggiunte a mano a public/radar.json.
+# Confronta HEAD con `base_ref` (default HEAD~1 = ciò che l'ultimo commit ha aggiunto).
+# Non riesegue la ricerca e non committa: solo notifica.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: "Ref di confronto (default HEAD~1)"
+        default: "HEAD~1"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 5 # serve HEAD~1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Notifica opportunità aggiunte (partecipabili, mai scadute)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_USER_ID_WHITELIST: ${{ secrets.TELEGRAM_USER_ID_WHITELIST }}
+          RADAR_BASE_REF: ${{ inputs.base_ref }}
+        run: npx --yes tsx scripts/radar-notify.ts

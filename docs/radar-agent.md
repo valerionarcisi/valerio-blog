@@ -34,6 +34,14 @@ In alternativa (o in aggiunta) puoi aggiornare quando vuoi da una sessione Claud
 "aggiorna il radar" e verrà eseguita la stessa logica (ricerca → riscrive `radar.json` →
 `radar-notify` → commit). Nessun costo oltre l'abbonamento.
 
+## Aggiunta manuale di una singola opportunità
+
+Quando trovi un bando a mano (es. un post): aggiungilo a `public/radar.json` (con un `id`
+stabile) e fai commit + push. Per mandarti la DM Telegram di quell'aggiunta, lancia il
+workflow **"Radar — notifica manuale"** (Actions → Run workflow): confronta `HEAD` con
+`base_ref` (default `HEAD~1`) e notifica solo le opportunità nuove e partecipabili, senza
+rieseguire la ricerca né committare. Override della baseline via env `RADAR_BASE_REF`.
+
 ## Note
 
 - `radar-update.mjs` usa la variante web search **`web_search_20250305`** perché Haiku 4.5 non
