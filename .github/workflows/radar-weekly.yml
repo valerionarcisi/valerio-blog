@@ -1,8 +1,12 @@
-name: Radar — aggiornamento settimanale
+name: Radar — aggiornamento periodico
 
 on:
   schedule:
-    - cron: "0 8 * * 1" # lunedì 08:00 UTC
+    # ponytail: giorni 1,4,7,…,28,31 alle 06:00 UTC. Non è "ogni 3 giorni"
+    # esatto (a fine mese il salto 31→1 è più corto), ma cron non lo esprime;
+    # come routine va bene. Se serve preciso: passare a un cron giornaliero
+    # + guardia "run solo se sono passati ≥3 giorni".
+    - cron: "0 6 */3 * *"
   workflow_dispatch: {} # run manuale dalla tab Actions
 
 permissions:

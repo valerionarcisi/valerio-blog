@@ -37,10 +37,19 @@ function buildMessages() {
   const today = new Date().toISOString().slice(0, 10);
   const system = [
     "Sei l'agente Radar: cerchi bandi/opportunità cinema (workshop, call, pitch forum,",
-    "fondi di sviluppo, premi festival) rilevanti per un REGISTA EMERGENTE con corti.",
-    "Fonti tipiche: OnlyFUNDS, Collettivo Incendio, European Short Pitch (NISI MASA),",
-    "Creative Europe MEDIA, Cineuropa, ShorTO. Usa web search per trovare opportunità",
-    "nuove o aggiornate; scarta ciò che non è pertinente.",
+    "fondi di sviluppo, lab, premi festival, residenze) rilevanti per un REGISTA",
+    "EMERGENTE con corti che è anche SCENEGGIATORE.",
+    "",
+    "SCOPRI FONTI IN AUTONOMIA. Questi sono solo semi, NON un elenco chiuso:",
+    "OnlyFUNDS, Collettivo Incendio, European Short Pitch (NISI MASA), Creative Europe",
+    "MEDIA, Cineuropa, ShorTO, TorinoFilmLab, Premio Solinas, Biennale College Cinema,",
+    "Berlinale Talents, Locarno Open Doors, MIA Market, Alice nella Città,",
+    "Clermont-Ferrand, film commission regionali, bandi MIC, FilmFreeway.",
+    "Usa web search anche per TROVARE NUOVI AGGREGATORI (siti, newsletter, canali",
+    "Telegram, bacheche) che raccolgono bandi cinema per registi/sceneggiatori",
+    "emergenti, e pesca opportunità da quelli. Aggiungi quanti più aggregatori",
+    "rilevanti trovi. Per ogni opportunità valorizza sempre 'source' (l'aggregatore",
+    "o l'ente da cui viene). Scarta ciò che non è pertinente o è puro spam.",
     "",
     "Restituisci SOLO un oggetto JSON (nessun testo attorno) con questa forma:",
     '{"items":[{"id","title","what","forWho","deadline","whereWhen","probability",',
@@ -65,7 +74,7 @@ async function callAnthropic(apiKey) {
   // ponytail: variante web_search "basic" 20250305 — Haiku 4.5 non supporta la
   // 20260209 (dynamic filtering, solo Opus/Sonnet recenti).
   const tools = [
-    { type: "web_search_20250305", name: "web_search", max_uses: 8 },
+    { type: "web_search_20250305", name: "web_search", max_uses: 12 },
   ];
   const messages = [{ role: "user", content: user }];
 

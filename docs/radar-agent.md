@@ -3,9 +3,9 @@
 Come si rigenera `public/radar.json` (la fonte della pagina `/admin/radar`).
 Schema completo in `docs/radar-spec.md`.
 
-## Flusso automatico (settimanale, GitHub Actions)
+## Flusso automatico (periodico, GitHub Actions)
 
-Workflow: `.github/workflows/radar-weekly.yml` — lunedì 08:00 UTC (o run manuale dalla tab Actions).
+Workflow: `.github/workflows/radar-weekly.yml` — cron `0 6 */3 * *` (~ogni 3 giorni, 06:00 UTC; o run manuale dalla tab Actions).
 
 1. `node scripts/radar-update.mjs` — chiama l'API Anthropic (**Haiku 4.5 + web search**, via
    `fetch`, zero dipendenze) passando gli item correnti; il modello cerca bandi/opportunità cinema
