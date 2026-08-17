@@ -1,4 +1,4 @@
-import { z as zod } from "astro:content";
+import { z as zod } from "astro/zod";
 import { env } from "~/lib/env";
 
 export const AUDIO_SCROBBLER_API_KEY = env("LASTFM_API_KEY");
@@ -74,7 +74,7 @@ export const fetchRecentTracks = async (
     return parsedData;
   } catch (error) {
     if (error instanceof zod.ZodError) {
-      console.error("Validation error:", error.errors);
+      console.error("Validation error:", error.issues);
       throw new Error("Invalid data format received from API");
     } else {
       console.error("Error fetching recent tracks:", error);
@@ -87,7 +87,13 @@ export const fetchRecentTracks = async (
    Aggregate methods for "Ascolti" / listening page
    ============================================ */
 
-export type Period = "7day" | "1month" | "3month" | "6month" | "12month" | "overall";
+export type Period =
+  | "7day"
+  | "1month"
+  | "3month"
+  | "6month"
+  | "12month"
+  | "overall";
 
 export interface TopAlbum {
   name: string;
@@ -119,17 +125,24 @@ function isBlankImage(url: string | undefined): boolean {
   return url.includes(LASTFM_BLANK_IMAGE_HASH);
 }
 
-function bestImage(images: { "#text": string; size: string }[] | undefined): string | null {
+function bestImage(
+  images: { "#text": string; size: string }[] | undefined,
+): string | null {
   if (!images || images.length === 0) return null;
   const prefer = ["extralarge", "large", "medium", "small"];
   for (const size of prefer) {
-    const found = images.find((i) => i.size === size && i["#text"] && !isBlankImage(i["#text"]));
+    const found = images.find(
+      (i) => i.size === size && i["#text"] && !isBlankImage(i["#text"]),
+    );
     if (found) return found["#text"];
   }
   return null;
 }
 
-export async function fetchTopAlbums(period: Period = "1month", limit = 24): Promise<TopAlbum[]> {
+export async function fetchTopAlbums(
+  period: Period = "1month",
+  limit = 24,
+): Promise<TopAlbum[]> {
   const params = new URLSearchParams({
     method: "user.gettopalbums",
     user: AUDIO_SCROBBLER_USER,
@@ -156,7 +169,10 @@ export async function fetchTopAlbums(period: Period = "1month", limit = 24): Pro
   }
 }
 
-export async function fetchTopArtists(period: Period = "1month", limit = 10): Promise<TopArtist[]> {
+export async function fetchTopArtists(
+  period: Period = "1month",
+  limit = 10,
+): Promise<TopArtist[]> {
   const params = new URLSearchParams({
     method: "user.gettopartists",
     user: AUDIO_SCROBBLER_USER,

@@ -7,7 +7,7 @@ Personal blog and portfolio site for Valerio Narcisi (filmmaker, sceneggiatore, 
 - **Framework**: Astro 5 (static site generation + Netlify Functions for server endpoints)
 - **Language**: TypeScript (strict mode), ESM
 - **Package Manager**: pnpm
-- **Node**: 20+ (pnpm requires it). Always `nvm use 20` before pnpm commands.
+- **Node**: 22.12+ (required by Astro 7). Always `nvm use 22` before pnpm commands.
 - **Styling**: Plain CSS, co-located CSS files next to components. No CSS framework.
 - **Design system**: **Foglio** — cream paper (`#f6f1e8`), EB Garamond serif (display + prose), Inter sans (body fallback), JetBrains Mono, terracotta accent (`#a8451a`). Tokens in `src/styles/foglio.css` (`--foglio-*`).
 - **Deployment**: Netlify (static pages + serverless functions). Auto-deploy on push to `main`.
@@ -81,7 +81,7 @@ docs/
 - **Path alias**: Use `~/` to reference `src/` (configured in tsconfig.json)
 - **CSS**: Co-located CSS files next to components (e.g., `Card.astro` + `Card.css`). Foglio layouts have their own CSS file (e.g. `FoglioPostLayout.astro` + `.css`).
 - **No `:global()` in plain `.css` files** — only works inside Astro scoped `<style>` blocks. Use direct selectors instead.
-- **No comments explaining what**: Self-documenting code via well-named functions. Comments only for *why*.
+- **No comments explaining what**: Self-documenting code via well-named functions. Comments only for _why_.
 - **Content collections**: Astro 5 glob loader. Slugs derived from filenames. Locale from directory (`it/`, `en/`).
 - **Images**: Blog covers may be external URLs or `/img/blog/{slug}/cover.jpg`. Film images in `public/img/{film-name}/`. Process new uploads with sharp (resize 1600px, JPEG q82, strip EXIF). Festival laurels for films go in `public/img/{film-name}/laurels/`.
 - **Server endpoints**: Use `export const prerender = false` on API routes. Turso client via `getDb()` from `~/lib/turso`. Env vars via `env()` from `~/lib/env`.
@@ -93,7 +93,7 @@ docs/
 
 ## Commands
 
-- `nvm use 20 && pnpm dev` — Start dev server (opens browser)
+- `nvm use 22 && pnpm dev` — Start dev server (opens browser)
 - `pnpm start` — Start dev server (no browser)
 - `pnpm build` — Type-check and build for production
 - `pnpm preview` — Preview production build locally
@@ -105,6 +105,7 @@ docs/
 ## External APIs (env vars required)
 
 **Core (data):**
+
 - `TURSO_DATABASE_URL` `TURSO_AUTH_TOKEN`
 - `TMDB_API_KEY` — Movie metadata
 - `LASTFM_API_KEY` — Last.FM / Audioscrobbler
@@ -112,9 +113,11 @@ docs/
 - `RESEND_API_KEY` — transactional email (contact form, comment notifications)
 
 **Admin:**
+
 - `ADMIN_TOKEN` — `/admin/*` and Bearer auth on `/api/admin/*`
 
 **Editorial Agents (Phase 1 — Idea Catcher Telegram bot):**
+
 - `TELEGRAM_BOT_TOKEN` — from BotFather
 - `TELEGRAM_SECRET_TOKEN` — `openssl rand -hex 32`; validates webhook calls
 - `TELEGRAM_USER_ID_WHITELIST` — comma-separated Telegram user IDs allowed to message the bot
@@ -151,6 +154,7 @@ A planned push-based editorial automation system. **Phase 1 (Idea Catcher) is li
 - **Setup guide**: `docs/setup/telegram-bot.md`
 
 Phase 1 (Idea Catcher) endpoints:
+
 - `POST /api/telegram/webhook` — Telegram Bot webhook. Validates `X-Telegram-Bot-Api-Secret-Token` header + `TELEGRAM_USER_ID_WHITELIST`. Returns 503 if `TELEGRAM_SECRET_TOKEN` env is empty (fail-closed). Handles: `/start`, `/help`, `/idea`, `/list`, `/done`, `/media`, `/tag`, voice (Whisper), photo (sharp), forwarded messages, plain text capture.
 
 **Known limitation**: photo upload via `fs.writeFile("public/img/uploads/...")` works in dev but fails in production (Netlify Functions filesystem is read-only). Migrate to **Netlify Blobs** before relying on the photo flow. Inline TODO in `src/pages/api/telegram/webhook.ts` references the setup doc.
