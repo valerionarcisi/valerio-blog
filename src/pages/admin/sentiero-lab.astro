@@ -1,0 +1,654 @@
+---
+import { Icon } from "astro-icon/components";
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+function mapsSearch(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+const logistics = [
+  {
+    icon: "ph:bed",
+    title: "Poggibonsi · 17–19 sett.",
+    items: [
+      "Pernottamento: Albergo Italia, Via Trento 36 — tel. 0577 936142 — 6 camere doppie con colazione inclusa",
+      "Pranzi inclusi nei giorni di corso",
+    ],
+    mapQuery: "Albergo Italia Via Trento 36 Poggibonsi",
+  },
+  {
+    icon: "ph:house-simple",
+    title: "Firenze · dal 19 sett.",
+    items: [
+      "Alloggio: Hu Camping Certosa — una struttura ogni due partecipanti",
+      "Cucina in comune per organizzarsi cene e colazioni",
+      "Lezioni e pranzi al Conventino Caffè Letterario",
+      "Accesso alla piscina del camping",
+    ],
+    mapQuery: "Hu Camping Certosa Firenze",
+  },
+  {
+    icon: "ph:car",
+    title: "Trasferimenti",
+    items: [
+      "Hu Camping → Conventino: organizzarsi in auto con chi ha mezzo proprio (il bus c'è ma è più lungo)",
+      "Poggibonsi → Firenze: supporto diretto del team Sentiero",
+    ],
+  },
+  {
+    icon: "ph:package",
+    title: "All'arrivo",
+    items: [
+      "Consegna del kit Lab, con Andrea Rapallini e Maris Muzzarelli presenti per le indicazioni",
+    ],
+  },
+];
+
+interface LabEvent {
+  time: string;
+  title: string;
+  desc: string;
+  location: string;
+  icon: string;
+  badge?: string;
+  mapQuery?: string;
+}
+
+interface LabDay {
+  day: string;
+  place: string;
+  events: LabEvent[];
+}
+
+const labProgram: LabDay[] = [
+  {
+    day: "Giovedì 17 settembre",
+    place: "Poggibonsi",
+    events: [
+      {
+        time: "9:00–9:30",
+        title: "Ritrovo",
+        desc: "Direttamente presso Palazzo Accabì, prima dell'inizio della lezione con Trento.",
+        location: "Palazzo Accabì",
+        icon: "ph:map-pin",
+        mapQuery: "Palazzo Accabì Poggibonsi",
+      },
+      {
+        time: "10:00",
+        title: "Laboratorio di scrittura — Francesco Trento",
+        desc: "Lezione frontale.",
+        location: "Palazzo Accabì",
+        icon: "ph:chalkboard-teacher",
+      },
+      {
+        time: "14:30",
+        title: "One-to-one — Francesco Trento",
+        desc: "Incontri individuali sui progetti di scrittura.",
+        location: "Palazzo Accabì",
+        icon: "ph:users-three",
+      },
+      {
+        time: "21:15",
+        title: "“Igor. L'eroe romantico del calcio”",
+        desc: "Regia di Luca Dal Canto (101′), a seguire talk.",
+        location: "Teatro Politeama, Sala Minore",
+        icon: "ph:film-slate",
+        badge: "aperto · facoltativo",
+        mapQuery: "Teatro Politeama Poggibonsi",
+      },
+    ],
+  },
+  {
+    day: "Venerdì 18 settembre",
+    place: "Poggibonsi",
+    events: [
+      {
+        time: "10:00",
+        title: "Laboratorio di scrittura — Adriano Giotti",
+        desc: "Lezione frontale.",
+        location: "Palazzo Accabì",
+        icon: "ph:chalkboard-teacher",
+      },
+      {
+        time: "14:30",
+        title: "One-to-one — Adriano Giotti",
+        desc: "Incontri individuali sui progetti di scrittura.",
+        location: "Palazzo Accabì",
+        icon: "ph:users-three",
+      },
+      {
+        time: "18:30",
+        title: "“Generazione Fumetto”",
+        desc: "Regia di Omar Rashid (90′), a seguire talk.",
+        location: "Teatro Politeama, Sala Minore",
+        icon: "ph:film-slate",
+        badge: "aperto · facoltativo",
+        mapQuery: "Teatro Politeama Poggibonsi",
+      },
+      {
+        time: "21:30",
+        title: "“The Madmen Coach”",
+        desc: "Regia di Carlo Liberatore, a seguire talk.",
+        location: "Teatro Politeama, Sala Minore",
+        icon: "ph:film-slate",
+        badge: "aperto · facoltativo",
+        mapQuery: "Teatro Politeama Poggibonsi",
+      },
+    ],
+  },
+  {
+    day: "Sabato 19 settembre",
+    place: "Trasferimento → Firenze",
+    events: [
+      {
+        time: "—",
+        title: "Trasferimento Poggibonsi → Firenze",
+        desc: "Supporto diretto del team Sentiero.",
+        location: "",
+        icon: "ph:car",
+      },
+      {
+        time: "12:30",
+        title: "Pranzo privato di benvenuto per il gruppo Bridges",
+        desc: "",
+        location: "Conventino",
+        icon: "ph:fork-knife",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "14:30",
+        title: "One-to-one di produzione col team Sentiero",
+        desc: "A seguire incontro con i grafici (Scuola Comics).",
+        location: "Conventino",
+        icon: "ph:handshake",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "21:00",
+        title: "Brindisi di apertura del festival",
+        desc: "",
+        location: "Circolo Aurora",
+        icon: "ph:wine",
+        badge: "aperto · consigliato",
+        mapQuery: "Circolo Aurora Firenze",
+      },
+    ],
+  },
+  {
+    day: "Domenica 20 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "10:00",
+        title: "Masterclass — Giuseppe Isoni",
+        desc: "",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:student",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "14:30",
+        title: "One-to-one e sviluppo narrativo — Giuseppe Isoni",
+        desc: "Lavoro sui progetti.",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:pen-nib",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+    ],
+  },
+  {
+    day: "Lunedì 21 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "10:00",
+        title: "Masterclass — Francesco Rossi (regia)",
+        desc: "",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:video-camera",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "14:00",
+        title: "One-to-one e sviluppo narrativo — Isoni e Rossi",
+        desc: "Lavoro sui progetti.",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:pen-nib",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+    ],
+  },
+  {
+    day: "Martedì 22 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "10:00",
+        title: "Masterclass di produzione — Francesco Bruschettini",
+        desc: "",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:presentation-chart",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "14:00",
+        title: "Lavoro con i grafici",
+        desc: "Finalizzazione moodboard.",
+        location: "Conventino (Aula Lab)",
+        icon: "ph:swatches",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+    ],
+  },
+  {
+    day: "Mercoledì 23 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "10:00",
+        title: "Distribuzione — Lucila Riggio",
+        desc: "Lezione, a seguire evento NITAL (Nikon, RED, DJI).",
+        location: "Conventino",
+        icon: "ph:megaphone",
+        mapQuery: "Conventino Caffè Letterario Firenze",
+      },
+      {
+        time: "14:00",
+        title: "One-to-one con Gloria Puppi",
+        desc: "Moodboard e preparazione pitch.",
+        location: "Chiostro Thouar",
+        icon: "ph:swatches",
+        mapQuery: "Chiostro Thouar Firenze",
+      },
+    ],
+  },
+  {
+    day: "Giovedì 24 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "10:30",
+        title: "Sentiero Connection",
+        desc: "Presentazione piattaforma First Act.",
+        location: "Area Industry",
+        icon: "ph:presentation-chart",
+      },
+      {
+        time: "12:00",
+        title: "Aperitivo con le Film Commission",
+        desc: "Toscana, Piemonte, Valle d'Aosta.",
+        location: "Area Industry",
+        icon: "ph:wine",
+      },
+      {
+        time: "14:30",
+        title: "PITCH FINALI BRIDGES",
+        desc: "Davanti a produttori e operatori dell'industria.",
+        location: "Area Industry",
+        icon: "ph:megaphone",
+        badge: "il momento clou",
+      },
+      {
+        time: "17:30–19:30",
+        title: "Proiezione “The Last Dance”",
+        desc: "Cortometraggio di Giovanni Tancredi Brusaporci (prod. Lupin Film). Presenza in sala del gruppo Bridges.",
+        location: "Sala Ex Leopoldine",
+        icon: "ph:film-slate",
+      },
+      {
+        time: "19:30",
+        title: "Sentiero Connection — Case History “The Last Dance”",
+        desc: "Incontro con il produttore Riccardo Neri, il montatore e il direttore della fotografia: il percorso dal pitch dello scorso anno alla produzione realizzata in meno di un anno.",
+        location: "Circolo Aurora",
+        icon: "ph:handshake",
+        mapQuery: "Circolo Aurora Firenze",
+      },
+    ],
+  },
+  {
+    day: "Venerdì 25 / Sabato 26 settembre",
+    place: "Firenze",
+    events: [
+      {
+        time: "—",
+        title: "Masterclass di produzione",
+        desc: "Accesso gratuito, orari da confermare.",
+        location: "",
+        icon: "ph:student",
+      },
+    ],
+  },
+];
+
+interface PublicEvent {
+  time: string;
+  desc: string;
+}
+
+interface PublicDay {
+  day: string;
+  events: PublicEvent[];
+}
+
+const publicEvents: PublicDay[] = [
+  {
+    day: "Giovedì 17",
+    events: [
+      { time: "21:15", desc: "Teatro Politeama, Sala Minore — “Igor. L'eroe romantico del calcio”, regia di Luca Dal Canto (101′), a seguire talk" },
+    ],
+  },
+  {
+    day: "Venerdì 18",
+    events: [
+      { time: "18:30", desc: "Teatro Politeama, Sala Minore — “Generazione Fumetto”, regia di Omar Rashid (90′), a seguire talk" },
+      { time: "21:30", desc: "Teatro Politeama, Sala Minore — “The Madmen Coach”, regia di Carlo Liberatore, a seguire talk" },
+    ],
+  },
+  {
+    day: "Sabato 19",
+    events: [
+      { time: "21:00", desc: "Brindisi di apertura del festival — Circolo Aurora" },
+      { time: "21:30", desc: "Sentiero Competition — cortometraggi in concorso, tema “Ordine e disobbedienza”" },
+    ],
+  },
+  {
+    day: "Domenica 20",
+    events: [
+      { time: "15:30", desc: "Torneo di calcetto benefico — Campetto di Piazza Tasso" },
+      { time: "17:30", desc: "Sentiero Connection — corto realizzato con Lorenzo Ci e Ardiglione" },
+      { time: "18:00", desc: "Sentiero Competition — tema “Ciò che ci attraversa”" },
+      { time: "19:30", desc: "Inaugurazione mostra “I grant you refuge”, con aperitivo — Terrazza Fuori Binario" },
+      { time: "21:00", desc: "Sentiero Talk — dibattito pubblico (Un Ponte Per, Emergency, Centro Storico Lebowsky, Nazra Film Festival, Niccolò Falsetti)" },
+      { time: "22:00", desc: "Sentiero Off — corti di registi palestinesi con Nazra Film Festival, tema “Voci da Gaza”" },
+    ],
+  },
+  {
+    day: "Lunedì 21",
+    events: [
+      { time: "9:30", desc: "Sentierini +11 — proiezioni per bambini" },
+      { time: "17:30", desc: "Sentiero Competition — tema “Terre di confine”" },
+      { time: "19:30", desc: "Sentiero Relax — aperitivo con open mic" },
+      { time: "21:30", desc: "Sentiero Competition — tema “Quello che resta”" },
+    ],
+  },
+  {
+    day: "Martedì 22",
+    events: [
+      { time: "9:30", desc: "Sentierini +11 — proiezioni per bambini" },
+      { time: "17:30", desc: "Sentiero Competition — tema “Mondi interiori”" },
+      { time: "19:30", desc: "Sentiero Connection — presentazione libro “Caregiver Motherfucker” di Lorenzo Clemente, con aperitivo" },
+      { time: "21:30", desc: "Sentiero Competition — tema “Altre forme di sé”" },
+    ],
+  },
+  {
+    day: "Mercoledì 23",
+    events: [
+      { time: "9:30", desc: "Sentierini +11 — proiezioni per bambini" },
+      { time: "12:30", desc: "Esposizione e demo strumentazione Nikon, RED e DJI Italia" },
+      { time: "17:30", desc: "Sentiero Competition — tema “Resistere al presente”" },
+      { time: "19:30", desc: "Sentiero Relax — aperitivo con open mic" },
+      { time: "21:30", desc: "Sentiero Guerriglia — corti a basso budget fuori concorso" },
+      { time: "23:00", desc: "Sentiero Talk — Talk Guerriglia con i registi dei corti proiettati" },
+    ],
+  },
+  {
+    day: "Giovedì 24",
+    events: [
+      { time: "9:30", desc: "Sentierini — proiezioni per bambini" },
+      { time: "17:30", desc: "Sentiero Competition — tema “Linee di frattura”" },
+      { time: "17:30–19:30", desc: "Sala Ex Leopoldine — proiezione “The Last Dance” di Giovanni Tancredi Brusaporci (Lupin Film)" },
+      { time: "19:30", desc: "Sentiero Connection — Case History “The Last Dance” (Tancredi / Lupin Film) — Circolo Aurora" },
+      { time: "21:30", desc: "Sentiero Competition — tema “Legami e derive”" },
+    ],
+  },
+  {
+    day: "Venerdì 25",
+    events: [
+      { time: "10:00", desc: "Sentiero Film Pitch — esposizione dei progetti in concorso" },
+      { time: "12:00", desc: "Sentiero Film Pitch — sessioni one-to-one con i produttori" },
+      { time: "17:30", desc: "Sentiero Film Pitch — premiazioni" },
+      { time: "—", desc: "Sentiero Competition — tema “Fuori posto”" },
+      { time: "19:30", desc: "Sentiero Relax — aperitivo con open mic" },
+      { time: "21:00", desc: "“I diari di mio padre” di Ado Hasanovic (con il regista) + “Every Day in Gaza” di Omar Rammal" },
+    ],
+  },
+  {
+    day: "Sabato 26",
+    events: [
+      { time: "12:00", desc: "Sentiero Premiazioni — pranzo agricolo e cerimonia finale, 14 premi assegnati" },
+      { time: "18:30", desc: "Sentiero Music" },
+      { time: "20:00", desc: "Sentiero Relax — aperitivo con open mic" },
+      { time: "21:00", desc: "Evento speciale music — “Con la pioggia dentro” di Matteo Berruto + live Giorgio Canali" },
+    ],
+  },
+];
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Sentiero Lab · Bridges 2026</title>
+    <style is:global>
+      .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
+
+      .foglio body.admin .page-header { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .page-kicker { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-header h1 { font-family: var(--foglio-serif); color: var(--foglio-ink); font-size: var(--foglio-fs-4xl); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-subtitle { color: var(--foglio-ink-soft); font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .foglio body.admin .page-subtitle .icon-inline { width: 1rem; height: 1rem; color: var(--foglio-accent); }
+
+      .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .card-title-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); }
+
+      /* Quick nav */
+      .foglio body.admin .quick-nav { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+      .foglio body.admin .quick-nav a { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.08em; color: var(--foglio-ink-soft); text-decoration: none; padding: 0.4rem 0.85rem; border: 1px solid var(--foglio-rule); border-radius: 999px; transition: all 0.15s; }
+      .foglio body.admin .quick-nav a:hover { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+
+      /* Logistics grid */
+      .foglio body.admin .logistics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+      .foglio body.admin .logistics-card { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      .foglio body.admin .logistics-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.65rem; }
+      .foglio body.admin .logistics-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .logistics-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
+      .foglio body.admin .logistics-list { list-style: none; }
+      .foglio body.admin .logistics-list li { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.55; padding: 0.25rem 0; }
+      .foglio body.admin .logistics-list li::before { content: "—"; color: var(--foglio-accent); margin-right: 0.4rem; }
+      .foglio body.admin .logistics-map { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; font-family: var(--foglio-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--foglio-ink-mute); text-decoration: none; }
+      .foglio body.admin .logistics-map:hover { color: var(--foglio-accent); }
+
+      /* Platform info box */
+      .foglio body.admin .info-box { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-left: 3px solid var(--foglio-accent); border-radius: var(--foglio-radius-md); padding: 1rem 1.15rem; margin-top: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; }
+      .foglio body.admin .info-box svg { width: 1.25rem; height: 1.25rem; color: var(--foglio-accent); flex-shrink: 0; margin-top: 0.15rem; }
+      .foglio body.admin .info-box p { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.6; }
+      .foglio body.admin .info-box strong { color: var(--foglio-ink); font-weight: 500; }
+
+      /* Lab program: day-grouped timeline */
+      .foglio body.admin .day-block { margin-bottom: 1.8rem; }
+      .foglio body.admin .day-block:last-child { margin-bottom: 0; }
+      .foglio body.admin .day-divider { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1rem; }
+      .foglio body.admin .day-divider-label { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--foglio-ink); white-space: nowrap; }
+      .foglio body.admin .day-divider-place { font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); color: var(--foglio-accent); white-space: nowrap; }
+      .foglio body.admin .day-divider-rule { flex: 1; height: 1px; background: var(--foglio-rule); }
+
+      .foglio body.admin .timeline { position: relative; padding-left: 2.5rem; }
+      .foglio body.admin .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--foglio-rule-strong); }
+      .foglio body.admin .step { position: relative; padding-bottom: 1.4rem; }
+      .foglio body.admin .step:last-child { padding-bottom: 0; }
+      .foglio body.admin .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); }
+      .foglio body.admin .step-dot svg { width: 1rem; height: 1rem; }
+      .foglio body.admin .step-time { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); font-weight: 700; letter-spacing: 0.1em; }
+      .foglio body.admin .step-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); margin: 0.1rem 0 0.3rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .foglio body.admin .step-desc { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); max-width: 700px; line-height: 1.6; }
+      .foglio body.admin .step-location { font-family: var(--foglio-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--foglio-ink-mute); margin-top: 0.35rem; display: flex; align-items: center; gap: 0.3rem; }
+      .foglio body.admin .step-location a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
+      .foglio body.admin .step-location a:hover { color: var(--foglio-accent); }
+      .foglio body.admin .badge { display: inline-flex; align-items: center; font-family: var(--foglio-mono); font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 999px; background: var(--foglio-paper-2); border: 1px solid var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .badge.badge-highlight { background: var(--foglio-accent); color: var(--foglio-paper); }
+
+      /* Public calendar accordion */
+      .foglio body.admin .accordion-day { border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); margin-bottom: 0.6rem; overflow: hidden; background: var(--foglio-paper-2); }
+      .foglio body.admin .accordion-day summary { cursor: pointer; list-style: none; padding: 0.85rem 1.1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-family: var(--foglio-serif); font-weight: 500; font-size: var(--foglio-fs-md); color: var(--foglio-ink); }
+      .foglio body.admin .accordion-day summary::-webkit-details-marker { display: none; }
+      .foglio body.admin .accordion-day summary .accordion-count { font-family: var(--foglio-mono); font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--foglio-ink-mute); flex-shrink: 0; }
+      .foglio body.admin .accordion-day summary .accordion-chevron { width: 1rem; height: 1rem; color: var(--foglio-accent); flex-shrink: 0; transition: transform 0.15s; }
+      .foglio body.admin .accordion-day[open] summary .accordion-chevron { transform: rotate(90deg); }
+      .foglio body.admin .accordion-list { list-style: none; padding: 0 1.1rem 0.9rem; border-top: 1px solid var(--foglio-rule); }
+      .foglio body.admin .accordion-list li { display: flex; gap: 0.85rem; padding: 0.5rem 0; border-bottom: 1px dashed var(--foglio-rule); font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.5; }
+      .foglio body.admin .accordion-list li:last-child { border-bottom: none; }
+      .foglio body.admin .accordion-time { font-family: var(--foglio-mono); font-size: 0.72rem; color: var(--foglio-accent); font-weight: 700; flex-shrink: 0; width: 4.5rem; padding-top: 0.05rem; }
+
+      .foglio body.admin .footer-note { text-align: center; font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-mute); letter-spacing: 0.06em; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--foglio-rule); }
+
+      @media (max-width: 720px) {
+        .foglio body.admin .card { padding: 1.15rem; }
+        .foglio body.admin .timeline { padding-left: 2rem; }
+        .foglio body.admin .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
+        .foglio body.admin .timeline::before { left: 0.8rem; }
+        .foglio body.admin .day-divider-place { display: none; }
+        .foglio body.admin .accordion-list li { flex-direction: column; gap: 0.15rem; }
+        .foglio body.admin .accordion-time { width: auto; }
+      }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="sentiero-lab" token={token} />
+    <div class="container">
+      <header class="page-header">
+        <div class="page-kicker">Sentiero Film Lab · Edizione 2026</div>
+        <h1><em class="acc">Bridges.</em> 17–26 Settembre 2026</h1>
+        <p class="page-subtitle">
+          <Icon name="ph:map-pin" class="icon-inline" size={16} is:inline />
+          <span>Poggibonsi / Chianti → Firenze</span>
+        </p>
+      </header>
+
+      <nav class="quick-nav">
+        <a href="#logistica"><Icon name="ph:bed" size={13} is:inline /> Logistica</a>
+        <a href="#programma"><Icon name="ph:path" size={13} is:inline /> Programma Lab</a>
+        <a href="#eventi"><Icon name="ph:calendar-check" size={13} is:inline /> Eventi pubblici</a>
+      </nav>
+
+      <section class="card" id="logistica">
+        <h2 class="card-title">
+          <Icon name="ph:bed" class="card-title-icon" size={18} is:inline />
+          Logistica
+        </h2>
+        <div class="logistics-grid">
+          {logistics.map((l) => (
+            <div class="logistics-card">
+              <div class="logistics-head">
+                <span class="logistics-icon"><Icon name={l.icon} size={18} is:inline /></span>
+                <span class="logistics-title">{l.title}</span>
+              </div>
+              <ul class="logistics-list">
+                {l.items.map((item) => <li>{item}</li>)}
+              </ul>
+              {l.mapQuery && (
+                <a class="logistics-map" href={mapsSearch(l.mapQuery)} target="_blank" rel="noopener noreferrer">
+                  <Icon name="ph:map-trifold" size={12} is:inline />
+                  Apri in Maps
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+        <div class="info-box">
+          <Icon name="ph:presentation-chart" is:inline />
+          <p>
+            <strong>Piattaforma First Act.</strong> Il Lab si svolge sulla piattaforma First Act — prima sperimentazione
+            pilota, in vista del suo utilizzo anche durante il festival. È prevista una call dedicata con l'ideatore
+            e programmatore Andrea Castelli per imparare a usarla insieme.
+          </p>
+        </div>
+      </section>
+
+      <section class="card" id="programma">
+        <h2 class="card-title">
+          <Icon name="ph:path" class="card-title-icon" size={18} is:inline />
+          Programma Bridges — giorno per giorno
+        </h2>
+        {labProgram.map((d) => (
+          <div class="day-block">
+            <div class="day-divider">
+              <span class="day-divider-label">{d.day}</span>
+              <span class="day-divider-place">{d.place}</span>
+              <span class="day-divider-rule"></span>
+            </div>
+            <div class="timeline">
+              {d.events.map((e) => (
+                <div class="step">
+                  <div class="step-dot">
+                    <Icon name={e.icon} is:inline />
+                  </div>
+                  <div class="step-time">{e.time}</div>
+                  <div class="step-title">
+                    <span>{e.title}</span>
+                    {e.badge && <span class={`badge ${e.badge === "il momento clou" ? "badge-highlight" : ""}`}>{e.badge}</span>}
+                  </div>
+                  {e.desc && <div class="step-desc">{e.desc}</div>}
+                  {e.location && (
+                    <div class="step-location">
+                      <Icon name="ph:map-pin" size={12} is:inline />
+                      {e.mapQuery ? (
+                        <a href={mapsSearch(e.mapQuery)} target="_blank" rel="noopener noreferrer">{e.location}</a>
+                      ) : (
+                        <span>{e.location}</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      <section class="card" id="eventi">
+        <h2 class="card-title">
+          <Icon name="ph:calendar-check" class="card-title-icon" size={18} is:inline />
+          Calendario eventi pubblici — Sentiero Film Factory
+        </h2>
+        <p class="step-desc" style="margin-bottom: 1rem;">
+          Eventi extra rispetto al programma del Lab, a cui i partecipanti Bridges hanno accesso libero.
+        </p>
+        {publicEvents.map((d) => (
+          <details class="accordion-day">
+            <summary>
+              <span>{d.day} settembre</span>
+              <span class="accordion-count">{d.events.length} eventi</span>
+              <Icon name="ph:caret-right" class="accordion-chevron" size={16} is:inline />
+            </summary>
+            <ul class="accordion-list">
+              {d.events.map((e) => (
+                <li>
+                  <span class="accordion-time">{e.time}</span>
+                  <span>{e.desc}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        ))}
+      </section>
+
+      <p class="footer-note">Sentiero Film ETS · sentierofilm@gmail.com · www.sentierofilm.it</p>
+    </div>
+  </body>
+</html>

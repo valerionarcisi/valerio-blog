@@ -3,7 +3,7 @@ import "./AdminNav.css";
 
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "radar" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava";
+  currentPage: "analytics" | "comments" | "radar" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava" | "sentiero-lab";
 }
 
 const { currentPage, token } = Astro.props;
@@ -31,6 +31,7 @@ const bottomLinks = [
 const tripLinks = [
   { id: "roma" as const, label: "Roma · 11 Apr", short: "Roma", href: `/admin/roma?token=${token}` },
   { id: "vacanza" as const, label: "Vacanza · Agosto", short: "Estate", href: `/admin/vacanza?token=${token}` },
+  { id: "sentiero-lab" as const, label: "Sentiero Lab · Bridges", short: "Bridges", href: `/admin/sentiero-lab?token=${token}` },
 ];
 
 const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];

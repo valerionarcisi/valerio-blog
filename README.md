@@ -129,6 +129,7 @@ Private dashboards under `/admin/` (protected by `?token=<ADMIN_TOKEN>`):
 | `/admin/grocery`    | Shopping list derived from meal plan                                                                            |
 | `/admin/recipes`    | Recipes with dosages                                                                                            |
 | `/admin/roma`       | Roma trip planner                                                                                               |
+| `/admin/sentiero-lab` | Sentiero Film Lab · Bridges 2026 — day-by-day program, logistics, public events calendar                     |
 | `/admin/radar`      | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `public/radar.json`, filters + search  |
 
 `public/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
