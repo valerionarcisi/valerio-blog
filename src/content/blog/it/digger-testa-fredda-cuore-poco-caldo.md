@@ -4,7 +4,7 @@ date: "2026-10-08"
 extract: "Intelligente nelle intuizioni, nella regia e in tutto. Ma non emoziona: Digger è un film di testa e non di cuore."
 tags:
   - "MOVIE"
-coverImage: "/img/blog/digger-testa-fredda-cuore-poco-caldo/locandina.jpg"
+coverImage: "/img/blog/digger-testa-fredda-cuore-poco-caldo/cover.jpg"
 ---
 
 Sono partito per andare in sala in fretta e furia come al solito. Orario quasi unico per vedere il film in inglese ma ehy baby we in province e che ci vuoi fare… è normale così, è tutto normale e giusto così.
