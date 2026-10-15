@@ -1,0 +1,363 @@
+---
+import { Icon } from "astro-icon/components";
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+function mapsSearch(query: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+function mapsDirections(from: string, to: string): string {
+  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(from)}&destination=${encodeURIComponent(to)}&travelmode=driving`;
+}
+
+const HOME = "Via Monti della Laga 9, Porto Sant'Elpidio, FM";
+const VENUE = "Palazzo San Lorenzo, Piazza dei Sanniti 9/A, Roma";
+
+const times = [
+  { label: "Partenza", value: "06:30", sub: "da casa, Via Monti della Laga" },
+  { label: "Viaggio", value: "~3 h", sub: "stima in auto, domenica mattina" },
+  { label: "Arrivo + parcheggio", value: "~09:45", sub: "garage, poi 17 min a piedi da Termini" },
+  { label: "Inizio", value: "10:30", sub: "Palazzo San Lorenzo" },
+  { label: "Pranzo", value: "13:35", sub: "nel teatro, prenotato" },
+  { label: "Fine", value: "19:45", sub: "rientro ~23:00" },
+];
+
+const rules = [
+  {
+    icon: "ph:car",
+    title: "Auto sì, treno no",
+    text: "Da Porto Sant'Elpidio il treno per Roma Termini richiede almeno un cambio e circa 5 ore. In auto sono circa 3 ore: conviene l'auto.",
+  },
+  {
+    icon: "ph:park",
+    title: "Piano B gratuito (consiglio di Francesco)",
+    text: "Scalo San Lorenzo, ma è incustodito. La mattina di domenica di solito si trova posto. Meglio non lasciare nulla in vista.",
+  },
+  {
+    icon: "ph:coins",
+    title: "Strisce blu",
+    text: "Secondo le fonti online le strisce blu sono a pagamento lun–sab 8–20 e gratis la domenica. Da verificare sui cartelli in zona, che hanno la precedenza.",
+  },
+  {
+    icon: "ph:shield-check",
+    title: "Consigliato: Termini Piastra, 24 ore",
+    text: "Termini Piastra (FS Park, Via Marsala 53): aperto 24 ore, 30 € al giorno o 3,50 €/h, videosorvegliato, circa 17 min a piedi (1,3 km). Alternativa: Garage Tiburtina, Via Lorenzo il Magnifico 156, aperto domenica 05:30–23:59, ma a piedi sono circa 27 min (2 km). Il Garage dei Bruzi (13 min a piedi) domenica chiude 10:00–19:00: meglio evitarlo.",
+  },
+  {
+    icon: "ph:fork-knife",
+    title: "Pranzo già prenotato",
+    text: "Francesco ha prenotato il pranzo al ristorante del teatro, menu fisso. Si paga a parte, direttamente al ristorante.",
+  },
+  {
+    icon: "ph:envelope-simple",
+    title: "Contatto",
+    text: "Francesco Trento · scrivereunagrandestoria@gmail.com. Biglietto già acquistato il 12 ottobre.",
+  },
+];
+
+
+const alternatives = [
+  {
+    icon: "ph:train",
+    title: "Metro B da Termini",
+    text: "Parcheggi a Termini Piastra e prendi la Metro B fino a Policlinico: da lì Piazza dei Sanniti è a pochi minuti a piedi. Fai prima a piedi (17 min) che con la metro. Biglietto singolo da verificare.",
+  },
+  {
+    icon: "ph:subway",
+    title: "Park & ride sulla Metro B",
+    text: "Rebibbia è sulla tua strada se arrivi dalla A24 ed è sulla Metro B, ma non ho trovato conferma che il parcheggio di scambio sia aperto la domenica. Controlla sul sito ATAC prima di contarci. Sicuri anche di domenica: Laurentina (Metro B) e Anagnina, Cinecittà (Metro A).",
+  },
+  {
+    icon: "ph:person-simple-walk",
+    title: "Parcheggio gratis e a piedi",
+    text: "Scalo San Lorenzo, Via dei Lucani: circa 10 min a piedi (700 m), gratis ma incustodito e senza garanzia di trovare posto. Strisce blu gratis la domenica secondo le fonti online.",
+  },
+  {
+    icon: "ph:taxi",
+    title: "Taxi dal parcheggio",
+    text: "Se sei stanco al ritorno (19:45), da Termini al garage a piedi sono 17 min. Un taxi da Piazza dei Sanniti a Termini è la soluzione più comoda.",
+  },
+];
+
+interface Step {
+  time: string;
+  title: string;
+  desc: string;
+  icon: string;
+  badge?: string;
+  places?: { label: string; url: string }[];
+}
+
+const timeline: Step[] = [
+  {
+    time: "06:30",
+    title: "Partenza da casa, Via Monti della Laga",
+    desc: "Sono circa 3 ore di viaggio. Con il garage prenotato il margine serve solo per traffico o una sosta. Controlla il traffico su Maps prima di uscire.",
+    icon: "ph:car",
+    places: [
+      { label: "Rotta in auto", url: mapsDirections(HOME, VENUE) },
+    ],
+  },
+  {
+    time: "09:30–10:00",
+    title: "Arrivo e parcheggio a San Lorenzo",
+    desc: "Parcheggia a Termini Piastra (24 ore, 30 €/giorno, 17 min a piedi). In alternativa Garage Tiburtina (27 min a piedi) o, gratis, lo Scalo San Lorenzo (10 min a piedi). Se è pieno, prova lo Scalo San Lorenzo (gratis, consigliato da Francesco). A piedi sono pochi minuti.",
+    icon: "ph:map-pin",
+    places: [
+      { label: "Garage dei Bruzi", url: mapsSearch("Garage dei Bruzi Via dei Bruzi 11/a Roma") },
+      { label: "Scalo San Lorenzo", url: mapsSearch("Scalo San Lorenzo Roma parcheggio") },
+      { label: "Garage Tiburtina", url: mapsSearch("Garage Tiburtina Via Lorenzo il Magnifico Roma") },
+      { label: "Piazza dei Sanniti 9/A", url: mapsSearch(VENUE) },
+    ],
+  },
+  {
+    time: "10:15",
+    title: "Ingresso a Palazzo San Lorenzo",
+    desc: "Registrazione e posto in sala. Il palazzo è a pochi minuti dalla Stazione Termini.",
+    icon: "ph:door-open",
+    places: [{ label: "Palazzo San Lorenzo", url: mapsSearch(VENUE) }],
+  },
+  {
+    time: "10:30",
+    title: "Prima sessione",
+    desc: "Il programma completo della domenica è qui sotto.",
+    icon: "ph:presentation-chart",
+  },
+  {
+    time: "13:35–15:00",
+    title: "Pranzo nel teatro del palazzo",
+    desc: "Menu fisso, prenotato da Francesco, si paga a parte. Pausa di 85 minuti.",
+    icon: "ph:fork-knife",
+    badge: "prenotato",
+  },
+  {
+    time: "19:45",
+    title: "Fine seminario",
+    desc: "Ultima lezione: Francesco Trento sulla motivazione. Saluti e rientro al parcheggio.",
+    icon: "ph:flag-checkered",
+  },
+  {
+    time: "~20:00",
+    title: "Rientro a Porto Sant'Elpidio",
+    desc: "Circa 3 ore di viaggio, arrivo verso le 23:00. Una sosta in autogrill a metà strada allunga il tempo di 15–20 minuti.",
+    icon: "ph:house-line",
+    places: [
+      { label: "Rotta di ritorno", url: mapsDirections(VENUE, HOME) },
+    ],
+  },
+];
+
+const program = [
+  { t: "10:30–10:50", who: "Nicolò Mazza de' Piccioli e Claudia La Ferla", what: "Dimmi con chi stai – Conoscere il personaggio dalle sue relazioni" },
+  { t: "11:00–12:00", who: "Giulia Blasi", what: "Basato su fatti realmente accaduti – Memoir, racconto personale, autofiction" },
+  { t: "12:00–12:15", pause: "Pausa" },
+  { t: "12:15–13:15", who: "Nadia Terranova", what: "Scrivere la felicità – Come narrare il sentimento più tabù della letteratura" },
+  { t: "13:15–13:35", who: "Francesco Trento e il team di editor", what: "Consigli di scrittura" },
+  { t: "13:35–15:00", pause: "Pausa pranzo" },
+  { t: "15:00–16:30", who: "Andrea Colamedici e Maura Gancitano", what: "Siamo animali narrativi" },
+  { t: "16:30–16:40", pause: "Pausa" },
+  { t: "16:40–17:40", who: "Lorenzo Gasparrini", what: "La scrittura saggistica" },
+  { t: "17:40–17:55", pause: "Pausa" },
+  { t: "17:55–18:45", who: "Marcella Ferrara", what: "Dal foglio al palco: come si scrive un talk che lascia traccia" },
+  { t: "18:45–19:45", who: "Francesco Trento", what: "L'ingrediente chiave di ogni scrittura: la motivazione" },
+];
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Roma · 18 Ottobre 2026</title>
+    <style is:global>
+      .foglio body.admin .container { max-width: 1100px; margin: 0 auto; }
+
+      .foglio body.admin .page-header { margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .page-kicker { color: var(--foglio-ink-soft); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-header h1 { font-family: var(--foglio-serif); color: var(--foglio-ink); font-size: var(--foglio-fs-4xl); font-weight: 500; letter-spacing: -0.015em; line-height: 1.05; margin-bottom: 0.5rem; }
+      .foglio body.admin .page-subtitle { color: var(--foglio-ink-soft); font-family: var(--foglio-serif); font-style: italic; font-size: var(--foglio-fs-sm); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+      .foglio body.admin .page-subtitle .icon-inline { width: 1rem; height: 1rem; color: var(--foglio-accent); }
+      .foglio body.admin .booking-ref { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); text-transform: uppercase; letter-spacing: 0.1em; font-style: normal; }
+
+      .foglio body.admin .card-title { font-family: var(--foglio-mono); color: var(--foglio-ink-soft); font-size: var(--foglio-fs-mono); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.55rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--foglio-rule); }
+      .foglio body.admin .card-title-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); }
+
+
+      .foglio body.admin .rules-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+      .foglio body.admin .rule { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1.1rem; }
+      .foglio body.admin .rule-head { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.55rem; }
+      .foglio body.admin .rule-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .rule-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); }
+      .foglio body.admin .rule-text { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.6; }
+
+      .foglio body.admin .timeline { position: relative; padding-left: 2.5rem; }
+      .foglio body.admin .timeline::before { content: ''; position: absolute; left: 0.95rem; top: 0.5rem; bottom: 0.5rem; width: 1px; background: var(--foglio-rule-strong); }
+      .foglio body.admin .step { position: relative; padding-bottom: 1.6rem; }
+      .foglio body.admin .step:last-child { padding-bottom: 0; }
+      .foglio body.admin .step-dot { position: absolute; left: -2.5rem; top: 0.15rem; width: 2rem; height: 2rem; border-radius: 50%; background: var(--foglio-paper); border: 1px solid var(--foglio-accent); display: flex; align-items: center; justify-content: center; color: var(--foglio-accent); }
+      .foglio body.admin .step-dot svg { width: 1rem; height: 1rem; }
+      .foglio body.admin .step-time { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); font-weight: 700; letter-spacing: 0.1em; }
+      .foglio body.admin .step-title { font-family: var(--foglio-serif); font-size: var(--foglio-fs-md); font-weight: 500; color: var(--foglio-ink); margin: 0.1rem 0 0.35rem; }
+      .foglio body.admin .step-desc { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); max-width: 700px; line-height: 1.6; }
+
+
+      .foglio body.admin .step-places { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.65rem; }
+      .foglio body.admin .map-link { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.7rem; border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-sm); background: var(--foglio-paper-2); color: var(--foglio-ink); font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.08em; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+      .foglio body.admin .map-link:hover { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .map-link svg { color: inherit; }
+
+
+      @media (max-width: 720px) {
+        .foglio body.admin .card { padding: 1.15rem; }
+        .foglio body.admin .timeline { padding-left: 2rem; }
+        .foglio body.admin .step-dot { left: -2rem; width: 1.7rem; height: 1.7rem; }
+        .foglio body.admin .timeline::before { left: 0.8rem; }
+        .foglio body.admin .included-wrap { grid-template-columns: 1fr; }
+      }
+    
+      .foglio body.admin .day-divider { display: flex; align-items: center; gap: 0.8rem; margin: 1.6rem 0 1rem; }
+      .foglio body.admin .step-badge { display: inline-block; margin-left: 0.4rem; padding: 0.05rem 0.5rem; border: 1px solid var(--foglio-accent); border-radius: var(--foglio-radius-sm); color: var(--foglio-accent); font-family: var(--foglio-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; vertical-align: middle; }
+      .foglio body.admin .step-time-end { color: var(--foglio-ink-mute); }
+      .foglio body.admin .talk-list { list-style: none; }
+      .foglio body.admin .talk-list li { display: grid; grid-template-columns: 7.5rem 1fr; gap: 0.8rem; padding: 0.5rem 0; border-bottom: 1px solid var(--foglio-rule); font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); line-height: 1.45; }
+      .foglio body.admin .talk-list .t { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-accent); font-weight: 700; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; }
+      .foglio body.admin .talk-list li.pause { opacity: 0.6; font-style: italic; }
+      .foglio body.admin .talk-list strong { color: var(--foglio-ink); font-weight: 500; }
+      .foglio body.admin .times-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .foglio body.admin .time-box { background: var(--foglio-paper-2); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md); padding: 1rem 1.1rem; }
+      .foglio body.admin .time-box .lbl { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.35rem; }
+      .foglio body.admin .time-box .val { font-family: var(--foglio-serif); font-size: var(--foglio-fs-xl, 1.6rem); color: var(--foglio-ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+      .foglio body.admin .time-box .sub { font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink-soft); margin-top: 0.25rem; }
+      @media (max-width: 720px) { .foglio body.admin .talk-list li { grid-template-columns: 6rem 1fr; } }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="roma-arte-di-narrare" token={token} />
+    <main class="container">
+      <header class="page-header">
+        <div class="page-kicker">Eventi · Come si scrive una grande storia</div>
+        <h1><em class="acc">L'arte di narrare.</em> Domenica 18 Ottobre 2026</h1>
+        <p class="page-subtitle">
+          <Icon name="ph:map-pin" class="icon-inline" size={16} is:inline />
+          <span>Palazzo San Lorenzo · Piazza dei Sanniti 9/A · Roma</span>
+          <span>·</span>
+          <span>10:30–19:45</span>
+        </p>
+      </header>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:clock" class="card-title-icon" size={18} is:inline />
+          Tempi in sintesi
+        </h2>
+        <div class="times-grid">
+          {times.map((t) => (
+            <div class="time-box">
+              <div class="lbl">{t.label}</div>
+              <div class="val">{t.value}</div>
+              <div class="sub">{t.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:car" class="card-title-icon" size={18} is:inline />
+          Spostamenti e parcheggio
+        </h2>
+        <div class="rules-grid">
+          {rules.map((r) => (
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-icon"><Icon name={r.icon} size={18} is:inline /></span>
+                <span class="rule-title">{r.title}</span>
+              </div>
+              <p class="rule-text">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:swap" class="card-title-icon" size={18} is:inline />
+          Alternative al parcheggio
+        </h2>
+        <div class="rules-grid">
+          {alternatives.map((r) => (
+            <div class="rule">
+              <div class="rule-head">
+                <span class="rule-icon"><Icon name={r.icon} size={18} is:inline /></span>
+                <span class="rule-title">{r.title}</span>
+              </div>
+              <p class="rule-text">{r.text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:path" class="card-title-icon" size={18} is:inline />
+          Giornata · Domenica
+        </h2>
+        <div class="timeline">
+          {timeline.map((step) => (
+            <div class="step">
+              <div class="step-dot">
+                <Icon name={step.icon} is:inline />
+              </div>
+              <div class="step-time">{step.time}</div>
+              <div class="step-title">{step.title}{step.badge && <span class="step-badge">{step.badge}</span>}</div>
+              <div class="step-desc">{step.desc}</div>
+              {step.places && step.places.length > 0 && (
+                <div class="step-places">
+                  {step.places.map((p) => (
+                    <a class="map-link" href={p.url} target="_blank" rel="noopener noreferrer">
+                      <Icon name="ph:map-trifold" size={14} is:inline />
+                      <span>{p.label}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">
+          <Icon name="ph:presentation-chart" class="card-title-icon" size={18} is:inline />
+          Programma · Domenica 18
+        </h2>
+        <ul class="talk-list">
+          {program.map((p) => (
+            <li class:list={[{ pause: p.pause }]}>
+              <span class="t">{p.t}</span>
+              {p.pause ? <span>{p.pause}</span> : <span><strong>{p.who}</strong><br />{p.what}</span>}
+            </li>
+          ))}
+        </ul>
+        <p class="step-desc" style="margin-top: 1rem;">
+          Fonte: <a class="map-link" href="https://www.comesiscriveunagrandestoria.it/l-arte-di-narrare" target="_blank" rel="noopener noreferrer"><Icon name="ph:arrow-square-out" size={14} is:inline /><span>Pagina dell'evento</span></a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
