@@ -18,12 +18,19 @@ import {
 import {
   isAllowedRequestOrigin,
   parseBeacon,
+  parseEngage,
   parsePageview,
   type PageviewInput,
 } from "~/lib/analytics-input";
 import { classifyChannel } from "~/lib/channels";
 import { countryFromGeo } from "~/lib/geo";
 import { checkRate } from "~/lib/rate-limit";
+import {
+  BOT_SCORE_RULE,
+  computeBotScore,
+  isScannerPath,
+} from "~/lib/bot-score";
+import { evaluateRules, loadRules, recordRuleHit } from "~/lib/bot-rules";
 
 export const prerender = false;
 
@@ -48,7 +55,7 @@ function clientIp(request: Request): string {
 }
 
 /** Columns added after the first release; dropped when the migration is not applied yet. */
-const OPTIONAL_COLUMNS = new Set(["channel", "visitor_hash"]);
+const OPTIONAL_COLUMNS = new Set(["channel", "visitor_hash", "bot_score"]);
 
 async function insertPageview(
   db: Client,
@@ -93,6 +100,22 @@ async function isFirstVisitToday(
   }
 }
 
+/** Pageviews this hash stored in the last minute (rate signal). Fail-quiet: 0 on error. */
+async function recentPageviews(
+  db: Client,
+  visitorHash: string,
+): Promise<number> {
+  try {
+    const res = await db.execute({
+      sql: "SELECT COUNT(*) AS n FROM pageviews WHERE visitor_hash = ? AND created_at >= datetime('now', '-1 minute')",
+      args: [visitorHash],
+    });
+    return Number(res.rows[0]?.n ?? 0);
+  } catch {
+    return 0;
+  }
+}
+
 function buildRow(
   p: PageviewInput,
   extra: {
@@ -101,6 +124,7 @@ function buildRow(
     browser: string | null;
     os: string | null;
     country: string | null;
+    botScore: number;
   },
 ): Record<string, InValue> {
   return {
@@ -128,6 +152,7 @@ function buildRow(
     viewport_height: p.viewportHeight,
     language: p.language,
     country: extra.country,
+    bot_score: extra.botScore,
   };
 }
 
@@ -149,14 +174,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(null, { status: 400 });
 
   const type = body.type;
-  if (type !== "pageview" && type !== "beacon") {
+  if (type !== "pageview" && type !== "beacon" && type !== "engage") {
     return new Response(null, { status: 400 });
   }
 
   const pv = type === "pageview" ? parsePageview(body) : null;
   const bc = type === "beacon" ? parseBeacon(body) : null;
-  const input = pv ?? bc;
+  const en = type === "engage" ? parseEngage(body) : null;
+  const input = pv ?? bc ?? en;
   if (!input || !input.ok) return noContent();
+  // Scanner probes (/wp-login.php, /.env, *.php...): drop, store nothing.
+  if (pv?.ok && isScannerPath(pv.value.pathname)) return noContent();
 
   const db = getDb();
   const ip = clientIp(request);
@@ -170,9 +198,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
   maybePurgeOldSalts(db, today);
 
-  if (bc?.ok) {
-    const b = bc.value;
-    // A beacon sent just after midnight UTC was hashed with yesterday's salt.
+  if (bc?.ok || en?.ok) {
+    // A beacon/engage sent just after midnight UTC was hashed with yesterday's salt.
     const hashes = [visitorHash];
     const yesterday = shiftDay(today, -1);
     const yesterdaySalt = await peekSalt(db, yesterday);
@@ -181,11 +208,26 @@ export const POST: APIRoute = async ({ request, locals }) => {
         await generateVisitorHash(yesterdaySalt, hostname, ip, ua ?? ""),
       );
     }
+    const inHashes = hashes.map(() => "?").join(", ");
+    if (en?.ok) {
+      try {
+        await db.execute({
+          sql: `UPDATE pageviews SET human = 1
+                WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
+          args: [en.value.pageId, ...hashes],
+        });
+      } catch {
+        /* migration not applied: no human column yet */
+      }
+      return noContent();
+    }
+    if (!bc?.ok) return noContent();
+    const b = bc.value;
     await db.execute({
       sql: `UPDATE pageviews
             SET time_on_page = MAX(COALESCE(time_on_page, 0), ?),
                 scroll_depth = MAX(COALESCE(scroll_depth, 0), ?)
-            WHERE page_id = ? AND visitor_hash IN (${hashes.map(() => "?").join(", ")})`,
+            WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
       args: [b.timeOnPage ?? 0, b.scrollDepth ?? 0, b.pageId, ...hashes],
     });
     return noContent();
@@ -200,9 +242,34 @@ export const POST: APIRoute = async ({ request, locals }) => {
     countryFromGeo(request.headers, geo) ?? countryFromTimezone(p.timezone);
   const isUnique = await isFirstVisitToday(db, today, visitorHash);
 
+  const { score } = computeBotScore({
+    headers: request.headers,
+    ua,
+    viewportWidth: p.viewportWidth,
+    viewportHeight: p.viewportHeight,
+    language: p.language,
+    timezone: p.timezone,
+    recentPageviews: await recentPageviews(db, visitorHash),
+  });
+  const matched = evaluateRules(await loadRules(db), {
+    ua,
+    referrerHost: p.referrerHost,
+    pathname: p.pathname,
+    visitorHash,
+    now: new Date(),
+  });
+  if (matched) await recordRuleHit(db, matched.id);
+
   await insertPageview(
     db,
-    buildRow(p, { visitorHash, isUnique, browser, os, country }),
+    buildRow(p, {
+      visitorHash,
+      isUnique,
+      browser,
+      os,
+      country,
+      botScore: matched ? BOT_SCORE_RULE : score,
+    }),
   );
   return noContent();
 };

@@ -21,7 +21,32 @@ export async function migrateAnalyticsV2(db: Client): Promise<string[]> {
     log.push("added pageviews.channel");
   }
 
+  // Phase 4: bot detection model.
+  if (!(await columnExists(db, "pageviews", "human"))) {
+    await db.execute(
+      "ALTER TABLE pageviews ADD COLUMN human INTEGER DEFAULT 0",
+    );
+    log.push("added pageviews.human");
+  }
+  if (!(await columnExists(db, "pageviews", "bot_score"))) {
+    await db.execute(
+      "ALTER TABLE pageviews ADD COLUMN bot_score INTEGER DEFAULT 0",
+    );
+    log.push("added pageviews.bot_score");
+  }
+
   await db.executeMultiple(`
+    CREATE TABLE IF NOT EXISTS bot_rules (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind       TEXT NOT NULL,
+      value      TEXT NOT NULL,
+      note       TEXT,
+      enabled    INTEGER NOT NULL DEFAULT 1,
+      hits       INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT
+    );
+
     CREATE TABLE IF NOT EXISTS analytics_salts (
       day  TEXT PRIMARY KEY,
       salt TEXT NOT NULL
@@ -35,7 +60,7 @@ export async function migrateAnalyticsV2(db: Client): Promise<string[]> {
 
     CREATE INDEX IF NOT EXISTS idx_pv_visitor_day ON pageviews(visitor_hash, created_at);
   `);
-  log.push("ensured analytics_salts, daily_visitors, idx_pv_visitor_day");
+  log.push("ensured bot_rules, analytics_salts, daily_visitors, idx_pv_visitor_day");
 
   return log;
 }

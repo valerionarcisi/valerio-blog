@@ -154,3 +154,21 @@ export function parseBeacon(
     },
   };
 }
+
+export interface EngageInput {
+  pageId: string;
+  hostname: string;
+}
+
+/** Human signal: first real interaction (or 3 s of visible time) on a page. */
+export function parseEngage(
+  body: Record<string, unknown>,
+): Parsed<EngageInput> {
+  if (!isAllowedHost(body.hostname)) return { ok: false, reason: "hostname" };
+  const pageId = validatePageId(body.page_id);
+  if (!pageId) return { ok: false, reason: "page_id" };
+  return {
+    ok: true,
+    value: { pageId, hostname: body.hostname.toLowerCase() },
+  };
+}

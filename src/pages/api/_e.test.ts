@@ -1,6 +1,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { createClient, type Client } from "@libsql/client";
 import { migrateAnalyticsV2 } from "../../../scripts/migrate-analytics-v2";
+import { invalidateRulesCache } from "~/lib/bot-rules";
 
 let db: Client;
 
@@ -39,12 +40,16 @@ function call(
     ua?: string;
     headers?: Record<string, string>;
     origin?: string | null;
+    bare?: boolean;
   } = {},
 ) {
   const headers: Record<string, string> = {
     "content-type": "application/json",
     "user-agent": opts.ua ?? UA,
     "x-nf-client-connection-ip": opts.ip ?? "203.0.113.7",
+    ...(opts.bare
+      ? {}
+      : { "accept-language": "it-IT,it;q=0.9", "sec-fetch-site": "same-origin" }),
     ...(opts.origin === null
       ? {}
       : { origin: opts.origin ?? "https://valerionarcisi.me" }),
@@ -86,6 +91,7 @@ beforeEach(async () => {
   db = createClient({ url: ":memory:" });
   await db.executeMultiple(OLD_SCHEMA);
   await migrateAnalyticsV2(db);
+  invalidateRulesCache();
 });
 
 describe("POST /api/e - pageview", () => {
@@ -263,5 +269,173 @@ describe("POST /api/e - migration not applied", () => {
     const rs = await rows();
     expect(rs).toHaveLength(2);
     expect(rs.map((r) => r.is_unique)).toEqual([1, 1]); // no visitor_hash fallback column -> unique
+  });
+
+  test("engage, rules and score degrade silently without the phase 4 columns/tables", async () => {
+    db = createClient({ url: ":memory:" });
+    await db.executeMultiple(OLD_SCHEMA);
+    invalidateRulesCache();
+    expect((await call(pageview(), { bare: true })).status).toBe(204);
+    expect((await call(engage())).status).toBe(204);
+    expect(await rows()).toHaveLength(1);
+  });
+});
+
+const engage = (over: Record<string, unknown> = {}) => ({
+  type: "engage",
+  page_id: PAGE_ID,
+  hostname: "valerionarcisi.me",
+  ...over,
+});
+
+describe("POST /api/e - engage (human signal)", () => {
+  test("sets human = 1 on the pageview, idempotently; new rows start at 0", async () => {
+    await call(pageview());
+    expect((await rows())[0].human).toBe(0);
+    expect((await call(engage())).status).toBe(204);
+    expect((await call(engage())).status).toBe(204);
+    const rs = await rows();
+    expect(rs).toHaveLength(1);
+    expect(rs[0].human).toBe(1);
+  });
+
+  test("an engage from a different visitor (ip or ua) is ignored", async () => {
+    await call(pageview());
+    await call(engage(), { ip: "198.51.100.77" });
+    await call(engage(), { ua: UA + " Other" });
+    expect((await rows())[0].human).toBe(0);
+  });
+
+  test("unknown page_id, foreign host, bad origin: nothing changes", async () => {
+    await call(pageview());
+    await call(engage({ page_id: "z".repeat(16) }));
+    await call(engage({ hostname: "evil.com" }));
+    expect((await call(engage(), { origin: "https://evil.com" })).status).toBe(
+      403,
+    );
+    expect((await rows())[0].human).toBe(0);
+  });
+
+  test("engage right after midnight still matches yesterday's hash", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-10-15T23:59:50Z"));
+      await call(pageview());
+      vi.setSystemTime(new Date("2026-10-16T00:00:30Z"));
+      await call(engage());
+      expect((await rows())[0].human).toBe(1);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  test("does not touch rows of other pages of the same visitor", async () => {
+    await call(pageview());
+    await call(pageview({ page_id: "q".repeat(16) }));
+    await call(engage());
+    expect((await rows()).map((r) => r.human)).toEqual([1, 0]);
+  });
+});
+
+describe("POST /api/e - bot score and scanner paths", () => {
+  test("scanner paths are dropped: 204 and nothing stored", async () => {
+    for (const pathname of [
+      "/wp-login.php",
+      "/.env",
+      "/xmlrpc.php",
+      "/wp-admin/x",
+      "/a/b.php",
+    ]) {
+      expect((await call(pageview({ pathname }))).status).toBe(204);
+    }
+    expect(await rows()).toHaveLength(0);
+  });
+
+  test("a regular browser request is stored with score 0", async () => {
+    await call(pageview());
+    expect((await rows())[0].bot_score).toBe(0);
+  });
+
+  test("missing Accept-Language and Sec-Fetch on Chrome: 6; plus viewport 0 on top", async () => {
+    await call(pageview(), { bare: true });
+    await call(pageview({ page_id: "v".repeat(16), viewport_width: 0 }), {
+      bare: true,
+      ip: "198.51.100.1",
+    });
+    expect((await rows()).map((r) => r.bot_score)).toEqual([6, 8]);
+  });
+
+  test("more than 20 pageviews in a minute from one hash adds the rate signal", async () => {
+    for (let i = 0; i < 22; i++) {
+      await call(pageview({ page_id: `p${i}`.padEnd(16, "x") }));
+    }
+    const scores = (await rows()).map((r) => r.bot_score);
+    expect(scores.slice(0, 21).every((s) => s === 0)).toBe(true);
+    expect(scores[21]).toBe(3);
+  });
+});
+
+describe("POST /api/e - bot rules at ingest", () => {
+  const FF = { ua: "Mozilla/5.0 Firefox/130.0" };
+
+  async function addRule(kind: string, value: string, expires?: string) {
+    await db.execute({
+      sql: "INSERT INTO bot_rules (kind, value, expires_at) VALUES (?, ?, ?)",
+      args: [kind, value, expires ?? null],
+    });
+    invalidateRulesCache();
+  }
+
+  test("ua_contains / referrer_host / path_prefix mark the row 99 and count hits", async () => {
+    await addRule("ua_contains", "chrome/120");
+    await call(pageview());
+    await addRule("referrer_host", "spam.example");
+    await call(
+      pageview({
+        page_id: "r".repeat(16),
+        referrer: "https://Spam.example/x",
+      }),
+      FF,
+    );
+    await addRule("path_prefix", "/private");
+    await call(
+      pageview({ page_id: "s".repeat(16), pathname: "/private/area" }),
+      FF,
+    );
+    await call(pageview({ page_id: "t".repeat(16) }), FF);
+    expect((await rows()).map((r) => r.bot_score)).toEqual([99, 99, 99, 0]);
+    const hits = (
+      await db.execute("SELECT hits FROM bot_rules ORDER BY id")
+    ).rows.map((r) => r.hits);
+    expect(hits).toEqual([1, 1, 1]);
+  });
+
+  test("disabled and expired rules are ignored", async () => {
+    await addRule("ua_contains", "chrome/120");
+    await db.execute("UPDATE bot_rules SET enabled = 0");
+    invalidateRulesCache();
+    await call(pageview());
+    await addRule("path_prefix", "/blog", "2000-01-01 00:00:00");
+    await call(pageview({ page_id: "u".repeat(16) }), { ip: "198.51.100.2" });
+    expect((await rows()).map((r) => r.bot_score)).toEqual([0, 0]);
+  });
+
+  test("rules are cached in memory between requests", async () => {
+    await call(pageview());
+    await db.execute(
+      "INSERT INTO bot_rules (kind, value) VALUES ('ua_contains', 'chrome/120')",
+    );
+    await call(pageview({ page_id: "w".repeat(16) }));
+    expect((await rows()).map((r) => r.bot_score)).toEqual([0, 0]);
+    invalidateRulesCache();
+    await call(pageview({ page_id: "y".repeat(16) }));
+    expect((await rows())[2].bot_score).toBe(99);
+  });
+
+  test("a broken rules table never breaks ingest", async () => {
+    await db.execute("DROP TABLE bot_rules");
+    invalidateRulesCache();
+    expect((await call(pageview())).status).toBe(204);
+    expect(await rows()).toHaveLength(1);
   });
 });

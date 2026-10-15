@@ -2,6 +2,12 @@ import type { APIRoute } from "astro";
 import { requireAdmin } from "~/lib/admin-auth";
 import getDb from "~/lib/turso";
 import { getDateRange } from "~/lib/date-range";
+import {
+  HUMAN_SQL,
+  NOT_LEGACY_BOT_SQL,
+  UNVERIFIED_SQL,
+  VERDICT_SQL,
+} from "~/lib/bot-verdict";
 
 export const prerender = false;
 
@@ -30,7 +36,12 @@ export const GET: APIRoute = async ({ url, request }) => {
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();
 
-  const baseWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND (visitor_hash IS NULL OR visitor_hash NOT IN (SELECT hash FROM bot_hashes))${pathnameFilter ? " AND pathname = ?" : ""}`;
+  // Coexistence period: default = human visits only; include=all = the OLD numbers
+  // (everything except the legacy per-hash flags).
+  const includeAll = url.searchParams.get("include") === "all";
+  const rangeWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}`;
+  const baseWhere = `${rangeWhere} AND ${includeAll ? NOT_LEGACY_BOT_SQL : HUMAN_SQL}`;
+  const legacyWhere = `${rangeWhere} AND ${NOT_LEGACY_BOT_SQL}`;
   const baseArgs = pathnameFilter
     ? [range.from, range.to, pathnameFilter]
     : [range.from, range.to];
@@ -42,7 +53,11 @@ export const GET: APIRoute = async ({ url, request }) => {
         ? "strftime('%Y-%m', created_at)"
         : "date(created_at)";
 
-  const suspectWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day') AND visitor_hash IS NOT NULL AND visitor_hash NOT IN (SELECT hash FROM bot_hashes) AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)${pathnameFilter ? " AND pathname = ?" : ""}`;
+  // LEGACY zero-engagement heuristic behind the old "Flag come bot" button.
+  const suspectWhere = `${legacyWhere} AND visitor_hash IS NOT NULL AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)`;
+
+  // First path segment + "*": '/blog/foo' -> '/blog/*', so scanners/crawlers hitting many posts group together.
+  const pathPattern = `CASE WHEN instr(substr(pathname, 2), '/') > 0 THEN substr(pathname, 1, instr(substr(pathname, 2), '/') + 1) || '*' ELSE pathname END`;
 
   const [
     summary,
@@ -61,6 +76,9 @@ export const GET: APIRoute = async ({ url, request }) => {
     suspectCountries,
     topEngagedPosts,
     sectionBreakdown,
+    legacySummary,
+    quality,
+    review,
   ] = await Promise.all([
     db.execute({
       sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors, ROUND(AVG(time_on_page)) as avg_time, ROUND(AVG(scroll_depth)) as avg_scroll FROM pageviews ${baseWhere}`,
@@ -107,7 +125,7 @@ export const GET: APIRoute = async ({ url, request }) => {
       args: baseArgs,
     }),
     db.execute({
-      sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash FROM pageviews ${baseWhere} AND is_unique = 1 ORDER BY created_at DESC LIMIT 30`,
+      sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash, ${VERDICT_SQL} as verdict FROM pageviews ${baseWhere} AND is_unique = 1 ORDER BY created_at DESC LIMIT 30`,
       args: baseArgs,
     }),
     db.execute({
@@ -154,7 +172,35 @@ export const GET: APIRoute = async ({ url, request }) => {
             ORDER BY pageviews DESC`,
       args: baseArgs,
     }),
+    db.execute({
+      sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors, ROUND(AVG(time_on_page)) as avg_time, ROUND(AVG(scroll_depth)) as avg_scroll FROM pageviews ${legacyWhere}`,
+      args: baseArgs,
+    }),
+    db.execute({
+      sql: `SELECT ${VERDICT_SQL} as verdict, COALESCE(SUM(is_unique), 0) as visits, COUNT(*) as pageviews FROM pageviews ${rangeWhere} GROUP BY verdict`,
+      args: baseArgs,
+    }),
+    db.execute({
+      sql: `SELECT browser, os, device_type, country, referrer, ${pathPattern} as path_pattern,
+              COUNT(*) as pageviews,
+              COALESCE(SUM(is_unique), 0) as visits,
+              MAX(bot_score) as max_score,
+              MAX(created_at) as last_seen
+            FROM pageviews ${rangeWhere} AND ${UNVERIFIED_SQL}
+            GROUP BY browser, os, device_type, country, referrer, path_pattern
+            ORDER BY pageviews DESC
+            LIMIT 15`,
+      args: baseArgs,
+    }),
   ]);
+
+  const verdictCounts = { human: 0, unverified: 0, bot: 0 };
+  for (const r of quality.rows) {
+    const v = String(r.verdict) as keyof typeof verdictCounts;
+    if (v in verdictCounts) verdictCounts[v] = Number(r.visits) || 0;
+  }
+  const nonBot = verdictCounts.human + verdictCounts.unverified;
+  const ls = legacySummary.rows[0];
 
   const prevFromDate = new Date(range.from + "T00:00:00Z");
   const prevToDate = new Date(range.to + "T00:00:00Z");
@@ -203,6 +249,23 @@ export const GET: APIRoute = async ({ url, request }) => {
         visitors_delta_pct: pctChange(totalVisitors, prevVis),
         prev_period: { from: prevFrom, to: prevTo, pageviews: prevPv, visitors: prevVis },
       },
+      mode: includeAll ? "all" : "human",
+      // Old numbers (all but legacy bot_hashes), kept side by side during the coexistence period.
+      summary_legacy: {
+        pageviews: Number(ls.pageviews) || 0,
+        visitors: Number(ls.visitors) || 0,
+        avg_time_on_page: Number(ls.avg_time) || 0,
+        avg_scroll_depth: Number(ls.avg_scroll) || 0,
+      },
+      // Visits (first hit of the day per visitor) by verdict. unverified_pct is over non-bot visits.
+      quality: {
+        ...verdictCounts,
+        unverified_pct:
+          nonBot > 0
+            ? Math.round((verdictCounts.unverified / nonBot) * 1000) / 10
+            : 0,
+      },
+      review: review.rows,
       chart: chart.rows,
       top_pages: topPages.rows,
       referrers: referrers.rows,

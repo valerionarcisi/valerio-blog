@@ -93,6 +93,16 @@ Ogni fase è rilasciabile da sola, con test Vitest (pattern del repo: `vi.mock("
 
 ### Fase 4 — Bot: nuovo modello e nuovo modo di flaggare (M)
 
+> **Stato: [x] implementata (2026-10-15), in periodo di coesistenza.** Dettagli e scelte in `docs/analytics-spec.md` ("Bot detection"). Codice: `src/lib/bot-score.ts`, `bot-rules.ts`, `bot-verdict.ts`, `/api/admin/bot-rules` (+ `/preview`), evento `engage` in `/api/e` e nel tracker, `/api/stats` (`quality`, `summary_legacy`, `review`, `?include=all`), dashboard.
+>
+> Decisioni: i "non verificati" sono **esclusi** dai numeri principali e mostrati a parte con la percentuale; `country_device` non implementato (kind: `ua_contains | referrer_host | path_prefix | hash_today`); le regole valgono dalle nuove visite (il verdetto in lettura usa `bot_score`, non rivaluta le regole sulle righe passate; l'UA non e salvato).
+>
+> **Da fare dopo ~2 settimane di coesistenza (data di deploy + 14 giorni):**
+> - [ ] Tarare soglia/pesi guardando `quality` e `summary_legacy` affiancati.
+> - [ ] Convertire `bot_hashes` in `bot_score = 99` sulle righe storiche e ripristinare `is_unique` da `daily_visitors` (punto 3 della migrazione sotto).
+> - [ ] Rimuovere `/api/admin/bot`, `bot-rollback.test.ts`, "Flag come bot", "Flag zero-engagement", "Annulla flag", "Annulla TUTTI", 🤖, URL `?recover=all`, "Sospetti"/`suspicious`, `summary_legacy`, la clausola `bot_hashes` in `bot-verdict.ts`, poi `DROP TABLE bot_hashes`.
+> - [ ] Valutare `ua_family` (browser major + os) per raggruppare meglio "Da rivedere" se i gruppi attuali sono troppo larghi.
+
 #### Come funziona oggi
 
 - **Filtro automatico** solo su User-Agent (`isbot`) e `navigator.webdriver`: i bot dichiarati non arrivano nemmeno al DB.

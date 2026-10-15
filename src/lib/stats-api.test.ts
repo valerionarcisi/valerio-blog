@@ -36,6 +36,8 @@ async function seedDb() {
       viewport_height INTEGER,
       language        TEXT,
       country         TEXT,
+      human           INTEGER DEFAULT 0,
+      bot_score       INTEGER DEFAULT 0,
       created_at      TEXT NOT NULL DEFAULT (datetime('now'))
     );
     CREATE TABLE IF NOT EXISTS bot_hashes (
@@ -71,6 +73,8 @@ function insertPageview(overrides: Record<string, unknown> = {}) {
     viewport_height: 900,
     language: "it",
     country: "IT",
+    human: 1,
+    bot_score: 0,
     created_at: "2026-03-05 10:00:00",
   };
   const row = { ...defaults, ...overrides };
@@ -81,8 +85,8 @@ function insertPageview(overrides: Record<string, unknown> = {}) {
       is_unique, visitor_hash, time_on_page, scroll_depth,
       browser, os, device_type,
       screen_width, screen_height, viewport_width, viewport_height,
-      language, country, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      language, country, human, bot_score, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       row.page_id,
       row.hostname,
@@ -105,6 +109,8 @@ function insertPageview(overrides: Record<string, unknown> = {}) {
       row.viewport_height,
       row.language,
       row.country,
+      row.human,
+      row.bot_score,
       row.created_at,
     ],
   });
@@ -112,13 +118,20 @@ function insertPageview(overrides: Record<string, unknown> = {}) {
 
 function makeRequest(
   period: string,
-  opts: { token?: string; from?: string; to?: string; pathname?: string } = {},
+  opts: {
+    token?: string;
+    from?: string;
+    to?: string;
+    pathname?: string;
+    include?: string;
+  } = {},
 ): { url: URL; request: Request } {
   const token = opts.token ?? "test-token";
   const params = new URLSearchParams({ period });
   if (opts.from) params.set("from", opts.from);
   if (opts.to) params.set("to", opts.to);
   if (opts.pathname) params.set("pathname", opts.pathname);
+  if (opts.include) params.set("include", opts.include);
   const url = new URL(`https://example.com/api/stats?${params}`);
   const request = new Request(url.toString(), {
     headers: { Authorization: `Bearer ${token}` },
@@ -462,5 +475,113 @@ describe("GET /api/stats", () => {
     }
 
     expect(dayTotal).toBe(weekBody.summary.pageviews);
+  });
+
+  describe("bot verdict (human / unverified / bot)", () => {
+    async function seedMix() {
+      await insertPageview({ human: 1, created_at: "2026-03-05 08:00:00" });
+      await insertPageview({ human: 1, created_at: "2026-03-05 08:10:00" });
+      await insertPageview({
+        human: 0,
+        pathname: "/blog/crawled",
+        created_at: "2026-03-05 09:00:00",
+      });
+      await insertPageview({
+        human: 0,
+        bot_score: 6,
+        created_at: "2026-03-05 09:30:00",
+      });
+      // bot_score wins over an engage sent by a scripted client
+      await insertPageview({
+        human: 1,
+        bot_score: 99,
+        created_at: "2026-03-05 09:40:00",
+      });
+      const flagged = "legacyflagged01";
+      await insertPageview({
+        human: 1,
+        visitor_hash: flagged,
+        created_at: "2026-03-05 10:00:00",
+      });
+      await db.execute({
+        sql: "INSERT INTO bot_hashes (hash) VALUES (?)",
+        args: [flagged],
+      });
+    }
+
+    async function get(opts: Parameters<typeof makeRequest>[1] = {}) {
+      const { GET } = await import("~/pages/api/stats");
+      const { url, request } = makeRequest("today", opts);
+      return (await GET({ url, request } as never)).json();
+    }
+
+    test("main numbers count human visits only", async () => {
+      await seedMix();
+      const body = await get();
+      expect(body.mode).toBe("human");
+      expect(body.summary.pageviews).toBe(2);
+      expect(body.summary.visitors).toBe(2);
+      expect(
+        body.top_pages.map((p: { pathname: string }) => p.pathname),
+      ).not.toContain("/blog/crawled");
+    });
+
+    test("quality splits visits and gives the unverified share", async () => {
+      await seedMix();
+      const body = await get();
+      expect(body.quality).toEqual({
+        human: 2,
+        unverified: 1,
+        bot: 3,
+        unverified_pct: 33.3,
+      });
+    });
+
+    test("summary_legacy keeps the old computation (all but legacy bot_hashes)", async () => {
+      await seedMix();
+      const body = await get();
+      expect(body.summary_legacy.pageviews).toBe(5);
+      expect(body.summary_legacy.visitors).toBe(5);
+    });
+
+    test("include=all returns the legacy behaviour for the main fields", async () => {
+      await seedMix();
+      const body = await get({ include: "all" });
+      expect(body.mode).toBe("all");
+      expect(body.summary.pageviews).toBe(5);
+      expect(body.summary.visitors).toBe(5);
+      expect(body.summary.pageviews).toBe(body.summary_legacy.pageviews);
+      expect(body.quality.human).toBe(2);
+    });
+
+    test("review groups unverified visits by browser/os/country/referrer/path pattern", async () => {
+      const common = {
+        human: 0,
+        browser: "Chrome",
+        os: "Linux",
+        country: "US",
+        referrer: "spam.example",
+      };
+      await insertPageview({
+        ...common,
+        pathname: "/blog/a",
+        created_at: "2026-03-05 08:00:00",
+      });
+      await insertPageview({
+        ...common,
+        pathname: "/blog/b",
+        created_at: "2026-03-05 08:05:00",
+      });
+      await insertPageview({ human: 1, created_at: "2026-03-05 08:10:00" });
+      const body = await get();
+      expect(body.review).toHaveLength(1);
+      expect(body.review[0]).toMatchObject({
+        browser: "Chrome",
+        os: "Linux",
+        referrer: "spam.example",
+        path_pattern: "/blog/*",
+      });
+      expect(Number(body.review[0].pageviews)).toBe(2);
+    });
   });
 });

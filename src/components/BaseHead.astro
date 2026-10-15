@@ -113,6 +113,14 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   function tick(){if(visible){var n=Date.now();acc+=n-last;last=n;}}
   function onScroll(){var h=document.documentElement.scrollHeight-innerHeight;if(h>0){var pct=Math.round(scrollY/h*100/5)*5;if(pct>maxScroll)maxScroll=pct;}}
   window.addEventListener("scroll",onScroll,{passive:true});
+  var eng=0,et;
+  function engage(){
+    if(eng)return;eng=1;clearInterval(et);
+    ["scroll","pointerdown","keydown","touchstart"].forEach(function(t){removeEventListener(t,engage);});
+    send({type:"engage",page_id:id,hostname:location.hostname}).catch(function(){});
+  }
+  ["scroll","pointerdown","keydown","touchstart"].forEach(function(t){addEventListener(t,engage,{passive:true});});
+  et=setInterval(function(){tick();if(acc>=3000)engage();},1000);
   function flush(){
     tick();
     var body=JSON.stringify({type:"beacon",page_id:id,hostname:location.hostname,time_on_page:Math.round(acc/1000),scroll_depth:maxScroll});

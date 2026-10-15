@@ -563,6 +563,102 @@ if (!Astro.locals.isAdmin) {
       }
       .foglio body.admin .ax-error { color: var(--ax-neg); }
 
+      /* Bot detection: traffic quality, review list, rules */
+      .foglio body.admin .ax-qual { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 0 0 0.75rem; }
+      .foglio body.admin .ax-qual .ax-stat { padding: 0.8rem; }
+      .foglio body.admin .ax-qual .ax-stat-value { font-size: 1.7rem; }
+      .foglio body.admin .ax-qual .ax-stat.human .ax-stat-value { color: var(--foglio-pos); }
+      .foglio body.admin .ax-qual .ax-stat.unverified .ax-stat-value { color: var(--foglio-warn); }
+      .foglio body.admin .ax-qual .ax-stat.bot .ax-stat-value { color: var(--foglio-neg); }
+      .foglio body.admin .ax-qual-note {
+        font-family: var(--foglio-mono);
+        font-size: 11px;
+        color: var(--ax-page-ink-soft);
+        margin: 0 0 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.25rem;
+        align-items: center;
+      }
+      .foglio body.admin .ax-qual-note label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; min-height: 32px; }
+      .foglio body.admin .ax-qual-note input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--foglio-accent); }
+      .foglio body.admin .ax-legacy-tag {
+        font-family: var(--foglio-mono);
+        font-size: 9px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 1px 5px;
+        border: 1px solid currentColor;
+        border-radius: var(--foglio-radius-sm);
+        color: var(--foglio-warn);
+        background: var(--foglio-paper);
+        margin-left: 0.4rem;
+        vertical-align: middle;
+      }
+      .foglio body.admin .ax-btn {
+        font-family: var(--foglio-mono);
+        font-size: 10.5px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        padding: 0.4rem 0.8rem;
+        background: transparent;
+        color: var(--ax-page-ink);
+        border: 1px solid var(--ax-page-rule);
+        border-radius: var(--foglio-radius-sm);
+        cursor: pointer;
+      }
+      .foglio body.admin .ax-btn:hover:not(:disabled) { border-color: var(--foglio-accent); color: var(--foglio-accent); }
+      .foglio body.admin .ax-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+      .foglio body.admin .ax-btn.primary { background: var(--foglio-accent); border-color: var(--foglio-accent); color: var(--foglio-paper); }
+      .foglio body.admin .ax-btn.primary:hover:not(:disabled) { color: var(--foglio-paper); opacity: 0.9; }
+      .foglio body.admin .ax-btn.danger:hover:not(:disabled) { border-color: var(--ax-neg); color: var(--ax-neg); }
+      .foglio body.admin .ax-card-list { margin: 0; padding: 0; list-style: none; }
+      .foglio body.admin .ax-card-list > li {
+        padding: 0.8rem 0.25rem;
+        border-bottom: 1px solid var(--ax-page-rule);
+        font-family: var(--foglio-mono);
+        font-size: 12px;
+        color: var(--ax-page-ink);
+      }
+      .foglio body.admin .ax-card-list > li:last-child { border-bottom: none; }
+      .foglio body.admin .ax-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.9rem; align-items: center; justify-content: space-between; }
+      .foglio body.admin .ax-row .ax-grow { flex: 1 1 14rem; min-width: 0; overflow-wrap: anywhere; }
+      .foglio body.admin .ax-sub { display: block; margin-top: 0.2rem; font-size: 10.5px; color: var(--ax-page-ink-mute); text-transform: uppercase; letter-spacing: 0.06em; }
+      .foglio body.admin .ax-rule-off { opacity: 0.5; }
+      .foglio body.admin .ax-kind {
+        font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em;
+        border: 1px solid var(--foglio-info); color: var(--foglio-info);
+        background: var(--foglio-paper); border-radius: var(--foglio-radius-sm); padding: 1px 5px; margin-right: 0.4rem;
+      }
+      .foglio body.admin .ax-rule-form {
+        display: grid; gap: 0.6rem; margin-top: 0.7rem; padding: 0.8rem;
+        background: var(--ax-page-bg); border: 1px dashed var(--ax-page-rule); border-radius: var(--foglio-radius-sm);
+      }
+      .foglio body.admin .ax-rule-form .ax-fields { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+      .foglio body.admin .ax-rule-form select,
+      .foglio body.admin .ax-rule-form input[type="text"] {
+        font-family: var(--foglio-mono); font-size: 12px; padding: 0.45rem 0.6rem;
+        background: var(--ax-page-bg-2); color: var(--ax-page-ink);
+        border: 1px solid var(--ax-page-rule); border-radius: var(--foglio-radius-sm); min-width: 0;
+      }
+      .foglio body.admin .ax-rule-form input[name="value"] { flex: 1 1 14rem; }
+      .foglio body.admin .ax-rule-form input[name="note"] { flex: 1 1 10rem; }
+      .foglio body.admin .ax-preview { font-size: 11.5px; color: var(--ax-page-ink-soft); }
+      .foglio body.admin .ax-preview-warn {
+        padding: 0.5rem 0.7rem; background: var(--foglio-paper); color: var(--foglio-warn);
+        border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm); font-weight: 600;
+      }
+      .foglio body.admin .ax-legacy-note { font-family: var(--foglio-mono); font-size: 10.5px; color: var(--ax-page-ink-mute); margin: 0 0 0.6rem; }
+      @media (pointer: coarse) {
+        .foglio body.admin .ax-btn,
+        .foglio body.admin .ax-bulk-flag,
+        .foglio body.admin .ax-flag-btn,
+        .foglio body.admin .ax-recent .ax-bot,
+        .foglio body.admin .ax-rule-form select,
+        .foglio body.admin .ax-rule-form input[type="text"] { min-height: 44px; min-width: 44px; }
+        .foglio body.admin .ax-qual-note label { min-height: 44px; }
+      }
+
       /* Tablet */
       @media (min-width: 768px) {
         .foglio body.admin .ax-wrap { padding: 1.75rem 1.75rem 4rem; }
@@ -664,12 +760,57 @@ if (!Astro.locals.isAdmin) {
           <div class="ax-stat-tooltip">Visitatori con &lt;5s sulla pagina o nessuna interazione.</div>
         </div>
         <div class="ax-stat suspect">
-          <div class="ax-stat-label">Sospetti <span class="ax-stat-info">?</span></div>
+          <div class="ax-stat-label">Sospetti <span class="ax-legacy-tag" title="Sistema vecchio: sostituito da verdetto e regole bot, verrà rimosso dopo il periodo di confronto">legacy</span> <span class="ax-stat-info">?</span></div>
           <div class="ax-stat-value" id="s-suspects">—</div>
-          <button class="ax-flag-btn" id="flag-suspects-btn">Flag come bot</button>
-          <div class="ax-stat-tooltip">Visitatori con zero engagement (tempo ≤5s e scroll 0%). Non ancora flaggati.</div>
+          <button class="ax-flag-btn" id="flag-suspects-btn" title="Legacy: flag per hash, sostituito dalle regole bot">Flag come bot (legacy)</button>
+          <div class="ax-stat-tooltip">LEGACY. Visitatori con zero engagement (tempo ≤5s e scroll 0%), non ancora flaggati. Usa "Da rivedere" e le regole bot al suo posto.</div>
         </div>
       </section>
+
+      <!-- Qualità traffico: umano / non verificato / bot -->
+      <div class="ax-section-head">
+        <h2>Qualità traffico</h2>
+        <span class="ax-section-meta" id="qual-meta">visite uniche per verdetto</span>
+      </div>
+      <div class="ax-qual" id="quality">
+        <div class="ax-stat human">
+          <div class="ax-stat-label">Umani</div>
+          <div class="ax-stat-value" id="q-human">—</div>
+        </div>
+        <div class="ax-stat unverified">
+          <div class="ax-stat-label">Non verificati</div>
+          <div class="ax-stat-value" id="q-unverified">—</div>
+          <div class="ax-stat-delta" id="q-pct"></div>
+        </div>
+        <div class="ax-stat bot">
+          <div class="ax-stat-label">Bot</div>
+          <div class="ax-stat-value" id="q-bot">—</div>
+        </div>
+      </div>
+      <p class="ax-qual-note">
+        <label>
+          <input type="checkbox" id="include-all" />
+          Includi non verificati (numeri come prima)
+        </label>
+        <span id="q-mode">—</span>
+        <span id="q-legacy"></span>
+      </p>
+
+      <div class="ax-section-head">
+        <h2>Da rivedere</h2>
+        <span class="ax-section-meta">non verificati, raggruppati per profilo</span>
+      </div>
+      <div class="ax-recent-card">
+        <ul class="ax-card-list" id="review-list"><li class="ax-loading">Caricamento…</li></ul>
+      </div>
+
+      <div class="ax-section-head">
+        <h2>Regole bot</h2>
+        <span class="ax-section-meta">valgono dalle nuove visite</span>
+      </div>
+      <div class="ax-recent-card">
+        <ul class="ax-card-list" id="rules-list"><li class="ax-loading">Caricamento…</li></ul>
+      </div>
 
       <!-- Visitatori recenti — featured: live feed -->
       <div class="ax-section-head ax-section-head--live">
@@ -678,9 +819,10 @@ if (!Astro.locals.isAdmin) {
           Visitatori recenti
         </h2>
         <div class="ax-bulk-actions">
-          <button class="ax-bulk-flag" id="flag-all-bots">Flag zero-engagement</button>
-          <button class="ax-bulk-flag" id="unflag-recent" title="Rimuove dai bot gli hash flaggati nelle ultime 24 ore">Annulla flag fatti oggi</button>
-          <button class="ax-bulk-flag" id="unflag-all" title="Rimuove TUTTI gli hash dalla bot list (paracadute)">Annulla TUTTI</button>
+          <span class="ax-legacy-tag" title="Sistema vecchio: sostituito da verdetto e regole bot, verrà rimosso dopo il periodo di confronto">legacy</span>
+          <button class="ax-bulk-flag" id="flag-all-bots" title="Legacy: flag per hash">Flag zero-engagement (legacy)</button>
+          <button class="ax-bulk-flag" id="unflag-recent" title="Legacy: rimuove dai bot gli hash flaggati nelle ultime 24 ore">Annulla flag fatti oggi (legacy)</button>
+          <button class="ax-bulk-flag" id="unflag-all" title="Legacy: rimuove TUTTI gli hash dalla bot list (paracadute)">Annulla TUTTI (legacy)</button>
         </div>
       </div>
       <div class="ax-recent-card">
@@ -885,7 +1027,7 @@ if (!Astro.locals.isAdmin) {
             if (!r.ok) return;
             row.classList.remove("flagged");
             btn.textContent = "🤖";
-            btn.title = "Flag come bot";
+            btn.title = "Flag come bot (legacy: flag per hash, sostituito dalle regole bot)";
             btn.onclick = function() { flagAsBot(hash, btn); };
           });
       }
@@ -920,7 +1062,7 @@ if (!Astro.locals.isAdmin) {
         var bulk = document.getElementById("flag-all-bots");
         bulk.style.display = zero > 0 ? "inline-block" : "none";
         bulk.disabled = false;
-        bulk.textContent = "Flag zero-engagement (" + zero + ")";
+        bulk.textContent = "Flag zero-engagement (" + zero + ") (legacy)";
 
         var ul = document.getElementById("recent-list");
         if (!visitors || !visitors.length) { ul.innerHTML = '<li class="ax-loading">Nessun visitatore recente.</li>'; return; }
@@ -942,7 +1084,9 @@ if (!Astro.locals.isAdmin) {
           if (time) metaParts.push("⏱ " + time);
           if (scroll) metaParts.push("↓ " + scroll);
 
-          var botBtn = hash ? '<button class="ax-bot" data-hash="' + escapeHtml(hash) + '" title="Flag come bot">🤖</button>' : '';
+          if (v.verdict === "unverified") metaParts.push("non verificato");
+          else if (v.verdict === "bot") metaParts.push("bot");
+          var botBtn = hash ? '<button class="ax-bot" data-hash="' + escapeHtml(hash) + '" title="Flag come bot (legacy: flag per hash, sostituito dalle regole bot)">🤖</button>' : '';
           var noTime = v.time_on_page == null || Number(v.time_on_page) <= 5;
           var noScroll = v.scroll_depth == null || Number(v.scroll_depth) === 0;
           var suspect = (noTime && noScroll && hash) ? ' suspect' : '';
@@ -958,6 +1102,183 @@ if (!Astro.locals.isAdmin) {
           b.onclick = function() { flagAsBot(b.dataset.hash, b); };
         });
       }
+
+      /* Bot detection: quality card, review list, rules */
+      var includeAll = false;
+      var _review = [];
+      function statsUrl(period) { return "/api/stats?period=" + period + (includeAll ? "&include=all" : ""); }
+      function reloadStats() { loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : "")); }
+
+      function renderQuality(d) {
+        var q = d.quality || { human: 0, unverified: 0, bot: 0, unverified_pct: 0 };
+        document.getElementById("q-human").textContent = fmt(q.human);
+        document.getElementById("q-unverified").textContent = fmt(q.unverified);
+        document.getElementById("q-bot").textContent = fmt(q.bot);
+        document.getElementById("q-pct").textContent = q.unverified_pct + "% dei non-bot";
+        document.getElementById("q-mode").textContent = d.mode === "all"
+          ? "Numeri principali: tutte le visite non flaggate (come prima)"
+          : "Numeri principali: solo visite umane";
+        var sl = d.summary_legacy;
+        document.getElementById("q-legacy").textContent = sl
+          ? "Numeri vecchi: " + fmt(sl.pageviews) + " pageviews · " + fmt(sl.visitors) + " visitatori"
+          : "";
+      }
+
+      function ruleKindLabel(k) {
+        return { ua_contains: "user-agent contiene", referrer_host: "referrer", path_prefix: "percorso inizia con", hash_today: "visitatore (oggi)" }[k] || k;
+      }
+
+      function suggestRule(row) {
+        if (row.referrer) return { kind: "referrer_host", value: row.referrer };
+        var p = String(row.path_pattern || "");
+        if (p.length > 1 && p.charAt(p.length - 1) === "*") p = p.slice(0, -1);
+        if (p.length > 1) return { kind: "path_prefix", value: p };
+        return { kind: "ua_contains", value: "" };
+      }
+
+      function renderReview(rows) {
+        _review = rows || [];
+        var ul = document.getElementById("review-list");
+        if (!_review.length) { ul.innerHTML = '<li class="ax-loading">Niente da rivedere nel periodo.</li>'; return; }
+        ul.innerHTML = _review.map(function(r, i) {
+          var parts = [deviceIcon(r.device_type) + " " + escapeHtml(r.browser || "?") + " / " + escapeHtml(r.os || "?")];
+          if (r.referrer) parts.push("da " + escapeHtml(r.referrer));
+          if (Number(r.max_score) > 0) parts.push("score " + Number(r.max_score));
+          return '<li data-i="' + i + '"><div class="ax-row">' +
+            '<span class="ax-grow">' + countryFlag(r.country) + " " + escapeHtml(r.path_pattern || "/") +
+            '<span class="ax-sub">' + parts.join(" · ") + '</span></span>' +
+            '<span>' + fmt(r.pageviews) + ' pv · ' + fmt(r.visits) + ' visite</span>' +
+            '<button class="ax-btn" data-act="rule">Crea regola</button>' +
+            '</div></li>';
+        }).join("");
+      }
+
+      function openRuleForm(li) {
+        var existing = li.querySelector(".ax-rule-form");
+        if (existing) { existing.remove(); return; }
+        var s = suggestRule(_review[Number(li.dataset.i)]);
+        var form = document.createElement("div");
+        form.className = "ax-rule-form";
+        form.innerHTML =
+          '<div class="ax-fields">' +
+            '<select name="kind" aria-label="Tipo regola">' +
+              ["ua_contains", "referrer_host", "path_prefix"].map(function(k) {
+                return '<option value="' + k + '"' + (k === s.kind ? " selected" : "") + ">" + escapeHtml(ruleKindLabel(k)) + "</option>";
+              }).join("") +
+            '</select>' +
+            '<input type="text" name="value" maxlength="200" aria-label="Valore" placeholder="es. HeadlessChrome" value="' + escapeHtml(s.value) + '" />' +
+            '<input type="text" name="note" maxlength="300" aria-label="Nota" placeholder="nota (facoltativa)" />' +
+          '</div>' +
+          '<div class="ax-preview" data-role="preview">Scrivi un valore per vedere l\'anteprima.</div>' +
+          '<div class="ax-fields">' +
+            '<button class="ax-btn primary" data-act="save" disabled>Salva regola</button>' +
+            '<button class="ax-btn" data-act="cancel">Annulla</button>' +
+          '</div>';
+        li.appendChild(form);
+        var timer = null;
+        var kindEl = form.querySelector('[name="kind"]'), valueEl = form.querySelector('[name="value"]');
+        function schedule() {
+          form.querySelector('[data-act="save"]').disabled = true;
+          clearTimeout(timer);
+          timer = setTimeout(function() { previewRule(form); }, 350);
+        }
+        kindEl.addEventListener("change", schedule);
+        valueEl.addEventListener("input", schedule);
+        valueEl.focus();
+        if (valueEl.value) previewRule(form);
+      }
+
+      function previewRule(form) {
+        var kind = form.querySelector('[name="kind"]').value;
+        var value = form.querySelector('[name="value"]').value.trim();
+        var box = form.querySelector('[data-role="preview"]');
+        var save = form.querySelector('[data-act="save"]');
+        form._ready = false;
+        if (!value) { box.textContent = "Scrivi un valore per vedere l'anteprima."; return; }
+        box.textContent = "Calcolo anteprima…";
+        apiJson("/api/admin/bot-rules/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: kind, value: value }) })
+          .then(function(p) {
+            form._ready = true; save.disabled = false;
+            if (!p.supported) {
+              form._risky = true;
+              box.innerHTML = '<div class="ax-preview-warn">Anteprima non disponibile per user-agent (non viene salvato). La regola colpirà ogni nuovo visitatore il cui user-agent contiene questo testo: usa una stringa specifica.</div>';
+              return;
+            }
+            form._risky = Number(p.human) > 0;
+            var msg = "Negli ultimi " + p.days + " giorni escluderebbe " + fmt(p.excluded) + " pageviews, di cui " + fmt(p.human) + " con segnale umano.";
+            box.innerHTML = Number(p.human) > 0
+              ? '<div class="ax-preview-warn">Attenzione: ' + escapeHtml(msg) + ' Potresti escludere lettori veri.</div>'
+              : escapeHtml(msg);
+          })
+          .catch(function(e) { box.textContent = "Errore: " + e.message; });
+      }
+
+      function saveRule(form, btn) {
+        if (!form._ready) return;
+        if (form._risky && !confirm("Questa regola potrebbe colpire visite umane (o non è verificabile). Salvarla comunque?")) return;
+        btn.disabled = true;
+        var body = {
+          kind: form.querySelector('[name="kind"]').value,
+          value: form.querySelector('[name="value"]').value.trim(),
+          note: form.querySelector('[name="note"]').value.trim() || undefined
+        };
+        apiJson("/api/admin/bot-rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+          .then(function() {
+            form.innerHTML = '<div class="ax-preview">Regola salvata. Vale per le nuove visite; quelle già registrate restano come sono.</div>';
+            loadRules();
+          })
+          .catch(function(e) { btn.disabled = false; form.querySelector('[data-role="preview"]').textContent = "Errore: " + e.message; });
+      }
+
+      document.getElementById("review-list").addEventListener("click", function(ev) {
+        var btn = ev.target.closest("button[data-act]");
+        if (!btn) return;
+        var li = btn.closest("li");
+        var act = btn.dataset.act;
+        if (act === "rule") openRuleForm(li);
+        else if (act === "cancel") btn.closest(".ax-rule-form").remove();
+        else if (act === "save") saveRule(btn.closest(".ax-rule-form"), btn);
+      });
+
+      function loadRules() {
+        var ul = document.getElementById("rules-list");
+        apiJson("/api/admin/bot-rules")
+          .then(function(d) {
+            var rules = (d && d.rules) || [];
+            if (!rules.length) { ul.innerHTML = '<li class="ax-loading">Nessuna regola. Creane una da "Da rivedere".</li>'; return; }
+            ul.innerHTML = rules.map(function(r) {
+              var on = Number(r.enabled) === 1;
+              var sub = ["colpi " + fmt(r.hits)];
+              if (r.expires_at) sub.push("scade " + escapeHtml(r.expires_at) + " UTC");
+              if (r.note) sub.push(escapeHtml(r.note));
+              return '<li class="' + (on ? "" : "ax-rule-off") + '" data-id="' + Number(r.id) + '" data-on="' + (on ? 1 : 0) + '"><div class="ax-row">' +
+                '<span class="ax-grow"><span class="ax-kind">' + escapeHtml(ruleKindLabel(r.kind)) + '</span>' + escapeHtml(r.value) +
+                '<span class="ax-sub">' + sub.join(" · ") + '</span></span>' +
+                '<button class="ax-btn" data-act="toggle">' + (on ? "Disattiva" : "Attiva") + '</button>' +
+                '<button class="ax-btn danger" data-act="delete">Elimina</button>' +
+                '</div></li>';
+            }).join("");
+          })
+          .catch(function(e) { ul.innerHTML = '<li class="ax-error">Errore: ' + escapeHtml(e.message) + '</li>'; });
+      }
+
+      document.getElementById("rules-list").addEventListener("click", function(ev) {
+        var btn = ev.target.closest("button[data-act]");
+        if (!btn) return;
+        var li = btn.closest("li");
+        var id = Number(li.dataset.id);
+        var json = { "Content-Type": "application/json" };
+        btn.disabled = true;
+        var req = btn.dataset.act === "toggle"
+          ? apiJson("/api/admin/bot-rules", { method: "PATCH", headers: json, body: JSON.stringify({ id: id, enabled: li.dataset.on !== "1" }) })
+          : (confirm("Eliminare la regola?") ? apiJson("/api/admin/bot-rules", { method: "DELETE", headers: json, body: JSON.stringify({ id: id }) }) : Promise.resolve());
+        req.then(loadRules).catch(function(e) { btn.disabled = false; console.error("rule action failed", e); });
+      });
+
+      document.getElementById("include-all").addEventListener("change", function(ev) {
+        includeAll = ev.target.checked;
+        reloadStats();
+      });
 
       /* Map */
       var leafletMap = null;
@@ -1131,9 +1452,11 @@ if (!Astro.locals.isAdmin) {
         updatePeriodLabel(); updateNavButtons();
         document.querySelectorAll(".ax-periods button").forEach(function(b) { b.classList.toggle("active", b.dataset.period === basePeriod); });
 
-        fetch("/api/stats?period=" + period, { credentials: "same-origin" })
+        fetch(statsUrl(period), { credentials: "same-origin" })
           .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
           .then(function(d) {
+            renderQuality(d);
+            renderReview(d.review);
             var s = d.summary;
             document.getElementById("s-pageviews").textContent = fmt(s.pageviews);
             document.getElementById("s-visitors").textContent = fmt(s.visitors);
@@ -1148,7 +1471,7 @@ if (!Astro.locals.isAdmin) {
             var flagBtn = document.getElementById("flag-suspects-btn");
             flagBtn.style.display = suspectN > 0 ? "inline-block" : "none";
             flagBtn.disabled = false;
-            flagBtn.textContent = "Flag come bot (" + suspectN + ")";
+            flagBtn.textContent = "Flag come bot (" + suspectN + ") (legacy)";
 
             _suspectCountries = {};
             if (d.suspicious && d.suspicious.countries) d.suspicious.countries.forEach(function(c) { if (c.country) _suspectCountries[c.country] = Number(c.suspects) || 0; });
@@ -1221,7 +1544,7 @@ if (!Astro.locals.isAdmin) {
       function pollRecent() {
         if (document.hidden) return;
         if (currentPeriod !== "today") return;
-        fetch("/api/stats?period=today", { credentials: "same-origin" })
+        fetch(statsUrl("today"), { credentials: "same-origin" })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             if (d && d.recent_visitors) renderRecentVisitors(d.recent_visitors);
@@ -1295,6 +1618,7 @@ if (!Astro.locals.isAdmin) {
       document.getElementById("date-from").value = todayStr;
 
       loadData("today");
+      loadRules();
       loadLive();
       function visibleTick(fn) { return function() { if (!document.hidden) fn(); }; }
       setInterval(visibleTick(loadLive), 30000);

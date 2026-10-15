@@ -143,10 +143,12 @@ Cookieless, privacy-first. Spec: `docs/analytics-spec.md`; piano: `docs/superpow
 - **Input**: validazione in `src/lib/analytics-input.ts` (host allow-list, Origin/Referer obbligatorio, path/UTM), rate limit 60/min per hash. Unicita atomica con `daily_visitors`.
 - **localStorage**: solo il flag di opt-out `notrack` (dichiarato nella privacy policy). Nessuna coda di retry.
 - **Migrazione**: `scripts/migrate-analytics-v2.ts` (idempotente; `/api/e` degrada se non applicata). Eseguire PRIMA del deploy.
-- **Bot detection**: UA-based via `isbot` + flag manuale di `visitor_hash` via `/api/admin/bot` (rivisto in Fase 4)
-- **Dashboard**: `/admin/analytics` — live online counter (30s polling), aggregates, geo map (Leaflet), bot flagging
-- **Stats query excludes** `visitor_hash IN bot_hashes` from all counts (`baseWhere` in `stats.ts`)
-- **Live counter**: `/api/stats/live` returns DISTINCT visitor_hash in last 5 min, excludes bots
+- **Bot detection (Fase 4)**: tre categorie calcolate in lettura (`src/lib/bot-verdict.ts`): **bot** (`bot_score >= BOT_SCORE_THRESHOLD`=5 o hash in `bot_hashes`), **umano** (`human = 1`), **non verificato** (resto). `human` lo imposta l'evento `engage` del tracker (prima interazione o 3 s visibili, legato a `page_id` + `visitor_hash` come il beacon). `bot_score` si calcola all'ingest in `src/lib/bot-score.ts` (Accept-Language, Sec-Fetch-*, viewport, lingua/timezone, rate); i percorsi da scanner (`*.php`, `/.env`, `/wp-admin`...) sono scartati (204). Regole in `bot_rules` (`src/lib/bot-rules.ts`: `ua_contains|referrer_host|path_prefix|hash_today`, match = `bot_score` 99, cache 60 s), gestite da `/api/admin/bot-rules` (+ `/preview` con conteggio ultimi 7 giorni e quanti `human=1`). Le regole valgono dalle nuove visite, nessuna riga viene riscritta. Dettagli: `docs/analytics-spec.md` ("Bot detection").
+- **LEGACY (da rimuovere ~2 settimane dopo il deploy della Fase 4)**: `/api/admin/bot`, pulsanti "Flag come bot"/"Flag zero-engagement"/"Annulla", 🤖, tabella `bot_hashes`, `summary_legacy`. Procedura di rimozione nella spec.
+- **Dashboard**: `/admin/analytics` — live counter (30s), card "Qualita traffico" (umani/non verificati/bot), toggle "Includi non verificati" (`?include=all` = numeri vecchi), lista "Da rivedere" con "Crea regola" e anteprima, pannello "Regole bot", geo map (Leaflet)
+- **Stats query**: i campi principali di `/api/stats` contano solo `HUMAN_SQL`; `include=all` usa `NOT_LEGACY_BOT_SQL` (vecchio comportamento); `quality`, `summary_legacy`, `review` sempre presenti
+- **Live counter**: `/api/stats/live` = DISTINCT visitor_hash degli ultimi 5 min, esclusi i bot (umani + non verificati: un visitatore appena arrivato non ha ancora interagito)
+- **Migrazione Fase 4**: stesso `scripts/migrate-analytics-v2.ts` (aggiunge `human`, `bot_score`, `bot_rules`). Eseguirla PRIMA del deploy: `/api/e` degrada se manca, ma `/api/stats` richiede le colonne.
 
 ## Editorial Agents
 

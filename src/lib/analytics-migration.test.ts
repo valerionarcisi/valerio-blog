@@ -68,4 +68,27 @@ describe("migrateAnalyticsV2", () => {
     expect((await ins()).rowsAffected).toBe(1);
     expect((await ins()).rowsAffected).toBe(0);
   });
+
+  test("phase 4: adds human/bot_score (default 0) and bot_rules, idempotently", async () => {
+    const db = await legacyDb();
+    const first = await migrateAnalyticsV2(db);
+    expect(first).toContain("added pageviews.human");
+    expect(first).toContain("added pageviews.bot_score");
+    const second = await migrateAnalyticsV2(db);
+    expect(second.some((l) => l.startsWith("added"))).toBe(false);
+
+    const cols = (await db.execute("PRAGMA table_info(pageviews)")).rows.map(
+      (r) => r.name,
+    );
+    expect(cols).toEqual(expect.arrayContaining(["human", "bot_score"]));
+    const row = (await db.execute("SELECT human, bot_score FROM pageviews")).rows[0];
+    expect([row.human, row.bot_score]).toEqual([0, 0]);
+
+    await db.execute(
+      "INSERT INTO bot_rules (kind, value) VALUES ('ua_contains', 'headless')",
+    );
+    const rule = (await db.execute("SELECT * FROM bot_rules")).rows[0];
+    expect(rule).toMatchObject({ enabled: 1, hits: 0, note: null, expires_at: null });
+    expect(typeof rule.created_at).toBe("string");
+  });
 });

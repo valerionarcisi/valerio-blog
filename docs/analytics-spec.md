@@ -16,6 +16,63 @@ Piano: `docs/superpowers/plans/2026-10-15-analytics-v2.md`. Migrazione: `scripts
 - **localStorage**: resta solo il flag di opt-out `notrack` (dichiarato nella privacy policy IT/EN). Rimossa la coda di retry `_ae`.
 - **Compatibilita pre-migrazione**: se mancano `channel`/`visitor_hash` l'INSERT riprova senza quelle colonne; se manca `daily_visitors` l'unicita ricade sul vecchio controllo; se manca `analytics_salts` si usa il salt di processo.
 
+## Bot detection (Analytics v2 - Fase 4, 2026-10-15)
+
+Sostituisce il flag manuale per `visitor_hash` con una **classificazione calcolata in lettura** (nessuna riga riscritta) piu **regole** che valgono anche nei giorni successivi. Migrazione: `scripts/migrate-analytics-v2.ts` (aggiunge `pageviews.human`, `pageviews.bot_score`, tabella `bot_rules`).
+
+### Tre categorie
+
+| Categoria | Quando (`src/lib/bot-verdict.ts`) | Nei numeri principali |
+|---|---|---|
+| **Bot** | `bot_score >= BOT_SCORE_THRESHOLD` (5) **oppure** `visitor_hash` in `bot_hashes` (LEGACY) | No |
+| **Umano** | `human = 1` e non bot | Si |
+| **Non verificato** | tutto il resto (nessun segnale umano, nessun indizio di bot) | No, mostrato a parte con la sua percentuale |
+
+Il bot vince sull'umano: un client scriptato puo mandare anche `engage`. La percentuale `unverified_pct` e calcolata sulle visite non-bot (umani + non verificati).
+
+### Segnale umano: `engage`
+
+Il tracker invia `{type:"engage", page_id, hostname}` **una sola volta per pagina**: alla prima interazione reale (`scroll`, `pointerdown`, `keydown`, `touchstart`) oppure dopo 3 s di tempo visibile accumulato. `/api/e` fa `UPDATE pageviews SET human = 1 WHERE page_id = ? AND visitor_hash IN (hash di oggi, hash di ieri)`: stesso legame page_id + visitor_hash dei beacon, stessa tolleranza a cavallo della mezzanotte UTC. Non dipende dal beacon finale (che si perde spesso su iOS).
+
+Limite noto: `human` e per riga (pageview). Un visitatore la cui *prima* pagina del giorno non ha prodotto engage ma la seconda si, ha `is_unique = 1` sulla riga non verificata: nei "visitatori" umani non compare (raro: bastano 3 s di lettura o un tocco sulla prima pagina).
+
+### Punteggio al momento dell'ingest (`src/lib/bot-score.ts`, funzioni pure)
+
+| Segnale | Peso |
+|---|---|
+| Manca `Accept-Language` | +3 |
+| Mancano tutti gli header `Sec-Fetch-*` ma l'UA dichiara Chrome/Edge >= 90, Firefox >= 95, Safari >= 17 | +3 |
+| Viewport 0, negativo o > 10000 (un viewport assente non conta) | +2 |
+| Lingua con regione (`it-IT`, `ja-JP`...) e timezone di un altro continente (mappa ristretta, solo IT/DE/FR/ES/GB/JP/KR/CN/BR) | +2 |
+| > 20 pageview nell'ultimo minuto per lo stesso hash (query su `pageviews` con `idx_pv_visitor_day`) | +3 |
+| Percorso da scanner (`/wp-login.php`, `/.env`, `/xmlrpc.php`, `*.php`, `/wp-admin`, ...) | **scartato**: `204`, nulla salvato |
+
+Soglia `BOT_SCORE_THRESHOLD = 5` (esportata): nessun segnale singolo la supera da solo, servono due indizi. I pesi sono un punto di partenza da tarare sui dati veri (`bot_score` e salvato per ogni riga). Una regola che corrisponde salva `bot_score = 99`.
+
+### Regole (`src/lib/bot-rules.ts`, `bot_rules`)
+
+`kind`: `ua_contains` (sottostringa dell'UA, valutata solo all'ingest: l'UA grezzo non e mai salvato), `referrer_host` (host esatto), `path_prefix`, `hash_today` (scade a fine giornata UTC, `expires_at` impostato alla creazione). Match case-insensitive; regole disattivate o scadute ignorate. Le regole sono in cache in memoria per ~60 s per processo (`invalidateRulesCache()` dopo ogni scrittura admin); il contatore `hits` e best-effort e un errore sulla tabella non rompe mai l'ingest.
+
+Le regole valgono **dalle nuove visite**: le righe gia registrate non vengono riclassificate (disattivare una regola non "riabilita" visite passate; per questo l'anteprima prima di salvare e importante).
+
+API admin (`requireAdmin`, cookie con CSRF same-origin oppure Bearer):
+
+- `GET /api/admin/bot-rules` lista con `hits`; `POST {kind, value, note?}` crea; `PATCH {id, enabled}`; `DELETE {id}`.
+- Validazione: kind in whitelist, valore max 200 caratteri, no caratteri di controllo; `ua_contains` >= 4 caratteri; `path_prefix` deve iniziare con `/` e non essere `/`; `referrer_host` deve essere un hostname e non un host del sito; `hash_today` = 16 hex. Duplicati => 409.
+- `POST /api/admin/bot-rules/preview {kind, value}` => `{supported, days:7, excluded, human}`: quante pageview degli ultimi 7 giorni la regola avrebbe escluso e quante hanno `human = 1` (match in SQL con `LIKE ... ESCAPE`, wildcard escapate). `ua_contains` non e anteprimabile (UA non salvato): `supported:false`.
+
+### API e dashboard
+
+`GET /api/stats`: i campi principali contano **solo umani**. Nuovi campi: `quality {human, unverified, bot, unverified_pct}` (visite uniche per verdetto), `summary_legacy` (vecchio calcolo: tutto tranne `bot_hashes`), `review` (non verificati raggruppati per browser, os, device, country, referrer e pattern di percorso `/blog/*`; l'UA grezzo non e salvato, quindi non e raggruppabile), `mode` (`human`|`all`). `?include=all` restituisce il comportamento vecchio nei campi principali. `recent_visitors[].verdict` per riga. `/api/stats/live` conta tutti i non-bot (umani + non verificati): un visitatore appena arrivato non ha ancora avuto il tempo di interagire.
+
+`/admin/analytics`: card "Qualita traffico", toggle "Includi non verificati" (`include=all`), lista "Da rivedere" con "Crea regola" (form inline precompilato con anteprima e avviso se colpisce visite umane), pannello "Regole bot" (hits, attiva/disattiva, elimina).
+
+### Coesistenza e rimozione del legacy
+
+Per **due settimane dal deploy** i due sistemi convivono: `summary_legacy` e il toggle mostrano i numeri vecchi accanto ai nuovi per tarare soglia e pesi. Restano attivi, marcati "legacy" in UI: `/api/admin/bot`, i pulsanti "Flag come bot", "Flag zero-engagement", "Annulla flag fatti oggi", "Annulla TUTTI", il 🤖 sulle righe, la tabella `bot_hashes` e la sua clausola in `bot-verdict.ts` (`BOT_SQL`, `NOT_LEGACY_BOT_SQL`).
+
+Per rimuoverli (dopo il periodo di confronto): (1) togliere endpoint `src/pages/api/admin/bot.ts`, `bot-rollback.test.ts` e i pulsanti/handler legacy in `analytics.astro`; (2) togliere `NOT_LEGACY_BOT_SQL`/la clausola `bot_hashes` da `bot-verdict.ts`, `summary_legacy`, il blocco "Sospetti" e `suspicious` in `stats.ts`; (3) convertire gli hash storici in `bot_score = 99` sulle righe (`UPDATE pageviews SET bot_score = 99 WHERE visitor_hash IN (SELECT hash FROM bot_hashes)`) e ripristinare `is_unique` con `daily_visitors`; (4) `DROP TABLE bot_hashes`.
+
 ## Recent changes (2026-05-27)
 
 - **Live counter** `/api/stats/live` — `DISTINCT visitor_hash` in ultimi 5 min, esclude bot flaggati. Polling 30s dalla dashboard. Cache-Control `no-store` per evitare stale.
@@ -221,7 +278,7 @@ Riceve un pageview dal tracking script.
 
 **Rate limiting:** 60 eventi/minuto per `visitor_hash` tramite `src/lib/rate-limit.ts` (tabella `rate_limits`, chiave = hash, nessun IP salvato).
 
-**Bot filtering — 3 livelli:**
+**Bot filtering — 3 livelli (livelli 2 e 3 = LEGACY, vedi "Bot detection" sopra per il nuovo modello):**
 1. **UA-based (ingestion)**: `isbot@5.1.35` — blocca bot/crawler/spider noti prima che la visita venga salvata. UA vuoto → bloccato.
 2. **Behavioral (automatico post-ingestion)**: se lo stesso `visitor_hash` fa ≥2 visite in 7 giorni con zero engagement (time_on_page ≤5s e scroll_depth = 0), viene auto-inserito in `bot_hashes`.
 3. **Manuale (admin)**: dalla dashboard è possibile flaggare singoli visitatori o fare bulk-flag di tutti i suspect del periodo. I flaggati finiscono in `bot_hashes` e vengono esclusi da tutte le query di stats.
