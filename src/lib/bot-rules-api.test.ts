@@ -254,12 +254,34 @@ describe("POST /api/admin/bot-rules/preview", () => {
 });
 
 describe("GET /api/stats/live", () => {
-  test("counts human and unverified, not bots", async () => {
+  async function seedVisits() {
     await insertPv({ hash: "human1", human: 1 });
     await insertPv({ hash: "unver1", human: 0 });
     await insertPv({ hash: "bot1", human: 0, bot_score: 6 });
     await insertPv({ hash: "legacy1", human: 1 });
     await db.execute("INSERT INTO bot_hashes (hash) VALUES ('legacy1')");
+  }
+  const addSession = (hash: string, o: { human?: number; bot_score?: number; seen?: string } = {}) =>
+    db.execute({
+      sql: `INSERT INTO sessions (day, visitor_hash, started_at, last_seen_at, entry_path, exit_path, human, bot_score)
+            VALUES (date('now'), ?, datetime('now'), COALESCE(?, datetime('now')), '/x', '/x', ?, ?)`,
+      args: [hash, o.seen ?? null, o.human ?? 0, o.bot_score ?? 0],
+    });
+
+  test("counts human and unverified, not bots (fallback: pageviews, no sessions table)", async () => {
+    await seedVisits();
+    await db.execute("DROP TABLE sessions");
+    const r = await call(live.GET, req("GET"));
+    expect(await r.json()).toEqual({ active: 2, pageviews5m: 2 });
+  });
+
+  test("with the sessions table: sessions seen in the last 5 minutes, bots excluded", async () => {
+    await seedVisits();
+    await addSession("human1", { human: 1 });
+    await addSession("unver1");
+    await addSession("bot1", { bot_score: 6 });
+    await addSession("legacy1", { human: 1 });
+    await addSession("old1", { human: 1, seen: "2000-01-01 00:00:00" });
     const r = await call(live.GET, req("GET"));
     expect(await r.json()).toEqual({ active: 2, pageviews5m: 2 });
   });

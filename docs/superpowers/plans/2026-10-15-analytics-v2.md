@@ -63,6 +63,18 @@ Ogni fase è rilasciabile da sola, con test Vitest (pattern del repo: `vi.mock("
 
 ### Fase 2 — Sessioni ed eventi (M)
 
+> **Stato: [x] implementata (2026-10-15).** Dettagli in `docs/analytics-spec.md` ("Sessioni, eventi e obiettivi"). Codice: `src/lib/analytics-sessions.ts`, `analytics-events.ts`, `analytics-goals.ts`, `analytics-session-stats.ts` (SQL condiviso rollup/raw), `/api/e` (tipo `event`, sessioni), tracker in `BaseHead.astro` (`window.va.track`), rollup/stats/live, dashboard (card Sessioni, Ingresso/uscita, Canali, Eventi, Obiettivi).
+>
+> Decisioni: sessioni raw 180 giorni, eventi raw 90, aggregati per sempre; bounce = 1 pageview e < 10 s di tempo attivo; sessioni `human` se una pageview e `human`; scope come Fase 4; tabella extra `daily_goals` (conversioni per sessione distinta) e colonna `events.page_id` (dedupe scroll).
+>
+> **Rimasto da fare:**
+> - [ ] Applicare la migrazione e rilanciare il rollup dei giorni recenti (i giorni chiusi prima del deploy non hanno sessioni).
+> - [ ] `contact_submit`: la pagina contatti non ha un form (solo mailto + commenti); oggi e il commento inviato su `pageId="contact"`. Se arriva un form vero, chiamare `window.va.track("contact_submit")` al successo.
+> - [ ] Sessioni/eventi/obiettivi non rispettano il filtro `pathname` e non hanno filtri paese/device/canale.
+> - [ ] Obiettivi basati su pagina (es. `/contatti` visitata) non implementati: solo eventi.
+> - [ ] Possibile doppia sessione se due prime pageview arrivano nello stesso istante (nessun lock).
+> - [ ] Rimuovere il vecchio `summary.bounce_rate` quando `sessions.bounce_rate` sara il riferimento.
+
 1. **Sessioni senza cookie**
    - Una sessione = stesso `visitor_hash` con pause < 30 minuti. Tabella `sessions(id, day, visitor_hash, started_at, last_seen_at, entry_path, exit_path, pageviews, engaged_seconds, channel, referrer, country, device_type)`.
    - In `/api/e`: cerca l'ultima sessione dell'hash con `last_seen_at > now-30min` (indice su `(visitor_hash, last_seen_at)`), altrimenti ne crea una; aggiorna `pageviews`, `exit_path`, `last_seen_at`. `pageviews.session_id` collega le righe.

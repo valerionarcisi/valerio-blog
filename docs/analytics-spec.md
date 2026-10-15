@@ -109,6 +109,45 @@ Nota: `include=all` ora e "umani + non verificati" (esclude anche i `bot_score` 
 
 Flaggare/sbloccare hash dal vecchio `/api/admin/bot` cambia i numeri dei giorni passati: l'endpoint cancella (best effort, max 120 giorni) le righe `rollup_log` dei giorni di quegli hash, cosi `/api/stats` torna ai dati grezzi per quei giorni finche non si ricalcolano (pulsante o job). Le **regole bot non sono retroattive** (valgono dalle nuove visite, nessuna riga riscritta), quindi creare/disattivare una regola non invalida nulla. Giorni oltre i 90 giorni non hanno piu raw: restano i rollup com'erano.
 
+## Sessioni, eventi e obiettivi (Analytics v2 - Fase 2, 2026-10-15)
+
+Privacy: nessun cookie, nessun IP salvato, nessun identificativo persistente. L'unico identificativo e l'hash giornaliero con salt segreto (cancellato dopo 2 giorni): sessioni ed eventi si appoggiano a quello, quindi non seguono una persona da un giorno all'altro. Gli eventi hanno una whitelist chiusa con proprieta minuscole e validate: non possono trasportare testo libero.
+
+Retention (decisione del proprietario): `sessions` 180 giorni, `events` grezzi 90 giorni (entrambi solo per i giorni con `rollup_log`), aggregati per sempre. Migrazione: `scripts/migrate-analytics-v2.ts` (idempotente; `/api/e` degrada se non applicata).
+
+### Sessioni (`src/lib/analytics-sessions.ts`)
+
+- Sessione = stesso `visitor_hash` con pausa < 30 minuti (la finestra scorre a ogni pageview e a ogni beacon). In `/api/e`, a ogni pageview: si cerca l'ultima sessione dell'hash con `last_seen_at > now-30min`, altrimenti se ne crea una (`entry_path`, `channel`, `referrer`, `country`, `device_type`); si aggiornano `pageviews`, `exit_path`, `last_seen_at`, `bot_score = MAX(...)` e si collega `pageviews.session_id`.
+- `engaged_seconds`: i beacon sono cumulativi per pagina; alla sessione si somma solo il **delta** rispetto al valore gia salvato (mai negativo).
+- `human`: la sessione eredita `human = 1` quando UNA qualsiasi delle sue pageview manda `engage` (semantica della Fase 4). Verdetto sessione = stessi helper `HUMAN_SQL`/`BOT_SQL` sulle colonne `human`, `bot_score`, `visitor_hash` della sessione. Le visite non verificate restano fuori dai numeri principali (scope `human`), incluse con `include=all`.
+- **Mezzanotte UTC**: l'hash ruota ogni giorno, quindi una visita a cavallo si divide **legittimamente in due sessioni**. `day` = giorno di inizio. E il prezzo di non avere un identificativo persistente.
+- Due prime pageview quasi simultanee possono creare due sessioni (nessun lock): accettato.
+- **Bounce reale** = sessione con esattamente 1 pageview e `engaged_seconds < 10`. Se il beacon finale si perde (iOS/Safari) il tempo resta 0 e il bounce e leggermente sovrastimato. `summary.bounce_rate` (vecchio, per visitatore: prima visita del giorno con < 5 s) resta invariato; il numero vero e `sessions.bounce_rate`.
+
+### Eventi (`src/lib/analytics-events.ts`)
+
+Whitelist: `clap`, `comment_submit`, `comment_like`, `contact_submit`, `outbound_click`, `download`, `not_found`, `scroll_75`, `scroll_100`, `copy_code`, `share`. Prop: `outbound_click` = solo hostname di destinazione (max 100); `download` = estensione in `pdf, zip, epub, mp3, mp4, docx, xlsx`; `share` = `x, twitter, linkedin, reddit, facebook, whatsapp, telegram, email, copy, native`; `not_found` = host del referrer (opzionale); gli altri non hanno prop (ignorata). Nome sconosciuto o prop non valida: scartato (204).
+
+`POST /api/e {type:"event", name, prop, page_id, hostname, pathname}`: stessi controlli degli altri beacon (Origin/Referer, rate limit 60/min fail-open, hash di oggi o di ieri). L'evento e legato a una pageview dello STESSO visitatore (`page_id` + hash); il `path` salvato e quello della pageview, non quello del body. `scroll_75`/`scroll_100` una sola volta per `page_id` (INSERT ... WHERE NOT EXISTS). Tabella `events(id, created_at, day, session_id, visitor_hash, name, path, prop, page_id)` (`page_id` in piu rispetto al piano, serve al dedupe).
+
+Tracker: `window.va.track(name, prop)` (assente se `notrack`/webdriver/admin: usare `window.va && window.va.track(...)`). Gli eventi aspettano la risposta del pageview. Un solo listener `click` delegato (link in uscita -> `outbound_click`; link a file -> `download`; `data-share` -> `share`), `copy` dentro `pre/code` (una volta per pagina), scroll 75/100 solo su `/blog/` e `/en/blog/`. Strumentati a mano: claps (`PostClaps.astro`), like e invio commenti (`Comments.astro`), `contact_submit` (la pagina contatti non ha un form: e il commento inviato con `pageId="contact"`), share (`ShareButtons.astro`: X/LinkedIn/Reddit via `data-share`, copia e condivisione nativa a mano), 404 (`src/pages/404.astro`, `not_found` col referrer host).
+
+### Obiettivi (`src/lib/analytics-goals.ts`)
+
+Lista tipizzata: `contact` (`contact_submit`), `comment` (`comment_submit`), `engaged_read` (`scroll_75` solo su post), `outbound` (`outbound_click`). Conversioni = **sessioni distinte** (per giorno di inizio sessione) con l'evento; tasso = conversioni / sessioni dello stesso scope; per canale e per le 10 pagine di ingresso migliori (denominatore = sessioni di quel canale/ingresso). Cambiare la lista vale per i rollup futuri: per ricalcolare il passato rilanciare il rollup.
+
+### Rollup e lettura ibrida
+
+Tabelle (in `ROLLUP_DDL`): `daily_sessions(day, scope, sessions, bounced_sessions, pageviews, engaged_seconds)`, `daily_events(day, scope, name, prop, count, visitors)` (prop `''` = nessuna), `daily_entry_exit(day, scope, kind, path, sessions)`, e in piu `daily_goals(day, scope, goal, dim, value, conversions)` (dim `total|channel|entry`; goal `_sessions` = denominatori per canale/ingresso). Gli SQL sono generati da una sola funzione (`src/lib/analytics-session-stats.ts`) usata sia dal rollup (INSERT ... SELECT per un giorno) sia dalla lettura raw, quindi non possono divergere (test di equivalenza in `analytics-sessions-rollup.test.ts`, scope `human` e `all`). Un evento appartiene allo scope della sua sessione; eventi senza sessione non contano. `visitors` di `daily_events` = hash distinti nel giorno (somma sui giorni, come gli altri rollup).
+
+`GET /api/stats`: campi NUOVI, forme esistenti invariate: `sessions {available, count, bounce_rate, pages_per_session, avg_engaged_seconds, by_channel, count_delta_pct, bounce_rate_delta_pp, prev_period}`, `channels` (visitatori per canale), `entry_pages`, `exit_pages` (top 10), `events [{name, prop, count, visitors}]`, `goals [{id, label, conversions, rate, by_channel, by_entry, conversions_delta_pct}]`. Sessioni/eventi/obiettivi non sono filtrati da `pathname` (una sessione attraversa piu pagine): con il filtro o col grafico orario si legge raw. Se la migrazione non e applicata `sessions.available = false`.
+
+`GET /api/stats/live`: se esiste `sessions`, `active` = visitatori distinti con `sessions.last_seen_at > now-5min`, bot esclusi; altrimenti la query sulle pageview. `pageviews5m` resta dalle pageview.
+
+Dopo il deploy: rilanciare il rollup dei giorni recenti (`POST /api/admin/analytics-rollup` o "Ricalcola aggregati"), altrimenti i giorni gia chiusi prima del deploy risultano a zero sessioni.
+
+Limiti noti: i giorni rollupati prima della Fase 2 non hanno sessioni; le sessioni a cavallo della mezzanotte si dividono; nessun filtro per paese/device sulle card nuove.
+
 ## Recent changes (2026-05-27)
 
 - **Live counter** `/api/stats/live` — `DISTINCT visitor_hash` in ultimi 5 min, esclude bot flaggati. Polling 30s dalla dashboard. Cache-Control `no-store` per evitare stale.

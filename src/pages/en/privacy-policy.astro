@@ -37,7 +37,10 @@ const today = new Date();
           anonymous and cannot identify individual users. The country comes from the
           approximate location provided by the hosting infrastructure or, failing that,
           from the browser timezone; the IP address is never stored and is only used to
-          compute, in memory, an anonymous identifier that resets every day.
+          compute, in memory, an anonymous identifier that resets every day. We also
+          measure, anonymously, a few actions on the pages: clicks on outbound links
+          and downloads, article scroll depth, copying of code, claps, comments, and
+          messages sent from the contact page.
         </p>
         <p>
           The browser stores a <code>notrack</code> flag in localStorage only if the

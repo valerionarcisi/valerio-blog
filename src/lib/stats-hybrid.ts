@@ -1,7 +1,12 @@
 import type { Client } from "@libsql/client";
 import { BOT_SQL, HUMAN_SQL } from "./bot-verdict";
 import { BLOG_PATH_SQL, SECTION_SQL } from "./analytics-sql";
-import { NULL_VALUE, eachDay } from "./analytics-rollup";
+import { NULL_VALUE, eachDay, tableExists } from "./analytics-rollup";
+import {
+  computeSessionStats,
+  emptySessionStats,
+  type SessionStats,
+} from "./analytics-session-stats";
 
 /**
  * Hybrid stats: days strictly before today that have a rollup_log row are read
@@ -53,6 +58,7 @@ export interface StatsBlock {
   utmCampaigns: Row[];
   topEngaged: Row[];
   sections: Row[];
+  channels: Row[];
   source: { rollup_days: number; raw_days: number };
 }
 
@@ -79,7 +85,7 @@ function segments(days: string[]): Array<[string, string]> {
   return out;
 }
 
-async function rolledDays(db: Client, o: BlockOpts): Promise<string[]> {
+export async function rolledDays(db: Client, o: BlockOpts): Promise<string[]> {
   if (o.useRollup === false || o.pathname || o.groupBy === "hour") return [];
   try {
     const r = await db.execute({
@@ -120,7 +126,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
   const pages = new Acc(2);
   const sections = new Acc(2);
   const dimAcc: Record<string, Acc> = {};
-  for (const d of ["referrer", "country", "browser", "os", "device", "lang", "utm_source", "utm_campaign"])
+  for (const d of ["referrer", "channel", "country", "browser", "os", "device", "lang", "utm_source", "utm_campaign"])
     dimAcc[d] = new Acc(1);
   const engaged = new Acc(5); // pv, visitors, sumTime, sumScroll, nScroll
 
@@ -165,10 +171,11 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
     totals.nScroll += n(t.ns);
 
     if (!o.totalsOnly) {
-      const [c, p, ref, cou, bro, osr, dev, lan, us, uc, sec, eng] = await Promise.all([
+      const [c, p, ref, chn, cou, bro, osr, dev, lan, us, uc, sec, eng] = await Promise.all([
         q(`SELECT ${dateExpr} as d, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis FROM pageviews ${where} GROUP BY d`),
         q(`SELECT pathname as v, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis FROM pageviews ${where} GROUP BY v ORDER BY pv DESC, v ASC LIMIT ${lim(20)}`),
         dimQuery("referrer", false, "ASC", lim(20)),
+        dimQuery("channel", true, "ASC", NONE).catch(() => ({ rows: [] })), // column absent pre-migration
         dimQuery("country", true, "ASC", lim(20)),
         dimQuery("browser", true, "ASC", lim(10)),
         dimQuery("os", true, "ASC", lim(10)),
@@ -189,6 +196,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
         for (const r of rows) acc.add(r.v === null ? NULL_VALUE : String(r.v), n(r.visitors));
       };
       feed(dimAcc.referrer, ref.rows);
+      feed(dimAcc.channel, chn.rows);
       feed(dimAcc.country, cou.rows);
       feed(dimAcc.browser, bro.rows);
       feed(dimAcc.os, osr.rows);
@@ -229,7 +237,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
         rq(`SELECT ${key} as d, SUM(pageviews) as pv, SUM(visitors) as vis FROM daily_stats WHERE scope = ? AND ${inLog} GROUP BY d`),
         rq(`SELECT pathname as v, SUM(pageviews) as pv, SUM(visitors) as vis FROM daily_pages WHERE scope = ? AND ${inLog} GROUP BY v`),
         rq(
-          `SELECT dim, value as v, SUM(visitors) as vis FROM daily_dims WHERE scope = ? AND ${inLog} AND dim <> 'section' AND dim <> 'channel' GROUP BY dim, v`,
+          `SELECT dim, value as v, SUM(visitors) as vis FROM daily_dims WHERE scope = ? AND ${inLog} AND dim <> 'section' GROUP BY dim, v`,
         ),
         rq(`SELECT value as v, SUM(pageviews) as pv, SUM(visitors) as vis FROM daily_dims WHERE scope = ? AND ${inLog} AND dim = 'section' GROUP BY v`),
         rq(
@@ -253,7 +261,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
     return {
       totals, avgTime, avgScroll, source,
       chart: empty, topPages: empty, referrers: empty, countries: empty, browsers: empty, os: empty,
-      devices: empty, languages: empty, utmSources: empty, utmCampaigns: empty, topEngaged: empty, sections: empty,
+      devices: empty, channels: empty, languages: empty, utmSources: empty, utmCampaigns: empty, topEngaged: empty, sections: empty,
     };
   }
 
@@ -298,6 +306,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
     browsers: dimRows("browser", "browser", 10),
     os: dimRows("os", "os", 10),
     devices: dimRows("device", "device_type", 1e9),
+    channels: dimRows("channel", "channel", 1e9),
     languages: dimRows("lang", "lang", 10),
     utmSources: dimRows("utm_source", "utm_source", 10),
     utmCampaigns: dimRows("utm_campaign", "utm_campaign", 10),
@@ -306,4 +315,33 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
       .sort((a, b) => b[1][0] - a[1][0] || cmpStr(a[0], b[0]))
       .map(([v, [pv, vis]]) => ({ section: v, pageviews: pv, visitors: vis })),
   };
+}
+
+/**
+ * Sessions / entry-exit / events / goals for the same range, hybrid like
+ * computeBlock. Not filtered by `pathname` (sessions span pages): with that
+ * filter, or an hourly chart, it simply reads raw for every day.
+ * Returns available=false when the phase-2 migration was not applied.
+ */
+export async function computeSessions(
+  db: Client,
+  o: BlockOpts,
+): Promise<SessionStats> {
+  try {
+    if (!(await tableExists(db, "sessions"))) return emptySessionStats();
+    const hasEvents = await tableExists(db, "events");
+    const rolled = await rolledDays(db, o);
+    const rolledSet = new Set(rolled);
+    const rawDays = eachDay(o.from, o.to).filter((d) => !rolledSet.has(d));
+    return await computeSessionStats(db, {
+      rolledDays: rolled,
+      rawRanges: segments(rawDays),
+      scope: o.includeAll ? "all" : "human",
+      scopeExpr: o.includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL,
+      hasEvents,
+      totalsOnly: o.totalsOnly,
+    });
+  } catch {
+    return emptySessionStats();
+  }
 }

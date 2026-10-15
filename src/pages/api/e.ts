@@ -22,6 +22,13 @@ import {
   parsePageview,
   type PageviewInput,
 } from "~/lib/analytics-input";
+import { ONCE_PER_PAGE, parseEvent } from "~/lib/analytics-events";
+import {
+  addSessionEngagement,
+  engagedDelta,
+  markSessionHuman,
+  recordSessionPageview,
+} from "~/lib/analytics-sessions";
 import { classifyChannel } from "~/lib/channels";
 import { countryFromGeo } from "~/lib/geo";
 import { checkRate } from "~/lib/rate-limit";
@@ -55,7 +62,12 @@ function clientIp(request: Request): string {
 }
 
 /** Columns added after the first release; dropped when the migration is not applied yet. */
-const OPTIONAL_COLUMNS = new Set(["channel", "visitor_hash", "bot_score"]);
+const OPTIONAL_COLUMNS = new Set([
+  "channel",
+  "visitor_hash",
+  "bot_score",
+  "session_id",
+]);
 
 async function insertPageview(
   db: Client,
@@ -125,9 +137,12 @@ function buildRow(
     os: string | null;
     country: string | null;
     botScore: number;
+    sessionId: number | null;
+    channel: string;
   },
 ): Record<string, InValue> {
   return {
+    session_id: extra.sessionId,
     page_id: p.pageId,
     hostname: p.hostname,
     pathname: p.pathname,
@@ -138,11 +153,7 @@ function buildRow(
     utm_content: p.utmContent,
     is_unique: extra.isUnique ? 1 : 0,
     visitor_hash: extra.visitorHash,
-    channel: classifyChannel({
-      referrerHost: p.referrerHost,
-      utmSource: p.utmSource,
-      utmMedium: p.utmMedium,
-    }),
+    channel: extra.channel,
     browser: extra.browser,
     os: extra.os,
     device_type: deviceTypeFromViewport(p.viewportWidth ?? undefined),
@@ -174,14 +185,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return new Response(null, { status: 400 });
 
   const type = body.type;
-  if (type !== "pageview" && type !== "beacon" && type !== "engage") {
+  if (type !== "pageview" &&
+    type !== "beacon" &&
+    type !== "engage" &&
+    type !== "event") {
     return new Response(null, { status: 400 });
   }
 
   const pv = type === "pageview" ? parsePageview(body) : null;
   const bc = type === "beacon" ? parseBeacon(body) : null;
   const en = type === "engage" ? parseEngage(body) : null;
-  const input = pv ?? bc ?? en;
+  const ev = type === "event" ? parseEvent(body) : null;
+  const input = pv ?? bc ?? en ?? ev;
   if (!input || !input.ok) return noContent();
   // Scanner probes (/wp-login.php, /.env, *.php...): drop, store nothing.
   if (pv?.ok && isScannerPath(pv.value.pathname)) return noContent();
@@ -198,7 +213,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   }
   maybePurgeOldSalts(db, today);
 
-  if (bc?.ok || en?.ok) {
+  if (bc?.ok || en?.ok || ev?.ok) {
     // A beacon/engage sent just after midnight UTC was hashed with yesterday's salt.
     const hashes = [visitorHash];
     const yesterday = shiftDay(today, -1);
@@ -219,10 +234,75 @@ export const POST: APIRoute = async ({ request, locals }) => {
       } catch {
         /* migration not applied: no human column yet */
       }
+      try {
+        // the session is human as soon as ANY of its pageviews is
+        const s = await db.execute({
+          sql: `SELECT session_id FROM pageviews
+                WHERE page_id = ? AND visitor_hash IN (${inHashes}) AND session_id IS NOT NULL LIMIT 1`,
+          args: [en.value.pageId, ...hashes],
+        });
+        if (s.rows[0]) await markSessionHuman(db, Number(s.rows[0].session_id));
+      } catch {
+        /* sessions not migrated */
+      }
+      return noContent();
+    }
+    if (ev?.ok) {
+      const e = ev.value;
+      try {
+        // Bound to a pageview of THIS visitor (today's or yesterday's salt): same rule as beacons.
+        const pv0 = await db.execute({
+          sql: `SELECT session_id, pathname, visitor_hash FROM pageviews
+                WHERE page_id = ? AND visitor_hash IN (${inHashes}) LIMIT 1`,
+          args: [e.pageId, ...hashes],
+        });
+        const row = pv0.rows[0];
+        if (!row) return noContent();
+        const sessionId = row.session_id == null ? null : Number(row.session_id);
+        const vals = [
+          today,
+          sessionId,
+          String(row.visitor_hash),
+          e.name,
+          String(row.pathname),
+          e.prop,
+          e.pageId,
+        ];
+        const cols = "day, session_id, visitor_hash, name, path, prop, page_id";
+        await db.execute(
+          ONCE_PER_PAGE.has(e.name)
+            ? {
+                sql: `INSERT INTO events (${cols})
+                      SELECT ?, ?, ?, ?, ?, ?, ?
+                      WHERE NOT EXISTS (SELECT 1 FROM events WHERE page_id = ? AND name = ?)`,
+                args: [...vals, e.pageId, e.name],
+              }
+            : {
+                sql: `INSERT INTO events (${cols}) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                args: vals,
+              },
+        );
+      } catch {
+        /* events table missing (migration not applied): drop */
+      }
       return noContent();
     }
     if (!bc?.ok) return noContent();
     const b = bc.value;
+    let beforeTime = 0;
+    let sessionId: number | null = null;
+    try {
+      const prev = await db.execute({
+        sql: `SELECT session_id, time_on_page FROM pageviews
+              WHERE page_id = ? AND visitor_hash IN (${inHashes}) LIMIT 1`,
+        args: [b.pageId, ...hashes],
+      });
+      beforeTime = Number(prev.rows[0]?.time_on_page) || 0;
+      sessionId =
+        prev.rows[0]?.session_id == null ? null : Number(prev.rows[0].session_id);
+    } catch {
+      /* sessions not migrated */
+    }
     await db.execute({
       sql: `UPDATE pageviews
             SET time_on_page = MAX(COALESCE(time_on_page, 0), ?),
@@ -230,6 +310,18 @@ export const POST: APIRoute = async ({ request, locals }) => {
             WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
       args: [b.timeOnPage ?? 0, b.scrollDepth ?? 0, b.pageId, ...hashes],
     });
+    if (sessionId != null) {
+      try {
+        await addSessionEngagement(
+          db,
+          sessionId,
+          engagedDelta(beforeTime, b.timeOnPage),
+          new Date(),
+        );
+      } catch {
+        /* best effort */
+      }
+    }
     return noContent();
   }
 
@@ -260,6 +352,28 @@ export const POST: APIRoute = async ({ request, locals }) => {
   });
   if (matched) await recordRuleHit(db, matched.id);
 
+  const botScore = matched ? BOT_SCORE_RULE : score;
+  const channel = classifyChannel({
+    referrerHost: p.referrerHost,
+    utmSource: p.utmSource,
+    utmMedium: p.utmMedium,
+  });
+  let sessionId: number | null = null;
+  try {
+    sessionId = await recordSessionPageview(db, {
+      visitorHash,
+      pathname: p.pathname,
+      channel,
+      referrer: p.referrerHost,
+      country,
+      deviceType: deviceTypeFromViewport(p.viewportWidth ?? undefined),
+      botScore,
+      now: new Date(),
+    });
+  } catch {
+    /* sessions table missing (migration not applied): pageview is stored anyway */
+  }
+
   await insertPageview(
     db,
     buildRow(p, {
@@ -268,7 +382,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       browser,
       os,
       country,
-      botScore: matched ? BOT_SCORE_RULE : score,
+      botScore,
+      sessionId,
+      channel,
     }),
   );
   return noContent();

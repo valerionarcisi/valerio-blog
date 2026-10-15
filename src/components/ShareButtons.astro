@@ -38,21 +38,21 @@ const redditUrl = `https://www.reddit.com/submit?url=${encodedUrl}&title=${encod
 <div class="fp-share" data-share-title={title} data-share-url={url} data-lang={lang}>
   <span class="fp-share-label">{t.label}</span>
 
-  <a class="fp-share-btn" href={twitterUrl} target="_blank" rel="noopener noreferrer" aria-label={t.twitter}>
+  <a class="fp-share-btn" href={twitterUrl} data-share="x" target="_blank" rel="noopener noreferrer" aria-label={t.twitter}>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
     </svg>
     <span>X</span>
   </a>
 
-  <a class="fp-share-btn" href={linkedinUrl} target="_blank" rel="noopener noreferrer" aria-label={t.linkedin}>
+  <a class="fp-share-btn" href={linkedinUrl} data-share="linkedin" target="_blank" rel="noopener noreferrer" aria-label={t.linkedin}>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.3 6.5a1.78 1.78 0 0 1-1.8 1.75zM19 19h-3v-4.74c0-1.42-.6-1.93-1.38-1.93A1.74 1.74 0 0 0 13 14.19a.66.66 0 0 0 0 .14V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.7-1.4c1.55 0 3.36.86 3.36 3.66z"/>
     </svg>
     <span>LinkedIn</span>
   </a>
 
-  <a class="fp-share-btn" href={redditUrl} target="_blank" rel="noopener noreferrer" aria-label={t.reddit}>
+  <a class="fp-share-btn" href={redditUrl} data-share="reddit" target="_blank" rel="noopener noreferrer" aria-label={t.reddit}>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M22 11.816a2.503 2.503 0 0 0-2.5-2.5c-.764 0-1.44.343-1.893.882c-1.439-.882-3.36-1.44-5.456-1.539l1.187-3.751l3.131.882l-.012.114a1.94 1.94 0 0 0 1.928 1.945a1.948 1.948 0 1 0-.494-3.831l-3.439-.97c-.143-.057-.286.057-.34.171L12.797 8.7c-1.989.114-3.78.659-5.182 1.482a2.483 2.483 0 0 0-1.781-.756a2.503 2.503 0 0 0-1.039 4.768a4.31 4.31 0 0 0-.058.74c0 3.755 4.066 6.802 9.078 6.802s9.077-3.046 9.077-6.802c0-.247-.024-.494-.058-.74A2.49 2.49 0 0 0 22 11.816M7 14.522a1.452 1.452 0 1 1 2.904.001A1.452 1.452 0 0 1 7 14.522m8.106 4.182c-.785.785-2.297.84-2.74.84c-.444 0-1.967-.043-2.74-.84a.297.297 0 0 1 0-.421a.297.297 0 0 1 .422 0c.498.498 1.563.668 2.319.668c.755 0 1.832-.17 2.319-.668a.297.297 0 0 1 .422 0a.31.31 0 0 1-.002.421m-.282-2.73a1.452 1.452 0 1 1-.001-2.904a1.452 1.452 0 0 1 .001 2.904"/>
     </svg>
@@ -83,10 +83,12 @@ const redditUrl = `https://www.reddit.com/submit?url=${encodedUrl}&title=${encod
       if (copyBtn && copyLabel) {
         copyBtn.addEventListener("click", function () {
           if (navigator.share && /Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+            if (window.va) window.va.track("share", "native");
             navigator.share({ title: title, url: url }).catch(function () {});
             return;
           }
           if (navigator.clipboard) {
+            if (window.va) window.va.track("share", "copy");
             navigator.clipboard.writeText(url).then(function () {
               copyLabel.textContent = labels.copied;
               copyBtn.classList.add("is-copied");

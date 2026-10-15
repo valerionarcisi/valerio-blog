@@ -9,7 +9,7 @@ import {
   UNVERIFIED_SQL,
   VERDICT_SQL,
 } from "~/lib/bot-verdict";
-import { computeBlock } from "~/lib/stats-hybrid";
+import { computeBlock, computeSessions } from "~/lib/stats-hybrid";
 
 export const prerender = false;
 
@@ -131,6 +131,11 @@ export const GET: APIRoute = async ({ url, request }) => {
     groupBy: "day",
     totalsOnly: true,
   });
+  const prevOpts = { ...blockOpts, from: prevFrom, to: prevTo, groupBy: "day", totalsOnly: true };
+  const [sess, prevSess] = await Promise.all([
+    computeSessions(db, blockOpts),
+    computeSessions(db, prevOpts),
+  ]);
   const prevPv = prevBlock.totals.pageviews;
   const prevVis = prevBlock.totals.visitors;
   function pctChange(curr: number, prev: number): number | null {
@@ -143,6 +148,12 @@ export const GET: APIRoute = async ({ url, request }) => {
     totalVisitors > 0
       ? Math.round((block.totals.bounced / totalVisitors) * 1000) / 10
       : 0;
+
+  const rate1 = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 1000) / 10 : 0);
+  const round1 = (x: number) => Math.round(x * 10) / 10;
+  const sessionsBounceRate = rate1(sess.bounced, sess.count);
+  const prevBounceRate = rate1(prevSess.bounced, prevSess.count);
+  const prevGoals = new Map(prevSess.goals.map((g) => [g.id, g.conversions]));
 
   return new Response(
     JSON.stringify({
@@ -174,6 +185,28 @@ export const GET: APIRoute = async ({ url, request }) => {
             : 0,
       },
       review: review.rows,
+      // Phase 2. REAL bounce = sessions with 1 pageview and < 10 s engaged / sessions;
+      // summary.bounce_rate above is the legacy per-visit approximation and stays as is.
+      sessions: {
+        available: sess.available,
+        count: sess.count,
+        bounce_rate: sessionsBounceRate,
+        pages_per_session: sess.count > 0 ? round1(sess.pageviews / sess.count) : 0,
+        avg_engaged_seconds: sess.count > 0 ? Math.round(sess.engagedSeconds / sess.count) : 0,
+        by_channel: sess.channels,
+        count_delta_pct: pctChange(sess.count, prevSess.count),
+        // difference in percentage points vs the previous period (null when it has no sessions)
+        bounce_rate_delta_pp: prevSess.count > 0 ? round1(sessionsBounceRate - prevBounceRate) : null,
+        prev_period: { count: prevSess.count, bounce_rate: prevBounceRate },
+      },
+      channels: block.channels,
+      entry_pages: sess.entryPages,
+      exit_pages: sess.exitPages,
+      events: sess.events,
+      goals: sess.goals.map((g) => ({
+        ...g,
+        conversions_delta_pct: pctChange(g.conversions, prevGoals.get(g.id) ?? 0),
+      })),
       // Debug: days of the range read from daily rollups vs live raw rows.
       source: block.source,
       chart: block.chart,

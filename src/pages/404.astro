@@ -16,6 +16,16 @@ import { SITE_TITLE } from "~/consts";
   </section>
 </FoglioLayout>
 
+<script is:inline>
+  (function () {
+    var h = "";
+    try {
+      h = new URL(document.referrer).hostname;
+    } catch (e) {}
+    if (window.va) window.va.track("not_found", h || null);
+  })();
+</script>
+
 <style is:global>
   .nf-section {
     max-width: 680px;

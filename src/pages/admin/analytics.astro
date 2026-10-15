@@ -309,6 +309,39 @@ if (!Astro.locals.isAdmin) {
         color: var(--ax-page-ink-mute);
       }
 
+      /* Phase 2: sessions / events / goals */
+      .foglio body.admin .ax-stats.ax-stats-4 { grid-template-columns: repeat(2, 1fr); }
+      .foglio body.admin .ax-goal { margin: 0 0 1.5rem; }
+      .foglio body.admin .ax-goal-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.75rem;
+        font-family: var(--foglio-mono);
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--ax-page-ink);
+        padding: 0 0 0.4rem;
+        border-bottom: 1px solid var(--foglio-rule);
+        margin: 0 0 0.3rem;
+      }
+      .foglio body.admin .ax-goal-head b { color: var(--foglio-accent-soft); font-weight: 600; }
+      .foglio body.admin .ax-goal .ax-section-meta {
+        display: block;
+        margin-top: 0.4rem;
+        font-family: var(--foglio-mono);
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        color: var(--ax-page-ink-mute);
+        overflow-wrap: anywhere;
+      }
+      .foglio body.admin .ax-unavailable {
+        font-family: var(--foglio-mono);
+        font-size: 12px;
+        color: var(--ax-page-ink-mute);
+        margin: 0 0 1.5rem;
+      }
+
       /* Chart container — cream paper card */
       .foglio body.admin .ax-chart-wrap {
         padding: 1rem;
@@ -693,6 +726,7 @@ if (!Astro.locals.isAdmin) {
         .foglio body.admin .ax-wrap { padding: 2rem 2.5rem 5rem; max-width: 1400px; }
         .foglio body.admin .ax-head h1 { font-size: var(--foglio-fs-5xl); }
         .foglio body.admin .ax-stats { grid-template-columns: repeat(6, 1fr); }
+        .foglio body.admin .ax-stats.ax-stats-4 { grid-template-columns: repeat(4, 1fr); }
         .foglio body.admin .ax-grid-3 { grid-template-columns: 1fr 1fr 1fr; gap: 2.5rem; }
         .foglio body.admin #world-map { height: 420px; }
         .foglio body.admin .ax-chart-wrap canvas { height: 320px !important; }
@@ -874,6 +908,63 @@ if (!Astro.locals.isAdmin) {
       <ul class="ax-list ax-engaged" id="engaged-list"></ul>
 
       <div class="ax-section-head">
+        <h2>Sessioni</h2>
+        <span class="ax-section-meta">visite con pausa &lt; 30 min · senza cookie</span>
+      </div>
+      <p class="ax-unavailable" id="sess-unavailable" hidden>Sessioni non ancora attive: applica la migrazione Fase 2.</p>
+      <section class="ax-stats ax-stats-4" id="sessions-stats">
+        <div class="ax-stat">
+          <div class="ax-stat-label">Sessioni <span class="ax-stat-info">?</span></div>
+          <div class="ax-stat-value acc" id="se-count">—</div>
+          <div class="ax-stat-delta" id="se-count-delta"></div>
+          <div class="ax-stat-tooltip">Una sessione = stesso visitatore anonimo con pause &lt; 30 minuti. A mezzanotte UTC l'identificativo cambia: una visita a cavallo si divide in due.</div>
+        </div>
+        <div class="ax-stat">
+          <div class="ax-stat-label">Bounce reale <span class="ax-stat-info">?</span></div>
+          <div class="ax-stat-value" id="se-bounce">—</div>
+          <div class="ax-stat-delta" id="se-bounce-delta"></div>
+          <div class="ax-stat-tooltip">Sessioni con 1 sola pagina e meno di 10 s di tempo attivo. Il "Bounce" in alto e il vecchio calcolo per visitatore.</div>
+        </div>
+        <div class="ax-stat">
+          <div class="ax-stat-label">Pagine / sessione <span class="ax-stat-info">?</span></div>
+          <div class="ax-stat-value" id="se-pages">—</div>
+          <div class="ax-stat-tooltip">Pageview medie per sessione.</div>
+        </div>
+        <div class="ax-stat">
+          <div class="ax-stat-label">Tempo attivo medio <span class="ax-stat-info">?</span></div>
+          <div class="ax-stat-value" id="se-time">—</div>
+          <div class="ax-stat-tooltip">Somma del tempo visibile sulle pagine della sessione, in media.</div>
+        </div>
+      </section>
+
+      <div class="ax-section-head">
+        <h2>Ingresso e uscita</h2>
+        <span class="ax-section-meta">prima e ultima pagina della sessione</span>
+      </div>
+      <div class="ax-grid-2">
+        <ul class="ax-list" id="entry-list"></ul>
+        <ul class="ax-list" id="exit-list"></ul>
+      </div>
+
+      <div class="ax-section-head">
+        <h2>Canali</h2>
+        <span class="ax-section-meta">sessioni per canale di provenienza</span>
+      </div>
+      <ul class="ax-list" id="channels-list"></ul>
+
+      <div class="ax-section-head">
+        <h2>Eventi</h2>
+        <span class="ax-section-meta">azioni anonime · conteggio</span>
+      </div>
+      <ul class="ax-list" id="events-list"></ul>
+
+      <div class="ax-section-head">
+        <h2>Obiettivi</h2>
+        <span class="ax-section-meta">sessioni con conversione · tasso sulle sessioni</span>
+      </div>
+      <div class="ax-grid-2" id="goals-grid"></div>
+
+      <div class="ax-section-head">
         <h2>Provenienza</h2>
         <span class="ax-section-meta">referrer · paesi · lingua</span>
       </div>
@@ -975,6 +1066,54 @@ if (!Astro.locals.isAdmin) {
             '<span class="ax-val">' + fmt(val) + '</span>' +
             '<span class="ax-bar"><span class="ax-bar-fill" style="width:' + pct + '%"></span></span>' +
             '</li>';
+        }).join("");
+      }
+
+      function pctText(n) { return (Number(n) || 0).toFixed(1).replace(".", ",") + "%"; }
+
+      function renderSessions(d) {
+        var se = d.sessions || {};
+        var off = !se.available;
+        document.getElementById("sess-unavailable").hidden = !off;
+        document.getElementById("se-count").textContent = off ? "—" : fmt(se.count);
+        document.getElementById("se-bounce").textContent = off ? "—" : pctText(se.bounce_rate);
+        document.getElementById("se-pages").textContent = off ? "—" : String(se.pages_per_session);
+        document.getElementById("se-time").textContent = off ? "—" : fmtTime(se.avg_engaged_seconds);
+        setDelta(document.getElementById("se-count-delta"), off ? null : se.count_delta_pct);
+        var bd = document.getElementById("se-bounce-delta");
+        if (off || se.bounce_rate_delta_pp == null) { bd.textContent = ""; bd.className = "ax-stat-delta"; }
+        else {
+          var pp = se.bounce_rate_delta_pp;
+          bd.textContent = (pp > 0 ? "▲ " : pp < 0 ? "▼ " : "= ") + Math.abs(pp).toFixed(1) + " pp vs periodo prec.";
+          // a higher bounce is worse
+          bd.className = "ax-stat-delta " + (pp > 0 ? "down" : pp < 0 ? "up" : "");
+        }
+        renderListRows(d.entry_pages, "path", "sessions", true, "entry-list", "Nessuna sessione nel periodo.");
+        renderListRows(d.exit_pages, "path", "sessions", true, "exit-list", "Nessuna sessione nel periodo.");
+        renderListRows((se.by_channel || []), "channel", "sessions", false, "channels-list", "Nessuna sessione nel periodo.");
+        var ev = (d.events || []).map(function(e) {
+          return { label: e.name + (e.prop ? " · " + e.prop : ""), count: e.count };
+        });
+        renderListRows(ev, "label", "count", false, "events-list", "Nessun evento nel periodo.");
+        renderGoals(d.goals || []);
+      }
+
+      function renderGoals(goals) {
+        var grid = document.getElementById("goals-grid");
+        if (!goals.length) { grid.innerHTML = '<p class="ax-empty">Nessun obiettivo.</p>'; return; }
+        grid.innerHTML = goals.map(function(g) {
+          var rows = (g.by_channel || []).map(function(c) {
+            return '<li><span class="ax-key">' + escapeHtml(c.channel) + '</span>' +
+              '<span class="ax-val" title="' + escapeHtml(c.conversions + " / " + c.sessions + " sessioni") + '">' + fmt(c.conversions) + ' · ' + pctText(c.rate) + '</span></li>';
+          }).join("");
+          var entries = (g.by_entry || []).slice(0, 3).map(function(c) {
+            return escapeHtml(c.path) + " (" + fmt(c.conversions) + ")";
+          }).join(" · ");
+          return '<div class="ax-goal">' +
+            '<div class="ax-goal-head"><span>' + escapeHtml(g.label) + '</span><span><b>' + fmt(g.conversions) + '</b> · ' + pctText(g.rate) + '</span></div>' +
+            '<ul class="ax-list">' + (rows || '<li class="ax-empty">Nessuna conversione.</li>') + '</ul>' +
+            (entries ? '<div class="ax-section-meta" title="Pagine di ingresso con più conversioni">Da: ' + entries + '</div>' : '') +
+            '</div>';
         }).join("");
       }
 
@@ -1558,6 +1697,7 @@ if (!Astro.locals.isAdmin) {
             renderListRows(d.sections, "section", "visitors", false, "sections-list", "Niente.");
             renderListRows(d.top_pages, "pathname", "visitors", true, "top-pages-list", "Niente.");
             renderEngaged(d.top_engaged_posts);
+            renderSessions(d);
             renderListRows(d.referrers, "referrer", "visitors", false, "referrers-list", "Solo traffico diretto.");
             renderListRows(d.countries, "country", "visitors", false, "countries-list", "—");
             renderListRows(d.languages, "lang", "visitors", false, "languages-list", "—");

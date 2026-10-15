@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { requireAdmin } from "~/lib/admin-auth";
 import getDb from "~/lib/turso";
 import { BOT_SQL } from "~/lib/bot-verdict";
+import { tableExists } from "~/lib/analytics-rollup";
 
 export const prerender = false;
 
@@ -13,11 +14,18 @@ export const GET: APIRoute = async ({ request }) => {
 
   const db = getDb();
   const where = `created_at > datetime('now', '-5 minutes') AND NOT ${BOT_SQL}`;
+  // Phase 2: with the sessions table, "active" = sessions seen in the last 5 minutes
+  // (indexed on last_seen_at; bot sessions excluded). Falls back to the pageviews query.
+  let activeSql = `SELECT COUNT(DISTINCT visitor_hash) as n FROM pageviews WHERE ${where}`;
+  try {
+    if (await tableExists(db, "sessions")) {
+      activeSql = `SELECT COUNT(DISTINCT visitor_hash) as n FROM sessions WHERE last_seen_at > datetime('now', '-5 minutes') AND NOT ${BOT_SQL}`;
+    }
+  } catch {
+    /* keep the fallback */
+  }
   const [active, pageviews] = await Promise.all([
-    db.execute({
-      sql: `SELECT COUNT(DISTINCT visitor_hash) as n FROM pageviews WHERE ${where}`,
-      args: [],
-    }),
+    db.execute({ sql: activeSql, args: [] }),
     db.execute({
       sql: `SELECT COUNT(*) as n FROM pageviews WHERE ${where}`,
       args: [],

@@ -108,10 +108,25 @@ const fullImageUrl = new URL(socialImage, Astro.url);
     utm_source:utm.s,utm_medium:utm.m,utm_campaign:utm.c,utm_content:utm.t,
     screen_width:screen.width,screen_height:screen.height,viewport_width:innerWidth,viewport_height:innerHeight,
     language:navigator.language,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
-  send(data).catch(function(){});
+  var pv=send(data).catch(function(){});
+  // events wait for the pageview; window.va is undefined when tracking is off
+  window.va={track:function(n,p){pv.then(function(){return send({type:"event",page_id:id,hostname:location.hostname,pathname:location.pathname,name:n,prop:p==null?null:String(p)});}).catch(function(){});}};
+  var blog=/^(\/en)?\/blog\//.test(location.pathname),s75,s100,cc;
+  document.addEventListener("click",function(e){
+    var a=e.target.closest&&e.target.closest("a[href]"),u,m;if(!a)return;
+    try{u=new URL(a.href,location.href);}catch(x){return;}
+    if(a.dataset.share){va.track("share",a.dataset.share);return;}
+    if(u.protocol!=="http:"&&u.protocol!=="https:")return;
+    if(m=/\.(pdf|zip|epub|mp3|mp4|docx|xlsx)$/i.exec(u.pathname))va.track("download",m[1].toLowerCase());
+    else if(u.hostname!==location.hostname)va.track("outbound_click",u.hostname);
+  },true);
+  document.addEventListener("copy",function(){
+    var n=getSelection().anchorNode;n=n&&(n.closest?n:n.parentElement);
+    if(!cc&&n&&n.closest("pre,code")){cc=1;va.track("copy_code");}
+  });
   var visible=document.visibilityState==="visible",last=Date.now(),acc=0,maxScroll=0,lastSent="";
   function tick(){if(visible){var n=Date.now();acc+=n-last;last=n;}}
-  function onScroll(){var h=document.documentElement.scrollHeight-innerHeight;if(h>0){var pct=Math.round(scrollY/h*100/5)*5;if(pct>maxScroll)maxScroll=pct;}}
+  function onScroll(){var h=document.documentElement.scrollHeight-innerHeight;if(h>0){var pct=Math.round(scrollY/h*100/5)*5;if(pct>maxScroll)maxScroll=pct;if(blog){if(pct>=75&&!s75){s75=1;va.track("scroll_75");}if(pct>=100&&!s100){s100=1;va.track("scroll_100");}}}}
   window.addEventListener("scroll",onScroll,{passive:true});
   var eng=0,et;
   function engage(){

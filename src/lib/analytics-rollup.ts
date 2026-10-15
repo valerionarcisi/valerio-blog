@@ -4,6 +4,7 @@ import { BOT_SQL, HUMAN_SQL } from "./bot-verdict";
 import { SECTION_SQL } from "./analytics-sql";
 import { ROLLUP_DDL } from "./analytics-rollup-schema";
 import { isoDate, subtractDays } from "./date-range";
+import { SESSION_ROLLUP_TABLES, rollupStatements } from "./analytics-session-stats";
 
 export type Scope = "human" | "all";
 export const SCOPES: Scope[] = ["human", "all"];
@@ -15,6 +16,9 @@ const MAX_RANGE_DAYS = 1000;
 export interface Caps {
   columns: Set<string>;
   botHashes: boolean;
+  /** Phase 2 raw tables (absent until the migration is applied). */
+  sessions: boolean;
+  events: boolean;
 }
 
 const ensured = new WeakSet<Client>();
@@ -41,6 +45,8 @@ export async function detectCaps(db: Client): Promise<Caps> {
   return {
     columns: await tableColumns(db, "pageviews"),
     botHashes: await tableExists(db, "bot_hashes"),
+    sessions: await tableExists(db, "sessions"),
+    events: await tableExists(db, "events"),
   };
 }
 
@@ -112,6 +118,7 @@ export async function rollupDay(
     { sql: "DELETE FROM daily_stats WHERE day = ?", args: [day] },
     { sql: "DELETE FROM daily_pages WHERE day = ?", args: [day] },
     { sql: "DELETE FROM daily_dims WHERE day = ?", args: [day] },
+    ...SESSION_ROLLUP_TABLES.map((t) => ({ sql: `DELETE FROM ${t} WHERE day = ?`, args: [day] })),
     { sql: "DELETE FROM rollup_log WHERE day = ?", args: [day] },
   ];
 
@@ -146,6 +153,12 @@ export async function rollupDay(
               FROM pageviews WHERE ${where}${d.skipNull ? ` AND ${d.expr} IS NOT NULL` : ""} GROUP BY v`,
         args,
       });
+    }
+    // Phase 2: sessions are scoped by their own bot_score/human (inherited from their pageviews).
+    if (c.sessions) {
+      stmts.push(
+        ...rollupStatements({ day, scope, scopeExpr: scopes[scope], hasEvents: c.events }),
+      );
     }
   }
   stmts.push({
@@ -210,6 +223,7 @@ export async function invalidateDays(db: Client, days: string[]): Promise<number
 
 export interface PruneResult {
   deletedPageviews: number;
+  deletedEvents: number;
   cleaned: string[];
 }
 
@@ -244,6 +258,22 @@ export async function pruneRaw(
     }
   }
 
+  let deletedEvents = 0;
+  try {
+    // Events: 90 days like raw pageviews, and only for days that were rolled up.
+    if ((await tableExists(db, "events")) && (await tableExists(db, "rollup_log"))) {
+      const cutoff = isoDate(subtractDays(now, keepDays));
+      const r = await db.execute({
+        sql: "DELETE FROM events WHERE day < ? AND day IN (SELECT day FROM rollup_log)",
+        args: [cutoff],
+      });
+      deletedEvents = r.rowsAffected;
+      cleaned.push("events");
+    }
+  } catch {
+    // best effort
+  }
+
   const sec7 = Math.floor(subtractDays(now, 7).getTime() / 1000);
   const iso7 = subtractDays(now, 7).toISOString();
   const day2 = isoDate(subtractDays(now, 2));
@@ -254,8 +284,12 @@ export async function pruneRaw(
     { table: "daily_visitors", sql: "DELETE FROM daily_visitors WHERE day < ?", arg: day2 },
     { table: "rate_limits", sql: "DELETE FROM rate_limits WHERE window_start < ?", arg: sec7 },
     { table: "telegram_updates", sql: "DELETE FROM telegram_updates WHERE seen_at < ?", arg: iso7 },
-    // phase 2 hook: sessions (180 days) once the table exists
-    { table: "sessions", sql: "DELETE FROM sessions WHERE day < ?", arg: day180 },
+    // sessions: 180 days, only days that were rolled up (the goals/entry rollups need them closed)
+    {
+      table: "sessions",
+      sql: "DELETE FROM sessions WHERE day < ? AND day IN (SELECT day FROM rollup_log)",
+      arg: day180,
+    },
   ];
   for (const j of jobs) {
     try {
@@ -266,7 +300,7 @@ export async function pruneRaw(
       // best effort: never fail the job over housekeeping
     }
   }
-  return { deletedPageviews: deleted, cleaned };
+  return { deletedPageviews: deleted, deletedEvents, cleaned };
 }
 
 /** What the scheduled job runs: yesterday + the day before (late beacons), then retention. */

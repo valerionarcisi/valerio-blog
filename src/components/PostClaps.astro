@@ -107,6 +107,7 @@ const t = labels[lang];
       render();
       pulse();
       inflight++;
+      if (window.va) window.va.track("clap");
       fetch("/api/posts/claps", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

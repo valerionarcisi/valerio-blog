@@ -1,6 +1,7 @@
 import { createClient, type Client } from "@libsql/client";
 import { pathToFileURL } from "node:url";
 import { ROLLUP_DDL } from "../src/lib/analytics-rollup-schema";
+import { SESSIONS_DDL } from "../src/lib/analytics-sessions";
 
 // Analytics v2 / phase 1. Fully idempotent: safe to run any number of times.
 // Run: TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx tsx scripts/migrate-analytics-v2.ts
@@ -66,6 +67,16 @@ export async function migrateAnalyticsV2(db: Client): Promise<string[]> {
   // Phase 3: daily rollups.
   await db.executeMultiple(ROLLUP_DDL);
   log.push("ensured daily_stats, daily_pages, daily_dims, rollup_log");
+
+  // Phase 2: cookieless sessions + custom events (raw tables; their rollups are in ROLLUP_DDL).
+  await db.executeMultiple(SESSIONS_DDL);
+  if (!(await columnExists(db, "pageviews", "session_id"))) {
+    await db.execute("ALTER TABLE pageviews ADD COLUMN session_id INTEGER");
+    log.push("added pageviews.session_id");
+  }
+  log.push(
+    "ensured sessions, events, daily_sessions, daily_events, daily_entry_exit, daily_goals",
+  );
 
   return log;
 }

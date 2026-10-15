@@ -307,6 +307,7 @@ const t = labels[lang];
                 btn.querySelector(".Comments-like-count").textContent =
                   data.count;
                 btn.classList.toggle("is-active", !!data.liked);
+                if (data.liked && window.va) window.va.track("comment_like");
                 btn.setAttribute("aria-pressed", data.liked ? "true" : "false");
                 var iconWrap = btn.querySelector(".Comments-like-icon");
                 if (iconWrap)
@@ -411,6 +412,11 @@ const t = labels[lang];
       })
         .then(function (r) {
           if (!r.ok) throw new Error();
+          if (window.va) {
+            window.va.track("comment_submit");
+            // the contact page has no form of its own: its comment box is the contact channel
+            if (pageId === "contact") window.va.track("contact_submit");
+          }
           if (isAuthor) {
             form.reset();
             var slot = form.parentElement && form.parentElement.classList.contains("Comments-reply-slot")

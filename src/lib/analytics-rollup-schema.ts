@@ -48,6 +48,49 @@ export const ROLLUP_DDL = `
     PRIMARY KEY (day, scope, dim, value)
   );
 
+  -- Phase 2. Sessions are attributed to the UTC day they STARTED.
+  CREATE TABLE IF NOT EXISTS daily_sessions (
+    day             TEXT NOT NULL,
+    scope           TEXT NOT NULL,
+    sessions        INTEGER NOT NULL DEFAULT 0,
+    bounced_sessions INTEGER NOT NULL DEFAULT 0,
+    pageviews       INTEGER NOT NULL DEFAULT 0,
+    engaged_seconds INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, scope)
+  );
+
+  -- prop '' = no prop (PK columns cannot be NULL). Events are attributed to the day they happened.
+  CREATE TABLE IF NOT EXISTS daily_events (
+    day      TEXT NOT NULL,
+    scope    TEXT NOT NULL,
+    name     TEXT NOT NULL,
+    prop     TEXT NOT NULL DEFAULT '',
+    count    INTEGER NOT NULL DEFAULT 0,
+    visitors INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, scope, name, prop)
+  );
+
+  CREATE TABLE IF NOT EXISTS daily_entry_exit (
+    day      TEXT NOT NULL,
+    scope    TEXT NOT NULL,
+    kind     TEXT NOT NULL,
+    path     TEXT NOT NULL,
+    sessions INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, scope, kind, path)
+  );
+
+  -- Goal conversions (distinct sessions, by session start day). goal '_sessions' holds the
+  -- session counts per channel/entry used as denominators. dim: total | channel | entry.
+  CREATE TABLE IF NOT EXISTS daily_goals (
+    day         TEXT NOT NULL,
+    scope       TEXT NOT NULL,
+    goal        TEXT NOT NULL,
+    dim         TEXT NOT NULL,
+    value       TEXT NOT NULL,
+    conversions INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, scope, goal, dim, value)
+  );
+
   CREATE TABLE IF NOT EXISTS rollup_log (
     day         TEXT PRIMARY KEY,
     computed_at TEXT NOT NULL,
