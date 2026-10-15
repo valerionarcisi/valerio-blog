@@ -29,6 +29,7 @@ await db.executeMultiple(`
     viewport_height INTEGER,
     language        TEXT,
     country         TEXT,
+    channel         TEXT,
     created_at      TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
@@ -37,6 +38,18 @@ await db.executeMultiple(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS analytics_salts (
+    day  TEXT PRIMARY KEY,
+    salt TEXT NOT NULL
+  );
+
+  CREATE TABLE IF NOT EXISTS daily_visitors (
+    day          TEXT NOT NULL,
+    visitor_hash TEXT NOT NULL,
+    PRIMARY KEY (day, visitor_hash)
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_pv_visitor_day ON pageviews(visitor_hash, created_at);
   CREATE INDEX IF NOT EXISTS idx_pv_created ON pageviews(created_at);
   CREATE INDEX IF NOT EXISTS idx_pv_pathname ON pageviews(pathname);
   CREATE INDEX IF NOT EXISTS idx_pv_hostname ON pageviews(hostname, created_at);

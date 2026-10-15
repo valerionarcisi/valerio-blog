@@ -33,8 +33,17 @@ const today = new Date();
         <p>
           Utilizziamo un sistema di analytics self-hosted che non usa cookie, non raccoglie
           indirizzi IP e non memorizza dati personali. I dati raccolti (pagine visitate,
-          referrer, tipo di dispositivo, lingua e paese derivato dal fuso orario) sono
-          completamente anonimi e non permettono di identificare singoli utenti.
+          referrer, tipo di dispositivo, lingua e paese) sono completamente anonimi e non
+          permettono di identificare singoli utenti. Il paese deriva dalla posizione
+          approssimativa fornita dall'infrastruttura di hosting o, in mancanza, dal fuso
+          orario; l'indirizzo IP non viene mai salvato e serve solo a calcolare, in
+          memoria, un identificativo anonimo che si azzera ogni giorno.
+        </p>
+        <p>
+          Il browser memorizza nel localStorage un'impostazione chiamata
+          <code>notrack</code> soltanto se il visitatore o il proprietario del sito
+          decide di escludersi dal conteggio: è un semplice flag, senza alcun
+          identificativo, e non viene inviato a nessuno.
         </p>
 
         <hr />

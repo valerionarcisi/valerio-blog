@@ -1,25 +1,34 @@
 import type { APIRoute } from "astro";
+import type { Client, InValue } from "@libsql/client";
 import getDb from "~/lib/turso";
 import {
   countryFromTimezone,
   parseUserAgent,
   deviceTypeFromViewport,
   isBot,
-  sanitizePathname,
-  extractHostname,
   generateVisitorHash,
 } from "~/lib/analytics";
+import {
+  getDailySalt,
+  peekSalt,
+  maybePurgeOldSalts,
+  shiftDay,
+  utcDay,
+} from "~/lib/analytics-salt";
+import {
+  isAllowedRequestOrigin,
+  parseBeacon,
+  parsePageview,
+  type PageviewInput,
+} from "~/lib/analytics-input";
+import { classifyChannel } from "~/lib/channels";
+import { countryFromGeo } from "~/lib/geo";
+import { checkRate } from "~/lib/rate-limit";
 
 export const prerender = false;
 
-const ALLOWED_ORIGINS = [
-  "https://valerionarcisi.me",
-  "https://www.valerionarcisi.me",
-  "http://localhost:4321",
-  "http://localhost:3000",
-  "http://127.0.0.1:4321",
-  "http://127.0.0.1:3000",
-];
+const RATE_LIMIT = 60;
+const RATE_WINDOW_SEC = 60;
 
 export function toFiniteNumber(val: unknown): number | null {
   if (val == null) return null;
@@ -27,16 +36,108 @@ export function toFiniteNumber(val: unknown): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-export const POST: APIRoute = async ({ request }) => {
-  const origin = request.headers.get("origin") ?? "";
-  if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+const noContent = () => new Response(null, { status: 204 });
+
+function clientIp(request: Request): string {
+  return (
+    request.headers.get("x-nf-client-connection-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+/** Columns added after the first release; dropped when the migration is not applied yet. */
+const OPTIONAL_COLUMNS = new Set(["channel", "visitor_hash"]);
+
+async function insertPageview(
+  db: Client,
+  row: Record<string, InValue>,
+): Promise<void> {
+  const run = (entries: [string, InValue][]) =>
+    db.execute({
+      sql: `INSERT INTO pageviews (${entries.map(([k]) => k).join(", ")})
+            VALUES (${entries.map(() => "?").join(", ")})`,
+      args: entries.map(([, v]) => v),
+    });
+  const all = Object.entries(row);
+  try {
+    await run(all);
+  } catch {
+    await run(all.filter(([k]) => !OPTIONAL_COLUMNS.has(k)));
+  }
+}
+
+/** Atomic first-visit-of-the-day detection. Falls back to the legacy check pre-migration. */
+async function isFirstVisitToday(
+  db: Client,
+  day: string,
+  visitorHash: string,
+): Promise<boolean> {
+  try {
+    const res = await db.execute({
+      sql: "INSERT OR IGNORE INTO daily_visitors (day, visitor_hash) VALUES (?, ?)",
+      args: [day, visitorHash],
+    });
+    return res.rowsAffected === 1;
+  } catch {
+    try {
+      const existing = await db.execute({
+        sql: "SELECT 1 FROM pageviews WHERE visitor_hash = ? AND created_at >= ? LIMIT 1",
+        args: [visitorHash, day],
+      });
+      return existing.rows.length === 0;
+    } catch {
+      return true;
+    }
+  }
+}
+
+function buildRow(
+  p: PageviewInput,
+  extra: {
+    visitorHash: string;
+    isUnique: boolean;
+    browser: string | null;
+    os: string | null;
+    country: string | null;
+  },
+): Record<string, InValue> {
+  return {
+    page_id: p.pageId,
+    hostname: p.hostname,
+    pathname: p.pathname,
+    referrer: p.referrerHost,
+    utm_source: p.utmSource,
+    utm_medium: p.utmMedium,
+    utm_campaign: p.utmCampaign,
+    utm_content: p.utmContent,
+    is_unique: extra.isUnique ? 1 : 0,
+    visitor_hash: extra.visitorHash,
+    channel: classifyChannel({
+      referrerHost: p.referrerHost,
+      utmSource: p.utmSource,
+      utmMedium: p.utmMedium,
+    }),
+    browser: extra.browser,
+    os: extra.os,
+    device_type: deviceTypeFromViewport(p.viewportWidth ?? undefined),
+    screen_width: p.screenWidth,
+    screen_height: p.screenHeight,
+    viewport_width: p.viewportWidth,
+    viewport_height: p.viewportHeight,
+    language: p.language,
+    country: extra.country,
+  };
+}
+
+export const POST: APIRoute = async ({ request, locals }) => {
+  if (!isAllowedRequestOrigin(request.headers)) {
     return new Response(null, { status: 403 });
   }
 
   const ua = request.headers.get("user-agent") ?? undefined;
-  if (isBot(ua)) {
-    return new Response(null, { status: 204 });
-  }
+  if (isBot(ua)) return noContent();
 
   let body: Record<string, unknown>;
   try {
@@ -44,153 +145,64 @@ export const POST: APIRoute = async ({ request }) => {
   } catch {
     return new Response(null, { status: 400 });
   }
+  if (!body || typeof body !== "object")
+    return new Response(null, { status: 400 });
 
-  const type = body.type as string;
+  const type = body.type;
+  if (type !== "pageview" && type !== "beacon") {
+    return new Response(null, { status: 400 });
+  }
 
-  if (type === "beacon") {
-    const pageId =
-      typeof body.page_id === "string" ? body.page_id.slice(0, 50) : null;
-    if (!pageId) return new Response(null, { status: 400 });
+  const pv = type === "pageview" ? parsePageview(body) : null;
+  const bc = type === "beacon" ? parseBeacon(body) : null;
+  const input = pv ?? bc;
+  if (!input || !input.ok) return noContent();
 
-    const timeOnPage = toFiniteNumber(body.time_on_page);
-    const scrollDepth = toFiniteNumber(body.scroll_depth);
+  const db = getDb();
+  const ip = clientIp(request);
+  const today = utcDay();
+  const hostname = input.value.hostname;
+  const salt = await getDailySalt(db, today);
+  const visitorHash = await generateVisitorHash(salt, hostname, ip, ua ?? "");
 
-    await getDb().execute({
-      sql: "UPDATE pageviews SET time_on_page = ?, scroll_depth = ? WHERE page_id = ? AND time_on_page IS NULL",
-      args: [
-        timeOnPage != null ? Math.min(Math.round(timeOnPage), 3600) : null,
-        scrollDepth != null ? Math.min(Math.round(scrollDepth), 100) : null,
-        pageId,
-      ],
+  if (!(await checkRate(db, `e:${visitorHash}`, RATE_LIMIT, RATE_WINDOW_SEC))) {
+    return new Response(null, { status: 429 });
+  }
+  maybePurgeOldSalts(db, today);
+
+  if (bc?.ok) {
+    const b = bc.value;
+    // A beacon sent just after midnight UTC was hashed with yesterday's salt.
+    const hashes = [visitorHash];
+    const yesterday = shiftDay(today, -1);
+    const yesterdaySalt = await peekSalt(db, yesterday);
+    if (yesterdaySalt) {
+      hashes.push(
+        await generateVisitorHash(yesterdaySalt, hostname, ip, ua ?? ""),
+      );
+    }
+    await db.execute({
+      sql: `UPDATE pageviews
+            SET time_on_page = MAX(COALESCE(time_on_page, 0), ?),
+                scroll_depth = MAX(COALESCE(scroll_depth, 0), ?)
+            WHERE page_id = ? AND visitor_hash IN (${hashes.map(() => "?").join(", ")})`,
+      args: [b.timeOnPage ?? 0, b.scrollDepth ?? 0, b.pageId, ...hashes],
     });
-
-    return new Response(null, { status: 204 });
+    return noContent();
   }
 
-  if (type === "pageview") {
-    const pathname = typeof body.pathname === "string" ? body.pathname : null;
-    if (!pathname) return new Response(null, { status: 400 });
+  if (!pv?.ok) return noContent();
+  const p = pv.value;
+  const { browser, os } = parseUserAgent(ua);
+  const geo = (locals as { netlify?: { context?: { geo?: unknown } } })?.netlify
+    ?.context?.geo;
+  const country =
+    countryFromGeo(request.headers, geo) ?? countryFromTimezone(p.timezone);
+  const isUnique = await isFirstVisitToday(db, today, visitorHash);
 
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      request.headers.get("x-real-ip") ??
-      "unknown";
-
-    const { browser, os } = parseUserAgent(ua);
-    const hostname =
-      typeof body.hostname === "string"
-        ? body.hostname.slice(0, 100)
-        : "valerionarcisi.me";
-    const pageId =
-      typeof body.page_id === "string"
-        ? body.page_id.slice(0, 50)
-        : crypto.randomUUID().slice(0, 8);
-
-    const visitorHash = await generateVisitorHash(hostname, ip, ua ?? "");
-    const today = new Date().toISOString().slice(0, 10);
-
-    let isUnique = 1;
-    try {
-      const existing = await getDb().execute({
-        sql: "SELECT 1 FROM pageviews WHERE visitor_hash = ? AND created_at >= ? LIMIT 1",
-        args: [visitorHash, today],
-      });
-      isUnique = existing.rows.length === 0 ? 1 : 0;
-    } catch {
-      // visitor_hash column may not exist yet — fall back to unique
-    }
-
-    const db = getDb();
-    try {
-      await db.execute({
-        sql: `INSERT INTO pageviews (
-          page_id, hostname, pathname, referrer,
-          utm_source, utm_medium, utm_campaign, utm_content,
-          is_unique, visitor_hash, browser, os, device_type,
-          screen_width, screen_height, viewport_width, viewport_height,
-          language, country
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          pageId,
-          hostname,
-          sanitizePathname(pathname),
-          extractHostname(body.referrer as string | undefined),
-          typeof body.utm_source === "string"
-            ? body.utm_source.slice(0, 200)
-            : null,
-          typeof body.utm_medium === "string"
-            ? body.utm_medium.slice(0, 200)
-            : null,
-          typeof body.utm_campaign === "string"
-            ? body.utm_campaign.slice(0, 200)
-            : null,
-          typeof body.utm_content === "string"
-            ? body.utm_content.slice(0, 200)
-            : null,
-          isUnique,
-          visitorHash,
-          browser,
-          os,
-          deviceTypeFromViewport(
-            toFiniteNumber(body.viewport_width) ?? undefined,
-          ),
-          toFiniteNumber(body.screen_width),
-          toFiniteNumber(body.screen_height),
-          toFiniteNumber(body.viewport_width),
-          toFiniteNumber(body.viewport_height),
-          typeof body.language === "string" ? body.language.slice(0, 10) : null,
-          countryFromTimezone(
-            typeof body.timezone === "string" ? body.timezone : undefined,
-          ),
-        ],
-      });
-    } catch {
-      // Fallback: insert without visitor_hash column (pre-migration)
-      await db.execute({
-        sql: `INSERT INTO pageviews (
-          page_id, hostname, pathname, referrer,
-          utm_source, utm_medium, utm_campaign, utm_content,
-          is_unique, browser, os, device_type,
-          screen_width, screen_height, viewport_width, viewport_height,
-          language, country
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          pageId,
-          hostname,
-          sanitizePathname(pathname),
-          extractHostname(body.referrer as string | undefined),
-          typeof body.utm_source === "string"
-            ? body.utm_source.slice(0, 200)
-            : null,
-          typeof body.utm_medium === "string"
-            ? body.utm_medium.slice(0, 200)
-            : null,
-          typeof body.utm_campaign === "string"
-            ? body.utm_campaign.slice(0, 200)
-            : null,
-          typeof body.utm_content === "string"
-            ? body.utm_content.slice(0, 200)
-            : null,
-          isUnique,
-          browser,
-          os,
-          deviceTypeFromViewport(
-            toFiniteNumber(body.viewport_width) ?? undefined,
-          ),
-          toFiniteNumber(body.screen_width),
-          toFiniteNumber(body.screen_height),
-          toFiniteNumber(body.viewport_width),
-          toFiniteNumber(body.viewport_height),
-          typeof body.language === "string" ? body.language.slice(0, 10) : null,
-          countryFromTimezone(
-            typeof body.timezone === "string" ? body.timezone : undefined,
-          ),
-        ],
-      });
-    }
-
-    return new Response(null, { status: 204 });
-  }
-
-  return new Response(null, { status: 400 });
+  await insertPageview(
+    db,
+    buildRow(p, { visitorHash, isUnique, browser, os, country }),
+  );
+  return noContent();
 };

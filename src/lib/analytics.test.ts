@@ -58,8 +58,7 @@ describe("parseUserAgent", () => {
   });
 
   test("IE on Windows", () => {
-    const ua =
-      "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko";
+    const ua = "Mozilla/5.0 (Windows NT 10.0; Trident/7.0; rv:11.0) like Gecko";
     expect(parseUserAgent(ua)).toEqual({ browser: "IE", os: "Windows" });
   });
 
@@ -180,29 +179,63 @@ describe("extractHostname", () => {
 });
 
 describe("generateVisitorHash", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2026-03-05T12:00:00Z"));
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+  const salt = "a".repeat(64);
 
   test("returns 16 char hex string", async () => {
-    const hash = await generateVisitorHash("example.com", "1.2.3.4", "Chrome");
+    const hash = await generateVisitorHash(
+      salt,
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
     expect(hash).toMatch(/^[0-9a-f]{16}$/);
   });
 
-  test("is deterministic", async () => {
-    const h1 = await generateVisitorHash("example.com", "1.2.3.4", "Chrome");
-    const h2 = await generateVisitorHash("example.com", "1.2.3.4", "Chrome");
+  test("is deterministic for the same salt", async () => {
+    const h1 = await generateVisitorHash(
+      salt,
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const h2 = await generateVisitorHash(
+      salt,
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
     expect(h1).toBe(h2);
   });
 
   test("different inputs produce different hashes", async () => {
-    const h1 = await generateVisitorHash("example.com", "1.2.3.4", "Chrome");
-    const h2 = await generateVisitorHash("example.com", "5.6.7.8", "Chrome");
+    const h1 = await generateVisitorHash(
+      salt,
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const h2 = await generateVisitorHash(
+      salt,
+      "example.com",
+      "5.6.7.8",
+      "Chrome",
+    );
+    expect(h1).not.toBe(h2);
+  });
+
+  test("different salt (i.e. different day) produces a different hash", async () => {
+    const h1 = await generateVisitorHash(
+      "salt-day-1",
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
+    const h2 = await generateVisitorHash(
+      "salt-day-2",
+      "example.com",
+      "1.2.3.4",
+      "Chrome",
+    );
     expect(h1).not.toBe(h2);
   });
 });
@@ -270,6 +303,7 @@ describe("generateStableVisitorHash", () => {
       "Chrome",
     );
     const dated = await generateVisitorHash(
+      "salt",
       "example.com",
       "1.2.3.4",
       "Chrome",

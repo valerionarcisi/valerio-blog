@@ -2,6 +2,20 @@
 
 Clone privacy-first di Simple Analytics, self-hosted su Turso + Astro + Netlify Functions.
 
+## Analytics v2 - Fase 1 (2026-10-15)
+
+Piano: `docs/superpowers/plans/2026-10-15-analytics-v2.md`. Migrazione: `scripts/migrate-analytics-v2.ts` (idempotente).
+
+- **Endpoint** `POST /api/e` (non `/api/collect`, che non esiste piu).
+- **Hash visitatore con salt giornaliero segreto**: `HMAC-SHA256(salt_del_giorno, hostname:ip:ua)` troncato a 16 hex. Il salt (32 byte random) vive in `analytics_salts(day, salt)`, creato con `INSERT OR IGNORE` + rilettura, memoizzato per processo; i salt piu vecchi di 2 giorni vengono cancellati opportunisticamente (~1% delle richieste, `src/lib/analytics-salt.ts`). Se il DB non risponde si usa un salt casuale per processo (il tracking non si rompe mai). Gli hash dei giorni passati non sono piu riproducibili.
+- **Paese da Netlify** (`x-nf-geo`, o `context.geo` se esposto; `src/lib/geo.ts`), fallback `countryFromTimezone`. IP e citta non vengono mai salvati.
+- **Referrer pulito + canale**: i referrer con hostname del sito sono scartati; `channel` (`direct|search|social|ai|email|referral|campaign`) calcolato server-side da referrer + UTM (`src/lib/channels.ts`).
+- **Validazione input** (`src/lib/analytics-input.ts`): `hostname` in allow-list, `pathname` che inizia con `/` (max 300, solo caratteri URL), UTM minuscoli max 100, `Origin` o `Referer` del sito obbligatorio (altrimenti 403), rate limit 60 eventi/minuto per hash visitatore (`rate-limit.ts`, fail-open, 429).
+- **Beacon legato al pageview e cumulativo**: `page_id` = 24 hex da `crypto.getRandomValues`; l'UPDATE richiede anche `visitor_hash` uguale a quello calcolato dalla richiesta (accettato anche l'hash col salt di ieri, per i beacon a cavallo della mezzanotte UTC). `time_on_page = MAX(COALESCE(time_on_page,0), ?)`, `scroll_depth` idem.
+- **Unicita atomica**: `daily_visitors(day, visitor_hash)` con `INSERT OR IGNORE`, `rowsAffected === 1` => `is_unique = 1`. Indice `idx_pv_visitor_day ON pageviews(visitor_hash, created_at)`.
+- **localStorage**: resta solo il flag di opt-out `notrack` (dichiarato nella privacy policy IT/EN). Rimossa la coda di retry `_ae`.
+- **Compatibilita pre-migrazione**: se mancano `channel`/`visitor_hash` l'INSERT riprova senza quelle colonne; se manca `daily_visitors` l'unicita ricade sul vecchio controllo; se manca `analytics_salts` si usa il salt di processo.
+
 ## Recent changes (2026-05-27)
 
 - **Live counter** `/api/stats/live` — `DISTINCT visitor_hash` in ultimi 5 min, esclude bot flaggati. Polling 30s dalla dashboard. Cache-Control `no-store` per evitare stale.
@@ -17,7 +31,7 @@ Il resto di questa spec descrive il sistema base ancora valido. Sezione "Bot det
 
 Sostituire Simple Analytics ($9/mese) con un sistema self-hosted che:
 
-- Non usa cookie, localStorage o fingerprinting
+- Non usa cookie ne fingerprinting; l'unico dato nel browser e il flag di opt-out `notrack` in localStorage (solo se il visitatore/proprietario si esclude)
 - Non salva IP address
 - Non richiede banner GDPR
 - Gira sullo stesso stack del blog (Turso + Netlify)
@@ -28,7 +42,7 @@ Sostituire Simple Analytics ($9/mese) con un sistema self-hosted che:
 ```
 Browser                    Netlify Functions              Turso
   |                             |                           |
-  |-- POST /api/collect ------->|-- INSERT pageview ------->|
+  |-- POST /api/e ------------->|-- INSERT pageview ------->|
   |                             |                           |
   |   Dashboard (SSR)           |                           |
   |-- GET /api/stats ---------->|-- SELECT aggregati ------>|
@@ -36,7 +50,7 @@ Browser                    Netlify Functions              Turso
 ```
 
 - **Tracking script**: JS inline (~2KB), caricato su ogni pagina
-- **Collect endpoint**: Netlify Function, riceve pageview, deriva country da timezone, parsa UA
+- **Collect endpoint** `/api/e`: Netlify Function, valida l'input, deriva country da Netlify geo (fallback timezone), canale da referrer/UTM, parsa UA
 - **Stats endpoint**: Netlify Function, restituisce aggregati con filtri data
 - **Dashboard**: pagina Astro SSR protetta da token (come `/admin/comments`)
 
@@ -47,12 +61,13 @@ Browser                    Netlify Functions              Turso
 | Campo             | Sorgente                                           | Note                                            |
 | ----------------- | -------------------------------------------------- | ----------------------------------------------- |
 | `pathname`        | `window.location.pathname`                         | No query string, no hash                        |
-| `referrer`        | `document.referrer`                                | Solo hostname, dominio esterno                  |
+| `referrer`        | `document.referrer`                                | Solo hostname; i referrer del sito stesso sono scartati |
 | `utm_source`      | URL param                                          | Estratto e poi rimosso dall'URL                 |
 | `utm_medium`      | URL param                                          | Estratto e poi rimosso dall'URL                 |
 | `utm_campaign`    | URL param                                          | Estratto e poi rimosso dall'URL                 |
 | `utm_content`     | URL param                                          | Estratto e poi rimosso dall'URL                 |
-| `is_unique`       | Referrer check                                     | `true` se referrer hostname != current hostname |
+| `is_unique`       | `daily_visitors`                                   | `1` alla prima visita del giorno (INSERT OR IGNORE atomico) |
+| `channel`         | referrer + UTM                                     | `direct`, `search`, `social`, `ai`, `email`, `referral`, `campaign` |
 | `screen_width`    | `screen.width`                                     | Dimensione schermo                              |
 | `screen_height`   | `screen.height`                                    | Dimensione schermo                              |
 | `viewport_width`  | `window.innerWidth`                                | Dimensione viewport                             |
@@ -65,7 +80,7 @@ Browser                    Netlify Functions              Turso
 
 | Campo         | Derivato da      | Note                                              |
 | ------------- | ---------------- | ------------------------------------------------- |
-| `country`     | `timezone`       | Mapping timezone -> country (no IP geolocation)   |
+| `country`     | `x-nf-geo` / timezone | Netlify geo (solo codice paese), fallback mapping timezone |
 | `browser`     | `user_agent`     | Nome browser (Chrome, Firefox, Safari...)         |
 | `os`          | `user_agent`     | Sistema operativo                                 |
 | `device_type` | `viewport_width` | mobile (<768), tablet (768-1024), desktop (>1024) |
@@ -73,7 +88,7 @@ Browser                    Netlify Functions              Turso
 ### Dati NON raccolti
 
 - IP address (non salvato, non hashato)
-- Cookie / localStorage / sessionStorage
+- Cookie / sessionStorage; localStorage solo per il flag `notrack`
 - Fingerprint del browser
 - Query string e hash dall'URL
 - Dati personali identificabili
@@ -82,16 +97,14 @@ Browser                    Netlify Functions              Turso
 
 ## Dati raccolti in differita (beacon)
 
-Quando l'utente lascia la pagina o la nasconde, lo script invia un secondo beacon con:
+Il tracker invia un beacon **cumulativo** a ogni `visibilitychange -> hidden` e a ogni `pagehide`:
 
 | Campo          | Sorgente         | Note                                                |
 | -------------- | ---------------- | --------------------------------------------------- |
-| `time_on_page` | Timer JS         | Secondi di permanenza (solo tempo con tab visibile) |
+| `time_on_page` | Timer JS         | Secondi accumulati **solo** mentre `visibilityState === "visible"` |
 | `scroll_depth` | `window.scrollY` | Percentuale massima raggiunta, arrotondata al 5%    |
 
-Questi vengono inviati con `navigator.sendBeacon()` (fallback `fetch` con `keepalive`) e collegati al pageview tramite un `page_id` generato client-side (random, non persistente).
-
-Il beacon parte sia su `visibilitychange → hidden` (tab nascosta, switch app su mobile) sia su `pagehide` (chiusura tab e navigazioni hard, incluso bfcache). I due trigger sono coperti da un flag `sent` per evitare doppi invii; lato server l'`UPDATE ... WHERE time_on_page IS NULL` è comunque idempotente, quindi un eventuale doppio beacon è innocuo. Usare entrambi gli eventi è necessario perché `visibilitychange` da solo non scatta in modo affidabile su tutte le navigazioni/browser (es. Safari più datati), il che lasciava `time_on_page`/`scroll_depth` a `NULL`.
+Il beacon porta anche `page_id` e `hostname` (per ricalcolare l'hash). Payload identici consecutivi non vengono rinviati. Il server fa `MAX(valore_esistente, valore_ricevuto)` con clamp a 3600s / 100%, quindi un lettore che cambia tab e torna viene misurato per intero, e un beacon fuori ordine non puo abbassare i valori. L'UPDATE richiede `page_id` **e** `visitor_hash` della richiesta corrente: un beacon puo aggiornare solo le proprie righe. Invio con `navigator.sendBeacon()` (fallback `fetch` con `keepalive`).
 
 ---
 
@@ -100,7 +113,7 @@ Il beacon parte sia su `visibilitychange → hidden` (tab nascosta, switch app s
 ```sql
 CREATE TABLE pageviews (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  page_id       TEXT NOT NULL,           -- UUID generato client-side per collegare beacon
+  page_id       TEXT NOT NULL,           -- 24 hex casuali generati client-side per collegare il beacon
   hostname      TEXT NOT NULL,           -- per supportare multi-dominio futuro
   pathname      TEXT NOT NULL,
   referrer      TEXT,                    -- hostname del referrer esterno, NULL se diretto
@@ -109,7 +122,7 @@ CREATE TABLE pageviews (
   utm_campaign  TEXT,
   utm_content   TEXT,
   is_unique     INTEGER NOT NULL DEFAULT 0,  -- 1 = unique visit
-  visitor_hash  TEXT,                    -- SHA-256(date:hostname:ip:ua) — daily rotating, no IP salvato
+  visitor_hash  TEXT,                    -- HMAC-SHA256(salt giornaliero, hostname:ip:ua), 16 hex — no IP salvato
   time_on_page  INTEGER,                -- secondi (aggiornato via beacon)
   scroll_depth  INTEGER,                -- percentuale 0-100 (aggiornato via beacon)
   browser       TEXT,
@@ -120,7 +133,8 @@ CREATE TABLE pageviews (
   viewport_width  INTEGER,
   viewport_height INTEGER,
   language      TEXT,
-  country       TEXT,                    -- derivato da timezone
+  country       TEXT,                    -- Netlify geo, fallback timezone
+  channel       TEXT,                    -- direct|search|social|ai|email|referral|campaign
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -132,6 +146,18 @@ CREATE INDEX idx_pv_created   ON pageviews(created_at);
 CREATE INDEX idx_pv_pathname  ON pageviews(pathname);
 CREATE INDEX idx_pv_hostname  ON pageviews(hostname, created_at);
 CREATE INDEX idx_pv_page_id   ON pageviews(page_id);
+CREATE INDEX idx_pv_visitor_day ON pageviews(visitor_hash, created_at);
+
+CREATE TABLE analytics_salts (       -- salt segreto giornaliero, cancellato dopo 2 giorni
+  day   TEXT PRIMARY KEY,
+  salt  TEXT NOT NULL
+);
+
+CREATE TABLE daily_visitors (        -- unicita atomica: INSERT OR IGNORE, rowsAffected === 1 => unico
+  day           TEXT NOT NULL,
+  visitor_hash  TEXT NOT NULL,
+  PRIMARY KEY (day, visitor_hash)
+);
 ```
 
 ### Stima dimensioni
@@ -144,7 +170,7 @@ CREATE INDEX idx_pv_page_id   ON pageviews(page_id);
 
 ## API Endpoints
 
-### `POST /api/collect`
+### `POST /api/e`
 
 Riceve un pageview dal tracking script.
 
@@ -153,7 +179,8 @@ Riceve un pageview dal tracking script.
 ```json
 {
   "type": "pageview",
-  "page_id": "a1b2c3d4",
+  "page_id": "a1b2c3d4e5f6a7b8c9d0e1f2",
+  "hostname": "valerionarcisi.me",
   "pathname": "/blog/non-fa-ridere-backstage",
   "referrer": "google.com",
   "utm_source": "twitter",
@@ -176,7 +203,8 @@ Riceve un pageview dal tracking script.
 ```json
 {
   "type": "beacon",
-  "page_id": "a1b2c3d4",
+  "page_id": "a1b2c3d4e5f6a7b8c9d0e1f2",
+  "hostname": "valerionarcisi.me",
   "time_on_page": 45,
   "scroll_depth": 80
 }
@@ -184,18 +212,14 @@ Riceve un pageview dal tracking script.
 
 **Logica server-side:**
 
-1. Validazione campi (pathname obbligatorio, lunghezze max)
-2. Se `type === "pageview"`:
-   - Deriva `country` da `timezone` (lookup table statica)
-   - Parsa `user_agent` per estrarre `browser`, `os`
-   - Deriva `device_type` da `viewport_width`
-   - Sanitizza `pathname` (rimuovi trailing slash, normalizza)
-   - INSERT nella tabella `pageviews`
-3. Se `type === "beacon"`:
-   - UPDATE `time_on_page` e `scroll_depth` dove `page_id` corrisponde
-4. Risposta: `204 No Content` (o `200` se errore silenzioso per bot)
+1. `Origin` (o, se assente, `Referer`) deve appartenere al sito, altrimenti `403`. UA bot => `204`. JSON non valido o `type` sconosciuto => `400`.
+2. Validazione (`analytics-input.ts`): `hostname` in allow-list (`valerionarcisi.me`, `www.`, `localhost`, `127.0.0.1`), `pathname` che inizia con `/` max 300 con solo caratteri URL, `page_id` 8-64 caratteri `[A-Za-z0-9_-]`, UTM minuscoli max 100. Input non valido => `204` (scartato in silenzio).
+3. Salt del giorno (UTC) -> `visitor_hash`; rate limit 60/min per hash (`429`, fail-open).
+4. `pageview`: country (Netlify geo, poi timezone), canale, `INSERT OR IGNORE INTO daily_visitors` per `is_unique`, un solo INSERT in `pageviews` (se le colonne nuove mancano riprova senza).
+5. `beacon`: `UPDATE ... SET time_on_page = MAX(...), scroll_depth = MAX(...) WHERE page_id = ? AND visitor_hash IN (hash di oggi, hash di ieri)`.
+6. Risposta `204 No Content`.
 
-**Rate limiting:** max 1 pageview/secondo per IP (in-memory, non persistente). L'IP non viene salvato.
+**Rate limiting:** 60 eventi/minuto per `visitor_hash` tramite `src/lib/rate-limit.ts` (tabella `rate_limits`, chiave = hash, nessun IP salvato).
 
 **Bot filtering — 3 livelli:**
 1. **UA-based (ingestion)**: `isbot@5.1.35` — blocca bot/crawler/spider noti prima che la visita venga salvata. UA vuoto → bloccato.
@@ -284,8 +308,8 @@ Script JS leggero (~2KB minificato) da caricare inline su ogni pagina.
 
 ### Comportamento
 
-1. **Pageview**: al caricamento della pagina, raccoglie i dati e invia `POST /api/collect` con `type: "pageview"`
-2. **Beacon**: su `visibilitychange → hidden` **e** su `pagehide`, invia `type: "beacon"` via `sendBeacon()` (con flag `sent` anti-doppio-invio)
+1. **Pageview**: al caricamento della pagina, raccoglie i dati e invia `POST /api/e` con `type: "pageview"` e un `page_id` casuale di 24 hex
+2. **Beacon cumulativo**: su ogni `visibilitychange → hidden` **e** `pagehide`, invia `type: "beacon"` con il tempo visibile accumulato (nessun flag `sent`; si salta solo un payload identico al precedente)
 3. **SPA support**: override di `history.pushState` per tracciare navigazioni client-side (utile se in futuro il blog usa View Transitions)
 4. **Do Not Track**: se `navigator.doNotTrack === "1"`, non inviare nulla
 5. **Bot detection**: skip se `navigator.webdriver === true`
@@ -296,7 +320,7 @@ Script JS leggero (~2KB minificato) da caricare inline su ogni pagina.
 - < 2KB minificato
 - < 1KB gzipped
 - Nessuna dipendenza
-- No cookie, no localStorage, no sessionStorage
+- No cookie, no sessionStorage; localStorage solo per `notrack` (nessuna coda di retry)
 
 ---
 
@@ -360,7 +384,9 @@ Pagina Astro SSR, protetta da token (`?token=ADMIN_TOKEN`), stessa logica di `/a
 | --------------------------------------- | ------------ | -------------------------------------------------------------- |
 | `src/components/BaseHead.astro`         | **Modifica** | Sostituisci script Simple Analytics con tracking script inline |
 | `src/lib/analytics.ts`                  | **Crea**     | Utility: parse UA, timezone->country mapping, validazione      |
-| `src/pages/api/collect.ts`              | **Crea**     | Endpoint POST per ricevere pageview e beacon                   |
+| `src/pages/api/e.ts`                    | **Crea**     | Endpoint POST per ricevere pageview e beacon                   |
+| `src/lib/analytics-salt.ts`, `analytics-input.ts`, `channels.ts`, `geo.ts` | **Crea** | Salt giornaliero, validazione, canali, geo (Fase 1) |
+| `scripts/migrate-analytics-v2.ts`       | **Crea**     | Migrazione idempotente Fase 1                                  |
 | `src/pages/api/stats.ts`                | **Crea**     | Endpoint GET per aggregati dashboard (protetto)                |
 | `src/pages/admin/analytics.astro`       | **Crea**     | Dashboard SSR                                                  |
 | `src/components/AnalyticsDashboard.css` | **Crea**     | Stili dashboard                                                |
@@ -388,11 +414,7 @@ Riutilizza `TURSO_DATABASE_URL` e `TURSO_AUTH_TOKEN` gia configurati.
 
 ## Privacy policy
 
-Aggiornare entrambe le versioni con testo tipo:
-
-**IT:** "Utilizziamo un sistema di analytics self-hosted che non usa cookie, non raccoglie indirizzi IP e non memorizza dati personali. I dati raccolti (pagine visitate, referrer, tipo di dispositivo, lingua e paese derivato dal fuso orario) sono completamente anonimi e non permettono di identificare singoli utenti."
-
-**EN:** "We use a self-hosted analytics system that does not use cookies, does not collect IP addresses, and does not store personal data. The data collected (pages visited, referrer, device type, language, and country derived from timezone) is fully anonymous and cannot identify individual users."
+Le due versioni (`src/pages/privacy-policy.astro`, `src/pages/en/privacy-policy.astro`) dichiarano: analytics self-hosted senza cookie, IP mai salvato (usato solo in memoria per un identificativo anonimo che si azzera ogni giorno), paese dalla posizione approssimativa dell'hosting o dal fuso orario, e **una frase esplicita sul flag `notrack`**: il browser lo memorizza in localStorage solo se il visitatore/proprietario si esclude dal conteggio, senza identificativi.
 
 ---
 
@@ -411,20 +433,17 @@ Aggiornare entrambe le versioni con testo tipo:
 
 ## Limiti e trade-off
 
-- **Timezone -> Country non e preciso al 100%**: un italiano in vacanza a New York avra timezone America/New_York ma e italiano. Accettabile per un blog personale.
-- **No session tracking**: non abbiamo un concetto di "sessione" persistente. Ogni pageview e indipendente. Il bounce rate e approssimato dal tempo sulla pagina.
-- **Rate limiting in-memory**: si resetta ad ogni cold start della function. Per un blog personale e sufficiente.
-- **Niente real-time**: la dashboard mostra dati con un piccolo delay (query al DB). Nessun WebSocket.
-- **Chart.js aggiunge ~60KB**: se il peso e un problema, possiamo generare SVG server-side o usare un'alternativa leggera.
+- **Country da Netlify geo e approssimato** (VPN, viaggiatori); in locale/dev manca l'header e si ricade sul timezone (mapping parziale, altrimenti `NULL`).
+- **No session tracking** (Fase 2): ogni pageview e indipendente; il bounce rate e approssimato dal tempo sulla pagina.
+- **Rate limit su DB** (`rate_limits`): 2 query in piu per evento; fail-open se il DB non risponde.
+- **Niente real-time**: la dashboard mostra dati con un piccolo delay (query al DB).
+- **Chart.js aggiunge ~60KB**: se il peso e un problema, possiamo generare SVG server-side.
 
 ### Caveat di accuratezza (come leggere i numeri)
 
-Questi non sono bug: sono conseguenze del modello di misurazione. Vanno tenuti presenti interpretando la dashboard.
-
-- **`time_on_page` / `scroll_depth` dipendono dal beacon.** Se il beacon non arriva (utente offline, browser che non emette né `visibilitychange` né `pagehide`), i due campi restano `NULL`. Gli `AVG` in SQLite ignorano i `NULL`, quindi **tempo medio e scroll medio riflettono solo le visite "ingaggiate"** e tendono a essere leggermente ottimistici. Il trigger su `pagehide` (vedi sopra) riduce molto i NULL ma non li azzera.
-- **`bounce_rate` tende a essere sovrastimato.** È calcolato come quota di unique visitor con `time_on_page < 5` **o `NULL`**: ogni visita senza beacon valido viene contata come rimbalzo.
-- **`visitors` su range multi-giorno = somma degli unici giornalieri.** `is_unique` è calcolato per giorno (l'hash visitatore include la data), e le stats fanno `SUM(is_unique)` sul periodo. Un visitatore che torna in 3 giorni diversi conta 3. Non è il numero di persone uniche sul periodo, ma di visite-uniche-per-giorno (stesso modello per-giorno di Plausible, ma senza dedup sull'intero range).
-- **Confine giornaliero in UTC.** `created_at` usa `datetime('now')` (UTC), quindi unicità e raggruppamenti per giorno seguono UTC, non Europe/Rome: le visite di tarda sera possono cadere nel giorno successivo. Irrilevante sui trend.
-- **`country` da timezone è grezzo e incompleto.** Mapping 1 timezone → 1 paese, con molti paesi non mappati → `country = NULL` (esclusi dal breakdown). Indicativo, non esatto.
-- **"Live" conta pageview attive, non utenti distinti.** `stats/live` fa `COUNT(DISTINCT page_id)` negli ultimi 5 minuti, e `page_id` è per-pageview: chi apre 3 pagine conta 3.
-- **`time_on_page` = tempo fino al primo `hidden`/`pagehide`.** Dopo il primo beacon il flag `sent` blocca invii successivi, quindi il tempo di chi torna sulla tab e poi la chiude non viene sommato.
+- **`time_on_page` / `scroll_depth` dipendono dal beacon.** Se nessun beacon arriva (offline, browser che non emette `visibilitychange` ne `pagehide`) restano `NULL`; gli `AVG` ignorano i `NULL`, quindi i valori medi riflettono le visite "ingaggiate". Con il beacon cumulativo il tempo di chi torna sulla tab e poi la chiude viene sommato.
+- **`bounce_rate` tende a essere sovrastimato**: quota di unique visitor con `time_on_page < 5` **o `NULL`**.
+- **`visitors` su range multi-giorno = somma degli unici giornalieri**: l'hash cambia ogni giorno (salt), quindi chi torna in 3 giorni conta 3. Voluto: nessun tracciamento tra giorni.
+- **Confine giornaliero in UTC** (`created_at` = `datetime('now')`, salt per giorno UTC).
+- **"Live" conta pageview attive, non utenti distinti** (`COUNT(DISTINCT page_id)` negli ultimi 5 minuti).
+- **Storico**: le righe precedenti alla Fase 1 hanno `channel = NULL` e hash col vecchio schema (non confrontabili con i nuovi).
