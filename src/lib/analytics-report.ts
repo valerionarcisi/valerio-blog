@@ -65,7 +65,7 @@ export async function buildReportData(db: Client, now: Date = new Date()): Promi
     computeVitals(db, { ...base, from: week.from, to: week.to }),
   ]);
 
-  let verdicts: ReportData["verdicts"] = null;
+  let verdicts: ReportData["verdicts"];
   try {
     const q = await db.execute({
       sql: `SELECT ${VERDICT_SQL} AS verdict, COALESCE(SUM(is_unique), 0) AS visits FROM pageviews

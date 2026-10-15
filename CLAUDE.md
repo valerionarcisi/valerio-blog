@@ -4,14 +4,14 @@ Personal blog and portfolio site for Valerio Narcisi (filmmaker, sceneggiatore, 
 
 ## Tech Stack
 
-- **Framework**: Astro 5 (static site generation + Netlify Functions for server endpoints)
+- **Framework**: Astro 7 (static site generation + Netlify Functions for server endpoints)
 - **Language**: TypeScript (strict mode), ESM
 - **Package Manager**: pnpm
 - **Node**: 22.12+ (required by Astro 7). Always `nvm use 22` before pnpm commands.
 - **Styling**: Plain CSS, co-located CSS files next to components. No CSS framework.
 - **Design system**: **Foglio** — cream paper (`#f6f1e8`), EB Garamond serif (display + prose), Inter sans (body fallback), JetBrains Mono, terracotta accent (`#a8451a`). Tokens in `src/styles/foglio.css` (`--foglio-*`).
 - **Deployment**: Netlify (static pages + serverless functions). Auto-deploy on push to `main`.
-- **Database**: Turso (libsql) for comments, claps, analytics, meditation, editorial agents queue, game leaderboard (`/non-fa-ridere/`).
+- **Database**: Turso (libsql) for comments, claps, analytics, editorial agents queue, game leaderboard (`/non-fa-ridere/`).
 
 ## i18n
 
@@ -82,7 +82,7 @@ docs/
 - **CSS**: Co-located CSS files next to components (e.g., `Card.astro` + `Card.css`). Foglio layouts have their own CSS file (e.g. `FoglioPostLayout.astro` + `.css`).
 - **No `:global()` in plain `.css` files** — only works inside Astro scoped `<style>` blocks. Use direct selectors instead.
 - **No comments explaining what**: Self-documenting code via well-named functions. Comments only for _why_.
-- **Content collections**: Astro 5 glob loader. Slugs derived from filenames. Locale from directory (`it/`, `en/`).
+- **Content collections**: Astro 7 glob loader. Slugs derived from filenames. Locale from directory (`it/`, `en/`).
 - **Images**: Blog covers may be external URLs or `/img/blog/{slug}/cover.jpg`. Film images in `public/img/{film-name}/`. Process new uploads with sharp (resize 1600px, JPEG q82, strip EXIF). Festival laurels for films go in `public/img/{film-name}/laurels/`.
 - **Server endpoints**: Use `export const prerender = false` on API routes. Turso client via `getDb()` from `~/lib/turso`. Env vars via `env()` from `~/lib/env`.
 - **Result pattern**: Tutti gli endpoint API usano `Result<T, E>` da `~/lib/result` per rendere espliciti successo/fallimento. Parsing input con funzioni `parse*()` che ritornano `Result`. Risposte via `jsonOk()` / `jsonErr()`.

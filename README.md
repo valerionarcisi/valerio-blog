@@ -2,7 +2,7 @@
 
 Personal site of Valerio Narcisi — filmmaker, sceneggiatore, sviluppatore. Cortometraggi, blog tecnico-narrativo, prodotti in costruzione (Oh Writers), dashboard private.
 
-Live: <https://valerionarcisi.me>. Built with **Astro 5** on **Netlify**, content in Markdown, data layer on **Turso**.
+Live: <https://valerionarcisi.me>. Built with **Astro 7** on **Netlify**, content in Markdown, data layer on **Turso**.
 
 ---
 
@@ -10,13 +10,13 @@ Live: <https://valerionarcisi.me>. Built with **Astro 5** on **Netlify**, conten
 
 | Layer           | Choice                                                                         |
 | --------------- | ------------------------------------------------------------------------------ |
-| Framework       | Astro 5 (static + Netlify Functions for server endpoints)                      |
+| Framework       | Astro 7 (static + Netlify Functions for server endpoints)                      |
 | Language        | TypeScript strict, ESM                                                         |
 | Package manager | pnpm                                                                           |
 | Node            | 20+ (pnpm requires it)                                                         |
 | Styling         | Plain CSS, co-located per component (no framework)                             |
 | Design system   | **Foglio** — cream paper, EB Garamond serif, JetBrains Mono, terracotta accent |
-| Database        | **Turso** (libsql) — comments, claps, analytics, meditation, editorial agents  |
+| Database        | **Turso** (libsql) — comments, claps, analytics, editorial agents             |
 | Deployment      | Netlify (auto-deploy on push to `main`)                                        |
 | i18n            | Italian (default, no prefix) + English (`/en/`)                                |
 
@@ -78,8 +78,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `GET /api/admin/claps` — claps recap by post
 - `POST /api/admin/analytics-rollup` — (re)compute daily analytics rollups for `{from, to}` (max 400 days); the nightly Netlify Scheduled Function `netlify/functions/analytics-rollup.mts` does it automatically and prunes raw pageviews older than 90 days
 - `POST /api/admin/bot` — flag suspicious visitors as bots (single, bulk, or auto-flag-suspects)
-- `GET/POST/DELETE /api/admin/meditation` — meditation session tracking
-- `POST /api/admin/workout-sessions` — workout logging
+- `GET /api/analytics-report` — weekly analytics report as plain text, read-only Bearer `ANALYTICS_REPORT_TOKEN` (fetched by the HAL bot on the NAS, which delivers it on Telegram)
 
 **Editorial Agents (Bearer / Telegram secret):**
 
@@ -123,24 +122,19 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `/admin/analytics`  | Cookieless analytics with live "online now" counter, GSC-ready aggregates, geo map, bot flagging, weekly trends |
 | `/admin/comments`   | Moderation queue + claps recap + activity feed                                                                  |
-| `/admin/meditation` | Vipassana timer, heatmap, adaptive yearly plan, streak                                                          |
-| `/admin/strava`     | Strava training summary, donut, recent activities, yearly heatmap                                               |
-| `/admin/training`   | Running training plan, week stats, suggestion engine, race target                                               |
-| `/admin/workout`    | Indoor workout session logger                                                                                   |
-| `/admin/body-comp`  | BIA body composition with charts (FFM, FM, BMI, BMR, PhA)                                                       |
-| `/admin/meal-plan`  | Weekly meal plan                                                                                                |
-| `/admin/grocery`    | Shopping list derived from meal plan                                                                            |
-| `/admin/recipes`    | Recipes with dosages                                                                                            |
-| `/admin/roma`       | Roma trip planner                                                                                               |
-| `/admin/sentiero-lab` | Sentiero Film Lab · Bridges 2026 — day-by-day program, logistics, public events calendar                     |
-| `/admin/radar`      | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `public/radar.json`, filters + search  |
+| `/admin`            | "Oggi" home: next event countdown, today's analytics and meals, links to every page                             |
+| `/admin/strava` → `/admin/training` | Training plan, week stats, race target; the "Attività" tab has the Strava donut, recent activities and yearly heatmap |
+| `/admin/body-comp`  | BIA body composition with charts (FFM, FM, BMI, BMR, PhA) and a "last measurement" banner                        |
+| `/admin/meal-plan`  | Tabs: weekly plan, shopping list (`#spesa`), recipes (`#ricette`); `/admin/grocery` and `/admin/recipes` redirect |
+| `/admin/arte-di-narrare` | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                  |
+| `/admin/radar`      | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `src/data/radar.json` (served via `GET /api/admin/radar`), filters + search  |
 
-`public/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
+`src/data/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
 GitHub Actions workflow (`.github/workflows/radar-weekly.yml`): `scripts/radar-update.mjs`
 web-researches film opportunities via the Anthropic API (Haiku + web search), rewrites the file,
 `scripts/radar-notify.ts` notifies new items via the Telegram bot, then it commits & pushes →
 Netlify deploys. Requires GitHub Secrets `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`,
-`TELEGRAM_USER_ID_WHITELIST`. To update manually, edit `public/radar.json` and push, or run the
+`TELEGRAM_USER_ID_WHITELIST`. To update manually, edit `src/data/radar.json` and push, or run the
 workflow from the Actions tab. See `docs/radar-spec.md` and `docs/radar-agent.md`.
 
 ---
@@ -250,7 +244,7 @@ Feature-level specs are in `docs/`. Each adds context that a future developer (o
 | `contact-spec.md`                                                                                                  | Contact form + Resend transactional email                                      |
 | `lastfm-spec.md`                                                                                                   | Last.FM ingestion + `/ascolti`                                                 |
 | `letterboxd-spec.md`                                                                                               | Letterboxd RSS + TMDB enrichment + `/visti` client refresh                     |
-| `meditation-spec.md` `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` `training-spec.md` `workout-spec.md` | Admin dashboards                                                               |
+| `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` `training-spec.md` | Admin dashboards                                                               |
 | `post-claps-spec.md`                                                                                               | Medium-style claps system                                                      |
 | `telegram-bot-spec.md`                                                                                             | Idea Catcher Telegram bot details                                              |
 | `editorial-strategy.md`                                                                                            | Editorial constitution (audience, columns, cadence)                            |

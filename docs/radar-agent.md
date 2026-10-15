@@ -1,6 +1,6 @@
 # Radar — aggiornamento dati
 
-Come si rigenera `public/radar.json` (la fonte della pagina `/admin/radar`).
+Come si rigenera `src/data/radar.json` (la fonte della pagina `/admin/radar`).
 Schema completo in `docs/radar-spec.md`.
 
 ## Flusso automatico (periodico, GitHub Actions)
@@ -11,13 +11,13 @@ Workflow: `.github/workflows/radar-weekly.yml` — cron `0 6 */3 * *` (~ogni 3 g
    `fetch`, zero dipendenze) passando gli item correnti; il modello cerca bandi/opportunità cinema
    nuovi o aggiornati (OnlyFUNDS, Collettivo Incendio, European Short Pitch, Creative Europe MEDIA,
    Cineuropa, ShorTO…) adatti a un regista emergente con corti, e restituisce il JSON aggiornato.
-   Lo script riscrive `public/radar.json` (`updatedAt` lo mette lui, autoritativo).
+   Lo script riscrive `src/data/radar.json` (`updatedAt` lo mette lui, autoritativo).
    **Fail-safe**: se la risposta non è un JSON con `items` non vuoto (o manca un `id`), esce con
    errore **senza** sovrascrivere il file — meglio dati vecchi che dati distrutti.
-2. `npx tsx scripts/radar-notify.ts` — confronta il working tree con `HEAD:public/radar.json`;
+2. `npx tsx scripts/radar-notify.ts` — confronta il working tree con `HEAD:src/data/radar.json`;
    se ci sono `id` nuovi, manda una DM Telegram all'owner. Gira **prima** del commit (così HEAD è
    ancora la versione vecchia).
-3. Commit + push di `public/radar.json` (se cambiato) → Netlify deploya.
+3. Commit + push di `src/data/radar.json` (se cambiato) → Netlify deploya.
 
 ### GitHub Secrets richiesti
 
@@ -36,7 +36,7 @@ In alternativa (o in aggiunta) puoi aggiornare quando vuoi da una sessione Claud
 
 ## Aggiunta manuale di una singola opportunità
 
-Quando trovi un bando a mano (es. un post): aggiungilo a `public/radar.json` (con un `id`
+Quando trovi un bando a mano (es. un post): aggiungilo a `src/data/radar.json` (con un `id`
 stabile) e fai commit + push. Per mandarti la DM Telegram di quell'aggiunta, lancia il
 workflow **"Radar — notifica manuale"** (Actions → Run workflow): confronta `HEAD` con
 `base_ref` (default `HEAD~1`) e notifica solo le opportunità nuove e partecipabili, senza
@@ -46,4 +46,4 @@ rieseguire la ricerca né committare. Override della baseline via env `RADAR_BAS
 
 - `radar-update.mjs` usa la variante web search **`web_search_20250305`** perché Haiku 4.5 non
   supporta la `20260209` (dynamic filtering, solo Opus/Sonnet recenti).
-- Aggiornamento manuale minimo: edita `public/radar.json` e fai push.
+- Aggiornamento manuale minimo: edita `src/data/radar.json` e fai push.

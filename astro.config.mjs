@@ -61,7 +61,11 @@ const define = {
 // https://astro.build/config
 export default defineConfig({
   site: "https://valerionarcisi.me",
-  adapter: netlify({ devFeatures: { edgeFunctions: false } }),
+  adapter: netlify({
+    // Dev only. images/environmentVariables keep the adapter defaults; edgeFunctions is off because
+    // the project has no edge functions and the local Deno server it needs is not installed.
+    devFeatures: { images: true, environmentVariables: false, edgeFunctions: false },
+  }),
   vite: { define },
   integrations: [
     icon(),

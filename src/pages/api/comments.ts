@@ -34,7 +34,7 @@ interface AuthorCommentInput {
   lang: "it" | "en";
 }
 
-const PAGE_ID_RE = /^[a-zA-Z0-9/_.\-]{1,200}$/;
+const PAGE_ID_RE = /^[a-zA-Z0-9/_.-]{1,200}$/;
 
 function parseCommentInput(body: unknown): Result<CommentInput | "honeypot"> {
   if (!body || typeof body !== "object") return err("Invalid body");

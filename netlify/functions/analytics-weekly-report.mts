@@ -22,7 +22,7 @@ function runtimeEnv(key: string): string {
   return netlify?.env?.get(key) ?? process.env[key] ?? "";
 }
 
-export default async (_req: Request): Promise<Response> => {
+export default async (): Promise<Response> => {
   // Opt-in: by default HAL (the NAS bot) fetches GET /api/analytics-report and delivers the report,
   // so sending from here too would duplicate it.
   if (runtimeEnv("ANALYTICS_REPORT_VIA_NETLIFY") !== "1") {

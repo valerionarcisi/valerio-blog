@@ -8,7 +8,7 @@ ordinate per scadenza. Alimentata da un file JSON rigenerato ogni giorno da un a
 - **Pagina**: `src/pages/admin/radar.astro` — route `/admin/radar`, `noindex`, self-contained
   (nessun layout condiviso, come le altre pagine admin). Tema Foglio (`foglio.css` +
   `admin-foglio.css`), accento terracotta.
-- **Dati**: `public/radar.json` — unica fonte, servita a `/radar.json`, letta client-side.
+- **Dati**: `src/data/radar.json` — unica fonte, servita da `GET /api/admin/radar` (protetta da sessione admin), letta dalla pagina.
 - **Ricerca**: `scripts/radar-update.mjs` — API Anthropic (Haiku + web search, via `fetch`) →
   riscrive `radar.json`. Fail-safe: non sovrascrive se la risposta non è valida.
 - **Notifica**: `scripts/radar-notify.ts` — diff deterministico degli `id` nuovi → DM Telegram.

@@ -89,6 +89,13 @@ beforeEach(async () => {
   seq = 0;
 });
 
+/** p75 is approximate across days by design; every other field must match exactly. */
+function withoutP75<T extends { p75?: unknown }>(v: T): Omit<T, "p75"> {
+  const copy = { ...v };
+  delete copy.p75;
+  return copy;
+}
+
 describe("daily_vitals rollup", () => {
   test("rollupDay stores exact buckets and p75 per scope/device/metric", async () => {
     await seed();
@@ -143,13 +150,13 @@ describe("computeVitals: rollup vs raw", () => {
     const raw = await computeVitals(db, { ...o, useRollup: false });
     expect(hybrid.available).toBe(true);
     for (const m of ["lcp", "inp", "cls"] as const) {
-      const { p75: _a, ...h } = hybrid[m];
-      const { p75: _b, ...r } = raw[m];
+      const h = withoutP75(hybrid[m]);
+      const r = withoutP75(raw[m]);
       expect(h).toEqual(r);
       expect(h.n).toBeGreaterThan(0);
       for (const dev of ["mobile", "desktop"]) {
-        const { p75: _c, ...hd } = hybrid.by_device[dev][m];
-        const { p75: _d, ...rd } = raw.by_device[dev][m];
+        const hd = withoutP75(hybrid.by_device[dev][m]);
+        const rd = withoutP75(raw.by_device[dev][m]);
         expect(hd).toEqual(rd);
       }
     }

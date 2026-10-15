@@ -18,7 +18,7 @@ function runtimeEnv(key: string): string {
   return netlify?.env?.get(key) ?? process.env[key] ?? "";
 }
 
-export default async (_req: Request): Promise<Response> => {
+export default async (): Promise<Response> => {
   const url = runtimeEnv("TURSO_DATABASE_URL");
   if (!url) {
     console.error("[analytics-rollup] TURSO_DATABASE_URL missing");
