@@ -4,7 +4,7 @@
   top: 0;
   left: 0;
   width: 180px;
-  height: 100vh;
+  height: 100dvh;
   background: var(--foglio-paper);
   border-right: 1px solid var(--foglio-rule);
   display: flex;
@@ -49,6 +49,8 @@
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sidebar-link:hover {
@@ -69,16 +71,13 @@
   font-size: 0.74rem;
 }
 
-.sidebar-label-short {
-  display: none;
-}
-
 body:has(.admin-sidebar) {
   padding-left: 196px !important;
 }
 
-/* ── Hamburger button (mobile only) ── */
-.admin-hamburger {
+/* ── Hamburger button + top bar (mobile only) ── */
+.admin-hamburger,
+.admin-topbar {
   display: none;
 }
 
@@ -98,6 +97,31 @@ body:has(.admin-sidebar) {
   body:has(.admin-sidebar) {
     padding-left: 1rem !important;
     padding-bottom: 1rem !important;
+    padding-top: 4.25rem !important;
+  }
+
+  .admin-topbar {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5rem;
+    padding: 0 1rem 0 4.1rem;
+    background: var(--foglio-paper);
+    border-bottom: 1px solid var(--foglio-rule);
+    z-index: 40;
+  }
+  .admin-topbar-title {
+    font-family: var(--foglio-mono);
+    font-size: var(--foglio-fs-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--foglio-ink-soft);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .admin-hamburger {
@@ -105,8 +129,8 @@ body:has(.admin-sidebar) {
     align-items: center;
     justify-content: center;
     position: fixed;
-    top: 0.85rem;
-    left: 0.85rem;
+    top: 0.375rem;
+    left: 0.75rem;
     z-index: 200;
     width: 44px;
     height: 44px;
@@ -145,19 +169,20 @@ body:has(.admin-sidebar) {
   .admin-sidebar {
     width: 230px;
     transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.28s;
+    visibility: hidden; /* closed menu is not focusable */
     z-index: 199;
     padding: 5rem 0.75rem 1.5rem;
   }
   .admin-sidebar.open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
   }
 
-  .sidebar-label-short { display: none; }
-  .sidebar-label-full { display: inline; }
-
   .sidebar-link {
-    padding: 0.6rem 0.75rem;
+    padding: 0.7rem 0.75rem;
+    min-height: 44px;
     font-size: 0.85rem;
   }
   .sidebar-link-sub {

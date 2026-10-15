@@ -18,6 +18,17 @@ if (!isAuthorized) {
 const measurements = rawData.measurements;
 const nutritionPlan = rawData.nutrition_plan;
 const sources = rawData.sources;
+
+// Ultima misurazione (data ISO), giorni trascorsi calcolati su Europe/Rome.
+const lastDate = measurements.map((m) => m.date).sort().at(-1);
+const todayRome = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+const daysAgo = lastDate
+  ? Math.max(0, Math.round((Date.parse(`${todayRome}T00:00:00Z`) - Date.parse(`${lastDate}T00:00:00Z`)) / 86400000))
+  : null;
+const lastLabel = lastDate
+  ? new Intl.DateTimeFormat("it-IT", { timeZone: "UTC", day: "numeric", month: "long", year: "numeric" }).format(new Date(`${lastDate}T00:00:00Z`))
+  : null;
+const isStale = daysAgo !== null && daysAgo > 21;
 ---
 
 <!doctype html>
@@ -28,7 +39,7 @@ const sources = rawData.sources;
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
     <title>Body Composition</title>
-    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { font-family: system-ui, -apple-system, sans-serif; background: var(--foglio-bg); color: var(--foglio-ink); padding: 1.5rem; min-height: 100vh; font-size: 1.05rem; }
@@ -61,8 +72,8 @@ const sources = rawData.sources;
       .chart-card:hover .chart-tooltip { display: block; }
       .stat-card .value { font-family: var(--foglio-mono); font-size: 1.4rem; color: var(--foglio-ink); font-weight: 700; }
       .stat-card .delta { font-size: 0.82rem; font-family: var(--foglio-mono); margin-top: 0.2rem; }
-      .delta.pos { color: #2ecc71; }
-      .delta.neg { color: #e74c3c; }
+      .delta.pos { color: var(--foglio-pos); }
+      .delta.neg { color: var(--foglio-neg); }
       .delta.neutral { color: var(--foglio-ink-soft); }
 
       .charts-grid {
@@ -146,8 +157,8 @@ const sources = rawData.sources;
       .tip-card .tip-icon svg { width: 1.4rem; height: 1.4rem; }
       .tip-card .tip-cat { font-size: 0.78rem; color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
       .tip-card .tip-text { font-size: 0.82rem; color: var(--foglio-ink); line-height: 1.5; }
-      .tip-card.wellness { border-left: 3px solid #2ecc71; }
-      .tip-card.consistency { border-left: 3px solid #f39c12; }
+      .tip-card.wellness { border-left: 3px solid var(--foglio-pos); }
+      .tip-card.consistency { border-left: 3px solid var(--foglio-warn); }
       .tip-card.meditation { border-left: 3px solid #9b59b6; }
 
       @media (max-width: 800px) {
@@ -166,6 +177,14 @@ const sources = rawData.sources;
     <AdminNav currentPage="body-comp" token={token} />
     <h1><em class="acc">Body Composition.</em></h1>
 
+    {lastLabel ? (
+      <p class:list={[isStale ? "state-warn" : "muted"]} role={isStale ? "status" : undefined} style="margin-bottom:1.25rem;">
+        Ultima misurazione: {lastLabel} ({daysAgo === 0 ? "oggi" : daysAgo === 1 ? "1 giorno fa" : `${daysAgo} giorni fa`}){isStale ? " — sono passate più di 3 settimane, valuta una nuova misurazione." : ""}
+      </p>
+    ) : (
+      <p class="state-empty" style="margin-bottom:1.25rem;">Nessuna misurazione disponibile.</p>
+    )}
+
     <div class="daily-tips" id="daily-tips"></div>
 
     <div class="source-legend">
@@ -183,7 +202,7 @@ const sources = rawData.sources;
       </div>
       <div class="chart-card">
         <h3>Body Fat %</h3>
-        <div class="chart-tooltip">Percentuale di massa grassa sul peso totale. Per un uomo adulto: <b style="color:#2ecc71">verde &lt;15%</b> atletico, <b style="color:#f1c40f">giallo 15-20%</b> normale, <b style="color:#e74c3c">rosso &gt;20%</b> da ridurre.</div>
+        <div class="chart-tooltip">Percentuale di massa grassa sul peso totale. Per un uomo adulto: <b style="color:var(--foglio-pos)">verde &lt;15%</b> atletico, <b style="color:var(--foglio-warn)">giallo 15-20%</b> normale, <b style="color:var(--foglio-neg)">rosso &gt;20%</b> da ridurre.</div>
         <div class="chart-wrap"><canvas id="bf-chart"></canvas></div>
       </div>
       <div class="chart-card">
@@ -193,7 +212,7 @@ const sources = rawData.sources;
       </div>
       <div class="chart-card">
         <h3>BMI</h3>
-        <div class="chart-tooltip">Indice di Massa Corporea (peso/altezza²). <b style="color:#3498db">&lt;18.5</b> sottopeso, <b style="color:#2ecc71">18.5-25</b> normopeso, <b style="color:#f1c40f">25-30</b> sovrappeso, <b style="color:#e74c3c">&gt;30</b> obeso. Non distingue tra massa grassa e magra.</div>
+        <div class="chart-tooltip">Indice di Massa Corporea (peso/altezza²). <b style="color:var(--foglio-info)">&lt;18.5</b> sottopeso, <b style="color:var(--foglio-pos)">18.5-25</b> normopeso, <b style="color:var(--foglio-warn)">25-30</b> sovrappeso, <b style="color:var(--foglio-neg)">&gt;30</b> obeso. Non distingue tra massa grassa e magra.</div>
         <div class="chart-wrap"><canvas id="bmi-chart"></canvas></div>
       </div>
       <div class="chart-card">

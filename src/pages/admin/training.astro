@@ -3,7 +3,9 @@ import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import ActivityHeatmap from "~/components/ActivityHeatmap.astro";
-import { fetchFullStats } from "~/services/strava";
+import StravaSummary from "~/components/StravaSummary.astro";
+import ActivityDonut from "~/components/ActivityDonut.astro";
+import { fetchFullStats, fetchRecentActivities } from "~/services/strava";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
@@ -16,8 +18,31 @@ if (!isAuthorized) {
   return new Response("Unauthorized", { status: 401 });
 }
 
-const fullStats = await fetchFullStats().catch(() => null);
-const heatmapDays = fullStats?.yearlyBreakdown ?? [];
+// Una sola fetch per richiesta, condivisa tra le due tab.
+const [fullStats, recentActivities] = await Promise.all([
+  fetchFullStats().catch((e) => {
+    console.error("[admin/training] fetchFullStats failed:", e);
+    return null;
+  }),
+  fetchRecentActivities(10).catch((e) => {
+    console.error("[admin/training] fetchRecentActivities failed:", e);
+    return [];
+  }),
+]);
+const stravaMissing = !fullStats;
+const heatmapDays = fullStats?.yearlyBreakdown ?? fullStats?.dailyBreakdown ?? [];
+
+const fmtPaceRun = (speed: number) => {
+  const secPerKm = 1000 / speed;
+  const m = Math.floor(secPerKm / 60);
+  const s = Math.round(secPerKm % 60);
+  return `${m}:${String(s).padStart(2, "0")}/km`;
+};
+const sportColor = (t: string) =>
+  t === "Run" ? "var(--foglio-accent)"
+  : t === "WeightTraining" ? "var(--foglio-accent-soft)"
+  : t === "Ride" || t === "VirtualRide" ? "var(--foglio-info)"
+  : "var(--foglio-ink-mute)";
 ---
 
 <!doctype html>
@@ -26,6 +51,7 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
     <title>Allenamento</title>
     <style is:global>
       .foglio body.admin .week-stats {
@@ -43,9 +69,9 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
       .foglio body.admin .load-bar-bg { flex: 1; height: 4px; background: var(--foglio-rule); border-radius: 2px; }
       .foglio body.admin .load-bar-fill { height: 4px; border-radius: 2px; transition: width 0.5s; }
       .foglio body.admin .load-badge { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 20px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.1em; }
-      .foglio body.admin .load-light  { background: rgba(46, 204, 113, 0.12); color: #2e8b57; }
+      .foglio body.admin .load-light  { background: color-mix(in srgb, var(--foglio-pos) 14%, transparent); color: var(--foglio-pos); }
       .foglio body.admin .load-normal { background: rgba(168, 69, 26, 0.12); color: var(--foglio-accent); }
-      .foglio body.admin .load-heavy  { background: rgba(231, 76, 60, 0.15); color: #c0392b; }
+      .foglio body.admin .load-heavy  { background: color-mix(in srgb, var(--foglio-neg) 15%, transparent); color: var(--foglio-neg); }
 
       .foglio body.admin .suggestion-card {
         background: var(--foglio-paper);
@@ -97,6 +123,12 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
       .foglio body.admin .activity-meta .pace { color: var(--foglio-accent); }
       .foglio body.admin .activity-date { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-mute); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.08em; }
 
+      .foglio body.admin .strava-top { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+      @media (min-width: 768px) { .foglio body.admin .strava-top { grid-template-columns: 1.4fr 1fr; align-items: start; } }
+      .foglio body.admin .tab-bar { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; }
+      .foglio body.admin .tab-bar [role="tab"] { min-height: 44px; min-width: 44px; }
+      .foglio body.admin [role="tabpanel"][hidden] { display: none; }
+
       @media (max-width: 768px) {
         .foglio body.admin .week-stats { grid-template-columns: repeat(2, 1fr); }
         .foglio body.admin .chart-label { display: none; }
@@ -110,16 +142,116 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
     <h1><em class="acc">Allenamento.</em></h1>
     <p class="subtitle">Monitoraggio settimanale e suggerimento smart per il weekend</p>
 
-    <div id="content">
-      <div class="loading">Carico dati Strava…</div>
+    <div class="tab-bar" role="tablist" aria-label="Sezioni allenamento">
+      <button class="tab active" role="tab" id="tab-settimana" aria-controls="panel-settimana" aria-selected="true" data-tab="settimana">Settimana</button>
+      <button class="tab" role="tab" id="tab-attivita" aria-controls="panel-attivita" aria-selected="false" tabindex="-1" data-tab="attivita">Attività</button>
     </div>
 
-    {heatmapDays.length > 0 && (
-      <div class="section">
-        <ActivityHeatmap days={heatmapDays} title="Attività ultimi 365 giorni" />
+    <div role="tabpanel" id="panel-settimana" aria-labelledby="tab-settimana" tabindex="0">
+      <div id="content">
+        <div class="loading">Carico dati Strava…</div>
       </div>
-    )}
+    </div>
 
+    <div role="tabpanel" id="panel-attivita" aria-labelledby="tab-attivita" tabindex="0" hidden>
+      {stravaMissing && (
+        <div class="state-error" role="alert">Impossibile caricare i dati Strava: sintesi, grafico e heatmap non disponibili.</div>
+      )}
+
+      {fullStats && (
+        <>
+          <div class="section">
+            <div class="section-title">Sintesi</div>
+            <div class="strava-top">
+              <StravaSummary stats={fullStats.periodStats} />
+              <ActivityDonut
+                distribution={fullStats.typeDistribution}
+                totalActivities={fullStats.periodStats.monthly.totalActivities}
+              />
+            </div>
+          </div>
+
+          {heatmapDays.length > 0 && (
+            <div class="section">
+              <ActivityHeatmap days={heatmapDays} title="Heatmap annuale" />
+            </div>
+          )}
+        </>
+      )}
+
+      {recentActivities.length > 0 ? (
+        <div class="section">
+          <div class="section-title">Attività recenti</div>
+          <div class="activity-list">
+            {recentActivities.map((a) => {
+              const km = a.distance > 0 ? (a.distance / 1000).toFixed(1) + " km" : "";
+              const pace = a.averageSpeed > 0 && a.sportType === "Run" ? fmtPaceRun(a.averageSpeed) : "";
+              const elev = a.elevation > 10 ? `↑${Math.round(a.elevation)}m` : "";
+              const hours = Math.floor(a.movingTime / 3600);
+              const mins = Math.floor((a.movingTime % 3600) / 60);
+              const dur = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+              const dateLabel = new Date(a.date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+              return (
+                <a href={a.url} target="_blank" rel="noopener" class="activity-row">
+                  <div class="activity-dot" style={`background:${sportColor(a.sportType)}`}></div>
+                  <div class="activity-name">{a.name}</div>
+                  <div class="activity-meta">
+                    {km && <span>{km}</span>}
+                    {pace && <span class="pace">{pace}</span>}
+                    {elev && <span>{elev}</span>}
+                    <span>{dur}</span>
+                  </div>
+                  <div class="activity-date">{dateLabel}</div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        !stravaMissing && <div class="state-empty">Nessuna attività recente.</div>
+      )}
+    </div>
+
+    <script is:inline>
+      (function () {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab-bar [role="tab"]'));
+        function show(name, focus) {
+          tabs.forEach(function (t) {
+            var on = t.dataset.tab === name;
+            t.classList.toggle('active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.setAttribute('tabindex', on ? '0' : '-1');
+            document.getElementById('panel-' + t.dataset.tab).hidden = !on;
+            if (on && focus) t.focus();
+          });
+        }
+        function fromHash() {
+          var h = location.hash.replace('#', '');
+          show(h === 'attivita' ? 'attivita' : 'settimana', false);
+        }
+        tabs.forEach(function (t, i) {
+          t.addEventListener('click', function () {
+            show(t.dataset.tab, false);
+            history.replaceState(null, '', '#' + t.dataset.tab);
+          });
+          t.addEventListener('keydown', function (e) {
+            var n = -1;
+            if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') n = 0;
+            else if (e.key === 'End') n = tabs.length - 1;
+            if (n < 0) return;
+            e.preventDefault();
+            show(tabs[n].dataset.tab, true);
+            history.replaceState(null, '', '#' + tabs[n].dataset.tab);
+          });
+        });
+        window.addEventListener('hashchange', fromHash);
+        fromHash();
+      })();
+    </script>
+
+    <script is:inline src="/admin/admin-client.js"></script>
     <script is:inline define:vars={{ token }}>
       const ADMIN_TOKEN = token;
       const API = '/api/training';
@@ -154,7 +286,7 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
       }
 
       function computeReadiness(data) {
-        const { currentWeekActivities, last4WeeklyKm, weekendLongRuns, last12WeeklyElevation } = data;
+        const { currentWeekActivities, last4WeeklyKm, weekendLongRuns } = data;
 
         const weekRuns = currentWeekActivities.filter(a => a.sportType === 'Run');
         const weekKm = weekRuns.reduce((s, a) => s + a.distance, 0) / 1000;
@@ -296,7 +428,7 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
         const loadRatio = ctx.avgKm4w > 0 ? ctx.weekKm / ctx.avgKm4w : 0.8;
         const lc = loadClass(loadRatio);
         const barW = Math.min(100, Math.round(loadRatio * 80));
-        const barColor = lc === 'light' ? '#2e8b57' : lc === 'normal' ? 'var(--foglio-accent)' : '#c0392b';
+        const barColor = lc === 'light' ? 'var(--foglio-pos)' : lc === 'normal' ? 'var(--foglio-accent)' : 'var(--foglio-neg)';
 
         const bestWeather = getWeekendWeather(weather);
         const suggestDay = bestWeather
@@ -332,7 +464,7 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
           return `<div class="chart-bar-wrap">
             <div class="chart-km">${km > 0 ? km.toFixed(0) : ''}</div>
             <div class="chart-bar${isCurrent ? ' current' : ''}" style="height:${h}%"></div>
-            <div class="chart-label">${w.weekLabel}</div>
+            <div class="chart-label">${escapeHtml(w.weekLabel)}</div>
           </div>`;
         }).join('');
 
@@ -341,9 +473,9 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
           const pace = a.sportType === 'Run' ? fmtPace(a.averageSpeed) : '';
           const km = a.distance > 0 ? fmtDist(a.distance) : '';
           const elev = a.elevation > 10 ? ' ↑' + Math.round(a.elevation) + 'm' : '';
-          return `<a href="${a.url}" target="_blank" rel="noopener" class="activity-row">
+          return `<a href="${escapeHtml(/^https?:\/\//.test(String(a.url)) ? a.url : '#')}" target="_blank" rel="noopener" class="activity-row">
             <div class="activity-dot" style="background:${color}"></div>
-            <div class="activity-name">${a.name}</div>
+            <div class="activity-name">${escapeHtml(a.name)}</div>
             <div class="activity-meta">
               ${km ? '<span>' + km + '</span>' : ''}
               ${pace ? '<span class="pace">' + pace + '</span>' : ''}
@@ -427,7 +559,7 @@ const heatmapDays = fullStats?.yearlyBreakdown ?? [];
           const data = await res.json();
           document.getElementById('content').innerHTML = buildContent(data);
         } catch (e) {
-          document.getElementById('content').innerHTML = '<div class="loading" style="color:#c0392b">Errore caricamento dati: ' + e.message + '</div>';
+          document.getElementById('content').innerHTML = '<div class="loading" style="color:var(--foglio-neg)">Errore caricamento dati: ' + escapeHtml(e.message) + '</div>';
         }
       }
 

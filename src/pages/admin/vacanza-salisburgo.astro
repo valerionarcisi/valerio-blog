@@ -1,8 +1,0 @@
----
-export const prerender = false;
-
-// Variante Salisburgo scartata: si reindirizza al piano definitivo a 3 basi.
-const token = Astro.url.searchParams.get("token") ?? "";
-const dest = `/admin/vacanza${token ? `?token=${encodeURIComponent(token)}` : ""}`;
-return Astro.redirect(dest, 302);
----

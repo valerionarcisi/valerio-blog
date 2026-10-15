@@ -179,10 +179,93 @@ if (!isAuthorized) {
       </section>
     </div>
 
+    <script is:inline src="/admin/admin-client.js"></script>
     <script is:inline define:vars={{ token }}>
       var ADMIN_TOKEN = token;
+      setAdminToken(token);
       try { localStorage.setItem("vbAdminToken", token); } catch (e) {}
       var currentStatus = "pending";
+
+      function el(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+      }
+
+      function td(cls) { return el("td", cls || null); }
+
+      function pageLink(pageId) {
+        var url = safePagePath(pageId);
+        if (!url) return el("span", "post-link", String(pageId == null ? "" : pageId));
+        var a = el("a", "post-link", String(pageId));
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        return a;
+      }
+
+      function actionBtn(cls, label, handler) {
+        var b = el("button", "btn " + cls, label);
+        b.addEventListener("click", handler);
+        return b;
+      }
+
+      function showError(msg) {
+        var n = document.getElementById("empty-msg");
+        n.textContent = msg;
+        n.style.display = "block";
+      }
+
+      var HEART_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5c-1.936 0-3.598 1.126-4.313 2.733c-.715-1.607-2.377-2.733-4.312-2.733C5.098 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12"/></svg>';
+
+      function commentRow(c, status) {
+        var tr = el("tr");
+        var children = Number(c.children_count || 0);
+
+        var tdPage = td("page-id");
+        tdPage.appendChild(pageLink(c.page_id));
+        if (c.parent_id != null) {
+          tdPage.appendChild(el("span", "reply-indicator", "\u21b3 in risposta a #" + Number(c.parent_id) + " (" + (c.parent_name || "?") + ")"));
+        }
+        tr.appendChild(tdPage);
+
+        var tdName = td();
+        tdName.appendChild(document.createTextNode(String(c.name == null ? "" : c.name)));
+        if (c.is_author) tdName.appendChild(el("span", "author-badge", "Author"));
+        if (children > 0) tdName.appendChild(el("span", "has-children", "+" + children + " replies"));
+        tr.appendChild(tdName);
+
+        tr.appendChild(el("td", "email", String(c.email == null ? "" : c.email)));
+
+        var tdText = el("td", "text-cell", String(c.text == null ? "" : c.text));
+        tdText.title = String(c.text == null ? "" : c.text);
+        tr.appendChild(tdText);
+
+        var tdLikes = td();
+        var likes = el("span", "likes-cell");
+        var icon = el("span", "likes-icon");
+        icon.innerHTML = HEART_SVG;
+        likes.appendChild(icon);
+        likes.appendChild(document.createTextNode(String(Number(c.likes_count || 0))));
+        tdLikes.appendChild(likes);
+        tr.appendChild(tdLikes);
+
+        var d = parseDbDate(c.created_at);
+        tr.appendChild(el("td", null, isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-US")));
+
+        var tdAct = td("actions");
+        var id = Number(c.id);
+        if (status === "pending") {
+          tdAct.appendChild(actionBtn("btn-approve", "Approve", function () { window.doAction(id, "approve"); }));
+        }
+        tdAct.appendChild(actionBtn("btn-delete", "Delete", function () {
+          if (children > 0) window.doActionConfirm(id, "delete", children);
+          else window.doAction(id, "delete");
+        }));
+        tr.appendChild(tdAct);
+        return tr;
+      }
 
       function loadComments(status) {
         currentStatus = status;
@@ -190,62 +273,38 @@ if (!isAuthorized) {
           btn.classList.toggle("active", btn.dataset.status === status);
         });
 
-        fetch("/api/admin/comments?status=" + status, { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } })
-          .then(function (r) { return r.json(); })
+        apiJson("/api/admin/comments?status=" + encodeURIComponent(status))
           .then(function (comments) {
+            if (!Array.isArray(comments)) throw new Error("Unexpected response");
             var tbody = document.getElementById("comments-body");
             var emptyMsg = document.getElementById("empty-msg");
             document.querySelector(".count").textContent = comments.length + " comment(s)";
+            tbody.textContent = "";
 
             if (!comments.length) {
-              tbody.innerHTML = "";
               emptyMsg.style.display = "block";
               return;
             }
             emptyMsg.style.display = "none";
-            tbody.innerHTML = comments.map(function (c) {
-              var d = new Date(c.created_at).toLocaleDateString("en-US");
-              var hasChildren = Number(c.children_count || 0) > 0;
-              var deleteHandler = hasChildren
-                ? 'doActionConfirm(' + c.id + ',\'delete\',' + Number(c.children_count) + ')'
-                : 'doAction(' + c.id + ',\'delete\')';
-              var actions = status === "pending"
-                ? '<button class="btn btn-approve" onclick="doAction(' + c.id + ',\'approve\')">Approve</button>'
-                : "";
-              actions += '<button class="btn btn-delete" onclick="' + deleteHandler + '">Delete</button>';
-              var replyIndicator = c.parent_id != null
-                ? '<span class="reply-indicator">↳ in risposta a #' + c.parent_id + ' (' + escapeHtml(c.parent_name || "?") + ')</span>'
-                : '';
-              var childrenBadge = hasChildren
-                ? '<span class="has-children">+' + Number(c.children_count) + ' replies</span>'
-                : '';
-              var authorBadge = c.is_author
-                ? '<span class="author-badge">Author</span>'
-                : '';
-              var commentUrl = '/' + String(c.page_id || '').replace(/^\/+/, '').replace(/\/+$/, '') + '/';
-              return '<tr>' +
-                '<td class="page-id"><a href="' + commentUrl + '" target="_blank" rel="noopener" class="post-link">' + escapeHtml(c.page_id) + '</a>' + replyIndicator + '</td>' +
-                '<td>' + escapeHtml(c.name) + authorBadge + childrenBadge + '</td>' +
-                '<td class="email">' + escapeHtml(c.email) + '</td>' +
-                '<td class="text-cell" title="' + escapeHtml(c.text) + '">' + escapeHtml(c.text) + '</td>' +
-                '<td><span class="likes-cell"><span class="likes-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8.25c0-2.485-2.099-4.5-4.687-4.5c-1.936 0-3.598 1.126-4.313 2.733c-.715-1.607-2.377-2.733-4.312-2.733C5.098 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12"/></svg></span>' + Number(c.likes_count || 0) + '</span></td>' +
-                '<td>' + d + '</td>' +
-                '<td class="actions">' + actions + '</td>' +
-                '</tr>';
-            }).join("");
+            comments.forEach(function (c) { tbody.appendChild(commentRow(c, status)); });
+          })
+          .catch(function (err) {
+            console.error("loadComments failed", err);
+            document.getElementById("comments-body").textContent = "";
+            showError("Failed to load comments (" + err.message + ").");
           });
       }
 
       window.doAction = function (id, action) {
-        fetch("/api/admin/comments", {
+        apiFetch("/api/admin/comments", {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + ADMIN_TOKEN,
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id: id, action: action }),
         }).then(function () {
           loadComments(currentStatus);
+        }).catch(function (err) {
+          console.error("doAction failed", err);
+          alert("Action failed: " + err.message);
         });
       };
 
@@ -256,12 +315,6 @@ if (!isAuthorized) {
         }
       };
 
-      function escapeHtml(str) {
-        var div = document.createElement("div");
-        div.appendChild(document.createTextNode(str));
-        return div.innerHTML;
-      }
-
       document.querySelectorAll(".tabs button").forEach(function (btn) {
         btn.addEventListener("click", function () {
           loadComments(btn.dataset.status);
@@ -269,39 +322,38 @@ if (!isAuthorized) {
       });
 
       function loadClaps() {
-        fetch("/api/admin/claps", { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } })
-          .then(function (r) { return r.json(); })
+        apiJson("/api/admin/claps")
           .then(function (data) {
             var totalsEl = document.getElementById("claps-totals");
             var tbody = document.getElementById("claps-body");
             var emptyEl = document.getElementById("claps-empty");
+            data = data || {};
             var totals = data.totals || {};
-            var total = Number(totals.total || 0);
-            var posts = Number(totals.posts || 0);
-            var uniques = Number(totals.unique_clappers || 0);
             totalsEl.innerHTML =
-              "<strong>" + total + "</strong> total claps · " +
-              "<strong>" + posts + "</strong> posts · " +
-              "<strong>" + uniques + "</strong> unique visitors";
+              "<strong>" + Number(totals.total || 0) + "</strong> total claps · " +
+              "<strong>" + Number(totals.posts || 0) + "</strong> posts · " +
+              "<strong>" + Number(totals.unique_clappers || 0) + "</strong> unique visitors";
             var rows = data.per_post || [];
+            tbody.textContent = "";
             if (!rows.length) {
-              tbody.innerHTML = "";
               emptyEl.style.display = "block";
               return;
             }
             emptyEl.style.display = "none";
-            tbody.innerHTML = rows.map(function (r) {
-              var last = r.last_clap_at ? new Date(r.last_clap_at).toLocaleString("en-US") : "—";
-              var url = '/' + r.post_id.replace(/^\/+/, '').replace(/\/+$/, '') + '/';
-              return '<tr>' +
-                '<td class="page-id"><a href="' + url + '" target="_blank" rel="noopener" class="post-link">' + escapeHtml(r.post_id) + '</a></td>' +
-                '<td class="clap-count">' + Number(r.total_claps) + '</td>' +
-                '<td class="unique-count">' + Number(r.unique_clappers) + '</td>' +
-                '<td>' + escapeHtml(last) + '</td>' +
-                '</tr>';
-            }).join("");
+            rows.forEach(function (r) {
+              var tr = el("tr");
+              var tdP = td("page-id");
+              tdP.appendChild(pageLink(r.post_id));
+              tr.appendChild(tdP);
+              tr.appendChild(el("td", "clap-count", String(Number(r.total_claps))));
+              tr.appendChild(el("td", "unique-count", String(Number(r.unique_clappers))));
+              var last = r.last_clap_at ? parseDbDate(r.last_clap_at).toLocaleString("en-US") : "\u2014";
+              tr.appendChild(el("td", null, last));
+              tbody.appendChild(tr);
+            });
           })
-          .catch(function () {
+          .catch(function (err) {
+            console.error("loadClaps failed", err);
             document.getElementById("claps-totals").textContent = "Failed to load claps.";
           });
       }

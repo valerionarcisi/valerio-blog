@@ -760,26 +760,37 @@ if (!isAuthorized) {
 
     </div>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
-    <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous" />
+    <script is:inline src="/admin/admin-client.js"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha384-u5N8qJeJOO2iqNjIKTdl6KeKsEikMAmCUBPc6sC6uGpgL34aPJ4VgNhuhumedpEk" crossorigin="anonymous"></script>
+    <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
     <script is:inline define:vars={{ token }}>
       var ADMIN_TOKEN = token;
+      setAdminToken(ADMIN_TOKEN);
       var AUTH_HEADERS = { "Authorization": "Bearer " + ADMIN_TOKEN };
       var chartInstance = null;
 
-      var FOGLIO_ACCENT = "#a8451a";
-      var FOGLIO_ACCENT_SOFT = "#c8714a";
-      var FOGLIO_PAPER = "#fbf7ee";
-      var FOGLIO_PAPER_2 = "#f1ebdd";
-      var FOGLIO_INK = "#221a12";
-      var FOGLIO_INK_SOFT = "#5e4d3a";
-      var FOGLIO_RULE = "#d8cebd";
-      var CYAN = "#00b4a6";
+      function cssVar(name, fallback) {
+        var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        return v || fallback;
+      }
+      var FOGLIO_ACCENT = cssVar("--foglio-accent", "#a8451a");
+      var FOGLIO_ACCENT_SOFT = cssVar("--foglio-accent-soft", "#c8714a");
+      var FOGLIO_PAPER = cssVar("--foglio-paper", "#fbf7ee");
+      var FOGLIO_PAPER_2 = cssVar("--foglio-paper-2", "#f1ebdd");
+      var FOGLIO_INK = cssVar("--foglio-ink", "#221a12");
+      var FOGLIO_INK_SOFT = cssVar("--foglio-ink-soft", "#5e4d3a");
+      var FOGLIO_RULE = cssVar("--foglio-rule", "#d8cebd");
+      var CYAN = cssVar("--ax-cyan", "#00b4a6");
+      function withAlpha(hex, a) {
+        var m = /^#?([0-9a-f]{6})$/i.exec(hex);
+        if (!m) return hex;
+        var n = parseInt(m[1], 16);
+        return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
+      }
 
       function fmt(n) { n = Number(n) || 0; return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
       function fmtTime(s) { s = Number(s) || 0; return s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s"; }
-      function escapeHtml(s) { var d = document.createElement("div"); d.appendChild(document.createTextNode(String(s))); return d.innerHTML; }
 
       var DAYS_SHORT = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
       var MONTHS_SHORT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
@@ -796,7 +807,8 @@ if (!isAuthorized) {
         var d = new Date(dateStr + "T00:00:00");
         return DAYS_SHORT[d.getDay()] + " " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();
       }
-      function dateStr(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+      // UTC, to match src/lib/date-range.ts (isoDate)
+      function dateStr(d) { return d.toISOString().slice(0, 10); }
 
       function fmtCalDate(iso) { var d = new Date(iso + "T00:00:00"); return d.getDate() + " " + MONTHS_SHORT[d.getMonth()]; }
       function fmtCalDateFull(iso) { var d = new Date(iso + "T00:00:00"); return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear(); }
@@ -811,7 +823,7 @@ if (!isAuthorized) {
       function renderListRows(rows, keyField, valueField, isPath, ulId, emptyMsg) {
         var ul = document.getElementById(ulId);
         if (!ul) return;
-        if (!rows || !rows.length) { ul.innerHTML = '<li class="ax-empty">' + (emptyMsg || "Nessun dato.") + '</li>'; return; }
+        if (!rows || !rows.length) { ul.innerHTML = '<li class="ax-empty">' + escapeHtml(emptyMsg || "Nessun dato.") + '</li>'; return; }
         var max = Number(rows[0][valueField]) || 1;
         ul.innerHTML = rows.map(function(r) {
           var key = r[keyField] != null && r[keyField] !== "" ? r[keyField] : "(diretto)";
@@ -847,7 +859,7 @@ if (!isAuthorized) {
       function deviceIcon(t) { return t === "mobile" ? "📱" : t === "tablet" ? "📋" : "💻"; }
 
       function timeAgo(dateStr) {
-        var diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+        var diff = Math.floor((new Date() - parseDbDate(dateStr)) / 1000);
         if (diff < 60) return "ora";
         if (diff < 3600) return Math.floor(diff / 60) + "m";
         if (diff < 86400) return Math.floor(diff / 3600) + "h";
@@ -899,8 +911,9 @@ if (!isAuthorized) {
         var btn = document.getElementById("flag-all-bots");
         btn.disabled = true; btn.textContent = "Flagging…";
         fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ hashes: hashes }) })
-          .then(function(r) { return r.json(); })
-          .then(function(d) { btn.textContent = d.flagged + " flaggati"; });
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+          .then(function(d) { btn.textContent = d.flagged + " flaggati"; })
+          .catch(function(e) { console.error("flagAllBots failed", e); btn.disabled = false; btn.textContent = "Errore"; });
       }
 
       function renderRecentVisitors(visitors) {
@@ -927,7 +940,7 @@ if (!isAuthorized) {
           var os = escapeHtml(v.os || "?");
           var ref = v.referrer ? escapeHtml(v.referrer) : "";
           var time = v.time_on_page != null ? fmtTime(Number(v.time_on_page)) : "";
-          var scroll = v.scroll_depth != null ? v.scroll_depth + "%" : "";
+          var scroll = v.scroll_depth != null ? Number(v.scroll_depth) + "%" : "";
           var ago = timeAgo(v.created_at);
           var hash = v.visitor_hash || "";
 
@@ -936,7 +949,7 @@ if (!isAuthorized) {
           if (time) metaParts.push("⏱ " + time);
           if (scroll) metaParts.push("↓ " + scroll);
 
-          var botBtn = hash ? '<button class="ax-bot" onclick="flagAsBot(\'' + escapeHtml(hash) + '\', this)" title="Flag come bot">🤖</button>' : '';
+          var botBtn = hash ? '<button class="ax-bot" data-hash="' + escapeHtml(hash) + '" title="Flag come bot">🤖</button>' : '';
           var noTime = v.time_on_page == null || Number(v.time_on_page) <= 5;
           var noScroll = v.scroll_depth == null || Number(v.scroll_depth) === 0;
           var suspect = (noTime && noScroll && hash) ? ' suspect' : '';
@@ -948,6 +961,9 @@ if (!isAuthorized) {
             botBtn +
             '</li>';
         }).join("");
+        ul.querySelectorAll("button.ax-bot").forEach(function(b) {
+          b.onclick = function() { flagAsBot(b.dataset.hash, b); };
+        });
       }
 
       /* Map */
@@ -1051,7 +1067,7 @@ if (!isAuthorized) {
         }
 
         if (_topoCache) applyGeo(_topoCache);
-        else fetch(GEOJSON_URL).then(function(r) { return r.json(); }).then(function(d) { _topoCache = d; applyGeo(d); }).catch(function() {});
+        else fetch(GEOJSON_URL).then(function(r) { return r.json(); }).then(function(d) { _topoCache = d; applyGeo(d); }).catch(function(e) { console.error("world map load failed", e); });
       }
 
       /* Period state */
@@ -1152,15 +1168,15 @@ if (!isAuthorized) {
 
             if (chartInstance) chartInstance.destroy();
             var ctx = document.getElementById("chart").getContext("2d");
-            var axisColor = "rgba(34,26,18,0.75)";
-            var gridColor = "rgba(34,26,18,0.12)";
+            var axisColor = withAlpha(FOGLIO_INK, 0.75);
+            var gridColor = withAlpha(FOGLIO_INK, 0.12);
             chartInstance = new Chart(ctx, {
               type: "line",
               data: {
                 labels: labels,
                 datasets: [
-                  { label: "Pageviews", data: pvData, borderColor: FOGLIO_ACCENT, backgroundColor: "rgba(168,69,26,0.14)", fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 7, pointBackgroundColor: FOGLIO_ACCENT, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3 },
-                  { label: "Visitatori", data: vData, borderColor: CYAN, backgroundColor: "rgba(0,180,166,0.08)", fill: true, tension: 0.35, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: CYAN, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3, borderDash: [6, 4] }
+                  { label: "Pageviews", data: pvData, borderColor: FOGLIO_ACCENT, backgroundColor: withAlpha(FOGLIO_ACCENT, 0.14), fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 7, pointBackgroundColor: FOGLIO_ACCENT, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3 },
+                  { label: "Visitatori", data: vData, borderColor: CYAN, backgroundColor: withAlpha(CYAN, 0.08), fill: true, tension: 0.35, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: CYAN, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3, borderDash: [6, 4] }
                 ]
               },
               options: {
@@ -1204,20 +1220,20 @@ if (!isAuthorized) {
 
       function loadLive() {
         fetch("/api/stats/live", { headers: AUTH_HEADERS })
-          .then(function(r) { return r.json(); })
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) { document.getElementById("live-count").textContent = d.active; })
-          .catch(function() {});
+          .catch(function(e) { console.error("loadLive failed", e); });
       }
 
       function pollRecent() {
         if (document.hidden) return;
         if (currentPeriod !== "today") return;
         fetch("/api/stats?period=today", { headers: AUTH_HEADERS })
-          .then(function(r) { return r.json(); })
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             if (d && d.recent_visitors) renderRecentVisitors(d.recent_visitors);
           })
-          .catch(function() {});
+          .catch(function(e) { console.error("pollRecent failed", e); });
       }
 
       document.querySelectorAll(".ax-periods button").forEach(function(b) {
@@ -1242,40 +1258,40 @@ if (!isAuthorized) {
         var orig = btn.textContent;
         btn.disabled = true; btn.textContent = "Annullamento…";
         fetch("/api/admin/bot?_=" + Date.now(), { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ all: true }) })
-          .then(function(r) { return r.json(); })
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.disabled = false;
             btn.textContent = d.unflagged > 0 ? d.unflagged + " annullati" : "Nessuno da annullare";
             setTimeout(function() { btn.textContent = orig; }, 3000);
             loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : ""));
           })
-          .catch(function() { btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 3000); });
+          .catch(function(e) { console.error("unflag failed", e); btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 3000); });
       });
       document.getElementById("unflag-recent").addEventListener("click", function() {
         var btn = document.getElementById("unflag-recent");
         var orig = btn.textContent;
         btn.disabled = true; btn.textContent = "Annullamento…";
         fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ recentMinutes: 1440 }) })
-          .then(function(r) { return r.json(); })
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.disabled = false;
             btn.textContent = d.unflagged > 0 ? d.unflagged + " annullati" : "Nessuno da annullare";
             setTimeout(function() { btn.textContent = orig; }, 2500);
             loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : ""));
           })
-          .catch(function() { btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 2500); });
+          .catch(function(e) { console.error("unflag failed", e); btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 2500); });
       });
       document.getElementById("flag-suspects-btn").addEventListener("click", function() {
         var btn = document.getElementById("flag-suspects-btn");
         if (!currentFrom || !currentTo) return;
         btn.disabled = true; btn.textContent = "Flagging…";
         fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo }) })
-          .then(function(r) { return r.json(); })
+          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.textContent = d.flagged + " flaggati";
             setTimeout(function() { loadData("custom&from=" + currentFrom + "&to=" + currentTo); }, 800);
           })
-          .catch(function() { btn.textContent = "Errore"; });
+          .catch(function(e) { console.error("flag suspects failed", e); btn.textContent = "Errore"; });
       });
       document.getElementById("cal-label").addEventListener("click", function() {
         document.getElementById("date-range").classList.toggle("open");
@@ -1287,8 +1303,10 @@ if (!isAuthorized) {
 
       loadData("today");
       loadLive();
-      setInterval(loadLive, 30000);
+      function visibleTick(fn) { return function() { if (!document.hidden) fn(); }; }
+      setInterval(visibleTick(loadLive), 30000);
       setInterval(pollRecent, 30000);
+      document.addEventListener("visibilitychange", function() { if (!document.hidden) { loadLive(); pollRecent(); } });
     </script>
   </body>
 </html>

@@ -22,6 +22,10 @@
   --foglio-accent-soft: #c8714a;
   --foglio-shadow: 0 8px 18px -10px rgba(34, 26, 18, 0.18);
   --foglio-shadow-strong: 0 14px 28px -12px rgba(34, 26, 18, 0.28);
+  --foglio-pos: #1f6b3f;
+  --foglio-neg: #a52a1e;
+  --foglio-info: #1d5a8a;
+  --foglio-warn: #8a5a00;
 
   /* Type stack */
   --foglio-serif: "EB Garamond", "Iowan Old Style", Georgia, serif;
@@ -36,7 +40,7 @@
   --foglio-radius-lg: 8px;
 
   /* Fluid type scale — clamp(min, fluid, max) tuned for 360px → 1280px viewport */
-  --foglio-fs-mono: clamp(0.66rem, 0.62rem + 0.18vw, 0.78rem);
+  --foglio-fs-mono: clamp(0.72rem, 0.68rem + 0.18vw, 0.8rem);
   --foglio-fs-xs:   clamp(0.82rem, 0.78rem + 0.22vw, 0.95rem);
   --foglio-fs-sm:   clamp(0.92rem, 0.85rem + 0.32vw, 1.05rem);
   --foglio-fs-base: clamp(1rem,    0.92rem + 0.4vw,  1.18rem);
@@ -64,6 +68,10 @@
     --foglio-accent-soft: #b86a3a;
     --foglio-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
     --foglio-shadow-strong: 0 14px 28px -12px rgba(0, 0, 0, 0.55);
+    --foglio-pos: #6cc58f;
+    --foglio-neg: #f08a7c;
+    --foglio-info: #7ab8ea;
+    --foglio-warn: #e3b653;
   }
 }
 
@@ -81,6 +89,10 @@ html[data-theme="dark"] {
   --foglio-accent-soft: #b86a3a;
   --foglio-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
   --foglio-shadow-strong: 0 14px 28px -12px rgba(0, 0, 0, 0.55);
+  --foglio-pos: #6cc58f;
+  --foglio-neg: #f08a7c;
+  --foglio-info: #7ab8ea;
+  --foglio-warn: #e3b653;
 }
 html[data-theme="light"] {
   --foglio-bg: #f6f1e8;
@@ -95,6 +107,10 @@ html[data-theme="light"] {
   --foglio-accent-soft: #c8714a;
   --foglio-shadow: 0 8px 18px -10px rgba(34, 26, 18, 0.18);
   --foglio-shadow-strong: 0 14px 28px -12px rgba(34, 26, 18, 0.28);
+  --foglio-pos: #1f6b3f;
+  --foglio-neg: #a52a1e;
+  --foglio-info: #1d5a8a;
+  --foglio-warn: #8a5a00;
 }
 
 /* Base body scope — applied via .foglio class on html */
@@ -329,7 +345,10 @@ html.foglio,
 .foglio button:focus-visible,
 .foglio summary:focus-visible,
 .foglio input:focus-visible,
-.foglio textarea:focus-visible {
+.foglio textarea:focus-visible,
+.foglio select:focus-visible,
+.foglio [role="tab"]:focus-visible,
+.foglio [tabindex]:focus-visible {
   outline: 2px solid var(--foglio-accent);
   outline-offset: 2px;
   border-radius: 2px;

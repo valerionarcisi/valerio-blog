@@ -12,7 +12,7 @@
   color: var(--foglio-ink);
   font-family: var(--foglio-sans);
   padding: 1.5rem;
-  min-height: 100vh;
+  min-height: 100dvh;
   font-size: 17px;
 }
 
@@ -138,7 +138,6 @@
 .foglio body.admin input:focus,
 .foglio body.admin textarea:focus,
 .foglio body.admin select:focus {
-  outline: none;
   border-color: var(--foglio-accent);
 }
 
@@ -179,3 +178,59 @@
 /* Generic accent text — use sparingly */
 .foglio body.admin .accent { color: var(--foglio-accent); }
 .foglio body.admin .muted  { color: var(--foglio-ink-soft); }
+
+/* Touch targets */
+@media (pointer: coarse) {
+  .foglio body.admin button,
+  .foglio body.admin .btn,
+  .foglio body.admin .tab,
+  .foglio body.admin .pill,
+  .foglio body.admin [role="tab"] {
+    min-height: 44px;
+  }
+}
+
+/* Semantic helpers */
+.foglio body.admin .text-pos { color: var(--foglio-pos); }
+.foglio body.admin .text-neg { color: var(--foglio-neg); }
+.foglio body.admin .text-info { color: var(--foglio-info); }
+.foglio body.admin .text-warn { color: var(--foglio-warn); }
+
+.foglio body.admin .table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.foglio body.admin .chip,
+.foglio body.admin .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--foglio-radius-sm);
+  border: 1px solid var(--foglio-rule-strong);
+  color: var(--foglio-ink-soft);
+  background: var(--foglio-paper-2);
+  white-space: nowrap;
+}
+.foglio body.admin .chip.pos, .foglio body.admin .badge.pos { color: var(--foglio-pos); border-color: var(--foglio-pos); }
+.foglio body.admin .chip.neg, .foglio body.admin .badge.neg { color: var(--foglio-neg); border-color: var(--foglio-neg); }
+.foglio body.admin .chip.info, .foglio body.admin .badge.info { color: var(--foglio-info); border-color: var(--foglio-info); }
+.foglio body.admin .chip.warn, .foglio body.admin .badge.warn { color: var(--foglio-warn); border-color: var(--foglio-warn); }
+
+.foglio body.admin .state-error,
+.foglio body.admin .state-empty {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--foglio-rule);
+  border-left-width: 3px;
+  border-radius: var(--foglio-radius-md);
+  background: var(--foglio-paper);
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin .state-error { border-left-color: var(--foglio-neg); color: var(--foglio-neg); }
+.foglio body.admin .state-empty { border-left-color: var(--foglio-rule-strong); color: var(--foglio-ink-soft); font-style: italic; }
+.foglio body.admin .state-warn { border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-md); color: var(--foglio-warn); padding: 0.6rem 0.9rem; font-size: var(--foglio-fs-xs); background: var(--foglio-paper); }

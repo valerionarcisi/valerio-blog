@@ -26,9 +26,9 @@ if (!isAuthorized) {
     <title>Radar opportunità · Admin</title>
     <style is:global>
       :root {
-        --rd-green: #2e8b57;
-        --rd-yellow: #b8860b;
-        --rd-red: #c0392b;
+        --rd-green: var(--foglio-pos);
+        --rd-yellow: var(--foglio-warn);
+        --rd-red: var(--foglio-neg);
         --rd-grey: var(--foglio-ink-mute);
       }
       .foglio body.admin {
@@ -40,12 +40,6 @@ if (!isAuthorized) {
       }
       .rd-head {
         margin-bottom: 1.25rem;
-      }
-      @media (max-width: 768px) {
-        /* lascia spazio all'hamburger fisso della sidebar admin */
-        .rd-head {
-          padding-left: 3.4rem;
-        }
       }
       .rd-head h1 {
         margin-bottom: 0.15rem;
@@ -112,7 +106,7 @@ if (!isAuthorized) {
       .rd-source {
         flex: 0 0 auto;
         font-family: var(--foglio-mono);
-        font-size: 0.62rem;
+        font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         color: var(--foglio-ink-soft);
@@ -152,7 +146,7 @@ if (!isAuthorized) {
         padding: 0.15rem 0.5rem;
         border-radius: 999px;
         font-weight: 600;
-        color: #fff;
+        color: var(--foglio-paper);
       }
       .prob-green {
         background: var(--rd-green);
@@ -178,7 +172,7 @@ if (!isAuthorized) {
       }
       .rd-body p .lbl {
         font-family: var(--foglio-mono);
-        font-size: 0.62rem;
+        font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.1em;
         color: var(--foglio-ink-mute);
@@ -193,7 +187,7 @@ if (!isAuthorized) {
       }
       .rd-tag {
         font-family: var(--foglio-mono);
-        font-size: 0.6rem;
+        font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         padding: 0.15rem 0.45rem;
@@ -232,10 +226,11 @@ if (!isAuthorized) {
   </head>
   <body class="admin">
     <AdminNav currentPage="radar" token={token} />
-    <div class="rd-wrap">
+    <main class="rd-wrap">
       <header class="rd-head">
         <h1>Radar <em class="acc">opportunità</em></h1>
         <p class="subtitle" id="rd-updated">Caricamento…</p>
+        <p class="state-warn" id="rd-stale" role="status" hidden></p>
       </header>
 
       <div class="rd-filters">
@@ -245,12 +240,12 @@ if (!isAuthorized) {
           type="search"
           placeholder="Cerca per titolo, descrizione, fonte…"
         />
-        <button class="pill rd-chip" data-filter="onlineHybrid">
+        <button type="button" aria-pressed="false" class="pill rd-chip" data-filter="onlineHybrid">
           Online/Hybrid
         </button>
-        <button class="pill rd-chip" data-filter="gratis">Gratis</button>
-        <button class="pill rd-chip" data-filter="soon">≤ 30 giorni</button>
-        <button class="pill rd-chip" data-filter="prob">Prob ≥ 50%</button>
+        <button type="button" aria-pressed="false" class="pill rd-chip" data-filter="gratis">Gratis</button>
+        <button type="button" aria-pressed="false" class="pill rd-chip" data-filter="soon">≤ 30 giorni</button>
+        <button type="button" aria-pressed="false" class="pill rd-chip" data-filter="prob">Prob ≥ 50%</button>
       </div>
 
       <div class="rd-grid" id="rd-active"></div>
@@ -260,7 +255,7 @@ if (!isAuthorized) {
         <summary class="rd-section-title" id="rd-expired-summary"></summary>
         <div class="rd-grid" id="rd-expired" style="margin-top:0.75rem"></div>
       </details>
-    </div>
+    </main>
 
     <script>
       type Item = {
@@ -437,9 +432,11 @@ if (!isAuthorized) {
               if (activeFilters.has(key)) {
                 activeFilters.delete(key);
                 btn.classList.remove("active");
+                btn.setAttribute("aria-pressed", "false");
               } else {
                 activeFilters.add(key);
                 btn.classList.add("active");
+                btn.setAttribute("aria-pressed", "true");
               }
               render();
             });
@@ -454,7 +451,11 @@ if (!isAuthorized) {
       async function init(): Promise<void> {
         wireControls();
         try {
-          const res = await fetch("/radar.json", { cache: "no-store" });
+          const tk = new URLSearchParams(location.search).get("token") ?? "";
+          const res = await fetch("/api/admin/radar", {
+            cache: "no-store",
+            headers: { Authorization: `Bearer ${tk}` },
+          });
           if (!res.ok) throw new Error(String(res.status));
           const data = await res.json();
           items = Array.isArray(data.items) ? data.items : [];
@@ -462,6 +463,19 @@ if (!isAuthorized) {
           updated.textContent = data.updatedAt
             ? `Aggiornato il ${fmtDate.format(new Date(data.updatedAt))}`
             : "";
+          const stale = document.getElementById("rd-stale")!;
+          const upd = data.updatedAt ? new Date(data.updatedAt) : null;
+          const age = upd && !Number.isNaN(upd.getTime())
+            ? Math.floor((Date.now() - upd.getTime()) / DAY)
+            : null;
+          if (age === null || age > 14) {
+            stale.hidden = false;
+            stale.textContent = age === null
+              ? "Attenzione: data di aggiornamento non disponibile, i dati potrebbero essere obsoleti."
+              : `Attenzione: dati aggiornati il ${fmtDate.format(upd!)} (${age} giorni fa), potrebbero essere obsoleti.`;
+          } else {
+            stale.hidden = true;
+          }
           render();
         } catch {
           items = [];

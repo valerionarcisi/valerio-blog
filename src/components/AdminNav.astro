@@ -1,45 +1,70 @@
 ---
 import "./AdminNav.css";
 
+type PageId =
+  | "home"
+  | "analytics"
+  | "comments"
+  | "radar"
+  | "meal-plan"
+  | "body-comp"
+  | "training"
+  | "roma-arte-di-narrare";
+
 interface Props {
   token: string;
-  currentPage: "analytics" | "comments" | "radar" | "meal-plan" | "grocery" | "body-comp" | "meditation" | "recipes" | "training" | "workout" | "roma" | "vacanza" | "strava" | "sentiero-lab" | "roma-arte-di-narrare";
+  currentPage: PageId;
 }
 
 const { currentPage, token } = Astro.props;
 
-const topLinks = [
-  { id: "analytics" as const, label: "Analytics", short: "Stats", href: `/admin/analytics?token=${token}` },
-  { id: "comments" as const, label: "Comments", short: "Msg", href: `/admin/comments?token=${token}` },
-  { id: "radar" as const, label: "Radar", short: "Radar", href: `/admin/radar?token=${token}` },
+const href = (slug: string) => `/admin/${slug}?token=${encodeURIComponent(token)}`;
+
+// Eventi: aggiungere o rimuovere voci qui.
+const events = [
+  { id: "roma-arte-di-narrare" as const, label: "Roma · 18 Ott", href: href("arte-di-narrare") },
 ];
 
-const dietaLinks = [
-  { id: "meal-plan" as const, label: "Meal Plan", short: "Menu", href: `/admin/meal-plan?token=${token}` },
-  { id: "body-comp" as const, label: "Body Comp", short: "Body", href: `/admin/body-comp?token=${token}` },
-  { id: "grocery" as const, label: "Spesa", short: "Spesa", href: `/admin/grocery?token=${token}` },
-  { id: "recipes" as const, label: "Ricette", short: "Chef", href: `/admin/recipes?token=${token}` },
+const groups: { title: string; links: { id: PageId; label: string; href: string }[] }[] = [
+  { title: "Oggi", links: [{ id: "home", label: "Home", href: `/admin?token=${encodeURIComponent(token)}` }] },
+  {
+    title: "Sito",
+    links: [
+      { id: "analytics", label: "Analytics", href: href("analytics") },
+      { id: "comments", label: "Commenti", href: href("comments") },
+      { id: "radar", label: "Radar", href: href("radar") },
+    ],
+  },
+  {
+    title: "Dieta",
+    links: [
+      { id: "meal-plan", label: "Piano & spesa", href: href("meal-plan") },
+      { id: "body-comp", label: "Body Comp", href: href("body-comp") },
+    ],
+  },
+  {
+    title: "Sport",
+    links: [
+      { id: "training", label: "Training", href: href("training") },
+    ],
+  },
+  ...(events.length ? [{ title: "Eventi", links: events }] : []),
 ];
 
-const bottomLinks = [
-  { id: "meditation" as const, label: "Medita", short: "Zen", href: `/admin/meditation?token=${token}` },
-  { id: "training" as const, label: "Training", short: "Run", href: `/admin/training?token=${token}` },
-  { id: "strava" as const, label: "Allenamento", short: "Strava", href: `/admin/strava?token=${token}` },
-  { id: "workout" as const, label: "Workout Casa", short: "Casa", href: `/admin/workout?token=${token}` },
-];
-
-const tripLinks = [
-  { id: "roma-arte-di-narrare" as const, label: "Roma · 18 Ott", short: "Arte", href: `/admin/arte-di-narrare?token=${token}` },
-  { id: "roma" as const, label: "Roma · 11 Apr", short: "Roma", href: `/admin/roma?token=${token}` },
-  { id: "vacanza" as const, label: "Vacanza · Agosto", short: "Estate", href: `/admin/vacanza?token=${token}` },
-  { id: "sentiero-lab" as const, label: "Sentiero Lab · Bridges", short: "Bridges", href: `/admin/sentiero-lab?token=${token}` },
-];
-
-const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];
+const currentLabel =
+  groups.flatMap((g) => g.links).find((l) => l.id === currentPage)?.label ?? "Admin";
 ---
 
-<!-- Hamburger button (mobile only) -->
-<button class="admin-hamburger" id="admin-hamburger" aria-label="Menu">
+<!-- Top bar + hamburger (mobile only) -->
+<div class="admin-topbar" aria-hidden="true"><span class="admin-topbar-title">{currentLabel}</span></div>
+<button
+  class="admin-hamburger"
+  id="admin-hamburger"
+  type="button"
+  aria-label="Menu"
+  aria-expanded="false"
+  aria-controls="admin-sidebar"
+>
   <span></span>
   <span></span>
   <span></span>
@@ -48,57 +73,22 @@ const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];
 <!-- Backdrop -->
 <div class="admin-backdrop" id="admin-backdrop"></div>
 
-<aside class="admin-sidebar" id="admin-sidebar">
-  <div class="sidebar-section">
-    {topLinks.map((link) => (
-      <a
-        href={link.href}
-        class:list={["sidebar-link", { active: currentPage === link.id }]}
-      >
-        <span class="sidebar-label-full">{link.label}</span>
-        <span class="sidebar-label-short">{link.short}</span>
-      </a>
-    ))}
-  </div>
-
-  <div class="sidebar-section">
-    <div class="sidebar-group-title">Dieta</div>
-    {dietaLinks.map((link) => (
-      <a
-        href={link.href}
-        class:list={["sidebar-link", "sidebar-link-sub", { active: currentPage === link.id }]}
-      >
-        <span class="sidebar-label-full">{link.label}</span>
-        <span class="sidebar-label-short">{link.short}</span>
-      </a>
-    ))}
-  </div>
-
-  <div class="sidebar-section">
-    {bottomLinks.map((link) => (
-      <a
-        href={link.href}
-        class:list={["sidebar-link", { active: currentPage === link.id }]}
-      >
-        <span class="sidebar-label-full">{link.label}</span>
-        <span class="sidebar-label-short">{link.short}</span>
-      </a>
-    ))}
-  </div>
-
-  <div class="sidebar-section">
-    <div class="sidebar-group-title">Trip</div>
-    {tripLinks.map((link) => (
-      <a
-        href={link.href}
-        class:list={["sidebar-link", "sidebar-link-sub", { active: currentPage === link.id }]}
-      >
-        <span class="sidebar-label-full">{link.label}</span>
-        <span class="sidebar-label-short">{link.short}</span>
-      </a>
-    ))}
-  </div>
-</aside>
+<nav class="admin-sidebar" id="admin-sidebar" aria-label="Admin">
+  {groups.map((group) => (
+    <div class="sidebar-section">
+      <div class="sidebar-group-title">{group.title}</div>
+      {group.links.map((link) => (
+        <a
+          href={link.href}
+          class:list={["sidebar-link", { active: currentPage === link.id }]}
+          aria-current={currentPage === link.id ? "page" : undefined}
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+  ))}
+</nav>
 
 <script>
   const btn = document.getElementById('admin-hamburger');
@@ -108,25 +98,38 @@ const allLinks = [...topLinks, ...dietaLinks, ...bottomLinks, ...tripLinks];
   function openMenu() {
     sidebar?.classList.add('open');
     btn?.classList.add('open');
+    btn?.setAttribute('aria-expanded', 'true');
     backdrop?.classList.add('visible');
     document.body.style.overflow = 'hidden';
+    sidebar?.querySelector<HTMLElement>('.sidebar-link.active, .sidebar-link')?.focus();
   }
-  function closeMenu() {
+  function closeMenu(returnFocus = false) {
     sidebar?.classList.remove('open');
     btn?.classList.remove('open');
+    btn?.setAttribute('aria-expanded', 'false');
     backdrop?.classList.remove('visible');
     document.body.style.overflow = '';
+    if (returnFocus) btn?.focus();
   }
 
   btn?.addEventListener('click', () => {
-    sidebar?.classList.contains('open') ? closeMenu() : openMenu();
+    sidebar?.classList.contains('open') ? closeMenu(true) : openMenu();
   });
-  backdrop?.addEventListener('click', closeMenu);
+  backdrop?.addEventListener('click', () => closeMenu());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar?.classList.contains('open')) closeMenu(true);
+  });
 
   // Close on link tap (mobile navigation)
   sidebar?.querySelectorAll('.sidebar-link').forEach(link => {
     link.addEventListener('click', () => {
       if (window.innerWidth <= 768) closeMenu();
     });
+  });
+
+  // Leaving mobile layout with the menu open: reset state
+  window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => {
+    if (e.matches) closeMenu();
   });
 </script>

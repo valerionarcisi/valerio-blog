@@ -1,0 +1,137 @@
+---
+import { timeSafeEqual } from "~/lib/auth";
+import { env } from "~/lib/env";
+import AdminNav from "~/components/AdminNav.astro";
+import { days } from "~/data/meal-plan";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get("token") ?? "";
+const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
+
+if (!isAuthorized) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const t = encodeURIComponent(token);
+const link = (slug: string) => `/admin/${slug}?token=${t}`;
+
+const TZ = "Europe/Rome";
+
+// "YYYY-MM-DD" di oggi in Europe/Rome
+const now = new Date();
+const todayStr = new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+const dayDiff = (iso: string) =>
+  Math.round((Date.parse(`${iso}T00:00:00Z`) - Date.parse(`${todayStr}T00:00:00Z`)) / 86400000);
+
+// Eventi: aggiungere o rimuovere voci qui (la card sparisce dopo la data).
+const events = [
+  {
+    title: "L'arte di narrare · Roma",
+    date: "2026-10-18",
+    departure: "06:30",
+    href: link("arte-di-narrare"),
+  },
+];
+const nextEvent = events
+  .filter((e) => dayDiff(e.date) >= 0)
+  .sort((a, b) => a.date.localeCompare(b.date))[0];
+const eventDays = nextEvent ? dayDiff(nextEvent.date) : 0;
+const eventWhen = eventDays === 0 ? "oggi" : eventDays === 1 ? "domani" : `tra ${eventDays} giorni`;
+
+// Piano alimentare di oggi (src/data/meal-plan.ts: days[].meals[].options[].items)
+const dayIds = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"];
+const weekday = new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short" }).format(now);
+const todayId = dayIds[["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(weekday)];
+const todayPlan = days.find((d) => d.id === todayId);
+const todayLabel = new Intl.DateTimeFormat("it-IT", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" }).format(now);
+
+const groups = [
+  { title: "Sito", items: [
+    { label: "Analytics", desc: "Visite e contenuti", href: link("analytics") },
+    { label: "Commenti", desc: "Moderazione", href: link("comments") },
+    { label: "Radar", desc: "Opportunità e scadenze", href: link("radar") },
+  ]},
+  { title: "Dieta", items: [
+    { label: "Piano & spesa", desc: "Menu, lista e ricette", href: link("meal-plan") },
+    { label: "Body Comp", desc: "Composizione corporea", href: link("body-comp") },
+  ]},
+  { title: "Sport", items: [
+    { label: "Training", desc: "Settimana e attività Strava", href: link("training") },
+  ]},
+  { title: "Eventi", items: events.map((e) => ({ label: e.title, desc: e.date, href: e.href })) },
+];
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Oggi · Admin</title>
+    <style is:global>
+      .foglio body.admin .home-wrap { max-width: 900px; margin: 0 auto; }
+      .foglio body.admin .home-grid { display: grid; grid-template-columns: 1fr; gap: 0.6rem; margin-bottom: 1.5rem; }
+      @media (min-width: 560px) { .foglio body.admin .home-grid { grid-template-columns: 1fr 1fr 1fr; } }
+      .foglio body.admin .home-link {
+        display: block; min-height: 44px; padding: 0.8rem 1rem; text-decoration: none;
+        background: var(--foglio-paper); border: 1px solid var(--foglio-rule); border-radius: var(--foglio-radius-md);
+        color: var(--foglio-ink); min-width: 0;
+      }
+      .foglio body.admin .home-link:hover { border-color: var(--foglio-accent); }
+      .foglio body.admin .home-link strong { display: block; font-family: var(--foglio-serif); font-weight: 500; font-size: var(--foglio-fs-md); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .foglio body.admin .home-link span { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.08em; }
+      .foglio body.admin .home-group-title { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.14em; color: var(--foglio-ink-soft); margin: 1.4rem 0 0.6rem; }
+      .foglio body.admin .big-when { font-family: var(--foglio-serif); font-size: var(--foglio-fs-3xl); color: var(--foglio-accent); line-height: 1.1; margin: 0.2rem 0; }
+      .foglio body.admin .meal-line { margin: 0 0 0.6rem; font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .meal-line b { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--foglio-ink-soft); display: block; font-weight: 600; }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="home" token={token} />
+    <main class="home-wrap">
+      <header>
+        <h1><em class="acc">Oggi.</em></h1>
+        <p class="subtitle" style="text-transform:capitalize;">{todayLabel}</p>
+      </header>
+
+      {nextEvent && (
+        <section class="card" aria-labelledby="ev-title">
+          <h2 class="card-title" id="ev-title">Prossimo evento</h2>
+          <div class="big-when">{eventWhen}</div>
+          <p style="margin:0 0 0.4rem;">{nextEvent.title}</p>
+          <p class="muted" style="margin:0 0 0.8rem;">Partenza alle {nextEvent.departure}</p>
+          <a class="btn" href={nextEvent.href} style="display:inline-flex;align-items:center;text-decoration:none;">Apri la pagina</a>
+        </section>
+      )}
+
+      {todayPlan && (
+        <section class="card" aria-labelledby="meal-title">
+          <h2 class="card-title" id="meal-title">Pasti di oggi · {todayPlan.label}</h2>
+          {todayPlan.meals.map((m) => (
+            <p class="meal-line">
+              <b>{m.name}</b>
+              {m.options[0]?.items.join(" + ")}
+            </p>
+          ))}
+          <a class="btn" href={link("meal-plan")} style="display:inline-flex;align-items:center;text-decoration:none;">Piano completo</a>
+        </section>
+      )}
+
+      {groups.map((g) => (
+        <section aria-label={g.title}>
+          <h2 class="home-group-title">{g.title}</h2>
+          <div class="home-grid">
+            {g.items.map((it) => (
+              <a class="home-link" href={it.href}><strong>{it.label}</strong><span>{it.desc}</span></a>
+            ))}
+          </div>
+        </section>
+      ))}
+    </main>
+  </body>
+</html>

@@ -17,6 +17,235 @@ if (!isAuthorized) {
 
 import { Icon } from "astro-icon/components";
 
+const groceryList = [
+  {
+    category: "Pane e Carboidrati",
+    icon: "ph:bread",
+    cost: 12,
+    items: [
+      "Pane integrale o ai cereali (per accompagnare pranzi e cene)",
+      "Gallette di riso o altro cereale (alternativa al pane)",
+      "Fette wasa (alternativa al pane)",
+      "Pasta (120g x ~3 porzioni settimanali)",
+      "Riso basmati (120g x ~2 porzioni settimanali)",
+      "Cereali alternativi: farro, orzo, quinoa, cous cous, grano saraceno (120g a porzione)",
+      "Friselle integrali (2 da circa 60g l'una: pranzo Mar opz 2)",
+      "Farina avena/integrale/tipo 1-2 (100g per piadina)",
+    ],
+  },
+  {
+    category: "Carne",
+    icon: "ph:cow",
+    cost: 28,
+    items: [
+      "Petto di pollo (200g x3: curry Gio + caesar salad Ven + Dom/opz)",
+      "Macinata magra (180g hamburger Mer + 100g per condire pasta/legumi)",
+      "Fesa di tacchino (100g millefoglie Mar + 150g opz Dom)",
+      "Cotto magro (100g millefoglie Mar, alternativa)",
+      "Galantina 150g (cena Mer opz 2)",
+      "Carne rossa magra: fesa, noce, scamone, girello (200g x1 Lun/Gio cena)",
+    ],
+  },
+  {
+    category: "Pesce",
+    icon: "ph:fish",
+    cost: 30,
+    items: [
+      "Tonno al naturale 80g (x10-12 scatolette: pranzi Lun/Mar/Gio/Ven/Sab + cena Sab opz 2)",
+      "Sgombro/salmone al naturale in scatola (~2 conf, 200g sgocciolato: pranzo Mer)",
+      "Pesce magro fresco: merluzzo, platessa, spigola, orata (250g x1: cena Lun)",
+      "Pesce spada / sgombro / tonno fresco (200-250g x1: cena Lun opz 2)",
+      "Salmone affumicato (100g x1: cena Sab + opz pranzo Mer/Gio)",
+    ],
+  },
+  {
+    category: "Uova e Latticini",
+    icon: "ph:egg",
+    cost: 12,
+    items: [
+      "Uova (confezione da 6 — 3 uova Mar cena + 3 uova Gio pranzo opz 2)",
+      "Yogurt greco 0% bianco (per salsa pollo al curry Gio + farcitura piadina Ven)",
+      "Mozzarella light 100g (x4: millefoglie Mar + friselle Mar pranzo + cena Sab opz 2 + insalatona Dom)",
+      "Ricotta 100g (x1: alternativa millefoglie Mar, Vallelata ricottina)",
+      "Parmigiano grattugiato (per millefoglie)",
+      "Formaggio magro spalmabile Exquisa Fitline / Philadelphia Protein (piadina Ven + cena Sab)",
+    ],
+  },
+  {
+    category: "Legumi",
+    icon: "ph:grains",
+    cost: 8,
+    items: [
+      "Ceci in scatola (x2: pranzo Lun/Sab opz 2 240g ciascuno)",
+      "Lenticchie in scatola (x1-2: alternativa ceci pranzo Lun/Sab)",
+      "Burger vegetali (x2 pz: cena Ven opz 1 — Bio Appetì, Valsoia, Ecor, Kioene, Granarolo)",
+    ],
+  },
+  {
+    category: "Verdura",
+    icon: "ph:plant",
+    cost: 18,
+    items: [
+      "Verdure a foglia verde: lattuga, rucola, valeriana, indivia, iceberg (insalatone Mar/Mer/Dom)",
+      "Zucchine (millefoglie Mar + caesar salad Ven + contorno Mer/altro)",
+      "Pomodorini (insalatone, friselle Mar, contorni vari)",
+      "Carote (insalatone Mar/Mer/Dom)",
+      "Sedano (insalatone Mar/Mer)",
+      "Funghi (contorni opzionali)",
+      "Avocado x1 grande (insalatona Mer pranzo opz 2 / farcitura piadina Ven)",
+      "Verdure per contorno a sazietà (a scelta per ogni cena)",
+    ],
+  },
+  {
+    category: "Condimenti",
+    icon: "ph:flower-tulip",
+    cost: 6,
+    note: "Molti durano più settimane",
+    items: [
+      "Olio extravergine di oliva (2-4 cucchiaini a pranzo e cena ogni giorno)",
+      "Olive nere (30g insalatona Mer + cena Sab)",
+      "Curry in polvere (pollo al curry Gio)",
+      "Limoni x1 (succo mezzo limone: pollo al curry Gio)",
+      "Vino bianco secco (per sfumare: pollo al curry Gio)",
+      "Semi di lino/zucca/girasole (1 cucchiaio: insalatona Mar pranzo + caesar salad Ven)",
+      "Erba cipollina (o altra spezia: caesar salad Ven)",
+      "Noci secche / pinoli (10g: pranzo Mer)",
+      "Spezie: rosmarino, timo, origano, aglio in polvere, basilico, prezzemolo",
+    ],
+  },
+];
+
+const totalCost = groceryList.reduce((sum, s) => sum + s.cost, 0);
+const totalItems = groceryList.reduce((sum, s) => sum + s.items.length, 0);
+const recipes = [
+  {
+    name: "Pollo al Curry",
+    day: "Giovedì — Cena",
+    time: "40 min",
+    icon: "ph:cooking-pot",
+    oil: "3 cucchiaini olio EVO (già nella marinata)",
+    ingredients: [
+      "200g petto di pollo",
+      "3 cucchiaini olio EVO",
+      "1 cucchiaio colmo di curry",
+      "Succo di mezzo limone",
+      "Pepe e sale",
+      "Vino bianco secco (per sfumare)",
+      "Yogurt greco 0% bianco",
+      "1 cucchiaio di curry (per la salsa)",
+    ],
+    steps: [
+      "Tagliare il petto di pollo a cubetti",
+      "Versare il tutto in una ciotola, aggiungendo 3 cucchiaini di olio, 1 cucchiaio colmo di curry, il succo di mezzo limone, pepe e sale",
+      "Lasciare il pollo in macera almeno un'ora per farlo insaporire",
+      "Scaldare una padella e rosolare i bocconcini di pollo",
+      "Dopo aver rosolato il pollo, sfumare con il vino bianco secco e proseguire la cottura a fuoco dolce per circa 10-15 minuti",
+      "Nel frattempo, preparare la salsa di accompagnamento: mescolare lo yogurt greco 0% bianco con un cucchiaio di curry",
+      "Una volta pronto, rimuovere il coperchio dalla padella e far asciugare eventuale liquido in eccesso",
+      "Togliere la padella dal fuoco e distribuire la salsina di yogurt al curry direttamente sopra ai bocconcini di pollo",
+      "Chiudere con il coperchio per far scaldare la salsina ed insaporire i bocconcini",
+      "Servire subito",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa",
+  },
+  {
+    name: "Millefoglie di Zucchine",
+    day: "Martedì — Cena (opzione 2)",
+    time: "45 min",
+    icon: "ph:plant",
+    oil: "2 cucchiaini olio EVO a crudo",
+    ingredients: [
+      "Zucchine q.b.",
+      "100g mozzarella light (Galbani Santa Lucia o Granarolo da 100g) / 100g ricotta (Vallelata ricottina da 100g)",
+      "100g prosciutto cotto magro o fesa di tacchino",
+      "1 cucchiaio di parmigiano grattugiato",
+      "2 cucchiaini olio EVO a crudo",
+      "Sale e pepe q.b.",
+    ],
+    steps: [
+      "Lavare accuratamente le zucchine, asciugarle e spuntarle",
+      "Tagliare a fettine sottilissime (2 mm di spessore) nel senso della lunghezza e affettare la mozzarella",
+      "In una teglia da forno formare uno strato con le fette di zucchina, accavallandole leggermente una di fianco all'altra",
+      "Sistemarvi sopra le fette di mozzarella light ed il prosciutto cotto magro",
+      "Ripetere questa sequenza per altre due volte, ripartendo sempre dalle zucchine, poi mozzarella, poi cotto magro",
+      "Terminare con uno strato finale di zucchine",
+      "Condire con 2 cucchiaini di olio EVO a crudo, sale, pepe e una manciata di parmigiano grattugiato",
+      "Infornare a 220°C per circa 30 minuti, fino a quando in superficie si formerà una leggera crosticina",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa",
+  },
+  {
+    name: "Caesar Salad con Pollo",
+    day: "Venerdì — Cena (opzione 2)",
+    time: "20 min",
+    icon: "ph:bowl-food",
+    oil: "3 cucchiaini olio EVO a crudo (nella salsa, senza sforare la dose del piano)",
+    ingredients: [
+      "200g petto di pollo",
+      "Zucchine q.b.",
+      "100g yogurt greco 0% bianco (circa 2 cucchiai colmi)",
+      "Erba cipollina (o altra spezia a piacere)",
+      "Succo di limone q.b.",
+      "3 cucchiaini olio EVO",
+      "1 cucchiaio di semi di lino/zucca/girasole",
+      "Sale e pepe q.b.",
+    ],
+    steps: [
+      "Cuocere il petto di pollo alla piastra (senza olio sulla piastra) con sale e pepe",
+      "Tagliarlo a striscioline una volta cotto",
+      "Cuocere le zucchine alla piastra o saltarle in padella",
+      "Preparare la salsa yogurt: mescolare lo yogurt greco con l'olio, il succo di limone, l'erba cipollina e un pizzico di sale",
+      "Disporre il pollo e le zucchine in una ciotola, aggiungere i semi e versare la salsa yogurt sopra",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa",
+  },
+  {
+    name: "Piadina Integrale Fatta in Casa",
+    day: "Venerdì — Pranzo (opzione 2)",
+    time: "50 min",
+    icon: "ph:bread",
+    oil: "3 cucchiaini olio EVO (nell'impasto)",
+    ingredients: [
+      "100g farina di avena o tipo 1 o tipo 2 o integrale (o mix)",
+      "Acqua q.b. (meno di 100ml)",
+      "3 cucchiaini olio EVO",
+      "1 cucchiaino di sale",
+    ],
+    steps: [
+      "Mettere la farina in una bacinella ed aggiungere pian piano l'acqua fino a che il composto diventa perfettamente modellabile",
+      "Aggiungere i 3 cucchiaini di olio EVO e continuare a mescolare bene",
+      "Continuare a lavorare il composto con le mani, versandolo su un piano ben infarinato",
+      "Bisogna ottenere un panetto compatto e non troppo appiccicoso",
+      "Mettere il composto a riposo in frigorifero circa 30 minuti",
+      "Stendere l'impasto con un matterello sul piano ben infarinato dando il più possibile una forma circolare sottile",
+      "Scaldare la padella antiaderente unta con un filo d'olio ed adagiare delicatamente i dischi ottenuti dall'impasto",
+      "Cuocere circa 3 minuti per lato e disporre le piadine una sull'altra",
+    ],
+    serve: "Farcire con 100g fonte proteica (affettato magro, gamberetti, tonno al naturale) o crema di legumi con 80g legumi in scatola + spezie/aromi + verdure di stagione, oppure mezzo avocado + yogurt greco 0%. Accompagnare con 1 fetta pane integrale (30g) / 2 gallette / 2 fette wasa + formaggio magro spalmabile (Exquisa Fitline / Philadelphia Protein)",
+  },
+  {
+    name: "Hamburger di Carne Magra",
+    day: "Mercoledì — Cena (opzione 1)",
+    time: "20 min",
+    icon: "ph:hamburger",
+    oil: "3 cucchiaini olio EVO a crudo",
+    ingredients: [
+      "180g macinata magra o bianca magra",
+      "Albume d'uovo (come amalgama, opzionale)",
+      "3 cucchiaini olio EVO a crudo",
+      "Sale e pepe q.b.",
+    ],
+    steps: [
+      "Lavorare la macinata in una ciotola con sale, pepe e un filo di albume se necessario come amalgama",
+      "Formare 1-2 hamburger compatti dello spessore desiderato",
+      "Scaldare una padella antiaderente o griglia",
+      "Cuocere gli hamburger circa 4-5 minuti per lato fino a doratura",
+      "In alternativa, acquistare dal macellaio 200g hamburger di carne magra già pronti (meglio senza parmigiano o uovo, ok con verdure/spezie/aromi)",
+    ],
+    serve: "2 fette pane integrale o ai cereali (60g) / 4 gallette di riso / 4 fette wasa + verdure a sazietà (es. zucchine alla piastra)",
+  },
+];
+
 const mealIconName: Record<string, string> = {
   "Colazione": "ph:coffee",
   "Pranzo": "ph:bowl-food",
@@ -33,7 +262,7 @@ const mealIconName: Record<string, string> = {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
-    <title>Piano Alimentare</title>
+    <title>Piano &amp; spesa</title>
     <style is:global>
       .foglio body.admin .day-tabs {
         display: flex;
@@ -49,6 +278,8 @@ const mealIconName: Record<string, string> = {
       .foglio body.admin .day-tab {
         flex-shrink: 0;
         padding: 0.45rem 0.9rem;
+        min-height: 44px;
+        min-width: 44px;
         border-radius: var(--foglio-radius-sm);
         border: 1px solid var(--foglio-rule);
         background: var(--foglio-paper);
@@ -97,20 +328,20 @@ const mealIconName: Record<string, string> = {
       .foglio body.admin .oil-badge {
         display: inline-block;
         font-family: var(--foglio-mono);
-        font-size: 0.7rem;
+        font-size: 0.72rem;
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        border: 1px solid rgba(46, 139, 87, 0.5);
-        color: #2e8b57;
+        border: 1px solid var(--foglio-pos);
+        color: var(--foglio-pos);
         padding: 0.1rem 0.5rem;
         border-radius: 2px;
         margin-left: auto;
         white-space: nowrap;
       }
       .foglio body.admin .oil-badge.no-oil {
-        border-color: rgba(192, 57, 43, 0.5);
-        color: #c0392b;
+        border-color: var(--foglio-neg);
+        color: var(--foglio-neg);
       }
 
       .foglio body.admin .meal-items {
@@ -188,6 +419,310 @@ const mealIconName: Record<string, string> = {
         margin-right: 0.4rem;
       }
 
+
+      .foglio body.admin .summary-bar {
+        display: flex;
+        gap: 1.5rem;
+        align-items: baseline;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+      }
+      .foglio body.admin .summary-total {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-2xl);
+        font-weight: 500;
+        color: var(--foglio-accent);
+        font-variant-numeric: tabular-nums;
+      }
+      .foglio body.admin .summary-total small {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        font-weight: 500;
+        color: var(--foglio-ink-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .foglio body.admin .summary-detail {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        color: var(--foglio-ink-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .foglio body.admin .grocery-list {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .foglio body.admin .grocery-card {
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--foglio-rule);
+        border-radius: 0;
+      }
+      .foglio body.admin .grocery-card summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 0.7rem 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-md);
+        font-weight: 500;
+        color: var(--foglio-ink);
+      }
+      .foglio body.admin .grocery-card summary::-webkit-details-marker { display: none; }
+      .foglio body.admin .grocery-card summary::before {
+        content: "▸";
+        color: var(--foglio-ink-mute);
+        font-size: 0.82rem;
+        width: 0.8rem;
+        flex-shrink: 0;
+        transition: transform 0.15s;
+      }
+      .foglio body.admin .grocery-card[open] summary::before { content: "▾"; color: var(--foglio-accent); }
+
+      .foglio body.admin .grocery-card .grocery-icon { width: 1.15rem; height: 1.15rem; color: var(--foglio-accent); flex-shrink: 0; }
+      .foglio body.admin .grocery-count {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        font-weight: 400;
+        color: var(--foglio-ink-mute);
+      }
+      .foglio body.admin .grocery-cost {
+        margin-left: auto;
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-sm);
+        font-weight: 600;
+        color: var(--foglio-accent);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .foglio body.admin .grocery-body {
+        padding: 0.2rem 0.25rem 0.8rem 1.4rem;
+      }
+
+      .foglio body.admin .grocery-note {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        color: var(--foglio-ink-soft);
+        font-style: italic;
+        margin-bottom: 0.4rem;
+      }
+
+      .foglio body.admin .grocery-items {
+        list-style: none;
+        padding: 0;
+        columns: 2;
+        column-gap: 1.5rem;
+      }
+      .foglio body.admin .grocery-items li {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        line-height: 1.5;
+        padding: 0.15rem 0 0.15rem 0.7rem;
+        position: relative;
+        color: var(--foglio-ink-soft);
+        break-inside: avoid;
+      }
+      .foglio body.admin .grocery-items li::before {
+        content: "·";
+        position: absolute;
+        left: 0;
+        color: var(--foglio-accent);
+        font-weight: 700;
+      }
+
+      @media (max-width: 500px) {
+        .foglio body.admin .grocery-items { columns: 1; }
+      }
+    
+      .foglio body.admin .recipes-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .foglio body.admin .recipe-card {
+        background: var(--foglio-paper);
+        border: 1px solid var(--foglio-rule);
+        border-radius: var(--foglio-radius-md);
+        overflow: hidden;
+      }
+
+      .foglio body.admin .recipe-header {
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        list-style: none;
+      }
+      .foglio body.admin .recipe-header::-webkit-details-marker { display: none; }
+
+      .foglio body.admin .recipe-icon {
+        width: 1.4rem;
+        height: 1.4rem;
+        color: var(--foglio-accent);
+        flex-shrink: 0;
+      }
+
+      .foglio body.admin .recipe-title {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-md);
+        font-weight: 500;
+        color: var(--foglio-ink);
+        flex: 1;
+      }
+
+      .foglio body.admin .recipe-meta {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .foglio body.admin .recipe-day {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        color: var(--foglio-ink-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .foglio body.admin .recipe-time {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        color: var(--foglio-accent);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .foglio body.admin .recipe-arrow {
+        color: var(--foglio-ink-mute);
+        font-size: 0.82rem;
+        transition: transform 0.2s;
+      }
+
+      .foglio body.admin details[open] .recipe-arrow { transform: rotate(90deg); }
+      .foglio body.admin details[open] .recipe-header { border-bottom: 1px solid var(--foglio-rule); }
+
+      .foglio body.admin .recipe-body {
+        padding: 1rem;
+      }
+
+      .foglio body.admin .recipe-section-title {
+        font-family: var(--foglio-mono);
+        font-size: var(--foglio-fs-mono);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--foglio-ink-soft);
+        margin: 0.8rem 0 0.4rem;
+      }
+
+      .foglio body.admin .recipe-ingredients {
+        list-style: none;
+        margin-bottom: 1rem;
+        columns: 2;
+        column-gap: 1.5rem;
+      }
+      .foglio body.admin .recipe-ingredients li {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        line-height: 1.55;
+        padding: 0.15rem 0 0.15rem 0.8rem;
+        position: relative;
+        color: var(--foglio-ink-soft);
+        break-inside: avoid;
+      }
+      .foglio body.admin .recipe-ingredients li::before {
+        content: "·";
+        position: absolute;
+        left: 0;
+        color: var(--foglio-accent);
+        font-weight: 700;
+      }
+
+      .foglio body.admin .recipe-steps {
+        list-style: none;
+        counter-reset: step;
+        margin-bottom: 1rem;
+      }
+      .foglio body.admin .recipe-steps li {
+        counter-increment: step;
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        line-height: 1.55;
+        padding: 0.4rem 0 0.4rem 2rem;
+        position: relative;
+        color: var(--foglio-ink-soft);
+        border-bottom: 1px solid var(--foglio-rule);
+      }
+      .foglio body.admin .recipe-steps li:last-child { border-bottom: none; }
+      .foglio body.admin .recipe-steps li::before {
+        content: counter(step);
+        position: absolute;
+        left: 0;
+        top: 0.4rem;
+        width: 1.3rem;
+        height: 1.3rem;
+        background: var(--foglio-accent);
+        color: var(--foglio-paper);
+        border-radius: 50%;
+        font-family: var(--foglio-mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .foglio body.admin .recipe-serve {
+        font-family: var(--foglio-serif);
+        font-size: var(--foglio-fs-sm);
+        font-style: italic;
+        color: var(--foglio-ink);
+        padding: 0.7rem 0.9rem;
+        background: var(--foglio-paper-2);
+        border-radius: var(--foglio-radius-sm);
+        border-left: 3px solid var(--foglio-accent);
+      }
+      .foglio body.admin .recipe-serve strong { color: var(--foglio-accent); font-style: normal; font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.1em; }
+
+      .foglio body.admin .recipe-oil {
+        display: inline-block;
+        font-family: var(--foglio-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border: 1px solid var(--foglio-pos);
+        color: var(--foglio-pos);
+        padding: 0.1rem 0.5rem;
+        border-radius: 2px;
+        margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 500px) {
+        .foglio body.admin .recipe-ingredients { columns: 1; }
+        .foglio body.admin .recipe-meta { flex-direction: column; gap: 0.2rem; align-items: flex-end; }
+      }
+    
+      .foglio body.admin .main-tabs { display: flex; gap: 0.4rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+      .foglio body.admin .main-tabs [role="tab"] { min-height: 44px; min-width: 44px; }
+      .foglio body.admin [role="tabpanel"][hidden] { display: none; }
+      .foglio body.admin .grocery-actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
+      .foglio body.admin .grocery-actions button { min-height: 44px; }
+      .foglio body.admin .grocery-status { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); }
+      .foglio body.admin .grocery-items label { display: flex; gap: 0.5rem; align-items: flex-start; cursor: pointer; min-height: 28px; }
+      .foglio body.admin .grocery-items input[type="checkbox"] { margin-top: 0.3rem; flex-shrink: 0; accent-color: var(--foglio-accent); width: 1rem; height: 1rem; }
+      .foglio body.admin .grocery-items li.done label span { text-decoration: line-through; color: var(--foglio-ink-mute); }
+      .foglio body.admin .grocery-items li::before { display: none; }
+      .foglio body.admin .grocery-items li { padding-left: 0; }
+
       @media (max-width: 500px) {
         .foglio body.admin .meal-card { padding: 0.75rem; }
       }
@@ -196,20 +731,33 @@ const mealIconName: Record<string, string> = {
   <body class="admin">
     <AdminNav currentPage="meal-plan" token={token} />
 
-    <h1><em class="acc">Piano alimentare.</em></h1>
+    <main>
+    <h1><em class="acc">Piano &amp; spesa.</em></h1>
 
-    <div class="day-tabs" role="tablist">
+    <div class="main-tabs" role="tablist" aria-label="Sezioni">
+      <button class="tab active" role="tab" id="mtab-piano" aria-controls="mpanel-piano" aria-selected="true" data-mtab="piano">Piano</button>
+      <button class="tab" role="tab" id="mtab-spesa" aria-controls="mpanel-spesa" aria-selected="false" tabindex="-1" data-mtab="spesa">Spesa</button>
+      <button class="tab" role="tab" id="mtab-ricette" aria-controls="mpanel-ricette" aria-selected="false" tabindex="-1" data-mtab="ricette">Ricette</button>
+    </div>
+
+    <div role="tabpanel" id="mpanel-piano" aria-labelledby="mtab-piano" data-mpanel="piano">
+
+    <div class="day-tabs" role="tablist" aria-label="Giorni della settimana">
       {days.map((day) => (
         <button
           class="day-tab"
           data-day={day.id}
+          id={`tab-${day.id}`}
           role="tab"
+          aria-controls={`panel-${day.id}`}
           aria-selected="false"
+          tabindex="-1"
+          aria-label={day.label}
         >
           {day.short}
         </button>
       ))}
-      <button class="day-tab" data-day="snacks" role="tab" aria-selected="false">
+      <button class="day-tab" data-day="snacks" id="tab-snacks" role="tab" aria-controls="panel-snacks" aria-selected="false" tabindex="-1">
         Spuntini
       </button>
     </div>
@@ -218,7 +766,10 @@ const mealIconName: Record<string, string> = {
       <div
         class="day-content"
         data-panel={day.id}
+        id={`panel-${day.id}`}
         role="tabpanel"
+        aria-labelledby={`tab-${day.id}`}
+        tabindex="0"
       >
         <h2 style="margin-bottom:0.75rem;">
           {day.label}
@@ -278,7 +829,7 @@ const mealIconName: Record<string, string> = {
       </div>
     ))}
 
-    <div class="day-content" data-panel="snacks" role="tabpanel">
+    <div class="day-content" data-panel="snacks" id="panel-snacks" role="tabpanel" aria-labelledby="tab-snacks" tabindex="0">
       <h2 style="margin-bottom:0.75rem;">
         Spuntini
       </h2>
@@ -301,6 +852,72 @@ const mealIconName: Record<string, string> = {
       ))}
     </div>
 
+    </div>
+
+    <div role="tabpanel" id="mpanel-spesa" aria-labelledby="mtab-spesa" data-mpanel="spesa" hidden>
+      <p class="subtitle">Solo pranzi e cene</p>
+      <div class="summary-bar">
+        <div class="summary-total">~{totalCost}€ <small>/settimana</small></div>
+        <div class="summary-detail">{totalItems} prodotti · {groceryList.length} categorie</div>
+      </div>
+      <div class="grocery-actions">
+        <button type="button" id="copy-grocery">Copia lista</button>
+        <button type="button" id="reset-grocery">Azzera spunte</button>
+        <span class="grocery-status" id="grocery-status" role="status" aria-live="polite"></span>
+      </div>
+      <div class="grocery-list" id="grocery-list">
+        {groceryList.map((section) => (
+          <details class="grocery-card" open>
+            <summary>
+              <Icon name={section.icon} class="grocery-icon" size={18} is:inline />
+              {section.category}
+              <span class="grocery-count">({section.items.length})</span>
+              <span class="grocery-cost">~{section.cost}€</span>
+            </summary>
+            <div class="grocery-body">
+              {"note" in section && section.note && <div class="grocery-note">{section.note}</div>}
+              <ul class="grocery-items" data-category={section.category}>
+                {section.items.map((item, i) => (
+                  <li data-key={`${section.category}|${i}`}>
+                    <label><input type="checkbox" /><span>{item}</span></label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+
+    <div role="tabpanel" id="mpanel-ricette" aria-labelledby="mtab-ricette" data-mpanel="ricette" hidden>
+      <p class="subtitle">del piano alimentare</p>
+      <div class="recipes-grid">
+        {recipes.map((recipe) => (
+          <details class="recipe-card">
+            <summary class="recipe-header">
+              <Icon name={recipe.icon} class="recipe-icon" size={20} is:inline />
+              <span class="recipe-title">{recipe.name}</span>
+              <div class="recipe-meta">
+                <span class="recipe-day">{recipe.day}</span>
+                <span class="recipe-time">{recipe.time}</span>
+              </div>
+              <span class="recipe-arrow">▸</span>
+            </summary>
+            <div class="recipe-body">
+              {recipe.oil && <span class="recipe-oil">{recipe.oil}</span>}
+              <div class="recipe-section-title">Ingredienti</div>
+              <ul class="recipe-ingredients">{recipe.ingredients.map((ing) => <li>{ing}</li>)}</ul>
+              <div class="recipe-section-title">Preparazione</div>
+              <ol class="recipe-steps">{recipe.steps.map((step) => <li>{step}</li>)}</ol>
+              <div class="recipe-serve"><strong>Accompagna con:</strong> {recipe.serve}</div>
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+
+    </main>
+
     <script is:inline>
       var dayMap = ['dom','lun','mar','mer','gio','ven','sab'];
       var todayId = dayMap[new Date().getDay()];
@@ -309,11 +926,12 @@ const mealIconName: Record<string, string> = {
         document.querySelectorAll('.day-tab').forEach(function(t) {
           t.classList.remove('active');
           t.setAttribute('aria-selected', 'false');
+          t.setAttribute('tabindex', '-1');
         });
         document.querySelectorAll('.day-content').forEach(function(p) { p.classList.remove('active'); });
         var tab = document.querySelector('[data-day="' + id + '"]');
         var panel = document.querySelector('[data-panel="' + id + '"]');
-        if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
+        if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); tab.setAttribute('tabindex', '0'); }
         if (panel) panel.classList.add('active');
       }
 
@@ -321,7 +939,114 @@ const mealIconName: Record<string, string> = {
 
       document.querySelectorAll('.day-tab').forEach(function(tab) {
         tab.addEventListener('click', function() { selectTab(tab.dataset.day); });
+        tab.addEventListener('keydown', function(e) {
+          var tabs = Array.prototype.slice.call(document.querySelectorAll('.day-tab'));
+          var i = tabs.indexOf(tab), n = -1;
+          if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+          else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+          else if (e.key === 'Home') n = 0;
+          else if (e.key === 'End') n = tabs.length - 1;
+          if (n < 0) return;
+          e.preventDefault();
+          selectTab(tabs[n].dataset.day);
+          tabs[n].focus();
+        });
       });
+      (function () {
+        var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-mtab]'));
+        var names = tabs.map(function (t) { return t.dataset.mtab; });
+        function show(name, focus) {
+          tabs.forEach(function (t) {
+            var on = t.dataset.mtab === name;
+            t.classList.toggle('active', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+            t.setAttribute('tabindex', on ? '0' : '-1');
+            document.querySelector('[data-mpanel="' + t.dataset.mtab + '"]').hidden = !on;
+            if (on && focus) t.focus();
+          });
+        }
+        function fromHash() {
+          var h = location.hash.replace('#', '');
+          show(names.indexOf(h) >= 0 ? h : 'piano', false);
+        }
+        tabs.forEach(function (t, i) {
+          t.addEventListener('click', function () { show(t.dataset.mtab, false); history.replaceState(null, '', '#' + t.dataset.mtab); });
+          t.addEventListener('keydown', function (e) {
+            var n = -1;
+            if (e.key === 'ArrowRight') n = (i + 1) % tabs.length;
+            else if (e.key === 'ArrowLeft') n = (i - 1 + tabs.length) % tabs.length;
+            else if (e.key === 'Home') n = 0;
+            else if (e.key === 'End') n = tabs.length - 1;
+            if (n < 0) return;
+            e.preventDefault();
+            show(tabs[n].dataset.mtab, true);
+            history.replaceState(null, '', '#' + tabs[n].dataset.mtab);
+          });
+        });
+        window.addEventListener('hashchange', fromHash);
+        fromHash();
+      })();
+
+      (function () {
+        var KEY = 'admin-grocery-bought-v1';
+        var status = document.getElementById('grocery-status');
+        function load() {
+          try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; }
+        }
+        function save(state) { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+        var state = load();
+        var boxes = Array.prototype.slice.call(document.querySelectorAll('#grocery-list li[data-key]'));
+        function paint(li) {
+          var on = !!state[li.dataset.key];
+          li.classList.toggle('done', on);
+          li.querySelector('input').checked = on;
+        }
+        function count() {
+          var n = boxes.filter(function (li) { return state[li.dataset.key]; }).length;
+          status.textContent = n + ' / ' + boxes.length + ' comprati';
+        }
+        boxes.forEach(function (li) {
+          paint(li);
+          li.querySelector('input').addEventListener('change', function (e) {
+            if (e.target.checked) state[li.dataset.key] = 1; else delete state[li.dataset.key];
+            save(state); paint(li); count();
+          });
+        });
+        count();
+        document.getElementById('reset-grocery').addEventListener('click', function () {
+          state = {}; save(state); boxes.forEach(paint); count();
+        });
+        function listText() {
+          var out = [];
+          document.querySelectorAll('#grocery-list .grocery-items').forEach(function (ul) {
+            var lines = [];
+            ul.querySelectorAll('li').forEach(function (li) {
+              if (!state[li.dataset.key]) lines.push('- ' + li.textContent.trim());
+            });
+            if (lines.length) out.push(ul.dataset.category.toUpperCase() + '\n' + lines.join('\n'));
+          });
+          return 'Lista della spesa\n\n' + out.join('\n\n');
+        }
+        function fallbackCopy(text) {
+          var ta = document.createElement('textarea');
+          ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          return ok;
+        }
+        document.getElementById('copy-grocery').addEventListener('click', function () {
+          var text = listText();
+          function done(ok) {
+            status.textContent = ok ? 'Lista copiata (solo da comprare)' : 'Copia non riuscita';
+            setTimeout(count, 2500);
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(fallbackCopy(text)); });
+          } else done(fallbackCopy(text));
+        });
+      })();
     </script>
   </body>
 </html>
