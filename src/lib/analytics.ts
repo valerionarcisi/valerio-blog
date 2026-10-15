@@ -143,16 +143,31 @@ export function extractHostname(referrer: string | undefined): string | null {
   }
 }
 
+/**
+ * Pseudonymous visitor hash: HMAC-SHA256 keyed with the secret daily salt
+ * (see analytics-salt.ts). Once the salt is deleted the hash is not
+ * reproducible, even by enumerating IPs.
+ */
 export async function generateVisitorHash(
+  salt: string,
   hostname: string,
   ip: string,
   ua: string,
 ): Promise<string> {
-  const date = new Date().toISOString().slice(0, 10);
-  const raw = `${date}:${hostname}:${ip}:${ua}`;
-  const data = new TextEncoder().encode(raw);
-  const hash = await crypto.subtle.digest("SHA-256", data);
-  const bytes = new Uint8Array(hash);
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(salt),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    enc.encode(`${hostname}:${ip}:${ua}`),
+  );
+  const bytes = new Uint8Array(sig);
   let hex = "";
   for (let i = 0; i < 8; i++) {
     hex += bytes[i].toString(16).padStart(2, "0");

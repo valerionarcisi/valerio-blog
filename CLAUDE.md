@@ -135,10 +135,15 @@ docs/
 
 ## Analytics System
 
-Cookieless, privacy-first. Anonymous visitor hash = SHA-256(date + hostname + IP + UA).
+Cookieless, privacy-first. Spec: `docs/analytics-spec.md`; piano: `docs/superpowers/plans/2026-10-15-analytics-v2.md`.
 
-- **Tracking**: client-side `<script is:inline>` in `BaseHead.astro` → `POST /api/e`
-- **Bot detection**: UA-based via `isbot` library + admin can flag specific `visitor_hash` as bot via `/api/admin/bot`
+- **Tracking**: `<script is:inline>` in `BaseHead.astro` → `POST /api/e`. `page_id` casuale (24 hex); beacon **cumulativo** (tempo visibile accumulato, inviato a ogni `hidden`/`pagehide`); l'UPDATE usa `MAX()` e richiede lo stesso `visitor_hash`.
+- **Visitor hash** = HMAC-SHA256(salt giornaliero segreto, hostname:ip:ua) → 16 hex. Salt in `analytics_salts` (`src/lib/analytics-salt.ts`), cancellati dopo 2 giorni. `generateStableVisitorHash` (claps/likes/leaderboard) resta separato e invariato.
+- **Country**: Netlify geo (`x-nf-geo`, `src/lib/geo.ts`), fallback timezone. **Channel**: `src/lib/channels.ts`. Referrer interni scartati.
+- **Input**: validazione in `src/lib/analytics-input.ts` (host allow-list, Origin/Referer obbligatorio, path/UTM), rate limit 60/min per hash. Unicita atomica con `daily_visitors`.
+- **localStorage**: solo il flag di opt-out `notrack` (dichiarato nella privacy policy). Nessuna coda di retry.
+- **Migrazione**: `scripts/migrate-analytics-v2.ts` (idempotente; `/api/e` degrada se non applicata). Eseguire PRIMA del deploy.
+- **Bot detection**: UA-based via `isbot` + flag manuale di `visitor_hash` via `/api/admin/bot` (rivisto in Fase 4)
 - **Dashboard**: `/admin/analytics` — live online counter (30s polling), aggregates, geo map (Leaflet), bot flagging
 - **Stats query excludes** `visitor_hash IN bot_hashes` from all counts (`baseWhere` in `stats.ts`)
 - **Live counter**: `/api/stats/live` returns DISTINCT visitor_hash in last 5 min, excludes bots
