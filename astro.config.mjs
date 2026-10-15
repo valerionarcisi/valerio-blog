@@ -56,7 +56,7 @@ const define = {
 // https://astro.build/config
 export default defineConfig({
   site: "https://valerionarcisi.me",
-  adapter: netlify(),
+  adapter: netlify({ devFeatures: { edgeFunctions: false } }),
   vite: { define },
   integrations: [
     icon(),

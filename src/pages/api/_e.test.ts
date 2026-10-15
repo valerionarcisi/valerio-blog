@@ -329,11 +329,19 @@ describe("POST /api/e - engage (human signal)", () => {
     }
   });
 
-  test("does not touch rows of other pages of the same visitor", async () => {
+  test("human status covers the whole visitor-day: earlier and later pageviews", async () => {
     await call(pageview());
     await call(pageview({ page_id: "q".repeat(16) }));
-    await call(engage());
-    expect((await rows()).map((r) => r.human)).toEqual([1, 0]);
+    await call(engage({ page_id: "q".repeat(16) }));
+    await call(pageview({ page_id: "r".repeat(16) }));
+    expect((await rows()).map((r) => r.human)).toEqual([1, 1, 1]);
+  });
+
+  test("another visitor is never touched by someone else's engage", async () => {
+    await call(pageview(), { ip: "203.0.113.9" });
+    await call(pageview({ page_id: "q".repeat(16) }));
+    await call(engage({ page_id: "q".repeat(16) }));
+    expect((await rows()).map((r) => r.human)).toEqual([0, 1]);
   });
 });
 

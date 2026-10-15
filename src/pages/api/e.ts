@@ -68,6 +68,7 @@ const OPTIONAL_COLUMNS = new Set([
   "visitor_hash",
   "bot_score",
   "session_id",
+  "human",
 ]);
 
 async function insertPageview(
@@ -113,6 +114,40 @@ async function isFirstVisitToday(
   }
 }
 
+/**
+ * Human status belongs to the visitor-day, not to a single pageview: the first page of a
+ * visit is stored before any interaction, so it must not stay "unverified" (and drop the
+ * visitor from the human counts) once a later page proves the visitor is human.
+ */
+async function alreadyHumanToday(
+  db: Client,
+  day: string,
+  visitorHash: string,
+): Promise<boolean> {
+  try {
+    const res = await db.execute({
+      sql: "SELECT 1 FROM pageviews WHERE visitor_hash = ? AND human = 1 AND created_at >= ? LIMIT 1",
+      args: [visitorHash, day],
+    });
+    return res.rows.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/** Marks every pageview of the visitor-day as human (the engage signal covers the whole visit). */
+async function markVisitorDayHuman(
+  db: Client,
+  day: string,
+  visitorHash: string,
+): Promise<void> {
+  await db.execute({
+    sql: `UPDATE pageviews SET human = 1
+          WHERE visitor_hash = ? AND created_at >= ? AND created_at < datetime(?, '+1 day')`,
+    args: [visitorHash, day, day],
+  });
+}
+
 /** Pageviews this hash stored in the last minute (rate signal). Fail-quiet: 0 on error. */
 async function recentPageviews(
   db: Client,
@@ -140,6 +175,7 @@ function buildRow(
     botScore: number;
     sessionId: number | null;
     channel: string;
+    human: boolean;
   },
 ): Record<string, InValue> {
   return {
@@ -165,6 +201,7 @@ function buildRow(
     language: p.language,
     country: extra.country,
     bot_score: extra.botScore,
+    human: extra.human ? 1 : 0,
   };
 }
 
@@ -227,11 +264,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const inHashes = hashes.map(() => "?").join(", ");
     if (en?.ok) {
       try {
-        await db.execute({
+        const upd = await db.execute({
           sql: `UPDATE pageviews SET human = 1
                 WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
           args: [en.value.pageId, ...hashes],
         });
+        // only an engage that matched one of this visitor's own pageviews vouches for the visit
+        if (upd.rowsAffected > 0) {
+          await markVisitorDayHuman(db, today, hashes[0]);
+          if (hashes[1]) await markVisitorDayHuman(db, yesterday, hashes[1]);
+        }
       } catch {
         /* migration not applied: no human column yet */
       }
@@ -378,6 +420,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
   if (matched) await recordRuleHit(db, matched.id);
 
   const botScore = matched ? BOT_SCORE_RULE : score;
+  const human = await alreadyHumanToday(db, today, visitorHash);
   const channel = classifyChannel({
     referrerHost: p.referrerHost,
     utmSource: p.utmSource,
@@ -410,6 +453,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       botScore,
       sessionId,
       channel,
+      human,
     }),
   );
   return noContent();
