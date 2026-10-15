@@ -1,7 +1,10 @@
 import type { APIRoute } from "astro";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { timeSafeEqual } from "~/lib/auth";
 import { env } from "~/lib/env";
+import getDb from "~/lib/turso";
+import { claimUpdate } from "~/lib/telegram-dedup";
 import { sendMessage, getFilePath, downloadFile } from "~/lib/telegram";
 import { transcribe } from "~/lib/whisper";
 import { createIdea, listIdeas, markIdeaStatus } from "~/lib/editorial-ideas";
@@ -52,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response("misconfigured", { status: 503 });
   }
   const secret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
-  if (secret !== expectedSecret) {
+  if (!secret || !timeSafeEqual(secret, expectedSecret)) {
     return new Response("unauthorized", { status: 401 });
   }
 
@@ -68,6 +71,18 @@ export const POST: APIRoute = async ({ request }) => {
 
   if (!isWhitelisted(message.from.id)) {
     return new Response("ok", { status: 200 });
+  }
+
+  // Telegram retries slow/failed deliveries: process each update_id once.
+  if (typeof update.update_id === "number") {
+    try {
+      if (!(await claimUpdate(getDb(), update.update_id))) {
+        return new Response("ok", { status: 200 });
+      }
+    } catch (e) {
+      // Dedup store unavailable: process anyway rather than drop the message.
+      console.error("[telegram-webhook] dedup failed", e);
+    }
   }
 
   try {
@@ -90,11 +105,15 @@ async function handleMessage(message: TelegramMessage): Promise<void> {
     const raw = await downloadFile(filePath);
     const processed = await processUpload(raw);
     const { dir, filename, webPath } = buildUploadPath();
-    await fs.mkdir(dir, { recursive: true });
-    // TODO(prod): Netlify Functions filesystem is read-only except /tmp.
-    // This works in dev/local; for production deploy migrate to Netlify Blobs.
-    // See docs/setup/telegram-bot.md "Limitazione importante".
-    await fs.writeFile(path.join(dir, filename), new Uint8Array(processed.buffer));
+    // Netlify Functions filesystem is read-only: photo storage to Blobs is not
+    // implemented yet. Works in dev/local only.
+    try {
+      await fs.mkdir(dir, { recursive: true });
+      await fs.writeFile(path.join(dir, filename), new Uint8Array(processed.buffer));
+    } catch {
+      await sendMessage(message.chat.id, "Salvataggio foto non ancora supportato in produzione");
+      return;
+    }
     const id = await createMedia({
       filename,
       path: webPath,

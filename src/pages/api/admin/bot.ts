@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
-import { verifyBearerToken } from "~/lib/auth";
+import { timeSafeEqual } from "~/lib/auth";
+import { requireAdmin } from "~/lib/admin-auth";
 import { env } from "~/lib/env";
 import getDb from "~/lib/turso";
 import {
@@ -25,6 +26,21 @@ type BotUnflagAction =
   | { type: "unflagRecent"; minutes: number }
   | { type: "unflagAll" };
 
+const MAX_HASHES = 500;
+const MAX_HASH_LEN = 32;
+
+function isValidHash(h: unknown): h is string {
+  return typeof h === "string" && h.length > 0 && h.length <= MAX_HASH_LEN;
+}
+
+function validHashes(input: unknown[]): Result<string[]> {
+  if (input.length > MAX_HASHES)
+    return err(`Too many hashes (max ${MAX_HASHES})`);
+  const valid = input.filter(isValidHash);
+  if (valid.length === 0) return err("No valid hashes");
+  return ok([...new Set(valid)]);
+}
+
 function parseBotAction(body: unknown): Result<BotAction> {
   if (!body || typeof body !== "object") return err("Invalid body");
   const b = body as Record<string, unknown>;
@@ -36,14 +52,12 @@ function parseBotAction(body: unknown): Result<BotAction> {
   }
 
   if (Array.isArray(b.hashes)) {
-    const valid = b.hashes.filter(
-      (h: unknown) => typeof h === "string" && h.length > 0 && h.length <= 32,
-    );
-    if (valid.length === 0) return err("No valid hashes");
-    return ok({ type: "bulkHash", hashes: valid });
+    const valid = validHashes(b.hashes);
+    if (!valid.ok) return valid;
+    return ok({ type: "bulkHash", hashes: valid.value });
   }
 
-  if (typeof b.hash === "string" && b.hash.length > 0 && b.hash.length <= 32) {
+  if (isValidHash(b.hash)) {
     return ok({ type: "singleHash", hash: b.hash });
   }
 
@@ -66,42 +80,35 @@ function parseBotUnflagAction(body: unknown): Result<BotUnflagAction> {
   }
 
   if (Array.isArray(b.hashes)) {
-    const valid = b.hashes.filter(
-      (h: unknown) => typeof h === "string" && h.length > 0 && h.length <= 32,
-    );
-    if (valid.length === 0) return err("No valid hashes");
-    return ok({ type: "unflagHashes", hashes: valid });
+    const valid = validHashes(b.hashes);
+    if (!valid.ok) return valid;
+    return ok({ type: "unflagHashes", hashes: valid.value });
   }
 
-  if (typeof b.hash === "string" && b.hash.length > 0 && b.hash.length <= 32) {
+  if (isValidHash(b.hash)) {
     return ok({ type: "unflagHash", hash: b.hash });
   }
 
   return err("Invalid input");
 }
 
-async function recalcUniqueForHashes(
-  db: ReturnType<typeof getDb>,
-  hashes: string[],
-) {
-  for (const h of hashes) {
-    await db.execute({
-      sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
-      args: [h],
-    });
-  }
+type Db = ReturnType<typeof getDb>;
+type Stmt = { sql: string; args: string[] };
+
+function clearUniqueStmts(hashes: string[]): Stmt[] {
+  return hashes.map((h) => ({
+    sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
+    args: [h],
+  }));
 }
 
-async function restoreUniqueForHashes(
-  db: ReturnType<typeof getDb>,
-  hashes: string[],
-) {
-  for (const h of hashes) {
-    await db.execute({
+function restoreUniqueStmts(hashes: string[]): Stmt[] {
+  return hashes.flatMap((h) => [
+    {
       sql: "UPDATE pageviews SET is_unique = 0 WHERE visitor_hash = ?",
       args: [h],
-    });
-    await db.execute({
+    },
+    {
       sql: `UPDATE pageviews SET is_unique = 1
             WHERE id IN (
               SELECT MIN(id) FROM pageviews
@@ -109,40 +116,46 @@ async function restoreUniqueForHashes(
               GROUP BY date(created_at)
             )`,
       args: [h],
-    });
-  }
+    },
+  ]);
 }
 
-async function insertAndRecalc(
-  db: ReturnType<typeof getDb>,
-  hashes: string[],
-): Promise<Response> {
-  const placeholders = hashes.map(() => "(?)").join(",");
-  await db.execute({
-    sql: `INSERT OR IGNORE INTO bot_hashes (hash) VALUES ${placeholders}`,
+function deleteHashesStmt(hashes: string[]): Stmt {
+  const placeholders = hashes.map(() => "?").join(",");
+  return {
+    sql: `DELETE FROM bot_hashes WHERE hash IN (${placeholders})`,
     args: hashes,
-  });
-  await recalcUniqueForHashes(db, hashes);
+  };
+}
+
+async function insertAndRecalc(db: Db, hashes: string[]): Promise<Response> {
+  const placeholders = hashes.map(() => "(?)").join(",");
+  await db.batch(
+    [
+      {
+        sql: `INSERT OR IGNORE INTO bot_hashes (hash) VALUES ${placeholders}`,
+        args: hashes,
+      },
+      ...clearUniqueStmts(hashes),
+    ],
+    "write",
+  );
   return jsonOk({ ok: true, flagged: hashes.length });
 }
 
-async function deleteAndRestore(
-  db: ReturnType<typeof getDb>,
-  hashes: string[],
-): Promise<Response> {
-  const placeholders = hashes.map(() => "?").join(",");
-  await db.execute({
-    sql: `DELETE FROM bot_hashes WHERE hash IN (${placeholders})`,
-    args: hashes,
-  });
-  await restoreUniqueForHashes(db, hashes);
+async function deleteAndRestore(db: Db, hashes: string[]): Promise<Response> {
+  await db.batch(
+    [deleteHashesStmt(hashes), ...restoreUniqueStmts(hashes)],
+    "write",
+  );
   return jsonOk({ ok: true, unflagged: hashes.length });
 }
 
-export const POST: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
-  }
+const GENERIC_ERROR = "Internal error";
+
+async function handlePost(request: Request): Promise<Response> {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
 
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
@@ -168,15 +181,20 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   return insertAndRecalc(db, [action.hash]);
+}
+
+export const POST: APIRoute = async ({ request }) => {
+  try {
+    return await handlePost(request);
+  } catch (e) {
+    console.error("[admin/bot POST]", e);
+    return jsonErr(GENERIC_ERROR, 500);
+  }
 };
 
-export const DELETE: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+async function handleDelete(request: Request): Promise<Response> {
+  const denied = requireAdmin(request);
+  if (denied) return denied;
 
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
@@ -216,11 +234,20 @@ export const DELETE: APIRoute = async ({ request }) => {
   }
 
   return deleteAndRestore(db, [action.hash]);
+}
+
+export const DELETE: APIRoute = async ({ request }) => {
+  try {
+    return await handleDelete(request);
+  } catch (e) {
+    console.error("[admin/bot DELETE]", e);
+    return jsonErr(GENERIC_ERROR, 500);
+  }
 };
 
 export const GET: APIRoute = async ({ url }) => {
   const token = url.searchParams.get("token") ?? "";
-  if (token.length === 0 || token !== env("ADMIN_TOKEN")) {
+  if (!timeSafeEqual(token, env("ADMIN_TOKEN"))) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -240,23 +267,21 @@ export const GET: APIRoute = async ({ url }) => {
     const hashes = all.rows.map((r) => String(r.hash));
 
     if (hashes.length > 0) {
-      const placeholders = hashes.map(() => "?").join(",");
-      await db.execute({
-        sql: `DELETE FROM bot_hashes WHERE hash IN (${placeholders})`,
-        args: hashes,
-      });
-      await restoreUniqueForHashes(db, hashes);
+      await db.batch(
+        [deleteHashesStmt(hashes), ...restoreUniqueStmts(hashes)],
+        "write",
+      );
     }
 
-    const dashHref = `/admin/analytics?token=${encodeURIComponent(token)}`;
+    // Token is not echoed into the HTML; the link is completed client-side from localStorage.
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a href="${dashHref}">→ Torna alla dashboard</a></p></body>`,
+      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a id="dash" href="/admin/analytics">→ Torna alla dashboard</a></p><script>try{var t=localStorage.getItem("vbAdminToken");if(t)document.getElementById("dash").href="/admin/analytics?token="+encodeURIComponent(t)}catch(e){}</script></body>`,
       { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
     );
   } catch (e) {
-    const msg = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+    console.error("[admin/bot GET recover]", e);
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Recover error</title><body style="font-family:system-ui;padding:2rem;max-width:680px"><h1>Errore</h1><pre style="background:#f5f5f5;padding:1rem;overflow:auto">${msg.replace(/[<>&]/g, (c) => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]!))}</pre></body>`,
+      `<!doctype html><meta charset="utf-8"><title>Recover error</title><body style="font-family:system-ui;padding:2rem;max-width:680px"><h1>Errore</h1><p>Errore interno, vedi i log del server.</p></body>`,
       { status: 500, headers: { "Content-Type": "text/html; charset=utf-8" } },
     );
   }

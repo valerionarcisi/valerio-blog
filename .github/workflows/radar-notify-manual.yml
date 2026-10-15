@@ -1,6 +1,6 @@
 name: Radar — notifica manuale
 
-# Manda la DM Telegram per le opportunità aggiunte a mano a public/radar.json.
+# Manda la DM Telegram per le opportunità aggiunte a mano a src/data/radar.json.
 # Confronta HEAD con `base_ref` (default HEAD~1 = ciò che l'ultimo commit ha aggiunto).
 # Non riesegue la ricerca e non committa: solo notifica.
 

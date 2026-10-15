@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --import tsx
 /**
- * Confronta public/radar.json (working tree) con la versione in HEAD e,
+ * Confronta src/data/radar.json (working tree) con la versione in HEAD e,
  * se ci sono item con id nuovi, manda una DM Telegram all'owner —
  * impaginata (HTML) con fit %, per chi, perché, azione, scadenza, link.
  *
@@ -32,7 +32,7 @@ type Item = {
   status?: string;
 };
 
-const RADAR_PATH = "public/radar.json";
+const RADAR_PATH = "src/data/radar.json";
 const TG_LIMIT = 3500; // sotto il tetto Telegram (4096) con margine
 
 function idsOf(json: string): Item[] {

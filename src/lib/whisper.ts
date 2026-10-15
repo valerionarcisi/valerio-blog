@@ -15,6 +15,7 @@ export async function transcribe(
     method: "POST",
     headers: { Authorization: `Bearer ${env("OPENAI_API_KEY")}` },
     body: form,
+    signal: AbortSignal.timeout(8000),
   });
   const data = (await r.json()) as { text?: string; error?: { message: string } };
   if (!r.ok || data.error) throw new Error(data.error?.message ?? `Whisper HTTP ${r.status}`);

@@ -10,7 +10,7 @@ on:
   workflow_dispatch: {} # run manuale dalla tab Actions
 
 permissions:
-  contents: write # per committare/pushare public/radar.json
+  contents: write # per committare/pushare src/data/radar.json
 
 jobs:
   update-radar:
@@ -36,12 +36,12 @@ jobs:
 
       - name: Commit & push se cambiato
         run: |
-          if git diff --quiet -- public/radar.json; then
+          if git diff --quiet -- src/data/radar.json; then
             echo "Nessuna modifica."
             exit 0
           fi
           git config user.name "radar-bot"
           git config user.email "radar-bot@users.noreply.github.com"
-          git add public/radar.json
+          git add src/data/radar.json
           git commit -m "radar: aggiornamento settimanale opportunità"
           git push

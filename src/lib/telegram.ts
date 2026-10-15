@@ -30,6 +30,7 @@ export async function sendMessage(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text, ...options }),
+    signal: AbortSignal.timeout(8000),
   });
   const data = (await r.json()) as { ok: boolean; result?: SendMessageResponse; description?: string };
   if (!data.ok) throw new Error(data.description ?? "Telegram API error");
@@ -37,7 +38,9 @@ export async function sendMessage(
 }
 
 export async function getFilePath(fileId: string): Promise<string> {
-  const r = await fetch(api(`/getFile?file_id=${encodeURIComponent(fileId)}`));
+  const r = await fetch(api(`/getFile?file_id=${encodeURIComponent(fileId)}`), {
+    signal: AbortSignal.timeout(8000),
+  });
   const data = (await r.json()) as { ok: boolean; result?: { file_path: string }; description?: string };
   if (!data.ok) throw new Error(data.description ?? "getFile failed");
   return data.result!.file_path;
@@ -45,7 +48,7 @@ export async function getFilePath(fileId: string): Promise<string> {
 
 export async function downloadFile(filePath: string): Promise<ArrayBuffer> {
   const url = `${API_BASE}/file/bot${env("TELEGRAM_BOT_TOKEN")}/${filePath}`;
-  const r = await fetch(url);
+  const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!r.ok) throw new Error(`downloadFile HTTP ${r.status}`);
   return r.arrayBuffer();
 }

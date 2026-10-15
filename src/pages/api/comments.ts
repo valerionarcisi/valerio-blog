@@ -6,6 +6,7 @@ import { verifyBearerToken } from "~/lib/auth";
 import { env } from "~/lib/env";
 import { AUTHOR_NAME, AUTHOR_EMAIL } from "~/lib/author";
 import { isSpam } from "~/lib/spam-filter";
+import { checkRate, rateKey } from "~/lib/rate-limit";
 import {
   type Result,
   ok,
@@ -34,6 +35,8 @@ interface AuthorCommentInput {
   lang: "it" | "en";
 }
 
+const PAGE_ID_RE = /^[a-zA-Z0-9/_.\-]{1,200}$/;
+
 function parseCommentInput(body: unknown): Result<CommentInput | "honeypot"> {
   if (!body || typeof body !== "object") return err("Invalid body");
   const { pageId, name, email, text, website, parentId, lang } = body as Record<
@@ -44,6 +47,7 @@ function parseCommentInput(body: unknown): Result<CommentInput | "honeypot"> {
   if (website) return ok("honeypot" as const);
 
   if (!isNonEmptyString(pageId)) return err("pageId required");
+  if (!PAGE_ID_RE.test(pageId.trim())) return err("Invalid pageId");
   if (!isNonEmptyString(name) || name.length > 100) return err("Invalid name");
   if (!isValidEmail(email)) return err("Invalid email");
   if (!isNonEmptyString(text) || text.length > 5000)
@@ -163,6 +167,10 @@ export const POST: APIRoute = async ({ request }) => {
 
   const isAuthor = verifyBearerToken(request, env("ADMIN_TOKEN"));
   if (isAuthor) return handleAuthorPost(body);
+
+  // Rate limit public posts only; fails open if the DB errors.
+  const allowed = await checkRate(getDb(), rateKey(request, "comments:post"), 5, 60);
+  if (!allowed) return jsonErr("Too many requests", 429);
 
   return handlePublicPost(body);
 };

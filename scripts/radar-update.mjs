@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Ricerca settimanale (Haiku + web search) → riscrive public/radar.json.
+ * Ricerca settimanale (Haiku + web search) → riscrive src/data/radar.json.
  * Chiamato dal workflow .github/workflows/radar-weekly.yml. Vedi docs/radar-agent.md.
  *
  * Zero dipendenze: parla con l'API Anthropic via fetch.
@@ -12,7 +12,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-const RADAR_PATH = "public/radar.json";
+const RADAR_PATH = "src/data/radar.json";
 const MODEL = "claude-haiku-4-5";
 const API = "https://api.anthropic.com/v1/messages";
 

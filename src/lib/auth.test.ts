@@ -18,6 +18,25 @@ describe("timeSafeEqual", () => {
     expect(timeSafeEqual("", "")).toBe(false);
   });
 
+  test("non-ASCII equal strings return true", () => {
+    expect(timeSafeEqual("pässwörd-日本", "pässwörd-日本")).toBe(true);
+  });
+
+  test("non-ASCII differing strings of same char length return false", () => {
+    expect(timeSafeEqual("aé", "ab")).toBe(false);
+    expect(timeSafeEqual("é", "e")).toBe(false);
+  });
+
+  test("prefix of the token returns false", () => {
+    expect(timeSafeEqual("secret", "secret123")).toBe(false);
+    expect(timeSafeEqual("secret123", "secret")).toBe(false);
+  });
+
+  test("one empty side returns false", () => {
+    expect(timeSafeEqual("", "token")).toBe(false);
+    expect(timeSafeEqual("token", "")).toBe(false);
+  });
+
   test("undefined input returns false", () => {
     expect(timeSafeEqual("token", undefined as unknown as string)).toBe(false);
     expect(timeSafeEqual(undefined as unknown as string, "token")).toBe(false);

@@ -16,3 +16,10 @@ function decode(): Record<string, string> {
 export function env(key: string): string {
   return decode()[key] ?? "";
 }
+
+/** Like env() but throws a clear error when the variable is missing/empty. */
+export function requireEnv(key: string): string {
+  const v = env(key);
+  if (!v) throw new Error(`Missing env ${key}`);
+  return v;
+}

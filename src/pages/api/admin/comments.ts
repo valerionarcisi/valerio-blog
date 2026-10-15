@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { verifyBearerToken } from "~/lib/auth";
-import { env } from "~/lib/env";
+import { requireAdmin } from "~/lib/admin-auth";
 import getDb from "~/lib/turso";
 import {
   notifyCommentApproved,
@@ -19,8 +18,7 @@ import {
 export const prerender = false;
 
 type CommentAction =
-  | { type: "approve"; id: number }
-  | { type: "delete"; id: number };
+  { type: "approve"; id: number } | { type: "delete"; id: number };
 
 function parseCommentAction(body: unknown): Result<CommentAction> {
   if (!body || typeof body !== "object") return err("Invalid body");
@@ -82,38 +80,39 @@ async function loadParent(parentId: number): Promise<{
 }
 
 export const GET: APIRoute = async ({ url, request }) => {
-  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const denied = requireAdmin(request);
+  if (denied) return denied;
 
   const status = url.searchParams.get("status") ?? "pending";
+  if (status !== "pending" && status !== "approved") {
+    return jsonErr("Invalid status — expected 'pending' or 'approved'", 400);
+  }
   const approvedValue = status === "approved" ? 1 : 0;
 
-  const result = await getDb().execute({
-    sql: `SELECT c.id, c.page_id, c.name, c.email, c.text, c.approved, c.created_at,
+  try {
+    const result = await getDb().execute({
+      sql: `SELECT c.id, c.page_id, c.name, c.email, c.text, c.approved, c.created_at,
             c.parent_id, c.likes_count, c.lang, c.is_author,
             p.name AS parent_name,
             (SELECT COUNT(*) FROM comments k WHERE k.parent_id = c.id) AS children_count
           FROM comments c
           LEFT JOIN comments p ON p.id = c.parent_id
           WHERE c.approved = ?
-          ORDER BY c.created_at DESC`,
-    args: [approvedValue],
-  });
+          ORDER BY c.created_at DESC
+          LIMIT 200`,
+      args: [approvedValue],
+    });
 
-  return jsonOk(result.rows);
+    return jsonOk(result.rows);
+  } catch (e) {
+    console.error("[admin/comments GET]", e);
+    return jsonErr("Internal error", 500);
+  }
 };
 
 export const PATCH: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const denied = requireAdmin(request);
+  if (denied) return denied;
 
   const bodyResult = await parseJsonBody(request);
   if (!bodyResult.ok) return jsonErr(bodyResult.error, 400);
@@ -121,50 +120,80 @@ export const PATCH: APIRoute = async ({ request }) => {
   const parsed = parseCommentAction(bodyResult.value);
   if (!parsed.ok) return jsonErr(parsed.error, 400);
 
-  const comment = await loadComment(parsed.value.id);
-  if (!comment) return jsonErr("Comment not found", 404);
+  try {
+    const comment = await loadComment(parsed.value.id);
+    if (!comment) return jsonErr("Comment not found", 404);
+    const db = getDb();
 
-  if (parsed.value.type === "approve") {
-    await getDb().execute({
-      sql: "UPDATE comments SET approved = 1, notified_approved = 1 WHERE id = ?",
-      args: [parsed.value.id],
-    });
-
-    if (comment.notified_approved === 0) {
-      notifyCommentApproved({
-        pageId: comment.page_id,
-        name: comment.name,
-        email: comment.email,
-        text: comment.text,
-        lang: comment.lang,
+    if (parsed.value.type === "approve") {
+      // notified_approved is only set after the send succeeded, so a failed
+      // send can be retried by approving again.
+      await db.execute({
+        sql: "UPDATE comments SET approved = 1 WHERE id = ?",
+        args: [parsed.value.id],
       });
 
-      if (comment.parent_id !== null) {
-        const parent = await loadParent(comment.parent_id);
-        if (parent && parent.email !== comment.email) {
-          notifyReplyToYourComment({
+      if (comment.notified_approved === 0) {
+        const sends: Promise<void>[] = [
+          notifyCommentApproved({
             pageId: comment.page_id,
-            parentName: parent.name,
-            parentEmail: parent.email,
-            replyName: comment.name,
-            replyText: comment.text,
+            name: comment.name,
+            email: comment.email,
+            text: comment.text,
             lang: comment.lang,
+          }),
+        ];
+
+        if (comment.parent_id !== null) {
+          const parent = await loadParent(comment.parent_id);
+          if (parent && parent.email !== comment.email) {
+            sends.push(
+              notifyReplyToYourComment({
+                pageId: comment.page_id,
+                parentName: parent.name,
+                parentEmail: parent.email,
+                replyName: comment.name,
+                replyText: comment.text,
+                lang: comment.lang,
+              }),
+            );
+          }
+        }
+
+        const results = await Promise.allSettled(sends);
+        for (const r of results) {
+          if (r.status === "rejected") {
+            console.error("[admin/comments notify]", r.reason);
+          }
+        }
+        if (results[0].status === "fulfilled") {
+          await db.execute({
+            sql: "UPDATE comments SET notified_approved = 1 WHERE id = ?",
+            args: [parsed.value.id],
           });
         }
       }
+    } else {
+      await db.execute({
+        sql: "DELETE FROM comments WHERE id = ?",
+        args: [parsed.value.id],
+      });
+      const [rejected] = await Promise.allSettled([
+        notifyCommentRejected({
+          pageId: comment.page_id,
+          name: comment.name,
+          email: comment.email,
+          lang: comment.lang,
+        }),
+      ]);
+      if (rejected.status === "rejected") {
+        console.error("[admin/comments notify]", rejected.reason);
+      }
     }
-  } else {
-    await getDb().execute({
-      sql: "DELETE FROM comments WHERE id = ?",
-      args: [parsed.value.id],
-    });
-    notifyCommentRejected({
-      pageId: comment.page_id,
-      name: comment.name,
-      email: comment.email,
-      lang: comment.lang,
-    });
-  }
 
-  return jsonOk({ ok: true });
+    return jsonOk({ ok: true });
+  } catch (e) {
+    console.error("[admin/comments PATCH]", e);
+    return jsonErr("Internal error", 500);
+  }
 };

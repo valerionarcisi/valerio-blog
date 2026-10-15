@@ -1,8 +1,6 @@
 import type { APIRoute } from "astro";
-import { verifyBearerToken } from "~/lib/auth";
-import { env } from "~/lib/env";
+import { requireAdmin } from "~/lib/admin-auth";
 import { fetchTrainingContext, fetchFullStats } from "~/services/strava";
-import getDb from "~/lib/turso";
 
 export const prerender = false;
 
@@ -28,32 +26,14 @@ async function fetchWeekendWeather() {
 }
 
 export const GET: APIRoute = async ({ request }) => {
-  if (!verifyBearerToken(request, env("ADMIN_TOKEN"))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { "Content-Type": "application/json" } });
-  }
-
-  async function fetchHomeWorkoutsThisWeek(): Promise<number> {
-    try {
-      const db = getDb();
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1);
-      const weekStartStr = weekStart.toISOString().slice(0, 10);
-      const res = await db.execute({
-        sql: "SELECT COUNT(*) as n FROM workout_sessions WHERE completed_at >= ?",
-        args: [weekStartStr],
-      });
-      return Number(res.rows[0]?.n ?? 0);
-    } catch {
-      return 0;
-    }
-  }
+  const denied = requireAdmin(request);
+  if (denied) return denied;
 
   try {
-    const [training, fullStats, weather, homeWorkouts] = await Promise.all([
+    const [training, fullStats, weather] = await Promise.all([
       fetchTrainingContext(),
       fetchFullStats(),
       fetchWeekendWeather(),
-      fetchHomeWorkoutsThisWeek(),
     ]);
 
     return new Response(
@@ -64,12 +44,12 @@ export const GET: APIRoute = async ({ request }) => {
         last12WeeklyElevation: training.last12WeeklyElevation,
         weeklyRunStats: fullStats.weeklyRunStats,
         weather,
-        homeWorkoutsThisWeek: homeWorkouts,
       }),
-      { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
+      { headers: { "Content-Type": "application/json", "Cache-Control": "private, no-store" } },
     );
   } catch (e) {
-    return new Response(JSON.stringify({ error: String(e) }), {
+    console.error("[training GET]", e);
+    return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
