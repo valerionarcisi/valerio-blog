@@ -21,6 +21,11 @@ const envKeys = [
   "TELEGRAM_SECRET_TOKEN",
   "TELEGRAM_USER_ID_WHITELIST",
   "OPENAI_API_KEY",
+  // Weekly analytics report (read by the HAL bot, or sent by the Netlify function when opted in)
+  "ANALYTICS_REPORT_TOKEN",
+  "ANALYTICS_REPORT_CHAT_ID",
+  "ANALYTICS_REPORT_DISABLED",
+  "ANALYTICS_REPORT_VIA_NETLIFY",
 ];
 
 // Merge process.env with .env file (process.env takes precedence)

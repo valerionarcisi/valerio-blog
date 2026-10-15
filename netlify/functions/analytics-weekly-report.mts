@@ -12,6 +12,7 @@ import { runWeeklyReport, resolveTarget, isReportDisabled } from "../../src/lib/
  * values, which do not exist in this separately bundled function):
  *   TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, TELEGRAM_BOT_TOKEN,
  *   ANALYTICS_REPORT_CHAT_ID (fallback: first id of TELEGRAM_USER_ID_WHITELIST),
+ *   ANALYTICS_REPORT_VIA_NETLIFY=1 to send from here (default: off, HAL delivers it),
  *   ANALYTICS_REPORT_DISABLED=1 to opt out.
  * Without a bot token or target it logs and does nothing.
  */
@@ -22,6 +23,12 @@ function runtimeEnv(key: string): string {
 }
 
 export default async (_req: Request): Promise<Response> => {
+  // Opt-in: by default HAL (the NAS bot) fetches GET /api/analytics-report and delivers the report,
+  // so sending from here too would duplicate it.
+  if (runtimeEnv("ANALYTICS_REPORT_VIA_NETLIFY") !== "1") {
+    console.log("[analytics-weekly-report] delivery delegated (set ANALYTICS_REPORT_VIA_NETLIFY=1 to send from Netlify)");
+    return new Response("delegated");
+  }
   if (isReportDisabled(runtimeEnv)) {
     console.log("[analytics-weekly-report] disabled (ANALYTICS_REPORT_DISABLED)");
     return new Response("disabled");
