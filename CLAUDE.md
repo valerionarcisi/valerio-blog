@@ -114,7 +114,7 @@ docs/
 
 **Admin:**
 
-- `ADMIN_TOKEN` — admin secret. Visit `/admin?token=...` once: middleware sets the HttpOnly `vb_admin` session cookie (HMAC keyed by the token, 30 days) and 302-redirects to the same URL without the token. Cookie, `Authorization: Bearer` and `?token=` all stay valid. Cookie-authenticated POST/PUT/PATCH/DELETE need a same-origin `Origin`/`Referer` (CSRF). `/admin/logout` clears it. Rotating = change `ADMIN_TOKEN`. See `docs/admin-auth-spec.md`.
+- `ADMIN_TOKEN` — admin secret. Visit `/admin?token=...` once: middleware sets the HttpOnly `vb_admin` session cookie (HMAC keyed by the token, 30 days) on that same response (no redirect: Netlify re-appends the query string to function redirects and it loops; `AdminNav` strips `?token=` from the address bar client-side). Cookie, `Authorization: Bearer` and `?token=` all stay valid. Cookie-authenticated POST/PUT/PATCH/DELETE need a same-origin `Origin`/`Referer` (CSRF). `/admin/logout` clears it. Rotating = change `ADMIN_TOKEN`. See `docs/admin-auth-spec.md`.
 
 **Editorial Agents (Phase 1 — Idea Catcher Telegram bot):**
 

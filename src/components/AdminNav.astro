@@ -93,6 +93,17 @@ const currentLabel =
 </nav>
 
 <script>
+  // The session cookie is already set; remove the one-time ?token= from the address bar and history.
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.has('token')) {
+      u.searchParams.delete('token');
+      history.replaceState(null, '', u.pathname + u.search + u.hash);
+    }
+  } catch {
+    /* address bar cleanup is best effort */
+  }
+
   const btn = document.getElementById('admin-hamburger');
   const sidebar = document.getElementById('admin-sidebar');
   const backdrop = document.getElementById('admin-backdrop');

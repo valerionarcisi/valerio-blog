@@ -39,22 +39,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
     verifyBearerToken(request, secret) ||
     validQueryToken;
 
-  let response: Response;
+  let response = await next();
   if (validQueryToken && (request.method === "GET" || request.method === "HEAD")) {
-    // Exchange the one-time ?token= for a session cookie and strip it from the URL.
-    const clean = new URL(url);
-    clean.searchParams.delete("token");
-    response = new Response(null, {
-      status: 302,
-      headers: {
-        Location: clean.pathname + clean.search + clean.hash,
-        "Set-Cookie": sessionCookieHeader(createSessionValue(secret), {
-          secure: url.protocol === "https:",
-        }),
-      },
+    // Exchange the one-time ?token= for a session cookie. NO redirect on purpose: Netlify re-appends
+    // the original query string to any relative Location a function returns, so a "strip the token"
+    // redirect goes back to the URL with the token and loops forever. The page strips the token from
+    // the address bar client-side (AdminNav) and Referrer-Policy: no-referrer keeps it from leaking.
+    const cookie = sessionCookieHeader(createSessionValue(secret), {
+      secure: url.protocol === "https:",
     });
-  } else {
-    response = await next();
+    try {
+      response.headers.append("Set-Cookie", cookie);
+    } catch {
+      response = new Response(response.body, response);
+      response.headers.append("Set-Cookie", cookie);
+    }
   }
   if (!isAdminPath(url.pathname)) return response;
 
