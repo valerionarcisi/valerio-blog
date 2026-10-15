@@ -161,9 +161,9 @@ const t = labels[lang];
     };
     var t = labels[lang] || labels.en;
     var MAX_DEPTH = 4;
-    var authorToken = null;
-    try { authorToken = localStorage.getItem("vbAdminToken"); } catch (e) {}
-    var isAuthor = !!authorToken;
+    // Author mode is detected at runtime from the HttpOnly admin session cookie
+    // (never baked into the statically cached HTML).
+    var isAuthor = false;
     var AUTHOR_LABEL_IT = "Stai rispondendo come Valerio · Author";
     var AUTHOR_LABEL_EN = "Posting as Valerio · Author";
 
@@ -397,7 +397,6 @@ const t = labels[lang];
       messageEl.className = "Comments-message";
 
       var headers = { "Content-Type": "application/json" };
-      if (isAuthor) headers["Authorization"] = "Bearer " + authorToken;
 
       function releaseLock() {
         form.dataset.submitting = "";
@@ -406,6 +405,7 @@ const t = labels[lang];
 
       fetch("/api/comments", {
         method: "POST",
+        credentials: "same-origin",
         headers: headers,
         body: JSON.stringify(data),
       })
@@ -431,7 +431,14 @@ const t = labels[lang];
         .then(releaseLock, releaseLock);
     }
 
-    applyAuthorMode(rootForm);
+    fetch("/api/admin/me", { credentials: "same-origin", cache: "no-store" })
+      .then(function (r) {
+        if (!r.ok) return;
+        isAuthor = true;
+        applyAuthorMode(rootForm);
+        document.querySelectorAll(".Comments-reply-slot form").forEach(applyAuthorMode);
+      })
+      .catch(function () {});
     rootForm.addEventListener("submit", function (e) {
       handleSubmit(e, rootForm, null);
     });

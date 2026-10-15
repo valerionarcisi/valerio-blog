@@ -1,16 +1,12 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 ---
@@ -607,7 +603,7 @@ if (!isAuthorized) {
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="analytics" token={token} />
+    <AdminNav currentPage="analytics" />
 
     <div class="ax-wrap">
       <header class="ax-head">
@@ -764,10 +760,7 @@ if (!isAuthorized) {
     <script is:inline src="/admin/admin-client.js"></script>
     <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha384-u5N8qJeJOO2iqNjIKTdl6KeKsEikMAmCUBPc6sC6uGpgL34aPJ4VgNhuhumedpEk" crossorigin="anonymous"></script>
     <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
-    <script is:inline define:vars={{ token }}>
-      var ADMIN_TOKEN = token;
-      setAdminToken(ADMIN_TOKEN);
-      var AUTH_HEADERS = { "Authorization": "Bearer " + ADMIN_TOKEN };
+    <script is:inline>
       var chartInstance = null;
 
       function cssVar(name, fallback) {
@@ -873,7 +866,7 @@ if (!isAuthorized) {
       function flagAsBot(hash, btn) {
         var row = btn.closest("li");
         btn.disabled = true;
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ hash: hash }) })
+        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hash: hash }) })
           .then(function(r) {
             btn.disabled = false;
             if (!r.ok) return;
@@ -886,7 +879,7 @@ if (!isAuthorized) {
       function unflagAsBot(hash, btn) {
         var row = btn.closest("li");
         btn.disabled = true;
-        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ hash: hash }) })
+        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hash: hash }) })
           .then(function(r) {
             btn.disabled = false;
             if (!r.ok) return;
@@ -910,7 +903,7 @@ if (!isAuthorized) {
         if (!hashes.length) return;
         var btn = document.getElementById("flag-all-bots");
         btn.disabled = true; btn.textContent = "Flagging…";
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ hashes: hashes }) })
+        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hashes: hashes }) })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) { btn.textContent = d.flagged + " flaggati"; })
           .catch(function(e) { console.error("flagAllBots failed", e); btn.disabled = false; btn.textContent = "Errore"; });
@@ -1138,7 +1131,7 @@ if (!isAuthorized) {
         updatePeriodLabel(); updateNavButtons();
         document.querySelectorAll(".ax-periods button").forEach(function(b) { b.classList.toggle("active", b.dataset.period === basePeriod); });
 
-        fetch("/api/stats?period=" + period, { headers: AUTH_HEADERS })
+        fetch("/api/stats?period=" + period, { credentials: "same-origin" })
           .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
           .then(function(d) {
             var s = d.summary;
@@ -1219,7 +1212,7 @@ if (!isAuthorized) {
       }
 
       function loadLive() {
-        fetch("/api/stats/live", { headers: AUTH_HEADERS })
+        fetch("/api/stats/live", { credentials: "same-origin" })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) { document.getElementById("live-count").textContent = d.active; })
           .catch(function(e) { console.error("loadLive failed", e); });
@@ -1228,7 +1221,7 @@ if (!isAuthorized) {
       function pollRecent() {
         if (document.hidden) return;
         if (currentPeriod !== "today") return;
-        fetch("/api/stats?period=today", { headers: AUTH_HEADERS })
+        fetch("/api/stats?period=today", { credentials: "same-origin" })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             if (d && d.recent_visitors) renderRecentVisitors(d.recent_visitors);
@@ -1257,7 +1250,7 @@ if (!isAuthorized) {
         var btn = document.getElementById("unflag-all");
         var orig = btn.textContent;
         btn.disabled = true; btn.textContent = "Annullamento…";
-        fetch("/api/admin/bot?_=" + Date.now(), { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ all: true }) })
+        fetch("/api/admin/bot?_=" + Date.now(), { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.disabled = false;
@@ -1271,7 +1264,7 @@ if (!isAuthorized) {
         var btn = document.getElementById("unflag-recent");
         var orig = btn.textContent;
         btn.disabled = true; btn.textContent = "Annullamento…";
-        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ recentMinutes: 1440 }) })
+        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ recentMinutes: 1440 }) })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.disabled = false;
@@ -1285,7 +1278,7 @@ if (!isAuthorized) {
         var btn = document.getElementById("flag-suspects-btn");
         if (!currentFrom || !currentTo) return;
         btn.disabled = true; btn.textContent = "Flagging…";
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + ADMIN_TOKEN }, body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo }) })
+        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo }) })
           .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
           .then(function(d) {
             btn.textContent = d.flagged + " flaggati";

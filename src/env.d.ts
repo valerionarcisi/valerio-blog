@@ -10,3 +10,10 @@ interface ImportMetaEnv {
   readonly STRAVA_CLIENT_SECRET: string;
   readonly STRAVA_REFRESH_TOKEN: string;
 }
+
+declare namespace App {
+  interface Locals {
+    /** True for a valid admin session cookie, Bearer token, or (on /admin pages) `?token=`. */
+    isAdmin: boolean;
+  }
+}

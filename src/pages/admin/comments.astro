@@ -1,17 +1,13 @@
 ---
 import { Icon } from "astro-icon/components";
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 ---
@@ -123,7 +119,7 @@ if (!isAuthorized) {
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="comments" token={token} />
+    <AdminNav currentPage="comments" />
     <div class="container">
       <header class="page-header">
         <h1><em class="acc">Comments.</em></h1>
@@ -180,10 +176,7 @@ if (!isAuthorized) {
     </div>
 
     <script is:inline src="/admin/admin-client.js"></script>
-    <script is:inline define:vars={{ token }}>
-      var ADMIN_TOKEN = token;
-      setAdminToken(token);
-      try { localStorage.setItem("vbAdminToken", token); } catch (e) {}
+    <script is:inline>
       var currentStatus = "pending";
 
       function el(tag, cls, text) {

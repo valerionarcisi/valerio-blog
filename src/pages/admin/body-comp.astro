@@ -1,6 +1,4 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
@@ -8,10 +6,8 @@ import rawData from "../../../data/body-comp/measurements.json";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 
@@ -174,7 +170,7 @@ const isStale = daysAgo !== null && daysAgo > 21;
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="body-comp" token={token} />
+    <AdminNav currentPage="body-comp" />
     <h1><em class="acc">Body Composition.</em></h1>
 
     {lastLabel ? (

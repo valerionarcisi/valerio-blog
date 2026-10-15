@@ -1,6 +1,4 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import ActivityHeatmap from "~/components/ActivityHeatmap.astro";
 import StravaSummary from "~/components/StravaSummary.astro";
@@ -11,10 +9,8 @@ import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 
@@ -137,7 +133,7 @@ const sportColor = (t: string) =>
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="training" token={token} />
+    <AdminNav currentPage="training" />
 
     <h1><em class="acc">Allenamento.</em></h1>
     <p class="subtitle">Monitoraggio settimanale e suggerimento smart per il weekend</p>
@@ -252,8 +248,7 @@ const sportColor = (t: string) =>
     </script>
 
     <script is:inline src="/admin/admin-client.js"></script>
-    <script is:inline define:vars={{ token }}>
-      const ADMIN_TOKEN = token;
+    <script is:inline>
       const API = '/api/training';
 
       function fmtPace(speedMs) {
@@ -554,7 +549,7 @@ const sportColor = (t: string) =>
 
       async function load() {
         try {
-          const res = await fetch(API, { headers: { "Authorization": "Bearer " + ADMIN_TOKEN } });
+          const res = await fetch(API, { credentials: "same-origin" });
           if (!res.ok) throw new Error('HTTP ' + res.status);
           const data = await res.json();
           document.getElementById('content').innerHTML = buildContent(data);

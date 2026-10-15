@@ -245,15 +245,15 @@ export const DELETE: APIRoute = async ({ request }) => {
   }
 };
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = async ({ url, request }) => {
   const token = url.searchParams.get("token") ?? "";
-  if (!timeSafeEqual(token, env("ADMIN_TOKEN"))) {
+  if (requireAdmin(request) && !timeSafeEqual(token, env("ADMIN_TOKEN"))) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   if (url.searchParams.get("recover") !== "all") {
     return new Response(
-      "Usage: GET /api/admin/bot?recover=all&token=ADMIN_TOKEN",
+      "Usage: GET /api/admin/bot?recover=all (admin session cookie, Bearer, or &token=ADMIN_TOKEN)",
       { status: 400, headers: { "Content-Type": "text/plain" } },
     );
   }
@@ -273,9 +273,8 @@ export const GET: APIRoute = async ({ url }) => {
       );
     }
 
-    // Token is not echoed into the HTML; the link is completed client-side from localStorage.
     return new Response(
-      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a id="dash" href="/admin/analytics">→ Torna alla dashboard</a></p><script>try{var t=localStorage.getItem("vbAdminToken");if(t)document.getElementById("dash").href="/admin/analytics?token="+encodeURIComponent(t)}catch(e){}</script></body>`,
+      `<!doctype html><meta charset="utf-8"><title>Recover</title><body style="font-family:system-ui;padding:2rem;max-width:600px"><h1>OK — ${hashes.length} hash sbloccati</h1><p>bot_hashes svuotata, is_unique ricalcolato.</p><p><a id="dash" href="/admin/analytics">→ Torna alla dashboard</a></p></body>`,
       { status: 200, headers: { "Content-Type": "text/html; charset=utf-8" } },
     );
   } catch (e) {

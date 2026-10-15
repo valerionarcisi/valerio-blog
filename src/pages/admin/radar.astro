@@ -1,17 +1,12 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized =
-  token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 ---
@@ -225,7 +220,7 @@ if (!isAuthorized) {
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="radar" token={token} />
+    <AdminNav currentPage="radar" />
     <main class="rd-wrap">
       <header class="rd-head">
         <h1>Radar <em class="acc">opportunità</em></h1>
@@ -451,10 +446,9 @@ if (!isAuthorized) {
       async function init(): Promise<void> {
         wireControls();
         try {
-          const tk = new URLSearchParams(location.search).get("token") ?? "";
           const res = await fetch("/api/admin/radar", {
             cache: "no-store",
-            headers: { Authorization: `Bearer ${tk}` },
+            credentials: "same-origin",
           });
           if (!res.ok) throw new Error(String(res.status));
           const data = await res.json();

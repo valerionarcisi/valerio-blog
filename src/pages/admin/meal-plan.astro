@@ -1,6 +1,4 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import { days, snacks } from "~/data/meal-plan";
 import "~/styles/foglio.css";
@@ -8,10 +6,8 @@ import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 
@@ -729,7 +725,7 @@ const mealIconName: Record<string, string> = {
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="meal-plan" token={token} />
+    <AdminNav currentPage="meal-plan" />
 
     <main>
     <h1><em class="acc">Piano &amp; spesa.</em></h1>

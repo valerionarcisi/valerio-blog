@@ -1,6 +1,4 @@
 ---
-import { timeSafeEqual } from "~/lib/auth";
-import { env } from "~/lib/env";
 import AdminNav from "~/components/AdminNav.astro";
 import { days } from "~/data/meal-plan";
 import "~/styles/foglio.css";
@@ -8,15 +6,12 @@ import "~/styles/admin-foglio.css";
 
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-const isAuthorized = token.length > 0 && timeSafeEqual(token, env("ADMIN_TOKEN"));
 
-if (!isAuthorized) {
+if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
 
-const t = encodeURIComponent(token);
-const link = (slug: string) => `/admin/${slug}?token=${t}`;
+const link = (slug: string) => `/admin/${slug}`;
 
 const TZ = "Europe/Rome";
 
@@ -92,7 +87,7 @@ const groups = [
     </style>
   </head>
   <body class="admin">
-    <AdminNav currentPage="home" token={token} />
+    <AdminNav currentPage="home" />
     <main class="home-wrap">
       <header>
         <h1><em class="acc">Oggi.</em></h1>

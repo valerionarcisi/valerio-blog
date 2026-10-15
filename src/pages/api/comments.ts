@@ -2,8 +2,7 @@ import type { APIRoute } from "astro";
 import getDb from "~/lib/turso";
 import { notifyNewComment, notifyReplyToYourComment } from "~/lib/email";
 import { generateStableVisitorHash } from "~/lib/analytics";
-import { verifyBearerToken } from "~/lib/auth";
-import { env } from "~/lib/env";
+import { adminAuth } from "~/lib/admin-auth";
 import { AUTHOR_NAME, AUTHOR_EMAIL } from "~/lib/author";
 import { isSpam } from "~/lib/spam-filter";
 import { checkRate, rateKey } from "~/lib/rate-limit";
@@ -165,7 +164,10 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonErr("Invalid JSON", 400);
   }
 
-  const isAuthor = verifyBearerToken(request, env("ADMIN_TOKEN"));
+  // Bearer, or cookie session (cookie POSTs must be same-origin: CSRF guard).
+  const auth = adminAuth(request);
+  if (auth === "forbidden") return jsonErr("Forbidden", 403);
+  const isAuthor = auth !== null;
   if (isAuthor) return handleAuthorPost(body);
 
   // Rate limit public posts only; fails open if the DB errors.

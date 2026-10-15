@@ -1,6 +1,5 @@
 ---
 export const prerender = false;
 
-const token = Astro.url.searchParams.get("token") ?? "";
-return Astro.redirect(`/admin/training?token=${encodeURIComponent(token)}#attivita`, 302);
+return Astro.redirect(`/admin/training#attivita`, 302);
 ---

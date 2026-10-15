@@ -1,7 +1,4 @@
 (function (w) {
-  var token = "";
-  w.setAdminToken = function (t) { token = t; };
-
   w.escapeHtml = function (v) {
     return String(v == null ? "" : v)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -25,9 +22,7 @@
 
   w.apiFetch = function (url, init) {
     init = init || {};
-    var headers = Object.assign({}, init.headers || {});
-    if (token && !headers.Authorization) headers.Authorization = "Bearer " + token;
-    init.headers = headers;
+    init = Object.assign({ credentials: "same-origin" }, init);
     return fetch(url, init).then(function (res) {
       if (!res.ok) {
         return res.text().then(function (t) {

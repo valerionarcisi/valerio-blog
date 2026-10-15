@@ -12,13 +12,12 @@ type PageId =
   | "roma-arte-di-narrare";
 
 interface Props {
-  token: string;
   currentPage: PageId;
 }
 
-const { currentPage, token } = Astro.props;
+const { currentPage } = Astro.props;
 
-const href = (slug: string) => `/admin/${slug}?token=${encodeURIComponent(token)}`;
+const href = (slug: string) => `/admin/${slug}`;
 
 // Eventi: aggiungere o rimuovere voci qui.
 const events = [
@@ -26,7 +25,7 @@ const events = [
 ];
 
 const groups: { title: string; links: { id: PageId; label: string; href: string }[] }[] = [
-  { title: "Oggi", links: [{ id: "home", label: "Home", href: `/admin?token=${encodeURIComponent(token)}` }] },
+  { title: "Oggi", links: [{ id: "home", label: "Home", href: "/admin" }] },
   {
     title: "Sito",
     links: [
@@ -88,6 +87,9 @@ const currentLabel =
       ))}
     </div>
   ))}
+  <div class="sidebar-section">
+    <a href="/admin/logout" class="sidebar-link">Esci</a>
+  </div>
 </nav>
 
 <script>

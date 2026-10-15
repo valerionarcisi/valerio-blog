@@ -53,10 +53,10 @@ src/
     contatti/        # Contact form
     who-i-am/        # About
     privacy-policy/
-    admin/           # Private dashboards (?token=...)
+    admin/           # Private dashboards (cookie session; visit once with ?token=...)
     en/              # English mirror
     api/             # API endpoints
-      admin/         # Bearer-token protected
+      admin/         # Cookie session or Bearer token (requireAdmin)
       stats/         # Public + live counter
       posts/         # Public claps
       telegram/      # Webhook for Idea Catcher (Phase 1 agents)
@@ -114,7 +114,7 @@ docs/
 
 **Admin:**
 
-- `ADMIN_TOKEN` — `/admin/*` and Bearer auth on `/api/admin/*`
+- `ADMIN_TOKEN` — admin secret. Visit `/admin?token=...` once: middleware sets the HttpOnly `vb_admin` session cookie (HMAC keyed by the token, 30 days) and 302-redirects to the same URL without the token. Cookie, `Authorization: Bearer` and `?token=` all stay valid. Cookie-authenticated POST/PUT/PATCH/DELETE need a same-origin `Origin`/`Referer` (CSRF). `/admin/logout` clears it. Rotating = change `ADMIN_TOKEN`. See `docs/admin-auth-spec.md`.
 
 **Editorial Agents (Phase 1 — Idea Catcher Telegram bot):**
 
@@ -125,11 +125,11 @@ docs/
 
 ## Comments + Claps System
 
-- **Public Comments API**: `GET/POST /api/comments` — fetch approved comments (nested replies via `parentId`), submit new ones, auto-login returning authors via Bearer token
+- **Public Comments API**: `GET/POST /api/comments` — fetch approved comments (nested replies via `parentId`), submit new ones, author mode via admin cookie session (or Bearer); the form detects it at runtime with `GET /api/admin/me`
 - **Comment Likes**: `POST /api/comments/like` — toggle like, visitor-hash anti-double-vote
 - **Claps**: `GET/POST /api/posts/claps` — Medium-style claps (max 50 per visitor)
-- **Admin API**: `GET/PATCH /api/admin/comments` — list pending, approve/delete (Bearer token + email notifications)
-- **Admin UI**: `/admin/comments?token=ADMIN_TOKEN`
+- **Admin API**: `GET/PATCH /api/admin/comments` — list pending, approve/delete (cookie session or Bearer + email notifications)
+- **Admin UI**: `/admin/comments`
 - **Anti-spam**: Honeypot hidden field (bots fill it, silently discarded). Email notifications via Resend.
 - **Moderation**: All comments pending until manually approved.
 

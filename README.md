@@ -59,7 +59,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 
 **Public:**
 
-- `GET/POST /api/comments` — public comments (nested replies via `parentId`; author auto-login via Bearer token)
+- `GET/POST /api/comments` — public comments (nested replies via `parentId`; author mode via admin cookie session or Bearer)
 - `POST /api/comments/like` — toggle like on a comment (visitor hash anti-double-vote)
 - `GET/POST /api/posts/claps` — Medium-style claps on blog posts (max 50 per visitor)
 - `GET/POST /api/non-fa-ridere/scores` — global leaderboard for the "Non Fa Ridere" mini-game (top 10, best score per name, server-side score clamping)
@@ -68,7 +68,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `POST /api/e` — privacy-first analytics tracker (no cookies, anonymous visitor hash)
 - `GET /api/t` — legacy bot-trap endpoint, kept as no-op
 
-**Admin (Bearer token):**
+**Admin (cookie session or Bearer token):**
 
 - `GET /api/stats` — analytics aggregates (pageviews, visitors, top pages, devices, geo, UTM, recent visitors, suspicious)
 - `GET /api/stats/live` — online-now counter (distinct visitor_hash in last 5 min, excludes flagged bots)
@@ -114,7 +114,7 @@ Built with co-located CSS files. Key reusable atoms:
 
 ## Admin
 
-Private dashboards under `/admin/` (protected by `?token=<ADMIN_TOKEN>`):
+Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an HttpOnly session cookie is set and the token is stripped from the URL; see `docs/admin-auth-spec.md`):
 
 | Page                | What                                                                                                            |
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |

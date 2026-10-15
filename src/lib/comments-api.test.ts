@@ -443,6 +443,30 @@ describe("POST /api/comments — author auto-login", () => {
     });
   }
 
+  test("cookie session: same-origin POST is author, no-Origin POST is 403", async () => {
+    const { createSessionValue } = await import("~/lib/admin-session");
+    const mk = (extra: Record<string, string>) =>
+      new Request("https://example.com/api/comments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-forwarded-for": "1.2.3.4",
+          "user-agent": "Mozilla/5.0 Test",
+          Cookie: `vb_admin=${createSessionValue("test-token")}`,
+          ...extra,
+        },
+        body: JSON.stringify({ pageId: "post-1", text: "da cookie", lang: "it" }),
+      });
+    const { POST } = await import("~/pages/api/comments");
+    const bad = await POST({ request: mk({}) } as never);
+    expect(bad.status).toBe(403);
+    const ok = await POST({ request: mk({ Origin: "https://example.com" }) } as never);
+    expect(ok.status).toBe(201);
+    const rows = await db.execute("SELECT is_author, approved FROM comments WHERE page_id = 'post-1'");
+    expect(rows.rows.length).toBe(1);
+    expect(rows.rows[0].is_author).toBe(1);
+  });
+
   test("with valid bearer token: comment is approved and is_author=1", async () => {
     const { POST } = await import("~/pages/api/comments");
     const res = await POST({
