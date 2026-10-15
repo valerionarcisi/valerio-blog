@@ -74,6 +74,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `GET /api/stats/live` — online-now counter (distinct visitor_hash in last 5 min, excludes flagged bots)
 - `GET/PATCH /api/admin/comments` — comment moderation (email notifications on approve/reject)
 - `GET /api/admin/claps` — claps recap by post
+- `POST /api/admin/analytics-rollup` — (re)compute daily analytics rollups for `{from, to}` (max 400 days); the nightly Netlify Scheduled Function `netlify/functions/analytics-rollup.mts` does it automatically and prunes raw pageviews older than 90 days
 - `POST /api/admin/bot` — flag suspicious visitors as bots (single, bulk, or auto-flag-suspects)
 - `GET/POST/DELETE /api/admin/meditation` — meditation session tracking
 - `POST /api/admin/workout-sessions` — workout logging

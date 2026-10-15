@@ -544,13 +544,13 @@ describe("GET /api/stats", () => {
       expect(body.summary_legacy.visitors).toBe(5);
     });
 
-    test("include=all returns the legacy behaviour for the main fields", async () => {
+    test("include=all = human + unverified (everything except bots, rollup scope 'all')", async () => {
       await seedMix();
       const body = await get({ include: "all" });
       expect(body.mode).toBe("all");
-      expect(body.summary.pageviews).toBe(5);
-      expect(body.summary.visitors).toBe(5);
-      expect(body.summary.pageviews).toBe(body.summary_legacy.pageviews);
+      expect(body.summary.pageviews).toBe(3);
+      expect(body.summary.visitors).toBe(3);
+      expect(body.summary_legacy.pageviews).toBe(5);
       expect(body.quality.human).toBe(2);
     });
 

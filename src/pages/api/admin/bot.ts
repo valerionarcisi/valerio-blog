@@ -3,6 +3,7 @@ import { timeSafeEqual } from "~/lib/auth";
 import { requireAdmin } from "~/lib/admin-auth";
 import { env } from "~/lib/env";
 import getDb from "~/lib/turso";
+import { invalidateDays } from "~/lib/analytics-rollup";
 import {
   type Result,
   ok,
@@ -128,6 +129,35 @@ function deleteHashesStmt(hashes: string[]): Stmt {
   };
 }
 
+const INVALIDATE_CHUNK = 500;
+const INVALIDATE_MAX_DAYS = 120;
+
+/**
+ * Best-effort: flagging/unflagging hashes changes numbers of PAST days whose
+ * rollups are already written. Forget those days' rollup_log rows so /api/stats
+ * reads them from raw again (until the next rollup). Never throws; capped.
+ */
+async function invalidateRollups(db: Db, hashes: string[]): Promise<void> {
+  try {
+    const days = new Set<string>();
+    for (
+      let i = 0;
+      i < hashes.length && days.size < INVALIDATE_MAX_DAYS;
+      i += INVALIDATE_CHUNK
+    ) {
+      const chunk = hashes.slice(i, i + INVALIDATE_CHUNK);
+      const r = await db.execute({
+        sql: `SELECT DISTINCT date(created_at) AS day FROM pageviews WHERE visitor_hash IN (${chunk.map(() => "?").join(",")}) LIMIT ${INVALIDATE_MAX_DAYS}`,
+        args: chunk,
+      });
+      for (const row of r.rows) days.add(String(row.day));
+    }
+    await invalidateDays(db, [...days].slice(0, INVALIDATE_MAX_DAYS));
+  } catch {
+    // best effort
+  }
+}
+
 async function insertAndRecalc(db: Db, hashes: string[]): Promise<Response> {
   const placeholders = hashes.map(() => "(?)").join(",");
   await db.batch(
@@ -140,6 +170,7 @@ async function insertAndRecalc(db: Db, hashes: string[]): Promise<Response> {
     ],
     "write",
   );
+  await invalidateRollups(db, hashes);
   return jsonOk({ ok: true, flagged: hashes.length });
 }
 
@@ -148,6 +179,7 @@ async function deleteAndRestore(db: Db, hashes: string[]): Promise<Response> {
     [deleteHashesStmt(hashes), ...restoreUniqueStmts(hashes)],
     "write",
   );
+  await invalidateRollups(db, hashes);
   return jsonOk({ ok: true, unflagged: hashes.length });
 }
 
@@ -271,6 +303,7 @@ export const GET: APIRoute = async ({ url, request }) => {
         [deleteHashesStmt(hashes), ...restoreUniqueStmts(hashes)],
         "write",
       );
+      await invalidateRollups(db, hashes);
     }
 
     return new Response(

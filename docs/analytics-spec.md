@@ -73,6 +73,42 @@ Per **due settimane dal deploy** i due sistemi convivono: `summary_legacy` e il 
 
 Per rimuoverli (dopo il periodo di confronto): (1) togliere endpoint `src/pages/api/admin/bot.ts`, `bot-rollback.test.ts` e i pulsanti/handler legacy in `analytics.astro`; (2) togliere `NOT_LEGACY_BOT_SQL`/la clausola `bot_hashes` da `bot-verdict.ts`, `summary_legacy`, il blocco "Sospetti" e `suspicious` in `stats.ts`; (3) convertire gli hash storici in `bot_score = 99` sulle righe (`UPDATE pageviews SET bot_score = 99 WHERE visitor_hash IN (SELECT hash FROM bot_hashes)`) e ripristinare `is_unique` con `daily_visitors`; (4) `DROP TABLE bot_hashes`.
 
+## Aggregati giornalieri e retention (Analytics v2 - Fase 3, 2026-10-15)
+
+### Tabelle (`src/lib/analytics-rollup-schema.ts`, create da `scripts/migrate-analytics-v2.ts` e, se mancano, dal job stesso)
+
+Tutte con `scope`: `'human'` (verdetto umano) e `'all'` (umani + non verificati = tutto tranne i bot, `NOT BOT_SQL`). I due scope bastano a ricostruire sia i numeri nuovi sia `?include=all`.
+
+- `daily_stats(day, scope, pageviews, visitors, bounced, sum_time, n_time, sum_scroll, n_scroll)`
+- `daily_pages(day, scope, pathname, pageviews, visitors, sum_time, n_time, sum_scroll, n_scroll, tp_visitors, tp_sum_scroll, tp_n_scroll)`: i `tp_*` sono le somme sulle sole righe con `time_on_page` non NULL (servono a "post piu letti", che filtra cosi).
+- `daily_dims(day, scope, dim, value, pageviews, visitors)` con `dim` in `referrer, channel, country, browser, os, device, lang, utm_source, utm_campaign, section`. Referrer NULL = `value` `"\u0001null"`. La classificazione `section` e `SECTION_SQL` in `src/lib/analytics-sql.ts`, usata sia da `/api/stats` sia dal rollup.
+- `rollup_log(day, computed_at, rows_in)`: un giorno e "chiuso" se ha una riga qui.
+
+Le medie non si salvano mai: si tengono somme e conteggi e si dividono in lettura (mai media di medie). Un giorno senza righe non scrive nulla in `daily_*` (il grafico non ha il punto, come dai dati grezzi); resta solo la riga in `rollup_log`.
+
+### Job (`netlify/functions/analytics-rollup.mts`, `src/lib/analytics-rollup.ts`)
+
+Netlify Scheduled Function `20 0 * * *` (00:20 UTC, la directory `netlify/functions` e quella di default, nessuna modifica a `netlify.toml`). Calcola ieri **e** l'altro ieri (beacon in ritardo) con `rollupDay` e poi `pruneRaw`. `rollupDay(db, day)`: usa gli helper del verdetto (`HUMAN_SQL`, `BOT_SQL`) e, in **un solo** `db.batch([...], "write")`, cancella e reinserisce le righe del giorno (idempotente). Se mancano colonne di migrazioni successive (`human`, `bot_score`, `channel`...) o `bot_hashes` degrada invece di fallire. Le funzioni Netlify non ricevono il `define` di Vite usato da `env()`: la funzione legge `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` da `Netlify.env`/`process.env` (le variabili devono essere visibili al runtime "Functions") e usa import relativi.
+
+### Retention (`pruneRaw`)
+
+Pageviews grezzi: 90 giorni, **solo per i giorni con una riga in `rollup_log`** (mai cancellati dati non aggregati). Aggregati: per sempre. Pulisce anche `analytics_salts` e `daily_visitors` (2 giorni, come `purgeOldSalts`), `rate_limits` e `telegram_updates` (7 giorni), se esistono. Aggancio per `sessions` (Fase 2, 180 giorni): `DELETE FROM sessions WHERE day < ?`, no-op finche la tabella non esiste.
+
+### `/api/stats` ibrido
+
+Per il periodo richiesto, i giorni **prima di oggi (UTC)** con riga in `rollup_log` sono letti dai rollup (`scope` = `human`, o `all` con `include=all`), gli altri (oggi, non ancora aggregati, invalidati) dai dati grezzi con le query di sempre ristrette a quei giorni; i risultati si sommano. Query su intervalli con `GROUP BY`, niente cicli per giorno. Forma JSON identica, piu `source: {rollup_days, raw_days}` (debug; la dashboard lo mostra in "Aggiornamento dati"). Sempre da raw: `recent_visitors`, `suspicious`, `quality`, `review`, `summary_legacy` (coprono comunque i giorni recenti; su periodi oltre i 90 giorni contano solo i dati grezzi rimasti). Con il filtro `pathname` e per i grafici orari (periodo `today` / un solo giorno) si legge **solo raw**: i breakdown filtrati oltre i 90 giorni non sono disponibili (si restituisce cio che esiste). Test di equivalenza in `src/lib/analytics-rollup.test.ts`.
+
+Nota: `include=all` ora e "umani + non verificati" (esclude anche i `bot_score` alti), coerente con lo scope `all`; `summary_legacy` resta il vecchio calcolo (tutto tranne `bot_hashes`) ed e solo da raw.
+
+### Backfill e ricalcolo manuale
+
+- `scripts/analytics-backfill.ts --from YYYY-MM-DD [--to YYYY-MM-DD]` (default `--to` = ieri): `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx tsx scripts/analytics-backfill.ts --from 2026-07-01`. Idempotente. Eseguirlo **prima** che il job cancelli i dati vecchi.
+- `POST /api/admin/analytics-rollup` `{from, to}` (admin; YYYY-MM-DD UTC, `to` prima di oggi, max 400 giorni): stesso ricalcolo. In dashboard, pulsante "Ricalcola aggregati" (periodo corrente, escluso oggi).
+
+### Invalidazione
+
+Flaggare/sbloccare hash dal vecchio `/api/admin/bot` cambia i numeri dei giorni passati: l'endpoint cancella (best effort, max 120 giorni) le righe `rollup_log` dei giorni di quegli hash, cosi `/api/stats` torna ai dati grezzi per quei giorni finche non si ricalcolano (pulsante o job). Le **regole bot non sono retroattive** (valgono dalle nuove visite, nessuna riga riscritta), quindi creare/disattivare una regola non invalida nulla. Giorni oltre i 90 giorni non hanno piu raw: restano i rollup com'erano.
+
 ## Recent changes (2026-05-27)
 
 - **Live counter** `/api/stats/live` — `DISTINCT visitor_hash` in ultimi 5 min, esclude bot flaggati. Polling 30s dalla dashboard. Cache-Control `no-store` per evitare stale.

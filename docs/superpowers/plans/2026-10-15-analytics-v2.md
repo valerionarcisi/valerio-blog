@@ -78,6 +78,17 @@ Ogni fase è rilasciabile da sola, con test Vitest (pattern del repo: `vi.mock("
 
 ### Fase 3 — Aggregati, retention e costo (M)
 
+> **Stato: [x] implementata (2026-10-15).** Dettagli in `docs/analytics-spec.md` ("Aggregati giornalieri e retention"). Codice: `src/lib/analytics-rollup.ts`, `analytics-rollup-schema.ts`, `analytics-sql.ts`, `stats-hybrid.ts`, `netlify/functions/analytics-rollup.mts`, `POST /api/admin/analytics-rollup`, `scripts/analytics-backfill.ts`.
+>
+> Decisioni: raw 90 giorni (solo giorni con `rollup_log`), aggregati per sempre; scope `human`/`all` (`all` = tutto tranne i bot, quindi `include=all` ora esclude anche `bot_score` alto); cron 00:20 UTC. Fatti i punti 1-4 per le tabelle esistenti.
+>
+> **Rimasto da fare:**
+> - [ ] `sessions`, `events`, `daily_events` e le colonne `sessions/bounces/engaged_seconds`, `entry/exit` (dipendono dalla Fase 2); aggancio di pulizia sessioni a 180 giorni gia pronto in `pruneRaw`.
+> - [ ] Live counter da `sessions.last_seen_at` (punto 5, Fase 2).
+> - [ ] `quality`, `review`, `summary_legacy` e `recent_visitors` restano da raw (nessun rollup per verdetto/bot).
+> - [ ] Breakdown filtrati per `pathname` oltre i 90 giorni non disponibili (solo raw).
+> - [ ] Hash flaggati dal legacy `/api/admin/bot`: invalidazione best effort; le regole non sono retroattive.
+
 1. **Rollup giornaliero** con una Netlify Scheduled Function (`netlify/functions/analytics-rollup.mts`, cron `15 0 * * *` Europe/Rome → in UTC) che per il giorno precedente scrive:
    - `daily_stats(day, pageviews, visitors, sessions, bounces, engaged_seconds)`
    - `daily_pages(day, path, pageviews, visitors, avg_time, avg_scroll)`

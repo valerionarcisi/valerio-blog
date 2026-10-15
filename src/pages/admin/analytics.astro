@@ -658,6 +658,7 @@ if (!Astro.locals.isAdmin) {
         .foglio body.admin .ax-rule-form input[type="text"] { min-height: 44px; min-width: 44px; }
         .foglio body.admin .ax-qual-note label { min-height: 44px; }
       }
+      .foglio body.admin .ax-rollup-btn { min-height: 44px; min-width: 44px; color: var(--ax-page-ink-soft); border-color: currentColor; }
 
       /* Tablet */
       @media (min-width: 768px) {
@@ -794,6 +795,11 @@ if (!Astro.locals.isAdmin) {
         </label>
         <span id="q-mode">—</span>
         <span id="q-legacy"></span>
+      </p>
+      <p class="ax-qual-note" id="data-source-note">
+        <span>Aggiornamento dati: <span id="data-source">—</span></span>
+        <button type="button" class="ax-bulk-flag ax-rollup-btn" id="rollup-recalc" title="Ricalcola gli aggregati giornalieri del periodo (esclude oggi)">Ricalcola aggregati</button>
+        <span id="rollup-status" role="status"></span>
       </p>
 
       <div class="ax-section-head">
@@ -1123,6 +1129,38 @@ if (!Astro.locals.isAdmin) {
           ? "Numeri vecchi: " + fmt(sl.pageviews) + " pageviews · " + fmt(sl.visitors) + " visitatori"
           : "";
       }
+
+      /* Daily rollups: where the numbers come from + manual recompute (cookie session, no tokens). */
+      var _period = null;
+      function renderDataSource(d) {
+        _period = d.period || null;
+        var src = d.source || { rollup_days: 0, raw_days: 0 };
+        document.getElementById("data-source").textContent =
+          src.rollup_days + " giorni da aggregati, " + src.raw_days + " dal vivo";
+      }
+      function recalcRollups() {
+        if (!_period) return;
+        var btn = document.getElementById("rollup-recalc");
+        var status = document.getElementById("rollup-status");
+        var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+        var to = _period.to < yesterday ? _period.to : yesterday;
+        var from = _period.from;
+        var maxFrom = new Date(new Date(to + "T00:00:00Z").getTime() - 399 * 86400000).toISOString().slice(0, 10);
+        if (from < maxFrom) from = maxFrom;
+        if (from > to) { status.textContent = "Nessun giorno chiuso nel periodo"; return; }
+        btn.disabled = true;
+        status.textContent = "Ricalcolo " + from + " → " + to + "…";
+        apiFetch("/api/admin/analytics-rollup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from: from, to: to }),
+        })
+          .then(function(r) { return r.json(); })
+          .then(function(j) { status.textContent = "Ricalcolati " + j.days + " giorni"; reloadStats(); })
+          .catch(function(e) { status.textContent = "Errore: " + e.message; })
+          .then(function() { btn.disabled = false; });
+      }
+      document.getElementById("rollup-recalc").addEventListener("click", recalcRollups);
 
       function ruleKindLabel(k) {
         return { ua_contains: "user-agent contiene", referrer_host: "referrer", path_prefix: "percorso inizia con", hash_today: "visitatore (oggi)" }[k] || k;
@@ -1456,6 +1494,7 @@ if (!Astro.locals.isAdmin) {
           .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
           .then(function(d) {
             renderQuality(d);
+            renderDataSource(d);
             renderReview(d.review);
             var s = d.summary;
             document.getElementById("s-pageviews").textContent = fmt(s.pageviews);

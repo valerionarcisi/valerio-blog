@@ -1,13 +1,15 @@
 import type { APIRoute } from "astro";
 import { requireAdmin } from "~/lib/admin-auth";
 import getDb from "~/lib/turso";
-import { getDateRange } from "~/lib/date-range";
+import { getDateRange, isoDate } from "~/lib/date-range";
 import {
+  BOT_SQL,
   HUMAN_SQL,
   NOT_LEGACY_BOT_SQL,
   UNVERIFIED_SQL,
   VERDICT_SQL,
 } from "~/lib/bot-verdict";
+import { computeBlock } from "~/lib/stats-hybrid";
 
 export const prerender = false;
 
@@ -36,22 +38,18 @@ export const GET: APIRoute = async ({ url, request }) => {
   const range = getDateRange(period, customFrom, customTo);
   const db = getDb();
 
-  // Coexistence period: default = human visits only; include=all = the OLD numbers
-  // (everything except the legacy per-hash flags).
+  // Coexistence period: default = human visits only; include=all = human + unverified
+  // (everything except bots, the rollup scope 'all').
+  // Main numbers/breakdowns come from computeBlock (rollups for closed days, raw for
+  // the rest). recent_visitors, suspicious, quality, review and summary_legacy need raw
+  // rows and keep reading raw.
   const includeAll = url.searchParams.get("include") === "all";
   const rangeWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}`;
-  const baseWhere = `${rangeWhere} AND ${includeAll ? NOT_LEGACY_BOT_SQL : HUMAN_SQL}`;
+  const baseWhere = `${rangeWhere} AND ${includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL}`;
   const legacyWhere = `${rangeWhere} AND ${NOT_LEGACY_BOT_SQL}`;
   const baseArgs = pathnameFilter
     ? [range.from, range.to, pathnameFilter]
     : [range.from, range.to];
-
-  const dateExpr =
-    range.groupBy === "hour"
-      ? "strftime('%Y-%m-%d %H:00', created_at)"
-      : range.groupBy === "month"
-        ? "strftime('%Y-%m', created_at)"
-        : "date(created_at)";
 
   // LEGACY zero-engagement heuristic behind the old "Flag come bot" button.
   const suspectWhere = `${legacyWhere} AND visitor_hash IS NOT NULL AND (time_on_page IS NULL OR time_on_page <= 5) AND (scroll_depth IS NULL OR scroll_depth = 0)`;
@@ -59,71 +57,26 @@ export const GET: APIRoute = async ({ url, request }) => {
   // First path segment + "*": '/blog/foo' -> '/blog/*', so scanners/crawlers hitting many posts group together.
   const pathPattern = `CASE WHEN instr(substr(pathname, 2), '/') > 0 THEN substr(pathname, 1, instr(substr(pathname, 2), '/') + 1) || '*' ELSE pathname END`;
 
+  const today = isoDate(new Date());
+  const blockOpts = {
+    from: range.from,
+    to: range.to,
+    groupBy: range.groupBy,
+    pathname: pathnameFilter,
+    includeAll,
+    today,
+  };
+
   const [
-    summary,
-    chart,
-    topPages,
-    referrers,
-    countries,
-    browsers,
-    os,
-    devices,
-    languages,
-    utmSources,
-    utmCampaigns,
+    block,
     recentVisitors,
     suspectCount,
     suspectCountries,
-    topEngagedPosts,
-    sectionBreakdown,
     legacySummary,
     quality,
     review,
   ] = await Promise.all([
-    db.execute({
-      sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors, ROUND(AVG(time_on_page)) as avg_time, ROUND(AVG(scroll_depth)) as avg_scroll FROM pageviews ${baseWhere}`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT ${dateExpr} as date, COUNT(*) as pageviews, SUM(is_unique) as visitors FROM pageviews ${baseWhere} GROUP BY date ORDER BY date`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT pathname, COUNT(*) as pageviews, SUM(is_unique) as visitors FROM pageviews ${baseWhere} GROUP BY pathname ORDER BY pageviews DESC LIMIT 20`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT referrer, SUM(is_unique) as visitors FROM pageviews ${baseWhere} GROUP BY referrer ORDER BY visitors DESC LIMIT 20`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT country, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND country IS NOT NULL GROUP BY country ORDER BY visitors DESC LIMIT 20`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT browser, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND browser IS NOT NULL GROUP BY browser ORDER BY visitors DESC LIMIT 10`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT os, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND os IS NOT NULL GROUP BY os ORDER BY visitors DESC LIMIT 10`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT device_type, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND device_type IS NOT NULL GROUP BY device_type ORDER BY visitors DESC`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT SUBSTR(language, 1, 2) as lang, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND language IS NOT NULL GROUP BY lang ORDER BY visitors DESC LIMIT 10`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT utm_source, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_source IS NOT NULL GROUP BY utm_source ORDER BY visitors DESC LIMIT 10`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT utm_campaign, SUM(is_unique) as visitors FROM pageviews ${baseWhere} AND utm_campaign IS NOT NULL GROUP BY utm_campaign ORDER BY visitors DESC LIMIT 10`,
-      args: baseArgs,
-    }),
+    computeBlock(db, blockOpts),
     db.execute({
       sql: `SELECT pathname, country, device_type, browser, os, referrer, time_on_page, scroll_depth, created_at, visitor_hash, ${VERDICT_SQL} as verdict FROM pageviews ${baseWhere} AND is_unique = 1 ORDER BY created_at DESC LIMIT 30`,
       args: baseArgs,
@@ -134,42 +87,6 @@ export const GET: APIRoute = async ({ url, request }) => {
     }),
     db.execute({
       sql: `SELECT country, COUNT(DISTINCT visitor_hash) as suspects FROM pageviews ${suspectWhere} AND country IS NOT NULL GROUP BY country ORDER BY suspects DESC`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT pathname,
-              COUNT(*) as pageviews,
-              SUM(is_unique) as visitors,
-              ROUND(AVG(time_on_page)) as avg_time,
-              ROUND(AVG(scroll_depth)) as avg_scroll
-            FROM pageviews ${baseWhere}
-              AND (pathname LIKE '/blog/%' OR pathname LIKE '/en/blog/%')
-              AND time_on_page IS NOT NULL
-            GROUP BY pathname
-            HAVING COUNT(*) >= 2
-            ORDER BY (COALESCE(avg_time, 0) * COALESCE(avg_scroll, 0)) DESC
-            LIMIT 10`,
-      args: baseArgs,
-    }),
-    db.execute({
-      sql: `SELECT
-              CASE
-                WHEN pathname = '/' OR pathname = '/en' OR pathname = '/en/' THEN 'home'
-                WHEN pathname LIKE '/blog/%' OR pathname LIKE '/en/blog/%' OR pathname = '/blog' OR pathname = '/en/blog' THEN 'blog'
-                WHEN pathname LIKE '/films/%' OR pathname LIKE '/en/films/%' OR pathname = '/films' OR pathname = '/en/films' THEN 'films'
-                WHEN pathname LIKE '/tag/%' OR pathname LIKE '/en/tag/%' THEN 'tag'
-                WHEN pathname LIKE '/chi-sono%' OR pathname LIKE '/en/about%' THEN 'about'
-                WHEN pathname LIKE '/visti%' OR pathname LIKE '/en/visti%' THEN 'visti'
-                WHEN pathname LIKE '/musica%' OR pathname LIKE '/en/music%' THEN 'musica'
-                WHEN pathname LIKE '/sport%' OR pathname LIKE '/en/sport%' THEN 'sport'
-                WHEN pathname LIKE '/note%' OR pathname LIKE '/en/notes%' THEN 'note'
-                ELSE 'altro'
-              END as section,
-              COUNT(*) as pageviews,
-              SUM(is_unique) as visitors
-            FROM pageviews ${baseWhere}
-            GROUP BY section
-            ORDER BY pageviews DESC`,
       args: baseArgs,
     }),
     db.execute({
@@ -207,45 +124,36 @@ export const GET: APIRoute = async ({ url, request }) => {
   const spanMs = Math.max(prevToDate.getTime() - prevFromDate.getTime(), 24 * 60 * 60 * 1000);
   const prevFrom = new Date(prevFromDate.getTime() - spanMs - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const prevTo = new Date(prevFromDate.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const prevArgs = pathnameFilter ? [prevFrom, prevTo, pathnameFilter] : [prevFrom, prevTo];
-  const prevSummary = await db.execute({
-    sql: `SELECT COUNT(*) as pageviews, SUM(is_unique) as visitors FROM pageviews ${baseWhere}`,
-    args: prevArgs,
+  const prevBlock = await computeBlock(db, {
+    ...blockOpts,
+    from: prevFrom,
+    to: prevTo,
+    groupBy: "day",
+    totalsOnly: true,
   });
-  const prevS = prevSummary.rows[0];
-  const prevPv = Number(prevS.pageviews) || 0;
-  const prevVis = Number(prevS.visitors) || 0;
+  const prevPv = prevBlock.totals.pageviews;
+  const prevVis = prevBlock.totals.visitors;
   function pctChange(curr: number, prev: number): number | null {
     if (prev === 0) return curr > 0 ? null : 0;
     return Math.round(((curr - prev) / prev) * 1000) / 10;
   }
 
-  const s = summary.rows[0];
-  const totalVisitors = Number(s.visitors) || 0;
-  const bounceResult =
-    totalVisitors > 0
-      ? await db.execute({
-          sql: `SELECT COUNT(*) as bounced FROM pageviews ${baseWhere} AND is_unique = 1 AND (time_on_page IS NULL OR time_on_page < 5)`,
-          args: baseArgs,
-        })
-      : null;
+  const totalVisitors = block.totals.visitors;
   const bounceRate =
-    bounceResult && totalVisitors > 0
-      ? Math.round(
-          (Number(bounceResult.rows[0].bounced) / totalVisitors) * 1000,
-        ) / 10
+    totalVisitors > 0
+      ? Math.round((block.totals.bounced / totalVisitors) * 1000) / 10
       : 0;
 
   return new Response(
     JSON.stringify({
       period: { from: range.from, to: range.to, groupBy: range.groupBy },
       summary: {
-        pageviews: Number(s.pageviews) || 0,
+        pageviews: block.totals.pageviews,
         visitors: totalVisitors,
-        avg_time_on_page: Number(s.avg_time) || 0,
-        avg_scroll_depth: Number(s.avg_scroll) || 0,
+        avg_time_on_page: block.avgTime,
+        avg_scroll_depth: block.avgScroll,
         bounce_rate: bounceRate,
-        pageviews_delta_pct: pctChange(Number(s.pageviews) || 0, prevPv),
+        pageviews_delta_pct: pctChange(block.totals.pageviews, prevPv),
         visitors_delta_pct: pctChange(totalVisitors, prevVis),
         prev_period: { from: prevFrom, to: prevTo, pageviews: prevPv, visitors: prevVis },
       },
@@ -266,19 +174,21 @@ export const GET: APIRoute = async ({ url, request }) => {
             : 0,
       },
       review: review.rows,
-      chart: chart.rows,
-      top_pages: topPages.rows,
-      referrers: referrers.rows,
-      countries: countries.rows,
-      browsers: browsers.rows,
-      os: os.rows,
-      devices: devices.rows,
-      languages: languages.rows,
-      utm_sources: utmSources.rows,
-      utm_campaigns: utmCampaigns.rows,
+      // Debug: days of the range read from daily rollups vs live raw rows.
+      source: block.source,
+      chart: block.chart,
+      top_pages: block.topPages,
+      referrers: block.referrers,
+      countries: block.countries,
+      browsers: block.browsers,
+      os: block.os,
+      devices: block.devices,
+      languages: block.languages,
+      utm_sources: block.utmSources,
+      utm_campaigns: block.utmCampaigns,
       recent_visitors: recentVisitors.rows,
-      top_engaged_posts: topEngagedPosts.rows,
-      sections: sectionBreakdown.rows,
+      top_engaged_posts: block.topEngaged,
+      sections: block.sections,
       suspicious: {
         count: Number(suspectCount.rows[0].count) || 0,
         countries: suspectCountries.rows,

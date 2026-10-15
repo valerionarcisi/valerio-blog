@@ -1,5 +1,6 @@
 import { createClient, type Client } from "@libsql/client";
 import { pathToFileURL } from "node:url";
+import { ROLLUP_DDL } from "../src/lib/analytics-rollup-schema";
 
 // Analytics v2 / phase 1. Fully idempotent: safe to run any number of times.
 // Run: TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx tsx scripts/migrate-analytics-v2.ts
@@ -61,6 +62,10 @@ export async function migrateAnalyticsV2(db: Client): Promise<string[]> {
     CREATE INDEX IF NOT EXISTS idx_pv_visitor_day ON pageviews(visitor_hash, created_at);
   `);
   log.push("ensured bot_rules, analytics_salts, daily_visitors, idx_pv_visitor_day");
+
+  // Phase 3: daily rollups.
+  await db.executeMultiple(ROLLUP_DDL);
+  log.push("ensured daily_stats, daily_pages, daily_dims, rollup_log");
 
   return log;
 }
