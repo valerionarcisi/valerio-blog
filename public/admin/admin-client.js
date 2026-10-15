@@ -43,4 +43,29 @@
       });
     });
   };
+
+  // Core Web Vitals: Google thresholds (good <= first, poor > second). cls in CLS units.
+  w.VITAL_THRESHOLDS = { lcp: [2500, 4000], inp: [200, 500], cls: [0.1, 0.25] };
+  w.vitalState = function (metric, v) {
+    var t = w.VITAL_THRESHOLDS[metric];
+    if (!t || v == null || isNaN(Number(v))) return null;
+    v = Number(v);
+    return v <= t[0] ? "good" : v > t[1] ? "poor" : "ni";
+  };
+  w.fmtVital = function (metric, v) {
+    if (v == null) return "—";
+    if (metric === "cls") return Number(v).toFixed(2).replace(".", ",");
+    if (metric === "lcp" && v >= 1000) return (v / 1000).toFixed(1).replace(".", ",") + " s";
+    return Math.round(v) + " ms";
+  };
+
+  // CSV export link for /api/stats/export (cookie session, same origin).
+  w.csvExportUrl = function (kind, o) {
+    o = o || {};
+    var q = ["kind=" + encodeURIComponent(kind)];
+    ["from", "to", "include", "country", "device", "channel"].forEach(function (k) {
+      if (o[k]) q.push(k + "=" + encodeURIComponent(o[k]));
+    });
+    return "/api/stats/export?" + q.join("&");
+  };
 })(window);

@@ -1,4 +1,5 @@
 import { sanitizePathname } from "./analytics";
+import { hasVitals, parseVitals, type VitalsInput } from "./analytics-vitals";
 
 export const ALLOWED_HOSTS = [
   "valerionarcisi.me",
@@ -133,6 +134,8 @@ export interface BeaconInput {
   hostname: string;
   timeOnPage: number | null;
   scrollDepth: number | null;
+  /** Web Vitals, already range-validated (null = absent or out of range). */
+  vitals: VitalsInput;
 }
 
 export function parseBeacon(
@@ -143,7 +146,9 @@ export function parseBeacon(
   if (!pageId) return { ok: false, reason: "page_id" };
   const t = finiteNumber(body.time_on_page);
   const s = finiteNumber(body.scroll_depth);
-  if (t == null && s == null) return { ok: false, reason: "empty" };
+  const vitals = parseVitals(body);
+  if (t == null && s == null && !hasVitals(vitals))
+    return { ok: false, reason: "empty" };
   return {
     ok: true,
     value: {
@@ -151,6 +156,7 @@ export function parseBeacon(
       hostname: body.hostname.toLowerCase(),
       timeOnPage: t != null ? Math.min(Math.max(Math.round(t), 0), 3600) : null,
       scrollDepth: s != null ? Math.min(Math.max(Math.round(s), 0), 100) : null,
+      vitals,
     },
   };
 }

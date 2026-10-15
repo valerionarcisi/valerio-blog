@@ -1,6 +1,8 @@
 ---
 import AdminNav from "~/components/AdminNav.astro";
 import { days } from "~/data/meal-plan";
+import getDb from "~/lib/turso";
+import { deltaPct, getTodaySummarySafe } from "~/lib/analytics-summary";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
@@ -43,6 +45,13 @@ const todayId = dayIds[["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf
 const todayPlan = days.find((d) => d.id === todayId);
 const todayLabel = new Intl.DateTimeFormat("it-IT", { timeZone: TZ, weekday: "long", day: "numeric", month: "long" }).format(now);
 
+// Card "Analytics oggi": soft failure, la home non dipende dal database.
+const summary = await getTodaySummarySafe(getDb, now);
+const fmtDelta = (p: number | null) => (p === null ? "—" : p === 0 ? "=" : `${p > 0 ? "+" : "−"}${Math.abs(p)}%`);
+const summaryTime = summary
+  ? new Intl.DateTimeFormat("it-IT", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(new Date(summary.asOf))
+  : "";
+
 const groups = [
   { title: "Sito", items: [
     { label: "Analytics", desc: "Visite e contenuti", href: link("analytics") },
@@ -84,6 +93,12 @@ const groups = [
       .foglio body.admin .big-when { font-family: var(--foglio-serif); font-size: var(--foglio-fs-3xl); color: var(--foglio-accent); line-height: 1.1; margin: 0.2rem 0; }
       .foglio body.admin .meal-line { margin: 0 0 0.6rem; font-size: var(--foglio-fs-sm); }
       .foglio body.admin .meal-line b { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); text-transform: uppercase; letter-spacing: 0.1em; color: var(--foglio-ink-soft); display: block; font-weight: 600; }
+      .foglio body.admin .an-unit { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.1em; }
+      .foglio body.admin .an-line { margin: 0 0 0.5rem; font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .an-spike { margin: 0 0 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm); color: var(--foglio-warn); font-weight: 600; font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .an-posts { margin: 0 0 0.6rem; padding-left: 1.2rem; font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .an-posts li { margin: 0; }
+      .foglio body.admin .an-posts a { display: inline-block; min-height: 44px; box-sizing: border-box; padding: 0.7rem 0; line-height: 1.4; overflow-wrap: anywhere; }
     </style>
   </head>
   <body class="admin">
@@ -93,6 +108,37 @@ const groups = [
         <h1><em class="acc">Oggi.</em></h1>
         <p class="subtitle" style="text-transform:capitalize;">{todayLabel}</p>
       </header>
+
+      <section class="card" aria-labelledby="an-title">
+        <h2 class="card-title" id="an-title">Analytics oggi</h2>
+        {summary ? (
+          <>
+            <div class="big-when">{summary.visitorsToday} <span class="an-unit">visitatori</span></div>
+            <p class="muted an-line">
+              Ieri alla stessa ora: {summary.visitorsYesterdaySoFar} ({fmtDelta(deltaPct(summary.visitorsToday, summary.visitorsYesterdaySoFar))})
+              · Ieri in tutto: {summary.visitorsYesterdayTotal} ({fmtDelta(deltaPct(summary.visitorsToday, summary.visitorsYesterdayTotal))})
+            </p>
+            {summary.spike?.active && (
+              <p class="an-spike" role="status">
+                Picco di traffico: oltre {summary.spike.factor}× la media degli ultimi 7 {new Intl.DateTimeFormat("it-IT", { timeZone: TZ, weekday: "long" }).format(now)} alla stessa ora ({summary.spike.baseline}).
+              </p>
+            )}
+            {summary.topPosts.length > 0 ? (
+              <ol class="an-posts">
+                {summary.topPosts.map((p) => (
+                  <li><a href={p.pathname}>{p.pathname}</a> <span class="muted">{p.pageviews} pv</span></li>
+                ))}
+              </ol>
+            ) : (
+              <p class="muted an-line">Nessun post letto finora.</p>
+            )}
+            <p class="muted an-line">Giorno UTC, solo visite umane · aggiornato alle {summaryTime} (Roma)</p>
+          </>
+        ) : (
+          <p class="muted">dati non disponibili</p>
+        )}
+        <a class="btn" href={link("analytics")} style="display:inline-flex;align-items:center;text-decoration:none;">Apri analytics</a>
+      </section>
 
       {nextEvent && (
         <section class="card" aria-labelledby="ev-title">

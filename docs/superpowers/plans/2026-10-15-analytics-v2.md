@@ -1,6 +1,6 @@
 # Analytics v2 — piano di miglioramento del tracking self-hosted
 
-Data: 2026-10-15 · Stato: proposta · Spec di riferimento: `docs/analytics-spec.md`
+Data: 2026-10-15 · Stato: implementato (fasi 1-5) · Spec di riferimento: `docs/analytics-spec.md`
 
 ## Perché
 
@@ -189,6 +189,15 @@ Ogni pageview ha un verdetto ricalcolabile, non un flag distruttivo:
 
 ### Fase 5 — Web Vitals e dashboard (S/M)
 
+> **Stato: [x] implementata (2026-10-15).** Dettagli in `docs/analytics-spec.md` ("Fase 5"). Codice: `src/lib/analytics-vitals.ts`, `analytics-vitals-stats.ts`, `analytics-filters.ts`, `csv.ts`, `analytics-summary.ts`, `analytics-report.ts`, `GET /api/stats/export`, `POST /api/admin/analytics-report`, `netlify/functions/analytics-weekly-report.mts`, tracker in `BaseHead.astro`, dashboard e home admin.
+>
+> Decisioni: Web Vitals SI (~+1,1 KB raw, +0,5 KB gzip), report settimanale SI (testo semplice, cron `0 6 * * 1` UTC con deriva DST di 1 h), non verificati esclusi dai numeri principali, raw 90 giorni. p75 su piu giorni = media pesata dei p75 giornalieri (approssimazione, bucket esatti). Filtri globali solo su raw (90 giorni).
+>
+> **Rimasto da fare:**
+> - [ ] Filtro `pathname` dalla dashboard (esiste solo come query param dell'API).
+> - [ ] p75 esatto su piu giorni (richiederebbe un istogramma per giorno invece del solo p75).
+> - [ ] Report: nessun invio di ritorno se il Telegram fallisce (solo log); nessun grafico.
+
 1. **Core Web Vitals RUM**: nel tracker, `PerformanceObserver` per LCP, CLS, INP (implementazione minima, ~1 KB, senza librerie) inviati nel beacon finale; colonne `lcp_ms`, `cls`, `inp_ms`. Dashboard: p75 per pagina e per device, con soglie Google (verde/giallo/rosso).
 2. **Nuove viste in `/admin/analytics`**: canali; entry/exit; pagine per sessione; goal e conversioni; eventi; Web Vitals; filtro per paese/device/canale applicabile a tutte le card; export CSV.
 3. **Card in home admin** (`/admin`): visitatori oggi vs ieri, top post di oggi, eventuali picchi di traffico.
@@ -224,6 +233,22 @@ Ordine consigliato: **1 → 4 → 3 → 2 → 5**. La Fase 4 va prima degli aggr
 3. **Report Telegram settimanale**: lo vuoi?
 4. **Web Vitals**: vale la pena il ~1 KB in più nel tracker?
 5. **Visite "non verificate"**: escluderle dai numeri principali (più prudente) o contarle e mostrare gli umani verificati come metrica di qualità?
+
+## Stato complessivo e ordine di deploy (aggiornato a Fase 5, 2026-10-15)
+
+Tutte e 5 le fasi sono implementate (Fase 1 correttezza/privacy, 4 bot, 3 aggregati/retention, 2 sessioni/eventi/obiettivi, 5 Web Vitals/filtri/export/home/report). Una sola migrazione, idempotente, copre tutto lo schema.
+
+**Ordine di deploy**
+
+1. **Migrazione (PRIMA del deploy)**: `TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx tsx scripts/migrate-analytics-v2.ts`. Aggiunge colonne `channel`, `human`, `bot_score`, `session_id`, `lcp_ms`, `cls_milli`, `inp_ms` e le tabelle (`bot_rules`, `analytics_salts`, `daily_*`, `sessions`, `events`, `daily_vitals`). Rieseguirla non cambia nulla.
+2. **Controllo env su Netlify** (disponibili anche alle Functions): `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `ADMIN_TOKEN`; per il report `TELEGRAM_BOT_TOKEN` e `ANALYTICS_REPORT_CHAT_ID` (o `TELEGRAM_USER_ID_WHITELIST`); `ANALYTICS_REPORT_DISABLED=1` per non farlo partire.
+3. **Deploy** (push su `main`): le due Scheduled Function compaiono nel pannello Functions (`analytics-rollup` 00:20 UTC, `analytics-weekly-report` lunedi 06:00 UTC).
+4. **Backfill / rollup**: subito dopo il deploy `POST /api/admin/analytics-rollup {from, to}` (o "Ricalcola aggregati" in dashboard, oppure `scripts/analytics-backfill.ts --from ...`) per i giorni recenti, **prima** che il job notturno cancelli i raw oltre i 90 giorni: i giorni chiusi prima del deploy non hanno sessioni ne vitals. I Web Vitals partono da zero (nessuno storico).
+5. **Prova del report**: `POST /api/admin/analytics-report` con `{}` (dry run), poi una volta `{"send":true}`.
+6. **Coesistenza (2 settimane dal deploy)**: bot e numeri "legacy" convivono (`summary_legacy`, "Qualita traffico", "Da rivedere"). In questo periodo tarare soglia e regole guardando i due set di numeri.
+7. **Rimozione del legacy: deploy + 14 giorni** (a deploy fatto nel 2026-10-15 = **dal 2026-10-29**): `/api/admin/bot` e i suoi pulsanti, `bot_hashes`, `summary_legacy`, `suspicious` (procedura in "Fase 4" sopra); poi i fallback "pre-migration" in `e.ts` (doppio INSERT, try/catch sulle colonne opzionali).
+
+**Rollback**: il codice degrada senza le nuove colonne (`/api/e` salva comunque pageview, tempo e scroll), quindi un revert del deploy non richiede di toccare il database. Le colonne e le tabelle aggiunte sono innocue se restano. Per spegnere solo il report: `ANALYTICS_REPORT_DISABLED=1`. Per togliere i Web Vitals dal tracker basta rimuovere il blocco "Web Vitals" in `BaseHead.astro`.
 
 ## Documentazione da aggiornare a ogni fase
 

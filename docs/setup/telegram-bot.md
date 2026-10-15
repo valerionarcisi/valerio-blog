@@ -71,6 +71,22 @@ Apri Telegram, scrivi al bot:
 7. `/media list` → mostra la foto
 8. `/tag 1 set,test` → tag assegnati
 
+## Report analytics settimanale (opzionale)
+
+Ogni lunedi (cron `0 6 * * 1` UTC = 07:00 Roma in inverno, 08:00 in estate) la Scheduled Function `netlify/functions/analytics-weekly-report.mts` manda un riepilogo in testo semplice dell'ultima settimana (lun-dom, Roma) con delta rispetto alla precedente.
+
+Env (Netlify, disponibili anche alle Functions): `TELEGRAM_BOT_TOKEN`, `ANALYTICS_REPORT_CHAT_ID` (opzionale: se manca si usa il primo id di `TELEGRAM_USER_ID_WHITELIST`), `ANALYTICS_REPORT_DISABLED=1` per spegnerlo. Senza token o destinazione la funzione logga e non fa nulla. Nota: il bot puo scrivere solo a chi gli ha mandato almeno un messaggio (`/start`).
+
+**Provarlo senza mandare nulla (dry run)** — con cookie di sessione admin (o Bearer):
+
+```bash
+curl -s -X POST https://valerionarcisi.me/api/admin/analytics-report \
+  -H "Authorization: Bearer $ADMIN_TOKEN" -H "Content-Type: application/json" -d '{}'
+# -> {"text":"Analytics - settimana 12-18 ottobre 2026\n...","sent":false,"dryRun":true}
+```
+
+Per inviarlo davvero una volta: `-d '{"send":true}'` (risposta `sent:true`, oppure `skipped:"no_target"|"disabled"`).
+
 ## Rimuovere la webhook
 
 ```bash

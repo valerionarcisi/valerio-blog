@@ -136,9 +136,24 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   }
   ["scroll","pointerdown","keydown","touchstart"].forEach(function(t){addEventListener(t,engage,{passive:true});});
   et=setInterval(function(){tick();if(acc>=3000)engage();},1000);
+  // Web Vitals (no library): last LCP, CLS = worst 5 s session window, INP = p98 of interactions. Absent if unsupported.
+  var lcp,cls,inp,sv=0,sf=0,sl=0,im={},st;
+  function ob(t,f,o){try{o=o||{};o.type=t;o.buffered=true;new PerformanceObserver(function(l){l.getEntries().forEach(f);}).observe(o);}catch(e){}}
+  ob("largest-contentful-paint",function(x){if(!st)lcp=x.startTime;});
+  ["keydown","pointerdown"].forEach(function(t){addEventListener(t,function(){st=1;},{once:true,capture:true});});
+  ob("layout-shift",function(x){if(x.hadRecentInput)return;if(sv&&x.startTime-sl<1e3&&x.startTime-sf<5e3)sv+=x.value;else{sv=x.value;sf=x.startTime;}sl=x.startTime;if(!(sv<=cls))cls=sv;});
+  ob("event",function(x){if(x.interactionId&&!(x.duration<=im[x.interactionId]))im[x.interactionId]=x.duration;},{durationThreshold:40});
+  function vitals(o){
+    var v=Object.keys(im).map(function(k){return im[k];}).sort(function(a,b){return b-a;});
+    if(v.length)inp=v[Math.min(v.length-1,Math.floor(v.length/50))];
+    if(lcp!=null)o.lcp_ms=Math.round(lcp);
+    if(cls!=null)o.cls=Math.round(cls*1e4)/1e4;
+    if(inp!=null)o.inp_ms=Math.round(inp);
+    return o;
+  }
   function flush(){
     tick();
-    var body=JSON.stringify({type:"beacon",page_id:id,hostname:location.hostname,time_on_page:Math.round(acc/1000),scroll_depth:maxScroll});
+    var body=JSON.stringify(vitals({type:"beacon",page_id:id,hostname:location.hostname,time_on_page:Math.round(acc/1000),scroll_depth:maxScroll}));
     if(body===lastSent)return;lastSent=body;
     if(navigator.sendBeacon){navigator.sendBeacon(EP,body);}
     else{send(JSON.parse(body)).catch(function(){});}

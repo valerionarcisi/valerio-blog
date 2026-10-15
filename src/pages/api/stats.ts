@@ -10,6 +10,14 @@ import {
   VERDICT_SQL,
 } from "~/lib/bot-verdict";
 import { computeBlock, computeSessions } from "~/lib/stats-hybrid";
+import { computeSlowPages, computeVitals } from "~/lib/analytics-vitals-stats";
+import {
+  clampRange,
+  filterSql,
+  filtersActive,
+  parseFilters,
+  retentionFrom,
+} from "~/lib/analytics-filters";
 
 export const prerender = false;
 
@@ -35,7 +43,20 @@ export const GET: APIRoute = async ({ url, request }) => {
     });
   }
 
-  const range = getDateRange(period, customFrom, customTo);
+  const parsedFilters = parseFilters(url.searchParams);
+  if (!parsedFilters.ok) {
+    return new Response(JSON.stringify({ error: parsedFilters.error }), {
+      status: 400,
+    });
+  }
+  const filters = parsedFilters.value;
+  const filtered = filtersActive(filters);
+
+  const today = isoDate(new Date());
+  const baseRange = getDateRange(period, customFrom, customTo);
+  // Filters exist only on raw rows: the range is clamped to the raw retention window.
+  const clamp = clampRange(baseRange.from, baseRange.to, today, filters);
+  const range = { ...baseRange, from: clamp.from, to: clamp.to };
   const db = getDb();
 
   // Coexistence period: default = human visits only; include=all = human + unverified
@@ -44,7 +65,7 @@ export const GET: APIRoute = async ({ url, request }) => {
   // the rest). recent_visitors, suspicious, quality, review and summary_legacy need raw
   // rows and keep reading raw.
   const includeAll = url.searchParams.get("include") === "all";
-  const rangeWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}`;
+  const rangeWhere = `WHERE created_at >= ? AND created_at < datetime(?, '+1 day')${pathnameFilter ? " AND pathname = ?" : ""}${filterSql(filters)}`;
   const baseWhere = `${rangeWhere} AND ${includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL}`;
   const legacyWhere = `${rangeWhere} AND ${NOT_LEGACY_BOT_SQL}`;
   const baseArgs = pathnameFilter
@@ -57,7 +78,6 @@ export const GET: APIRoute = async ({ url, request }) => {
   // First path segment + "*": '/blog/foo' -> '/blog/*', so scanners/crawlers hitting many posts group together.
   const pathPattern = `CASE WHEN instr(substr(pathname, 2), '/') > 0 THEN substr(pathname, 1, instr(substr(pathname, 2), '/') + 1) || '*' ELSE pathname END`;
 
-  const today = isoDate(new Date());
   const blockOpts = {
     from: range.from,
     to: range.to,
@@ -65,6 +85,7 @@ export const GET: APIRoute = async ({ url, request }) => {
     pathname: pathnameFilter,
     includeAll,
     today,
+    filters,
   };
 
   const [
@@ -124,21 +145,28 @@ export const GET: APIRoute = async ({ url, request }) => {
   const spanMs = Math.max(prevToDate.getTime() - prevFromDate.getTime(), 24 * 60 * 60 * 1000);
   const prevFrom = new Date(prevFromDate.getTime() - spanMs - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const prevTo = new Date(prevFromDate.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-  const prevBlock = await computeBlock(db, {
-    ...blockOpts,
-    from: prevFrom,
-    to: prevTo,
-    groupBy: "day",
-    totalsOnly: true,
-  });
   const prevOpts = { ...blockOpts, from: prevFrom, to: prevTo, groupBy: "day", totalsOnly: true };
-  const [sess, prevSess] = await Promise.all([
+  // With a filter the previous period is only comparable while it is still inside the raw
+  // retention window; otherwise the comparison is omitted (never shown as a misleading zero).
+  const prevComparable = !filtered || prevFrom >= retentionFrom(today);
+  const prevBlock = prevComparable
+    ? await computeBlock(db, prevOpts)
+    : await computeBlock(db, { ...prevOpts, from: prevTo, to: prevFrom }); // empty range: zeros
+  const [sess, prevSess, vitals, slowPages] = await Promise.all([
     computeSessions(db, blockOpts),
-    computeSessions(db, prevOpts),
+    prevComparable ? computeSessions(db, prevOpts) : computeSessions(db, { ...prevOpts, from: prevTo, to: prevFrom }),
+    computeVitals(db, blockOpts),
+    computeSlowPages(db, {
+      from: range.from > retentionFrom(today) ? range.from : retentionFrom(today),
+      to: range.to,
+      includeAll,
+      filters,
+    }),
   ]);
   const prevPv = prevBlock.totals.pageviews;
   const prevVis = prevBlock.totals.visitors;
   function pctChange(curr: number, prev: number): number | null {
+    if (!prevComparable) return null;
     if (prev === 0) return curr > 0 ? null : 0;
     return Math.round(((curr - prev) / prev) * 1000) / 10;
   }
@@ -158,6 +186,18 @@ export const GET: APIRoute = async ({ url, request }) => {
   return new Response(
     JSON.stringify({
       period: { from: range.from, to: range.to, groupBy: range.groupBy },
+      // Active filters force raw reads and a range inside the retention window (90 days).
+      filters: {
+        active: filtered,
+        ...filters,
+        clamped: clamp.clamped,
+        requested_from: baseRange.from,
+        retention_days: 90,
+      },
+      // Phase 5. p75 exact for one day / raw reads; across rolled days the n-weighted
+      // average of the daily p75 (approximation). cls in CLS units (0.1 = good limit).
+      vitals,
+      vitals_pages: slowPages,
       summary: {
         pageviews: block.totals.pageviews,
         visitors: totalVisitors,

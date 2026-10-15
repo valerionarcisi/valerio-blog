@@ -91,6 +91,21 @@ export const ROLLUP_DDL = `
     PRIMARY KEY (day, scope, goal, dim, value)
   );
 
+  -- Phase 5. Core Web Vitals per day: Google buckets + exact p75 of the day.
+  -- device 'all' = every device. p75 / metric in storage units (ms; cls in thousandths).
+  CREATE TABLE IF NOT EXISTS daily_vitals (
+    day    TEXT NOT NULL,
+    scope  TEXT NOT NULL,
+    device TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    n      INTEGER NOT NULL DEFAULT 0,
+    good   INTEGER NOT NULL DEFAULT 0,
+    ni     INTEGER NOT NULL DEFAULT 0,
+    poor   INTEGER NOT NULL DEFAULT 0,
+    p75    INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, scope, device, metric)
+  );
+
   CREATE TABLE IF NOT EXISTS rollup_log (
     day         TEXT PRIMARY KEY,
     computed_at TEXT NOT NULL,

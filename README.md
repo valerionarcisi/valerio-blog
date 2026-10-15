@@ -71,6 +71,8 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 **Admin (cookie session or Bearer token):**
 
 - `GET /api/stats` — analytics aggregates (pageviews, visitors, top pages, devices, geo, UTM, recent visitors, suspicious)
+- `GET /api/stats/export?kind=top_pages|referrers|utm|channels|events|goals|daily` — CSV export of analytics tables (admin; CSV-injection safe)
+- `POST /api/admin/analytics-report` — weekly analytics Telegram report: dry run by default (`{}`), `{"send":true}` delivers; the Scheduled Function `netlify/functions/analytics-weekly-report.mts` sends it on Mondays
 - `GET /api/stats/live` — online-now counter (distinct visitor_hash in last 5 min, excludes flagged bots)
 - `GET/PATCH /api/admin/comments` — comment moderation (email notifications on approve/reject)
 - `GET /api/admin/claps` — claps recap by post

@@ -1,6 +1,7 @@
 import type { Client } from "@libsql/client";
 import { BOT_SQL, HUMAN_SQL } from "./bot-verdict";
 import { BLOG_PATH_SQL, SECTION_SQL } from "./analytics-sql";
+import { filterSql, filtersActive, type Filters } from "./analytics-filters";
 import { NULL_VALUE, eachDay, tableExists } from "./analytics-rollup";
 import {
   computeSessionStats,
@@ -29,6 +30,10 @@ export interface BlockOpts {
   useRollup?: boolean;
   /** Only totals (used for the previous-period comparison). */
   totalsOnly?: boolean;
+  /** Country / device / channel. Any active filter => raw rows only (no rollup has those cross-dimensions). */
+  filters?: Filters;
+  /** Do not truncate the lists (CSV export). */
+  full?: boolean;
 }
 
 interface Totals {
@@ -86,7 +91,7 @@ function segments(days: string[]): Array<[string, string]> {
 }
 
 export async function rolledDays(db: Client, o: BlockOpts): Promise<string[]> {
-  if (o.useRollup === false || o.pathname || o.groupBy === "hour") return [];
+  if (o.useRollup === false || o.pathname || o.groupBy === "hour" || filtersActive(o.filters)) return [];
   try {
     const r = await db.execute({
       sql: "SELECT day FROM rollup_log WHERE day >= ? AND day <= ? AND day < ? ORDER BY day",
@@ -119,7 +124,8 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
   const rolled = await rolledDays(db, o);
   const rolledSet = new Set(rolled);
   const rawDays = eachDay(o.from, o.to).filter((d) => !rolledSet.has(d));
-  const lim = (k: number) => (rolled.length === 0 ? k : NONE);
+  const lim = (k: number) => (rolled.length === 0 && !o.full ? k : NONE);
+  const top = (k: number) => (o.full ? 1e9 : k);
 
   const totals = emptyTotals();
   const chart = new Acc(2);
@@ -146,7 +152,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
       .join(" OR ");
     const rangeArgs = segs.flatMap(([a, b]) => [a, b]);
     const scopeSql = o.includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL;
-    const where = `WHERE (${rangeSql})${o.pathname ? " AND pathname = ?" : ""} AND ${scopeSql}`;
+    const where = `WHERE (${rangeSql})${o.pathname ? " AND pathname = ?" : ""} AND ${scopeSql}${filterSql(o.filters)}`;
     const args = o.pathname ? [...rangeArgs, o.pathname] : rangeArgs;
     const q = (sql: string) => db.execute({ sql, args });
     const dimQuery = (expr: string, notNull: boolean, order: string, limit: number) =>
@@ -300,16 +306,16 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
       .entries()
       .sort((a, b) => cmpStr(a[0], b[0]))
       .map(([d, [pv, vis]]) => ({ date: d, pageviews: pv, visitors: vis })),
-    topPages: rank(pages, 0, 20).map(([v, [pv, vis]]) => ({ pathname: v, pageviews: pv, visitors: vis })),
-    referrers: dimRows("referrer", "referrer", 20),
+    topPages: rank(pages, 0, top(20)).map(([v, [pv, vis]]) => ({ pathname: v, pageviews: pv, visitors: vis })),
+    referrers: dimRows("referrer", "referrer", top(20)),
     countries: dimRows("country", "country", 20),
     browsers: dimRows("browser", "browser", 10),
     os: dimRows("os", "os", 10),
     devices: dimRows("device", "device_type", 1e9),
     channels: dimRows("channel", "channel", 1e9),
     languages: dimRows("lang", "lang", 10),
-    utmSources: dimRows("utm_source", "utm_source", 10),
-    utmCampaigns: dimRows("utm_campaign", "utm_campaign", 10),
+    utmSources: dimRows("utm_source", "utm_source", top(10)),
+    utmCampaigns: dimRows("utm_campaign", "utm_campaign", top(10)),
     topEngaged,
     sections: rank(sections, 0, 1e9)
       .sort((a, b) => b[1][0] - a[1][0] || cmpStr(a[0], b[0]))
@@ -337,7 +343,7 @@ export async function computeSessions(
       rolledDays: rolled,
       rawRanges: segments(rawDays),
       scope: o.includeAll ? "all" : "human",
-      scopeExpr: o.includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL,
+      scopeExpr: `${o.includeAll ? `(NOT ${BOT_SQL})` : HUMAN_SQL}${filterSql(o.filters)}`,
       hasEvents,
       totalsOnly: o.totalsOnly,
     });

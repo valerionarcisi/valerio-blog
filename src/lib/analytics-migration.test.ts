@@ -91,4 +91,17 @@ describe("migrateAnalyticsV2", () => {
     expect(rule).toMatchObject({ enabled: 1, hits: 0, note: null, expires_at: null });
     expect(typeof rule.created_at).toBe("string");
   });
+  test("phase 5: adds lcp_ms/cls_milli/inp_ms and daily_vitals, idempotently", async () => {
+    const db = await legacyDb();
+    const first = await migrateAnalyticsV2(db);
+    for (const c of ["lcp_ms", "cls_milli", "inp_ms"]) expect(first).toContain(`added pageviews.${c}`);
+    const second = await migrateAnalyticsV2(db);
+    expect(second.some((l) => l.startsWith("added"))).toBe(false);
+    const cols = (await db.execute("PRAGMA table_info(pageviews)")).rows.map((r) => r.name);
+    expect(cols).toEqual(expect.arrayContaining(["lcp_ms", "cls_milli", "inp_ms"]));
+    const row = (await db.execute("SELECT lcp_ms, cls_milli, inp_ms FROM pageviews")).rows[0];
+    expect([row.lcp_ms, row.cls_milli, row.inp_ms]).toEqual([null, null, null]);
+    const t = await db.execute("SELECT 1 FROM sqlite_master WHERE name = 'daily_vitals'");
+    expect(t.rows).toHaveLength(1);
+  });
 });

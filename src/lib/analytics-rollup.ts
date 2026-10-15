@@ -4,6 +4,7 @@ import { BOT_SQL, HUMAN_SQL } from "./bot-verdict";
 import { SECTION_SQL } from "./analytics-sql";
 import { ROLLUP_DDL } from "./analytics-rollup-schema";
 import { isoDate, subtractDays } from "./date-range";
+import { buildVitalsRows } from "./analytics-vitals";
 import { SESSION_ROLLUP_TABLES, rollupStatements } from "./analytics-session-stats";
 
 export type Scope = "human" | "all";
@@ -119,6 +120,7 @@ export async function rollupDay(
     { sql: "DELETE FROM daily_pages WHERE day = ?", args: [day] },
     { sql: "DELETE FROM daily_dims WHERE day = ?", args: [day] },
     ...SESSION_ROLLUP_TABLES.map((t) => ({ sql: `DELETE FROM ${t} WHERE day = ?`, args: [day] })),
+    { sql: "DELETE FROM daily_vitals WHERE day = ?", args: [day] },
     { sql: "DELETE FROM rollup_log WHERE day = ?", args: [day] },
   ];
 
@@ -153,6 +155,29 @@ export async function rollupDay(
               FROM pageviews WHERE ${where}${d.skipNull ? ` AND ${d.expr} IS NOT NULL` : ""} GROUP BY v`,
         args,
       });
+    }
+    // Phase 5: Web Vitals. p75 needs the sorted values of the day, so they are read here
+    // (exact) and the resulting rows are inserted in the same batch.
+    if (has("lcp_ms") && has("cls_milli") && has("inp_ms")) {
+      const raw = await db.execute({
+        sql: `SELECT ${sel("device_type")} AS d, lcp_ms, cls_milli, inp_ms FROM pageviews
+              WHERE ${where} AND (lcp_ms IS NOT NULL OR cls_milli IS NOT NULL OR inp_ms IS NOT NULL)`,
+        args: [day, day],
+      });
+      const rows = buildVitalsRows(
+        raw.rows.map((r) => ({
+          device: r.d == null ? null : String(r.d),
+          lcp: r.lcp_ms == null ? null : Number(r.lcp_ms),
+          inp: r.inp_ms == null ? null : Number(r.inp_ms),
+          cls: r.cls_milli == null ? null : Number(r.cls_milli),
+        })),
+      );
+      for (const v of rows) {
+        stmts.push({
+          sql: `INSERT INTO daily_vitals (day, scope, device, metric, n, good, ni, poor, p75) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [day, scope, v.device, v.metric, v.n, v.good, v.ni, v.poor, v.p75],
+        });
+      }
     }
     // Phase 2: sessions are scoped by their own bot_score/human (inherited from their pageviews).
     if (c.sessions) {

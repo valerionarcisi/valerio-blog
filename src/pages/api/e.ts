@@ -22,6 +22,7 @@ import {
   parsePageview,
   type PageviewInput,
 } from "~/lib/analytics-input";
+import { hasVitals } from "~/lib/analytics-vitals";
 import { ONCE_PER_PAGE, parseEvent } from "~/lib/analytics-events";
 import {
   addSessionEngagement,
@@ -310,6 +311,30 @@ export const POST: APIRoute = async ({ request, locals }) => {
             WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
       args: [b.timeOnPage ?? 0, b.scrollDepth ?? 0, b.pageId, ...hashes],
     });
+    if (hasVitals(b.vitals)) {
+      try {
+        // LCP / INP: latest non-null value wins (the tracker sends the running value).
+        // CLS only grows within a page view: MAX. Separate statement so a database
+        // without the phase-5 columns still gets time/scroll above.
+        await db.execute({
+          sql: `UPDATE pageviews
+                SET lcp_ms = COALESCE(?, lcp_ms),
+                    inp_ms = COALESCE(?, inp_ms),
+                    cls_milli = CASE WHEN ? IS NULL THEN cls_milli ELSE MAX(COALESCE(cls_milli, 0), ?) END
+                WHERE page_id = ? AND visitor_hash IN (${inHashes})`,
+          args: [
+            b.vitals.lcpMs,
+            b.vitals.inpMs,
+            b.vitals.clsMilli,
+            b.vitals.clsMilli,
+            b.pageId,
+            ...hashes,
+          ],
+        });
+      } catch {
+        /* migration not applied: no vitals columns yet */
+      }
+    }
     if (sessionId != null) {
       try {
         await addSessionEngagement(

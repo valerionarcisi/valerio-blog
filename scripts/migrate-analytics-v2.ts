@@ -78,6 +78,19 @@ export async function migrateAnalyticsV2(db: Client): Promise<string[]> {
     "ensured sessions, events, daily_sessions, daily_events, daily_entry_exit, daily_goals",
   );
 
+  // Phase 5: Core Web Vitals (daily_vitals itself is in ROLLUP_DDL above).
+  for (const [col, type] of [
+    ["lcp_ms", "INTEGER"],
+    ["cls_milli", "INTEGER"],
+    ["inp_ms", "INTEGER"],
+  ] as const) {
+    if (!(await columnExists(db, "pageviews", col))) {
+      await db.execute(`ALTER TABLE pageviews ADD COLUMN ${col} ${type}`);
+      log.push(`added pageviews.${col}`);
+    }
+  }
+  log.push("ensured daily_vitals");
+
   return log;
 }
 

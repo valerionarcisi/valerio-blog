@@ -534,6 +534,40 @@ Pagina Astro SSR, protetta da token (`?token=ADMIN_TOKEN`), stessa logica di `/a
 
 ---
 
+## Web Vitals, filtri, export, card home e report settimanale (Analytics v2 - Fase 5, 2026-10-15)
+
+Decisioni del proprietario: Web Vitals SI (~1 KB nel tracker), report Telegram settimanale SI, le visite "non verificate" restano fuori dai numeri principali, raw 90 giorni. Migrazione: `scripts/migrate-analytics-v2.ts` (colonne `pageviews.lcp_ms`, `cls_milli`, `inp_ms` + tabella `daily_vitals`, idempotente; `/api/e` degrada se non applicata, `/api/stats` risponde `vitals.available = false`).
+
+### Web Vitals (RUM)
+
+- **Tracker** (`BaseHead.astro`, senza librerie, ~+1,1 KB non compresso / ~+0,5 KB gzip): `PerformanceObserver` con `buffered`, per tipo supportato. **LCP** = ultimo `largest-contentful-paint`, smette di aggiornarsi al primo `keydown`/`pointerdown`. **CLS** = massima *session window* (shift senza input recente, finestra chiusa da un gap >= 1 s o a 5 s di durata). **INP** = eventi `event` con `durationThreshold: 40`, raggruppati per `interactionId` (massimo per interazione), valore = p98 delle interazioni (il piu lento sotto le 50 interazioni). Valori mandati nel beacon cumulativo gia esistente (`lcp_ms`, `cls` come numero, `inp_ms`), solo se misurati: tipo non supportato = chiave assente, nessuna richiesta in piu. Test: `analytics-tracker-vitals.test.ts` esegue il vero script in una VM con un browser finto.
+- **Server** (`parseVitals` in `analytics-vitals.ts`): `lcp_ms` 0-60000, `inp_ms` 0-10000, `cls` 0-10, fuori range = scartato (il beacon resta valido). `UPDATE` separato da tempo/scroll: LCP/INP = ultimo valore non nullo (`COALESCE(?, col)`), CLS = `MAX` (`cls_milli` = CLS x 1000). Senza le colonne il beacon salva comunque tempo e scroll.
+- **Rollup** `daily_vitals(day, scope, device, metric, n, good, ni, poor, p75)`, PK `(day, scope, device, metric)`; `device` = `all` + ogni `device_type` (NULL = `unknown`); `metric` = `lcp|inp|cls`; `p75` in unita di storage (ms; CLS in millesimi). Soglie Google: LCP 2500/4000 ms, INP 200/500 ms, CLS 0,1/0,25 (buono <= prima, scarso > seconda). p75 del giorno = *nearest rank* sui valori ordinati, esatto.
+- **Lettura** (`analytics-vitals-stats.ts`): giorni chiusi da `daily_vitals`, oggi / filtri / `pathname` / grafico orario da raw. I conteggi dei bucket sono **esatti** in ogni caso; il p75 e esatto per un solo giorno o per una lettura tutta raw; su piu giorni rollupati e la **media dei p75 giornalieri pesata per n (approssimazione)**: un p75 vero su piu giorni richiederebbe i valori grezzi. Test di equivalenza rollup vs raw in `analytics-vitals-stats.test.ts`.
+- **`GET /api/stats`**: `vitals {available, lcp:{p75,good,ni,poor,n}, inp, cls, by_device:{mobile, desktop}}` (`cls.p75` in unita CLS) e `vitals_pages` (le 10 pagine con LCP p75 peggiore, n >= 5, solo raw, ultimi 90 giorni intersecati col periodo). I giorni rollupati prima del deploy non hanno vitals (non esistevano misure), nessun backfill necessario.
+
+### Filtri globali
+
+`country` (2 lettere), `device` (`mobile|tablet|desktop`), `channel` (`direct|search|social|ai|email|referral|campaign`) come query param di `/api/stats` (e dell'export); valori non validi = 400. Si applicano a riepilogo, grafico, top pagine, referrer, dimensioni, sessioni (`sessions` ha `country/device_type/channel`), eventi, obiettivi e vitals. **I filtri esistono solo sulle righe grezze**: con un filtro attivo l'API legge solo raw (`source.rollup_days = 0`), il periodo viene ridotto alla finestra di retention (90 giorni: `period.from` = max(richiesto, oggi - 90), `filters.clamped`, `filters.requested_from`) e il confronto col periodo precedente e `null` se non rientra nella finestra. La dashboard mostra una nota esplicita. SQL: `src/lib/analytics-filters.ts` (valori validati a insiemi chiusi, inseriti come letterali).
+
+### Export CSV
+
+`GET /api/stats/export?kind=top_pages|referrers|utm|channels|events|goals|daily&from&to` (+ `include=all`, filtri; max 400 giorni; default ultimi 30). `requireAdmin` (cookie o Bearer, GET = niente CSRF). Risposta `text/csv`, `Content-Disposition: attachment`, `Cache-Control: private, no-store`, `nosniff`; liste **non troncate**. CSV RFC 4180 con CRLF (`src/lib/csv.ts`); le celle di testo che iniziano con `= + - @` (o tab/CR) sono precedute da `'` contro la CSV injection; i numeri non vengono toccati. Link "Esporta CSV" nelle intestazioni delle card.
+
+### Card "Analytics oggi" (`/admin`)
+
+`src/lib/analytics-summary.ts`, renderizzata lato server con **soft failure** (qualsiasi errore o 3 s di timeout = "dati non disponibili", la home non si rompe). Giorno = **giorno UTC** (come tutto il resto), solo visite umane; l'ora di aggiornamento e mostrata in Europe/Rome. Mostra: visitatori oggi; ieri **alla stessa ora** (taglio allo stesso orario UTC) e ieri totale, con variazione %; top 3 post di oggi (pageview). **Regola picco**: avviso se `visitatori oggi >= 10` E `visitatori oggi > 2 x media` dei visitatori (stesso orario, dalle 00:00 UTC) degli ultimi 7 stessi giorni della settimana (-7, -14, ... -49 giorni).
+
+### Report settimanale Telegram
+
+- Formatter puro `src/lib/analytics-report.ts` (testo semplice, niente `parse_mode`: nulla da escapare). Settimana = ultimo lunedi-domenica completo per **date Europe/Rome**, mappate 1:1 sui giorni UTC dell'analytics (qualche ora di scarto ai bordi, irrilevante) vs la settimana prima. Contenuto: visitatori e pageview con delta %, riga qualita (visite umane verificate vs non verificate), top 3 post, top 3 canali, obiettivi con conversioni, LCP mobile p75 con giudizio (se ci sono misure), link a `https://valerionarcisi.me/admin/analytics` (nessun token). Dati dagli stessi helper ibridi di `/api/stats`.
+- Consegna: Netlify Scheduled Function `netlify/functions/analytics-weekly-report.mts`, cron `0 6 * * 1` (UTC) = lunedi 07:00 Roma in inverno (CET), **08:00 in estate (CEST)**: Netlify non ha fuso orario nel cron, la deriva di un'ora con l'ora legale e accettata. Legge `TURSO_*`, `TELEGRAM_BOT_TOKEN` e la destinazione da `Netlify.env`/`process.env` (come `analytics-rollup.mts`; import relativi; `fetch` con `AbortSignal.timeout(8000)`; l'URL contiene il token del bot quindi gli errori non lo propagano). Destinazione: `ANALYTICS_REPORT_CHAT_ID`, altrimenti il primo id di `TELEGRAM_USER_ID_WHITELIST`; senza token o destinazione logga e non fa nulla. Opt-out: `ANALYTICS_REPORT_DISABLED=1`.
+- Test sicuro: `POST /api/admin/analytics-report` (admin) con `{}` = **dry run**, ritorna `{text, sent:false, dryRun:true}` senza inviare; `{"send":true}` invia davvero (rispetta opt-out e destinazione).
+
+### Env vars (Fase 5)
+
+`ANALYTICS_REPORT_CHAT_ID` (opzionale, chat del report; fallback primo id di `TELEGRAM_USER_ID_WHITELIST`), `ANALYTICS_REPORT_DISABLED` (`1` = nessun invio). Gia necessarie: `TELEGRAM_BOT_TOKEN`, `TURSO_*`, `ADMIN_TOKEN`.
+
 ## Env vars
 
 ```

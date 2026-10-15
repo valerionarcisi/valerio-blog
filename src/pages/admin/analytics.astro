@@ -693,6 +693,41 @@ if (!Astro.locals.isAdmin) {
       }
       .foglio body.admin .ax-rollup-btn { min-height: 44px; min-width: 44px; color: var(--ax-page-ink-soft); border-color: currentColor; }
 
+      /* Phase 5: global filters, CSV export, Web Vitals */
+      .foglio body.admin .ax-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin-top: 0.8rem; font-family: var(--foglio-mono); font-size: 11px; color: var(--ax-page-ink-soft); }
+      .foglio body.admin .ax-filters label { display: inline-flex; align-items: center; gap: 0.4rem; text-transform: uppercase; letter-spacing: 0.1em; }
+      .foglio body.admin .ax-filters select {
+        font-family: var(--foglio-mono); font-size: 12px; min-height: 44px; padding: 0.4rem 0.6rem;
+        background: var(--ax-page-bg-2); color: var(--ax-page-ink);
+        border: 1px solid var(--ax-page-rule); border-radius: var(--foglio-radius-sm);
+      }
+      .foglio body.admin .ax-filter-note {
+        margin: 0.7rem 0 0; padding: 0.5rem 0.7rem; font-family: var(--foglio-mono); font-size: 11px;
+        background: var(--foglio-paper); color: var(--foglio-warn); border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm);
+      }
+      .foglio body.admin .ax-export {
+        display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; padding: 0 0.4rem;
+        color: var(--foglio-accent-soft); text-decoration: underline; text-underline-offset: 3px;
+      }
+      .foglio body.admin .ax-section-head .ax-section-meta { display: inline-flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
+      .foglio body.admin .ax-vitals { grid-template-columns: 1fr; margin-bottom: 1rem; }
+      .foglio body.admin .ax-vital .ax-stat-value { font-size: 2rem; }
+      .foglio body.admin .ax-vital.good .ax-stat-value { color: var(--foglio-pos); }
+      .foglio body.admin .ax-vital.ni .ax-stat-value { color: var(--foglio-warn); }
+      .foglio body.admin .ax-vital.poor .ax-stat-value { color: var(--foglio-neg); }
+      .foglio body.admin .ax-vital-state { font-family: var(--foglio-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.5rem; color: var(--foglio-ink-soft); }
+      .foglio body.admin .ax-vital-split { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--foglio-rule); margin: 0.4rem 0; }
+      .foglio body.admin .ax-vital-split span { display: block; height: 100%; }
+      .foglio body.admin .ax-vital-split .g { background: var(--foglio-pos); }
+      .foglio body.admin .ax-vital-split .n { background: var(--foglio-warn); }
+      .foglio body.admin .ax-vital-split .p { background: var(--foglio-neg); }
+      .foglio body.admin .ax-vital-meta { font-family: var(--foglio-mono); font-size: 10.5px; color: var(--foglio-ink-soft); margin: 0.15rem 0; overflow-wrap: anywhere; }
+      .foglio body.admin .ax-vital-dev b { font-weight: 600; }
+      .foglio body.admin .ax-vital-dev .good, .foglio body.admin .ax-vital-dev b.good { color: var(--foglio-pos); }
+      .foglio body.admin .ax-vital-dev b.ni { color: var(--foglio-warn); }
+      .foglio body.admin .ax-vital-dev b.poor { color: var(--foglio-neg); }
+      @media (min-width: 768px) { .foglio body.admin .ax-stats.ax-vitals { grid-template-columns: repeat(3, 1fr); } }
+
       /* Tablet */
       @media (min-width: 768px) {
         .foglio body.admin .ax-wrap { padding: 1.75rem 1.75rem 4rem; }
@@ -764,6 +799,24 @@ if (!Astro.locals.isAdmin) {
             <button id="date-go">Vai</button>
           </div>
         </div>
+        <div class="ax-filters" role="group" aria-label="Filtri globali">
+          <label>Paese <select id="f-country"><option value="">Tutti</option></select></label>
+          <label>Device
+            <select id="f-device">
+              <option value="">Tutti</option><option value="mobile">mobile</option>
+              <option value="tablet">tablet</option><option value="desktop">desktop</option>
+            </select>
+          </label>
+          <label>Canale
+            <select id="f-channel">
+              <option value="">Tutti</option><option value="direct">direct</option><option value="search">search</option>
+              <option value="social">social</option><option value="ai">ai</option><option value="email">email</option>
+              <option value="referral">referral</option><option value="campaign">campaign</option>
+            </select>
+          </label>
+          <button type="button" class="ax-btn" id="f-reset" hidden>Azzera filtri</button>
+        </div>
+        <p class="ax-filter-note" id="filter-note" role="status" hidden></p>
       </header>
 
       <section class="ax-stats" id="summary">
@@ -871,7 +924,7 @@ if (!Astro.locals.isAdmin) {
 
       <div class="ax-section-head">
         <h2>Traffico nel tempo</h2>
-        <span class="ax-section-meta" id="chart-meta">pageviews · visitatori</span>
+        <span class="ax-section-meta" id="chart-meta">pageviews · visitatori <a class="ax-export" data-export="daily" href="#" download>Esporta CSV</a></span>
       </div>
       <div class="ax-chart-wrap"><canvas id="chart"></canvas></div>
 
@@ -890,7 +943,7 @@ if (!Astro.locals.isAdmin) {
 
       <div class="ax-section-head">
         <h2>Sezioni</h2>
-        <span class="ax-section-meta">dove leggono</span>
+        <span class="ax-section-meta">dove leggono <a class="ax-export" data-export="top_pages" href="#" download>Esporta CSV</a></span>
       </div>
       <div class="ax-grid-2">
         <div>
@@ -948,25 +1001,37 @@ if (!Astro.locals.isAdmin) {
 
       <div class="ax-section-head">
         <h2>Canali</h2>
-        <span class="ax-section-meta">sessioni per canale di provenienza</span>
+        <span class="ax-section-meta">sessioni per canale di provenienza <a class="ax-export" data-export="channels" href="#" download>Esporta CSV</a></span>
       </div>
       <ul class="ax-list" id="channels-list"></ul>
 
       <div class="ax-section-head">
         <h2>Eventi</h2>
-        <span class="ax-section-meta">azioni anonime · conteggio</span>
+        <span class="ax-section-meta">azioni anonime · conteggio <a class="ax-export" data-export="events" href="#" download>Esporta CSV</a></span>
       </div>
       <ul class="ax-list" id="events-list"></ul>
 
       <div class="ax-section-head">
         <h2>Obiettivi</h2>
-        <span class="ax-section-meta">sessioni con conversione · tasso sulle sessioni</span>
+        <span class="ax-section-meta">sessioni con conversione · tasso sulle sessioni <a class="ax-export" data-export="goals" href="#" download>Esporta CSV</a></span>
       </div>
       <div class="ax-grid-2" id="goals-grid"></div>
 
       <div class="ax-section-head">
+        <h2>Web Vitals</h2>
+        <span class="ax-section-meta" id="vitals-meta">p75 · utenti reali</span>
+      </div>
+      <p class="ax-unavailable" id="vitals-unavailable" hidden>Web Vitals non ancora attivi: applica la migrazione Fase 5.</p>
+      <section class="ax-stats ax-vitals" id="vitals-cards" aria-label="Core Web Vitals"></section>
+      <div class="ax-section-head">
+        <h2>Pagine più lente</h2>
+        <span class="ax-section-meta">LCP p75 · almeno 5 misure · dati grezzi</span>
+      </div>
+      <ul class="ax-list" id="slow-pages-list"></ul>
+
+      <div class="ax-section-head">
         <h2>Provenienza</h2>
-        <span class="ax-section-meta">referrer · paesi · lingua</span>
+        <span class="ax-section-meta">referrer · paesi · lingua <a class="ax-export" data-export="referrers" href="#" download>Esporta CSV</a></span>
       </div>
       <div class="ax-grid-3">
         <ul class="ax-list" id="referrers-list"></ul>
@@ -986,7 +1051,7 @@ if (!Astro.locals.isAdmin) {
 
       <div class="ax-section-head">
         <h2>UTM</h2>
-        <span class="ax-section-meta">campagne · sorgenti</span>
+        <span class="ax-section-meta">campagne · sorgenti <a class="ax-export" data-export="utm" href="#" download>Esporta CSV</a></span>
       </div>
       <div class="ax-grid-2">
         <ul class="ax-list" id="utm-sources-list"></ul>
@@ -1251,7 +1316,12 @@ if (!Astro.locals.isAdmin) {
       /* Bot detection: quality card, review list, rules */
       var includeAll = false;
       var _review = [];
-      function statsUrl(period) { return "/api/stats?period=" + period + (includeAll ? "&include=all" : ""); }
+      var filters = { country: "", device: "", channel: "" };
+      function filterQuery() {
+        return ["country", "device", "channel"].filter(function(k) { return filters[k]; })
+          .map(function(k) { return "&" + k + "=" + encodeURIComponent(filters[k]); }).join("");
+      }
+      function statsUrl(period) { return "/api/stats?period=" + period + (includeAll ? "&include=all" : "") + filterQuery(); }
       function reloadStats() { loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : "")); }
 
       function renderQuality(d) {
@@ -1562,6 +1632,84 @@ if (!Astro.locals.isAdmin) {
       }
 
       /* Period state */
+      /* Phase 5: filters note, CSV links, Web Vitals */
+      var knownCountries = {};
+      function syncCountryOptions(rows) {
+        (rows || []).forEach(function(r) { if (r.country) knownCountries[r.country] = true; });
+        if (filters.country) knownCountries[filters.country] = true;
+        var sel = document.getElementById("f-country");
+        sel.innerHTML = '<option value="">Tutti</option>' + Object.keys(knownCountries).sort().map(function(c) {
+          return '<option value="' + escapeHtml(c) + '"' + (c === filters.country ? " selected" : "") + '>' + escapeHtml(countryFlag(c) + " " + c) + '</option>';
+        }).join("");
+      }
+      function renderFilters(d) {
+        var f = d.filters || {};
+        var note = document.getElementById("filter-note");
+        document.getElementById("f-reset").hidden = !f.active;
+        if (!f.active) { note.hidden = true; note.textContent = ""; return; }
+        note.hidden = false;
+        note.textContent = "Filtri attivi: i dati vengono letti dalle visite grezze (conservate " + (f.retention_days || 90) + " giorni), non dagli aggregati." +
+          (f.clamped ? " Periodo ridotto a partire dal " + (d.period && d.period.from) + "." : "") +
+          " Il confronto col periodo precedente c'è solo se rientra nella finestra.";
+      }
+      function updateExportLinks() {
+        document.querySelectorAll("a.ax-export").forEach(function(a) {
+          a.href = csvExportUrl(a.dataset.export, {
+            from: currentFrom, to: currentTo, include: includeAll ? "all" : "",
+            country: filters.country, device: filters.device, channel: filters.channel
+          });
+        });
+      }
+      var VITAL_LABELS = { lcp: "LCP", inp: "INP", cls: "CLS" };
+      var VITAL_HINT = { lcp: "Largest Contentful Paint: quando compare il contenuto principale", inp: "Interaction to Next Paint: reattività a tocchi e click", cls: "Cumulative Layout Shift: quanto salta il layout" };
+      var STATE_TXT = { good: "Buono", ni: "Da migliorare", poor: "Scarso" };
+      function vitalCard(metric, v, byDev) {
+        v = v || { n: 0, good: 0, ni: 0, poor: 0, p75: null };
+        var st = v.n > 0 ? vitalState(metric, v.p75) : null;
+        var tot = v.good + v.ni + v.poor;
+        var pc = function(x) { return tot > 0 ? Math.round(x / tot * 100) : 0; };
+        var dev = ["mobile", "desktop"].map(function(dn) {
+          var x = byDev && byDev[dn] ? byDev[dn][metric] : null;
+          if (!x || !x.n) return '<span>' + escapeHtml(dn) + ' <b>—</b></span>';
+          return '<span class="ax-vital-dev">' + escapeHtml(dn) + ' <b class="' + escapeHtml(vitalState(metric, x.p75) || "") + '">' + escapeHtml(fmtVital(metric, x.p75)) + '</b> (' + fmt(x.n) + ')</span>';
+        }).join(" · ");
+        return '<div class="ax-stat ax-vital ' + (st || "") + '" title="' + escapeHtml(VITAL_HINT[metric]) + '">' +
+          '<div class="ax-stat-label">' + escapeHtml(VITAL_LABELS[metric]) + ' · p75</div>' +
+          '<div class="ax-stat-value">' + escapeHtml(v.n > 0 ? fmtVital(metric, v.p75) : "—") + '</div>' +
+          '<p class="ax-vital-state">' + escapeHtml(st ? STATE_TXT[st] : "Nessun dato") + ' · ' + fmt(v.n) + ' misure</p>' +
+          '<div class="ax-vital-split" role="img" aria-label="' + escapeHtml("Buono " + pc(v.good) + "%, da migliorare " + pc(v.ni) + "%, scarso " + pc(v.poor) + "%") + '">' +
+            '<span class="g" style="width:' + pc(v.good) + '%"></span><span class="n" style="width:' + pc(v.ni) + '%"></span><span class="p" style="width:' + pc(v.poor) + '%"></span></div>' +
+          '<p class="ax-vital-meta">buono ' + pc(v.good) + '% · da migliorare ' + pc(v.ni) + '% · scarso ' + pc(v.poor) + '%</p>' +
+          '<p class="ax-vital-meta">' + dev + '</p>' +
+          '</div>';
+      }
+      function renderVitals(d) {
+        var v = d.vitals || {};
+        document.getElementById("vitals-unavailable").hidden = v.available !== false;
+        var box = document.getElementById("vitals-cards");
+        box.hidden = v.available === false;
+        box.innerHTML = v.available === false ? "" : ["lcp", "inp", "cls"].map(function(m) { return vitalCard(m, v[m], v.by_device); }).join("");
+        var ul = document.getElementById("slow-pages-list");
+        var rows = d.vitals_pages || [];
+        if (!rows.length) { ul.innerHTML = '<li class="ax-empty">Nessuna pagina con almeno 5 misure LCP.</li>'; return; }
+        ul.innerHTML = rows.map(function(r) {
+          var st = vitalState("lcp", r.lcp_p75) || "";
+          return '<li><span class="ax-key path" title="' + escapeHtml(r.pathname) + '">' + escapeHtml(r.pathname) + '</span>' +
+            '<span class="ax-val ax-vital-dev"><b class="' + escapeHtml(st) + '">' + escapeHtml(fmtVital("lcp", r.lcp_p75)) + '</b> · ' + fmt(r.n) + '</span></li>';
+        }).join("");
+      }
+      function onFilterChange() {
+        filters.country = document.getElementById("f-country").value;
+        filters.device = document.getElementById("f-device").value;
+        filters.channel = document.getElementById("f-channel").value;
+        reloadStats();
+      }
+      ["f-country", "f-device", "f-channel"].forEach(function(id) { document.getElementById(id).addEventListener("change", onFilterChange); });
+      document.getElementById("f-reset").addEventListener("click", function() {
+        ["f-country", "f-device", "f-channel"].forEach(function(id) { document.getElementById(id).value = ""; });
+        onFilterChange();
+      });
+
       var PERIOD_DAYS = { "today": 1, "7d": 7, "30d": 30, "90d": 90, "12m": 365 };
       var currentPeriod = "30d";
       var currentFrom = null;
@@ -1633,6 +1781,10 @@ if (!Astro.locals.isAdmin) {
           .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
           .then(function(d) {
             renderQuality(d);
+            renderFilters(d);
+            syncCountryOptions(d.countries);
+            renderVitals(d);
+            updateExportLinks();
             renderDataSource(d);
             renderReview(d.review);
             var s = d.summary;
