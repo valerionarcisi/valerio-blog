@@ -1,9 +1,7 @@
 ---
 title: "4 No's for Embracing Simplicity"
 date: "2024-11-20"
-extract: "In my quest to build a more efficient blog, I learned the importance of simplicity and adaptability. By saying \"No\" to complex tools like vanilla-extract and effect-ts, and embracing straightforward solutions such as global CSS, zod for validation, and HyGraph for content management, I've streamlined my development process. Join me as I share the lessons learned and the changes made to enhance my blogging experience.
-
-Feel free to adjust any part of it to better fit your style!"
+extract: "In my quest to build a more efficient blog, I learned the importance of simplicity and adaptability. By saying \"No\" to complex tools like vanilla-extract and effect-ts, and embracing straightforward solutions such as global CSS, zod for validation, and HyGraph for content management, I've streamlined my development process. Join me as I share the lessons learned and the changes made to enhance my blogging experience."
 tags:
   - "CSS"
   - "vanilla-extract"
