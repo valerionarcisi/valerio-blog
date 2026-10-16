@@ -29,7 +29,6 @@ Note: the legacy client-side language redirect (BaseHead detected navigator.lang
 - **Films**: Astro Content Collections in `src/content/films/{locale}/{slug}.md`
 - **Movies watched**: Fetched from Letterboxd RSS + TMDB API at build time, then refreshed client-side from `/api/letterboxd` so freshly-logged films appear without a redeploy
 - **Music**: Last.FM at build time, served via `/ascolti` (top albums, top artists, recent scrobbles)
-- **Sports activities**: Strava at build time, served via `/admin/strava`
 
 ## Project Structure
 

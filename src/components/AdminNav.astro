@@ -8,7 +8,6 @@ type PageId =
   | "radar"
   | "meal-plan"
   | "body-comp"
-  | "strava"
   | "roma-arte-di-narrare";
 
 interface Props {
@@ -39,12 +38,6 @@ const groups: { title: string; links: { id: PageId; label: string; href: string 
     links: [
       { id: "meal-plan", label: "Piano & spesa", href: href("meal-plan") },
       { id: "body-comp", label: "Body Comp", href: href("body-comp") },
-    ],
-  },
-  {
-    title: "Sport",
-    links: [
-      { id: "strava", label: "Strava", href: href("strava") },
     ],
   },
   ...(events.length ? [{ title: "Eventi", links: events }] : []),
