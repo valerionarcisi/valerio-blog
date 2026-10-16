@@ -1,5 +1,6 @@
 import { createClient } from "@libsql/client";
 import { BOT_SCORE_THRESHOLD } from "../src/lib/bot-score";
+import { BOT_SQL } from "../src/lib/bot-verdict";
 
 // Read-only health check of the analytics data. Prints aggregate indicators only (no visitor ids, no IPs).
 //   TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx -y tsx scripts/analytics-health.ts [--days 7]
@@ -38,12 +39,12 @@ if (total === 0) {
   process.exit(0);
 }
 
-console.log("\nPer day: pageviews / human / unverified / bot");
+console.log("\nPer day: pageviews / human / unverified / bot (bot = score >= " + BOT_SCORE_THRESHOLD + " or a hash flagged by hand with the old buttons)");
 const perDay = await db.execute({
   sql: `SELECT date(created_at) d, COUNT(*) pv,
-          SUM(CASE WHEN COALESCE(bot_score,0) >= ${BOT_SCORE_THRESHOLD} THEN 0 WHEN COALESCE(human,0) = 1 THEN 1 ELSE 0 END) human,
-          SUM(CASE WHEN COALESCE(bot_score,0) >= ${BOT_SCORE_THRESHOLD} THEN 0 WHEN COALESCE(human,0) = 0 THEN 1 ELSE 0 END) unverified,
-          SUM(CASE WHEN COALESCE(bot_score,0) >= ${BOT_SCORE_THRESHOLD} THEN 1 ELSE 0 END) bot
+          SUM(CASE WHEN ${BOT_SQL} THEN 0 WHEN COALESCE(human,0) = 1 THEN 1 ELSE 0 END) human,
+          SUM(CASE WHEN ${BOT_SQL} THEN 0 WHEN COALESCE(human,0) = 0 THEN 1 ELSE 0 END) unverified,
+          SUM(CASE WHEN ${BOT_SQL} THEN 1 ELSE 0 END) bot
         FROM pageviews WHERE created_at >= ? GROUP BY d ORDER BY d`,
   args: [since],
 });
