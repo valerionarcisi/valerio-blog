@@ -29,15 +29,18 @@ const periodLabels: Record<Period, string> = {
   overall: "All time",
 };
 
-const [albums, artists, info, recent] = await Promise.all([
-  fetchTopAlbums(activePeriod, 12),
+const [allAlbums, artists, info, recent] = await Promise.all([
+  fetchTopAlbums(activePeriod, 200),
   fetchTopArtists(activePeriod, 8),
   fetchUserInfo(),
   fetchRecentTracks(undefined, undefined, "30").catch(() => []),
 ]);
 
-const totalPlaysPeriod = albums.reduce((s, a) => s + a.playcount, 0);
-const uniqueArtists = new Set(albums.map((a) => a.artist)).size;
+const albums = allAlbums.slice(0, 12);
+const totalPlaysPeriod = allAlbums.reduce((s, a) => s + a.playcount, 0);
+const uniqueArtists = new Set(allAlbums.map((a) => a.artist)).size;
+const lastListen = (recent as any[]).find((t) => t.date?.["#text"])?.date["#text"] as string | undefined;
+const widerPeriod = validPeriods[validPeriods.indexOf(activePeriod) + 1];
 const topArtistName = artists[0]?.name ?? "—";
 const topArtistPlays = artists[0]?.playcount ?? 0;
 
@@ -86,7 +89,7 @@ function fmtTrackDate(raw?: string): string {
         </div>
         <div class="as-stat">
           <dt>Distinct albums</dt>
-          <dd>{albums.length}</dd>
+          <dd>{allAlbums.length}</dd>
         </div>
         <div class="as-stat">
           <dt>Distinct artists</dt>
@@ -103,7 +106,13 @@ function fmtTrackDate(raw?: string): string {
       <section class="as-section">
         <h2 class="as-section-title">Top albums <span class="as-section-period">— {periodLabels[activePeriod]}</span></h2>
         {albums.length === 0 ? (
-          <p class="as-empty">No albums for this period.</p>
+          <p class="as-empty">
+            Nothing played in the last {periodLabels[activePeriod]}.
+            {lastListen && <> Last track: {fmtTrackDate(lastListen)}.</>}
+            {widerPeriod && (
+              <> <a href={widerPeriod === "1month" ? "/en/listening" : `/en/listening?p=${widerPeriod}`}>Try {periodLabels[widerPeriod]} →</a></>
+            )}
+          </p>
         ) : (
           <div class="as-album-grid">
             {albums.map((a, i) => (

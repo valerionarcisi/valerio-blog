@@ -454,3 +454,12 @@ html.dc .vw-year-label {
 .dc-section-title--sm h2 {
   font-size: clamp(40px, 6vw, 84px);
 }
+
+html.dc .as-empty a {
+  color: var(--dc-link);
+  border-bottom: 1px solid var(--dc-link);
+}
+html.dc .as-empty a:hover {
+  color: var(--foglio-accent);
+  border-bottom-color: var(--foglio-accent);
+}
