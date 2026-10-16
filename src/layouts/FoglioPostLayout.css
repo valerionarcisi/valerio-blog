@@ -442,3 +442,61 @@
 .fp-article .astro-code span[style*="color: #E36209"] {
   color: #a8451a !important;
 }
+
+/* Click-to-load third-party embeds (src/lib/embed-consent.ts). The real iframe is created only after a click. */
+.embed-consent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  margin: var(--foglio-space-4, 1.5rem) 0;
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md, 6px);
+  background: var(--foglio-paper-2);
+  color: var(--foglio-ink);
+}
+.embed-consent__box {
+  max-width: 34rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+}
+.embed-consent__text {
+  margin: 0 0 1rem;
+  font-family: var(--foglio-serif);
+  font-size: var(--foglio-fs-sm, 0.95rem);
+  line-height: 1.55;
+  color: var(--foglio-ink-soft);
+}
+.embed-consent__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem 1.25rem;
+  margin: 0;
+}
+.embed-consent__btn {
+  min-height: 44px;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid var(--foglio-accent);
+  border-radius: var(--foglio-radius-sm, 4px);
+  background: transparent;
+  color: var(--foglio-accent);
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono, 0.72rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.embed-consent__btn:hover {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.embed-consent__open,
+.embed-consent__privacy {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono, 0.72rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

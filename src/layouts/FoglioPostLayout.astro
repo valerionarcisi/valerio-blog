@@ -77,6 +77,11 @@ const h2Headings = headings.filter((h) => h.depth === 2);
   </head>
 
   <body>
+    <!-- Third-party embeds load only after a click (see src/lib/embed-consent.ts) -->
+    <script>
+      import "~/scripts/embed-consent";
+    </script>
+
     <!-- Reading progress bar -->
     <div class="fp-progress" id="fp-progress"></div>
     <script is:inline>

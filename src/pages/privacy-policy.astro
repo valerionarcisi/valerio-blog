@@ -5,7 +5,7 @@ import Footer from "~/components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
 import Title from "~/components/Title.astro";
 import "~/layouts/BlogPost.css";
-const today = new Date();
+const LAST_UPDATE = "16 ottobre 2026";
 ---
 
 <!doctype html>
@@ -21,34 +21,45 @@ const today = new Date();
     <main class="BlogPost">
       <Title title="Privacy Policy" />
       <section class="prose">
-        <h2>Ultimo aggiornamento: {today.getFullYear()}</h2>
+        <h2>Ultimo aggiornamento: {LAST_UPDATE}</h2>
 
         <p>
-          Su valerionarcisi.me, la privacy degli utenti e una priorita. Non utilizziamo
-          cookie, pubblicita o strumenti di tracciamento di terze parti.
+          Su valerionarcisi.me la privacy dei visitatori è una priorità. Il sito non
+          imposta cookie ai visitatori, non mostra pubblicità e non carica strumenti di
+          tracciamento di terze parti. Due articoli possono incorporare un contenuto esterno
+          (un video di YouTube e un widget di Relive), ma questo si carica solo dopo un tuo
+          clic: vedi la sezione 3.
         </p>
 
         <hr />
         <h2>1. Analytics</h2>
         <p>
-          Utilizziamo un sistema di analytics self-hosted che non usa cookie, non raccoglie
-          indirizzi IP e non memorizza dati personali. I dati raccolti (pagine visitate,
-          referrer, tipo di dispositivo, lingua e paese) sono completamente anonimi e non
-          permettono di identificare singoli utenti. Il paese deriva dalla posizione
-          approssimativa fornita dall'infrastruttura di hosting o, in mancanza, dal fuso
-          orario; l'indirizzo IP non viene mai salvato e serve solo a calcolare, in
-          memoria, un identificativo anonimo che si azzera ogni giorno. Misuriamo anche, in
-          modo anonimo, alcune azioni sulle pagine: clic su link in uscita e su
-          download, profondità di scorrimento degli articoli, copia di codice, applausi,
-          commenti e messaggi dalla pagina dei contatti. Misuriamo inoltre, in forma anonima,
-          alcune metriche di prestazione del caricamento delle pagine (tempi di caricamento,
-          stabilità del layout e reattività), senza alcun dato personale.
+          Utilizziamo un sistema di analytics self-hosted, senza cookie e senza strumenti di
+          terze parti. Non salviamo mai il tuo indirizzo IP. Viene usato solo in memoria,
+          insieme al browser, per calcolare un identificativo pseudonimo con una chiave
+          segreta che cambia ogni giorno: la chiave viene cancellata dopo due giorni e da quel
+          momento non è più possibile risalire a una persona né collegare le sue visite. Nel
+          frattempo, le pagine viste da uno stesso visitatore possono essere raggruppate in una
+          visita (finché le visite non sono distanti più di 30 minuti) per capire come si
+          legge il sito.
+        </p>
+        <p>
+          Raccogliamo pagine visitate, referrer, tipo di dispositivo, browser, sistema
+          operativo, lingua e paese. Il paese deriva dalla posizione approssimativa fornita
+          dall'infrastruttura di hosting o, in mancanza, dal fuso orario. Misuriamo anche
+          alcune azioni sulle pagine (clic su link in uscita e su download, profondità di
+          scorrimento degli articoli, copia di codice, applausi, commenti, condivisioni) e
+          alcune metriche di prestazione del caricamento (tempi, stabilità del layout e
+          reattività). I dati grezzi sono conservati per 90 giorni; le visite per 180 giorni;
+          oltre restano solo totali aggregati.
         </p>
         <p>
           Il browser memorizza nel localStorage un'impostazione chiamata
           <code>notrack</code> soltanto se il visitatore o il proprietario del sito
           decide di escludersi dal conteggio: è un semplice flag, senza alcun
-          identificativo, e non viene inviato a nessuno.
+          identificativo, e non viene inviato a nessuno. Le altre voci nel localStorage
+          sono solo preferenze (tema chiaro o scuro, punteggio di un gioco) e restano sul
+          tuo dispositivo.
         </p>
 
         <hr />
@@ -61,9 +72,28 @@ const today = new Date();
           l'email non viene mai mostrata pubblicamente e viene utilizzata solo per
           eventuali comunicazioni relative al commento.
         </p>
+        <p>
+          Applausi e «mi piace»: per evitare voti doppi usiamo un identificativo derivato dal
+          tuo indirizzo IP e dal tuo browser (non viene mostrato e non permette di risalire
+          all'IP). È un dato pseudonimo conservato nel database finché resta online il
+          contenuto, e lo trattiamo per il legittimo interesse di avere conteggi corretti.
+        </p>
         <hr />
 
-        <h2>3. Modulo di contatto</h2>
+        <h2>3. Contenuti di terze parti</h2>
+        <p>
+          Alcuni articoli incorporano un contenuto esterno: un video di YouTube (Google) in
+          «Ligabue e la fine della spensieratezza» e un widget di Relive in «21 giorni senza
+          alcol». Non vengono caricati finché non premi «Carica il contenuto»: fino ad
+          allora il fornitore non riceve nulla da te. Dopo il clic il fornitore riceve il tuo
+          indirizzo IP e può usare cookie secondo la propria informativa (per YouTube:
+          <a href="https://policies.google.com/privacy" rel="noopener noreferrer">policies.google.com/privacy</a>).
+          Ogni riquadro ha anche un link per aprire il contenuto direttamente sul sito del
+          fornitore. Non salviamo la tua scelta: al prossimo accesso il riquadro torna chiuso.
+        </p>
+        <hr />
+
+        <h2>4. Modulo di contatto</h2>
         <p>
           Il modulo di contatto raccoglie nome, email e messaggio per permetterci
           di risponderti. I dati vengono inviati via email e non vengono archiviati
@@ -71,14 +101,17 @@ const today = new Date();
         </p>
         <hr />
 
-        <h2>4. I tuoi diritti</h2>
+        <h2>5. I tuoi diritti</h2>
         <p>
           Hai il diritto di: richiedere la cancellazione della tua email dalla nostra newsletter;
-          richiedere la cancellazione dei tuoi commenti contattandoci direttamente.
+          richiedere l'accesso, la rettifica o la cancellazione dei tuoi commenti e dei dati che
+          li accompagnano; opporti al trattamento basato sul legittimo interesse. Scrivici ai
+          contatti qui sotto; puoi anche presentare reclamo al Garante per la protezione dei dati
+          personali.
         </p>
         <hr />
 
-        <h2>5. Contatti</h2>
+        <h2>6. Contatti</h2>
         <p>
           Per qualsiasi richiesta relativa alla privacy, contattaci a: <a
             href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com</a

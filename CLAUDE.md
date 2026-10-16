@@ -89,6 +89,7 @@ docs/
 - **Pipe**: `pipe()` da `~/lib/result` per comporre trasformazioni in modo leggibile. `andThen()` per concatenare operazioni su `Result`.
 - **Validation**: Guardie di tipo condivise in `~/lib/result` (`isValidDate`, `isNonEmptyString`, `isValidEmail`, `clampInt`, `parseJsonBody`). Niente Zod — zero dipendenze, validazione plain TypeScript.
 - **Tests**: Vitest with co-located `*.test.ts` files. Mock libsql via `vi.mock("~/lib/turso", ...)` with in-memory `createClient({ url: ":memory:" })`. Mock `env()` via `vi.mock("~/lib/env", ...)`. **Note**: test files inside `src/pages/` must be prefixed `_` (e.g. `_webhook.test.ts`) or Astro will pick them up as routes.
+- **Third-party embeds**: never paste a raw `<iframe>` (YouTube, Relive, Vimeo...) in a post: it loads, and the provider receives the visitor's IP, as soon as the page opens. Print the click-to-load block with `npx -y tsx scripts/embed-consent-html.ts "<embed url>" it|en [height]` and paste that instead (`src/lib/embed-consent.ts`, `src/scripts/embed-consent.ts`, styles in `FoglioPostLayout.css`). A test fails if a raw iframe appears in `src/content`. The privacy policy (IT + EN, section "Contenuti di terze parti") names the embeds: update it when you add a new provider.
 - **Sitemap filter**: `astro.config.mjs` excludes `/admin/`, `/tag/`, paginated `/blog/N/`, paginated `/en/blog/N/` — keep this in sync if you add new noindex-able archives.
 
 ## Commands
