@@ -4,7 +4,7 @@
   SECRETS_SCAN_ENABLED = "false"
   NODE_VERSION = "22"
 [build]
-  command = "env | grep -E '^(ADMIN_TOKEN|TURSO_|STRAVA_|TMDB_|LASTFM_|RESEND_)' > .env && pnpm build && rm -f .env"
+  command = "env | grep -E '^(ADMIN_TOKEN|TURSO_|TMDB_|LASTFM_|RESEND_)' > .env && pnpm build && rm -f .env"
   publish = "dist"
 [[headers]]
   for = "/*"
@@ -52,11 +52,6 @@
 
 [[headers]]
   for = "/api/letterboxd"
-  [headers.values]
-    Access-Control-Allow-Origin = "*"
-
-[[headers]]
-  for = "/api/strava"
   [headers.values]
     Access-Control-Allow-Origin = "*"
 

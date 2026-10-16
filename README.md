@@ -63,7 +63,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `POST /api/comments/like` — toggle like on a comment (visitor hash anti-double-vote)
 - `GET/POST /api/posts/claps` — Medium-style claps on blog posts (max 50 per visitor)
 - `GET/POST /api/non-fa-ridere/scores` — global leaderboard for the "Non Fa Ridere" mini-game (top 10, best score per name, server-side score clamping)
-- `GET /api/letterboxd` `GET /api/lastfm` `GET /api/strava` `GET /api/contact` — data fetchers + form
+- `GET /api/letterboxd` `GET /api/lastfm` `GET /api/contact` — data fetchers + form
 - `GET /api/search.json` — full-text site search
 - `POST /api/e` — privacy-first analytics tracker (no cookies, anonymous visitor hash)
 - `GET /api/t` — legacy bot-trap endpoint, kept as no-op
@@ -194,9 +194,6 @@ TURSO_DATABASE_URL
 TURSO_AUTH_TOKEN
 TMDB_API_KEY
 LASTFM_API_KEY
-STRAVA_CLIENT_ID
-STRAVA_CLIENT_SECRET
-STRAVA_REFRESH_TOKEN
 RESEND_API_KEY              # transactional email (contact form, comment notifications)
 ```
 
@@ -244,7 +241,7 @@ Feature-level specs are in `docs/`. Each adds context that a future developer (o
 | `contact-spec.md`                                        | Contact form + Resend transactional email                                      |
 | `lastfm-spec.md`                                         | Last.FM ingestion + `/ascolti`                                                 |
 | `letterboxd-spec.md`                                     | Letterboxd RSS + TMDB enrichment + `/visti` client refresh                     |
-| `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` | Admin dashboards                                                               |
+| `meal-plan-spec.md` `body-comp-spec.md` | Admin dashboards                                                               |
 | `post-claps-spec.md`                                     | Medium-style claps system                                                      |
 | `telegram-bot-spec.md`                                   | Idea Catcher Telegram bot details                                              |
 | `editorial-strategy.md`                                  | Editorial constitution (audience, columns, cadence)                            |

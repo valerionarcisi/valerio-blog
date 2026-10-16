@@ -60,7 +60,7 @@ src/
       stats/         # Public + live counter
       posts/         # Public claps
       telegram/      # Webhook for Idea Catcher (Phase 1 agents)
-  services/          # External API integrations (Letterboxd, TMDB, Last.FM, Strava, Audioscrobbler)
+  services/          # External API integrations (Letterboxd, TMDB, Last.FM, Audioscrobbler)
   styles/            # foglio.css (design tokens) + global.css (legacy) + fonts.css + admin-foglio.css
 public/
   img/               # Static images organized by section
@@ -110,7 +110,6 @@ docs/
 - `TURSO_DATABASE_URL` `TURSO_AUTH_TOKEN`
 - `TMDB_API_KEY` — Movie metadata
 - `LASTFM_API_KEY` — Last.FM / Audioscrobbler
-- `STRAVA_CLIENT_ID` `STRAVA_CLIENT_SECRET` `STRAVA_REFRESH_TOKEN` (scope: `activity:read_all`)
 - `RESEND_API_KEY` — transactional email (contact form, comment notifications)
 
 **Admin:**
