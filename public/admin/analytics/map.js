@@ -12,7 +12,8 @@ let lastCountries = [];
 function ensureMap() {
   if (map || typeof L === "undefined") return !!map;
   map = L.map("world-map", { center: [30, 10], zoom: 1, minZoom: 1, maxZoom: 6, zoomControl: true, attributionControl: false, scrollWheelZoom: false });
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 6 }).addTo(map);
+  // No basemap tiles on purpose: CARTO now serves "API KEY REQUIRED" watermark tiles without a key, and the
+  // country polygons below are all the map needs. The container background comes from the Foglio tokens.
   return true;
 }
 

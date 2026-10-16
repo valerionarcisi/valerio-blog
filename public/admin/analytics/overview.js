@@ -186,7 +186,11 @@ function syncMetricButtons() {
 // ---------- compact cards ----------
 function compactCards(stats) {
   $("ov-top").innerHTML = barsHtml(
-    (stats.top_pages || []).slice(0, 5).map((p) => ({ key: p.pathname, value: p.visitors })),
+    (stats.top_pages || [])
+      .slice()
+      .sort((a, b) => (b.visitors || 0) - (a.visitors || 0) || (b.pageviews || 0) - (a.pageviews || 0))
+      .slice(0, 5)
+      .map((p) => ({ key: p.pathname, value: p.visitors })),
     { path: true, empty: "Nessuna pagina nel periodo" },
   );
   const se = stats.sessions;
