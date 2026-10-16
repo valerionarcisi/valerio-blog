@@ -62,6 +62,15 @@
 .cf-input[aria-invalid="true"] {
   border-color: var(--foglio-neg);
 }
+/* Browser autofill paints inputs light blue/white: keep them on the Foglio paper colour. */
+.cf-input:-webkit-autofill,
+.cf-input:-webkit-autofill:hover,
+.cf-input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--foglio-ink);
+  caret-color: var(--foglio-ink);
+  box-shadow: 0 0 0 1000px var(--foglio-paper-2) inset;
+  transition: background-color 9999s ease-out;
+}
 textarea.cf-input {
   resize: vertical;
   min-height: 8rem;
