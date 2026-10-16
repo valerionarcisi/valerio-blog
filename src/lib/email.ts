@@ -1,4 +1,5 @@
 import { env } from "~/lib/env";
+import { headerSafe } from "~/lib/contact";
 
 const RESEND_API = "https://api.resend.com/emails";
 const NOTIFY_TO = "valerio.narcisi@gmail.com";
@@ -26,6 +27,7 @@ async function sendEmail(payload: {
   to: string;
   subject: string;
   html: string;
+  text?: string;
   reply_to?: string;
 }): Promise<boolean> {
   const apiKey = env("RESEND_API_KEY");
@@ -48,7 +50,8 @@ async function sendEmail(payload: {
 export async function notifyNewComment(
   comment: CommentNotification,
 ): Promise<void> {
-  const adminUrl = `${SITE_URL}/admin/comments?token=${env("ADMIN_TOKEN")}`;
+  // Plain link: the admin session cookie authenticates you. The admin secret must never travel by email.
+  const adminUrl = `${SITE_URL}/admin/comments`;
   const isReply = !!comment.parentId;
   const subject = isReply
     ? `Reply da ${comment.name} a ${comment.parentName ?? "#" + comment.parentId} su ${comment.pageId}`
@@ -187,22 +190,40 @@ interface ContactMessage {
   name: string;
   email: string;
   message: string;
+  topic?: "film" | "collab" | "altro" | null;
+  lang?: "it" | "en";
 }
+
+const TOPIC_LABEL: Record<string, string> = {
+  film: "Film / sceneggiatura",
+  collab: "Collaborazione",
+  altro: "Altro",
+};
 
 export async function sendContactEmail(
   contact: ContactMessage,
 ): Promise<boolean> {
+  // Subject and reply-to come from a stranger: strip anything that could add a header line.
+  const name = headerSafe(contact.name, 60) || "sconosciuto";
+  const topic = contact.topic ? TOPIC_LABEL[contact.topic] : null;
+  const subject = `${topic ? `[${topic}] ` : ""}Nuovo messaggio da ${name}`;
+
   return sendEmail({
     to: NOTIFY_TO,
-    reply_to: contact.email,
-    subject: `Nuovo messaggio da ${contact.name}`,
+    reply_to: headerSafe(contact.email, 254),
+    subject,
+    text: `Da: ${name} <${headerSafe(contact.email, 254)}>${topic ? `\nTipo: ${topic}` : ""}${contact.lang === "en" ? "\nLingua: inglese" : ""}\n\n${contact.message}\n\n(Rispondi a questa email per scrivere a ${name}.)`,
     html: `
-      <div style="font-family:system-ui,sans-serif;max-width:500px">
+      <div style="font-family:system-ui,sans-serif;max-width:560px">
         <h2 style="color:#c9a84c;margin:0 0 16px">Messaggio dal modulo contatti</h2>
         <p><strong>Nome:</strong> ${escapeHtml(contact.name)}</p>
         <p><strong>Email:</strong> ${escapeHtml(contact.email)}</p>
+        ${topic ? `<p><strong>Tipo:</strong> ${escapeHtml(topic)}</p>` : ""}
+        ${contact.lang === "en" ? `<p><strong>Lingua:</strong> inglese</p>` : ""}
         <hr style="border:none;border-top:1px solid #ddd;margin:16px 0"/>
         <p style="white-space:pre-wrap">${escapeHtml(contact.message)}</p>
+        <hr style="border:none;border-top:1px solid #ddd;margin:16px 0"/>
+        <p style="color:#777;font-size:13px">Rispondi a questa email per scrivere a ${escapeHtml(contact.name)}.</p>
       </div>
     `,
   });

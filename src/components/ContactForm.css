@@ -1,90 +1,254 @@
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  max-width: 520px;
+/* Contact form: Foglio tokens, compact, no third party, no cookies (src/scripts/contact-form.ts). */
+.cf-wrap {
+  min-width: 0;
 }
-
-.contact-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  font-size: 0.9rem;
-  color: var(--color-secondary);
+.cf {
+  display: grid;
+  gap: 1.15rem;
 }
-
-.contact-form input,
-.contact-form textarea {
-  padding: 0.6rem 0.8rem;
-  background: var(--color-surface, #141416);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  color: var(--color-primary, #e8e6e1);
-  font-family: inherit;
-  font-size: 0.9rem;
-  transition: border-color 0.2s;
+/* display:grid above would otherwise win over the [hidden] attribute the script uses */
+.cf[hidden],
+.cf-done[hidden] {
+  display: none;
 }
-
-.contact-form input:focus-visible,
-.contact-form textarea:focus-visible {
-  outline: 2px solid var(--color-tertiary, #c9a84c);
-  outline-offset: 1px;
-  border-color: var(--color-tertiary, #c9a84c);
+.cf-row {
+  display: grid;
+  gap: 1.15rem;
+  grid-template-columns: 1fr 1fr;
 }
-
-.contact-form input:focus:not(:focus-visible),
-.contact-form textarea:focus:not(:focus-visible) {
+.cf-field {
+  display: grid;
+  gap: 0.4rem;
+  position: relative;
+  min-width: 0;
+}
+.cf-label {
+  font-family: var(--foglio-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--foglio-ink-soft);
+}
+.cf-label em {
+  font-style: normal;
+  letter-spacing: 0.08em;
+  color: var(--foglio-ink-mute, var(--foglio-ink-soft));
+}
+.cf-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--foglio-rule-strong, var(--foglio-rule));
+  border-radius: var(--foglio-radius-sm, 4px);
+  background: var(--foglio-paper-2, transparent);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-serif);
+  font-size: 1.05rem;
+  line-height: 1.5;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.cf-input::placeholder {
+  color: var(--foglio-ink-mute, var(--foglio-ink-soft));
+  opacity: 0.8;
+}
+.cf-input:hover {
+  border-color: var(--foglio-accent-soft, var(--foglio-accent));
+}
+.cf-input:focus-visible {
   outline: none;
-  border-color: var(--color-tertiary, #c9a84c);
+  border-color: var(--foglio-accent);
+  box-shadow: 0 0 0 3px var(--foglio-accent-soft, rgba(168, 69, 26, 0.18));
 }
-
-.contact-form textarea {
-  min-height: 160px;
+.cf-input[aria-invalid="true"] {
+  border-color: var(--foglio-neg);
+}
+textarea.cf-input {
   resize: vertical;
+  min-height: 8rem;
+  max-height: 22rem;
+}
+.cf-count {
+  justify-self: end;
+  font-family: var(--foglio-mono);
+  font-size: 0.7rem;
+  color: var(--foglio-ink-mute, var(--foglio-ink-soft));
+  font-variant-numeric: tabular-nums;
+}
+.cf-count.is-near {
+  color: var(--foglio-warn);
 }
 
-.contact-form button {
-  align-self: flex-start;
-  padding: 0.6rem 1.6rem;
-  background: var(--color-tertiary, #c9a84c);
-  color: #0a0a0c;
-  border: none;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: opacity 0.2s;
+.cf-topics {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
 }
-
-.contact-form button:hover {
-  opacity: 0.85;
+.cf-topics legend {
+  padding: 0;
+  margin-bottom: 0.5rem;
 }
-
-.contact-form button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.cf-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-
-.hp-field {
+.cf-pill {
+  position: relative;
+}
+.cf-pill input {
   position: absolute;
-  left: -9999px;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.cf-pill span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: 1px solid var(--foglio-rule-strong, var(--foglio-rule));
+  border-radius: 999px;
+  font-family: var(--foglio-serif);
+  font-size: 0.98rem;
+  color: var(--foglio-ink-soft);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.cf-pill:hover span {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-ink);
+}
+.cf-pill input:checked + span {
+  border-color: var(--foglio-accent);
+  background: var(--foglio-accent-soft, transparent);
+  color: var(--foglio-ink);
+}
+.cf-pill input:focus-visible + span {
+  box-shadow: 0 0 0 3px var(--foglio-accent-soft, rgba(168, 69, 26, 0.18));
+  outline: 2px solid var(--foglio-accent);
+  outline-offset: 1px;
 }
 
-.form-msg {
-  padding: 0.8rem;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
+.cf-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 
-.form-msg.ok {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
-  border: 1px solid rgba(46, 204, 113, 0.3);
+.cf-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem 1.5rem;
+}
+.cf-privacy {
+  flex: 1 1 16rem;
+  margin: 0;
+  font-family: var(--foglio-serif);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--foglio-ink-soft);
+}
+.cf-privacy a {
+  color: var(--foglio-ink);
+  border-bottom: 1px solid var(--foglio-accent-soft, var(--foglio-accent));
+}
+.cf-submit,
+.cf-again {
+  min-height: 46px;
+  padding: 0 1.4rem;
+  border: 1px solid var(--foglio-accent);
+  border-radius: var(--foglio-radius-sm, 4px);
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+.cf-submit {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.cf-submit:hover:not(:disabled) {
+  opacity: 0.88;
+}
+.cf-submit:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+.cf-again {
+  background: transparent;
+  color: var(--foglio-accent);
+}
+.cf-again:hover {
+  background: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.cf-submit:focus-visible,
+.cf-again:focus-visible {
+  outline: 2px solid var(--foglio-accent);
+  outline-offset: 3px;
 }
 
-.form-msg.err {
-  background: rgba(231, 76, 60, 0.1);
-  color: #e74c3c;
-  border: 1px solid rgba(231, 76, 60, 0.3);
+.cf-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-family: var(--foglio-serif);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--foglio-ink-soft);
+}
+.cf-status--error {
+  color: var(--foglio-neg);
+}
+.cf-status a {
+  color: inherit;
+  border-bottom: 1px solid currentColor;
+}
+
+.cf-done {
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md, 6px);
+  background: var(--foglio-paper-2);
+}
+.cf-done:focus {
+  outline: none;
+}
+.cf-done-title {
+  margin: 0 0 0.5rem;
+  font-family: var(--foglio-serif);
+  font-weight: 500;
+  font-size: 1.9rem;
+  color: var(--foglio-accent);
+}
+.cf-done-text {
+  margin: 0 0 1.4rem;
+  font-family: var(--foglio-serif);
+  font-size: 1.1rem;
+  color: var(--foglio-ink-soft);
+}
+
+@media (max-width: 600px) {
+  .cf-row {
+    grid-template-columns: 1fr;
+  }
+  .cf-submit {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cf-input,
+  .cf-pill span,
+  .cf-submit,
+  .cf-again {
+    transition: none;
+  }
 }

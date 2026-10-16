@@ -1,0 +1,230 @@
+---
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import ContactForm from "~/components/ContactForm.astro";
+import { SITE_TITLE } from "~/consts";
+
+interface Props {
+  lang: "it" | "en";
+}
+const { lang } = Astro.props;
+
+const COPY = {
+  it: {
+    title: `Contatti · ${SITE_TITLE}`,
+    description: "Scrivimi per collaborazioni, sceneggiature, idee o qualsiasi altra cosa. Rispondo a tutti.",
+    eyebrow: "Contatti",
+    h1: "Scrivimi.",
+    lede: ["Per collaborazioni, sceneggiature, idee — o solo per dire qualcosa.", "Rispondo a tutti, in giornata."],
+    email: "Email",
+    elsewhere: "Altrove",
+    films: "Per i film",
+    filmsNote:
+      "Se hai un progetto cinematografico, una sceneggiatura da leggere o un'idea in testa — anche abbozzata — scrivimi. Non ho nessun filtro.",
+  },
+  en: {
+    title: `Contact · ${SITE_TITLE}`,
+    description: "Get in touch for collaborations, screenplays, ideas, or anything else. I reply to everyone.",
+    eyebrow: "Contact",
+    h1: "Get in touch.",
+    lede: ["For collaborations, screenplays, ideas — or just to say something.", "I reply to everyone, same day."],
+    email: "Email",
+    elsewhere: "Elsewhere",
+    films: "About films",
+    filmsNote:
+      "If you have a film project, a screenplay you'd like me to read, or even just a rough idea — write me. No filter needed.",
+  },
+}[lang];
+
+const LINKS = [
+  ["Instagram", "https://www.instagram.com/narcisi.valerio/", "instagram.com/narcisi.valerio"],
+  ["LinkedIn", "https://www.linkedin.com/in/cv-valerio-narcisi/", "linkedin.com/in/cv-valerio-narcisi"],
+  ["Letterboxd", "https://letterboxd.com/valenar/", "letterboxd.com/valenar"],
+  ["BlueSky", "https://bsky.app/profile/valerionarcisi.me", "bsky.app/valerionarcisi.me"],
+  ["GitHub", "https://github.com/valerionarcisi", "github.com/valerionarcisi"],
+];
+---
+
+<FoglioLayout title={COPY.title} description={COPY.description} lang={lang} pageId="contact">
+  <div class="ct-page">
+    <div class="ct-grid">
+      <div class="ct-main">
+        <header class="ct-head">
+          <p class="ct-eyebrow">{COPY.eyebrow}</p>
+          <h1><em class="acc">{COPY.h1}</em></h1>
+          <p class="ct-lede">{COPY.lede[0]} {COPY.lede[1]}</p>
+        </header>
+
+        <ContactForm lang={lang} />
+      </div>
+
+      <aside class="ct-aside">
+        <div class="ct-block">
+          <h2 class="ct-block-label">{COPY.email}</h2>
+          <a href="mailto:valerio.narcisi@gmail.com" class="ct-primary-link">valerio.narcisi@gmail.com</a>
+        </div>
+
+        <div class="ct-block">
+          <h2 class="ct-block-label">{COPY.films}</h2>
+          <p class="ct-note">{COPY.filmsNote}</p>
+        </div>
+
+        <div class="ct-block">
+          <h2 class="ct-block-label">{COPY.elsewhere}</h2>
+          <ul class="ct-links">
+            {
+              LINKS.map(([role, href, label]) => (
+                <li>
+                  <span class="ct-link-role">{role}</span>
+                  <a href={href} class="ct-link" target="_blank" rel="noopener noreferrer">{label}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</FoglioLayout>
+
+<style is:global>
+  /* Prefixed with .ct-page so the layout's global h1/h2/p rules never win over these. */
+  .ct-page {
+    max-width: var(--foglio-maxw);
+    margin: 0 auto;
+    padding: 3.5rem 3rem 7rem;
+  }
+
+  .ct-page .ct-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .ct-page .ct-main {
+    min-width: 0;
+  }
+
+  .ct-page .ct-head {
+    margin-bottom: 2.2rem;
+    padding-bottom: 1.8rem;
+    border-bottom: 1px solid var(--foglio-rule);
+  }
+
+  .ct-page .ct-eyebrow {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--foglio-ink-soft);
+    margin: 0 0 0.9rem;
+  }
+
+  .ct-page .ct-head h1 {
+    font-family: var(--foglio-serif);
+    font-weight: 500;
+    font-size: clamp(2.6rem, 5vw, 3.8rem);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    margin: 0 0 1rem;
+  }
+
+  .ct-page .ct-lede {
+    font-family: var(--foglio-serif);
+    font-size: 1.15rem;
+    line-height: 1.55;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+    max-width: 34rem;
+  }
+
+  .ct-page .ct-aside {
+    display: grid;
+    gap: 2.2rem;
+    padding-top: 2.3rem;
+  }
+
+  .ct-page .ct-block-label {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--foglio-ink-soft);
+    font-weight: 400;
+    margin: 0 0 0.9rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--foglio-rule);
+  }
+
+  .ct-page .ct-primary-link {
+    font-family: var(--foglio-mono);
+    font-size: 0.9rem;
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+    padding-bottom: 2px;
+    transition: opacity 0.15s;
+  }
+  .ct-page .ct-primary-link:hover {
+    opacity: 0.75;
+  }
+
+  .ct-page .ct-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .ct-page .ct-links li {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--foglio-rule);
+    align-items: baseline;
+  }
+  .ct-page .ct-links li:last-child {
+    border-bottom: none;
+  }
+  .ct-page .ct-link-role {
+    font-family: var(--foglio-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--foglio-ink-soft);
+  }
+  .ct-page .ct-link {
+    font-family: var(--foglio-serif);
+    font-size: 0.95rem;
+    color: var(--foglio-ink);
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    word-break: break-all;
+  }
+  .ct-page .ct-link:hover {
+    color: var(--foglio-accent);
+    border-bottom-color: var(--foglio-accent-soft);
+  }
+
+  .ct-page .ct-note {
+    font-family: var(--foglio-serif);
+    font-size: 1.02rem;
+    line-height: 1.6;
+    color: var(--foglio-ink-soft);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .ct-page .ct-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+    .ct-page .ct-aside {
+      padding-top: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ct-page {
+      padding: 2.2rem 1.4rem 5rem;
+    }
+  }
+</style>

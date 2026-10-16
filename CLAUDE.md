@@ -126,6 +126,10 @@ docs/
 - `ANALYTICS_REPORT_CHAT_ID` — chat id for the weekly analytics report (optional; falls back to the first id of `TELEGRAM_USER_ID_WHITELIST`)
 - `ANALYTICS_REPORT_DISABLED` — `1` disables the weekly report
 
+## Contact form
+
+`/contatti` and `/en/contact` (shared `src/components/ContactPage.astro` + `ContactForm.astro`, script `src/scripts/contact-form.ts`) → `POST /api/contact` → e-mail to the owner through Resend (`reply_to` = the visitor). Nothing about the message is stored. No cookies, no CAPTCHA, no third party; protection: honeypot, a small proof of work solved in the browser (`GET /api/contact/challenge` returns a signed, expiring, single-use challenge, HMAC key derived from `ADMIN_TOKEN`; `src/lib/contact.ts`), rate limits on a hashed IP plus a global daily cap (`src/lib/rate-limit.ts`), same-site Origin check, strict validation and the spam filter. If the mail service fails the visitor gets a ready-made `mailto:` with their text. Needs `RESEND_API_KEY` (503 `not_configured` without it). Never put the admin secret in an email.
+
 ## Comments + Claps System
 
 - **Public Comments API**: `GET/POST /api/comments` — fetch approved comments (nested replies via `parentId`), submit new ones, author mode via admin cookie session (or Bearer); the form detects it at runtime with `GET /api/admin/me`

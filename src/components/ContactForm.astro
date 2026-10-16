@@ -1,0 +1,143 @@
+---
+import "./ContactForm.css";
+
+interface Props {
+  lang: "it" | "en";
+}
+const { lang } = Astro.props;
+
+const COPY = {
+  it: {
+    name: "Nome",
+    email: "Email",
+    message: "Messaggio",
+    messagePlaceholder: "Raccontami cosa hai in mente…",
+    topicLegend: "Di cosa si tratta?",
+    optional: "facoltativo",
+    topics: { film: "Film o sceneggiatura", collab: "Collaborazione", altro: "Altro" },
+    privacy: "Uso nome ed email solo per risponderti. Il messaggio non viene salvato sul sito.",
+    privacyLink: "Informativa",
+    privacyHref: "/privacy-policy",
+    submit: "Invia messaggio",
+    sending: "Invio…",
+    noscript: "Per inviare il modulo serve JavaScript. Oppure scrivimi direttamente a",
+    doneTitle: "Ricevuto.",
+    doneText: "Ti rispondo in giornata, all'indirizzo che hai lasciato.",
+    again: "Scrivi un altro messaggio",
+    msgs: {
+      name: "Scrivi il tuo nome.",
+      email: "Controlla l'indirizzo email.",
+      message: "Scrivimi almeno qualche parola (10 caratteri).",
+      spam: "Il messaggio sembra spam (troppi link o parole sospette). Riscrivilo senza link, oppure scrivimi direttamente.",
+      rate: "Hai inviato troppi messaggi, riprova tra qualche minuto.",
+      fail: "Non sono riuscito a inviarlo. Scrivimi direttamente: ho preparato la mail qui sotto.",
+      mailto: "Apri la mail già scritta",
+      preparing: "Un attimo, sto preparando l'invio…",
+      mailSubject: "Messaggio dal sito",
+    },
+  },
+  en: {
+    name: "Name",
+    email: "Email",
+    message: "Message",
+    messagePlaceholder: "Tell me what you have in mind…",
+    topicLegend: "What is it about?",
+    optional: "optional",
+    topics: { film: "Film or screenplay", collab: "Collaboration", altro: "Other" },
+    privacy: "I only use your name and email to reply. The message is not stored on the site.",
+    privacyLink: "Privacy policy",
+    privacyHref: "/en/privacy-policy",
+    submit: "Send message",
+    sending: "Sending…",
+    noscript: "The form needs JavaScript. Or write to me directly at",
+    doneTitle: "Got it.",
+    doneText: "I'll reply the same day, at the address you left.",
+    again: "Write another message",
+    msgs: {
+      name: "Please enter your name.",
+      email: "Please check the email address.",
+      message: "Please write a few words (at least 10 characters).",
+      spam: "The message looks like spam (too many links or suspicious words). Rewrite it without links, or write to me directly.",
+      rate: "You sent too many messages, please try again in a few minutes.",
+      fail: "I couldn't send it. Please write to me directly: I've prepared the email below.",
+      mailto: "Open the ready-made email",
+      preparing: "One moment, getting ready to send…",
+      mailSubject: "Message from the website",
+    },
+  },
+}[lang];
+const topicEntries = Object.entries(COPY.topics);
+---
+
+<div class="cf-wrap">
+  <form
+    class="cf"
+    novalidate
+    data-lang={lang}
+    data-i18n={JSON.stringify({ ...COPY.msgs, sending: COPY.sending, submit: COPY.submit })}
+  >
+    <div class="cf-row">
+      <label class="cf-field">
+        <span class="cf-label">{COPY.name}</span>
+        <input class="cf-input" type="text" name="name" required maxlength="100" autocomplete="name" />
+      </label>
+      <label class="cf-field">
+        <span class="cf-label">{COPY.email}</span>
+        <input class="cf-input" type="email" name="email" required maxlength="254" autocomplete="email" inputmode="email" />
+      </label>
+    </div>
+
+    <fieldset class="cf-topics">
+      <legend class="cf-label">{COPY.topicLegend} <em>· {COPY.optional}</em></legend>
+      <div class="cf-pills">
+        {
+          topicEntries.map(([value, label]) => (
+            <label class="cf-pill">
+              <input type="radio" name="topic" value={value} />
+              <span>{label}</span>
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <label class="cf-field cf-message">
+      <span class="cf-label">{COPY.message}</span>
+      <textarea
+        class="cf-input"
+        name="message"
+        required
+        minlength="10"
+        maxlength="5000"
+        rows="5"
+        placeholder={COPY.messagePlaceholder}></textarea>
+      <span class="cf-count" aria-hidden="true">0 / 5000</span>
+    </label>
+
+    <div class="cf-hp" aria-hidden="true">
+      <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+
+    <div class="cf-foot">
+      <p class="cf-privacy">{COPY.privacy} <a href={COPY.privacyHref}>{COPY.privacyLink}</a>.</p>
+      <button class="cf-submit" type="submit">{COPY.submit}</button>
+    </div>
+
+    <p class="cf-status" role="status" aria-live="polite"></p>
+    <noscript>
+      <p class="cf-status cf-status--error">
+        {COPY.noscript} <a href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com</a>.
+      </p>
+    </noscript>
+  </form>
+
+  <div class="cf-done" hidden tabindex="-1">
+    <h2 class="cf-done-title">{COPY.doneTitle}</h2>
+    <p class="cf-done-text">{COPY.doneText}</p>
+    <button class="cf-again" type="button">{COPY.again}</button>
+  </div>
+</div>
+
+<script>
+  import "~/scripts/contact-form";
+</script>
