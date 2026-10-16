@@ -613,3 +613,18 @@ Le due versioni (`src/pages/privacy-policy.astro`, `src/pages/en/privacy-policy.
 - **Confine giornaliero in UTC** (`created_at` = `datetime('now')`, salt per giorno UTC).
 - **"Live" conta pageview attive, non utenti distinti** (`COUNT(DISTINCT page_id)` negli ultimi 5 minuti).
 - **Storico**: le righe precedenti alla Fase 1 hanno `channel = NULL` e hash col vecchio schema (non confrontabili con i nuovi).
+
+## Cutover backfill (one-off)
+
+Pageviews recorded before the `engage` signal existed could never prove a visit was human, so after the v2 migration they all read as "unverified" and fall out of the main numbers (dashboard history and the first weekly reports would show ~0 users). `scripts/backfill-legacy-human.ts` marks them human with the OLD counting rule: not scored as a bot (`bot_score < 5`) and not in the legacy `bot_hashes`. Rows from the cutover on keep their real verdict.
+
+```
+# dry run (default, read-only): prints how many rows and per day
+TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx -y tsx scripts/backfill-legacy-human.ts --auto
+# apply: writes, then recomputes the daily rollups of the affected closed days
+TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx -y tsx scripts/backfill-legacy-human.ts --auto --apply
+```
+
+- `--auto` takes the time of the first real engage signal as the cutover; `--before <UTC timestamp>` sets it by hand (never in the future).
+- Idempotent: rows already human are never touched; a second run does nothing.
+- Logic and tests live in `src/lib/analytics-legacy-human.ts` (+ `.test.ts`).
