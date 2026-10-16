@@ -19,7 +19,8 @@ export const prerender = false;
 type BotAction =
   | { type: "flagSuspicious"; from: string; to: string }
   | { type: "bulkHash"; hashes: string[] }
-  | { type: "singleHash"; hash: string };
+  | { type: "singleHash"; hash: string }
+  | { type: "sessionHash"; sessionId: number };
 
 type BotUnflagAction =
   | { type: "unflagHash"; hash: string }
@@ -60,6 +61,11 @@ function parseBotAction(body: unknown): Result<BotAction> {
 
   if (isValidHash(b.hash)) {
     return ok({ type: "singleHash", hash: b.hash });
+  }
+
+  // LEGACY: the "Utenti" panel never sees the visitor hash, so it flags by session id.
+  if (typeof b.sessionId === "number" && Number.isInteger(b.sessionId) && b.sessionId > 0) {
+    return ok({ type: "sessionHash", sessionId: b.sessionId });
   }
 
   return err("Invalid hash");
@@ -210,6 +216,15 @@ async function handlePost(request: Request): Promise<Response> {
 
   if (action.type === "bulkHash") {
     return insertAndRecalc(db, action.hashes);
+  }
+
+  if (action.type === "sessionHash") {
+    const row = await db.execute({
+      sql: "SELECT visitor_hash FROM sessions WHERE id = ?",
+      args: [action.sessionId],
+    });
+    if (!row.rows[0]) return jsonErr("Session not found", 404);
+    return insertAndRecalc(db, [String(row.rows[0].visitor_hash)]);
   }
 
   return insertAndRecalc(db, [action.hash]);

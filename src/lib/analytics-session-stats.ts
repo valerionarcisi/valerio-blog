@@ -182,6 +182,18 @@ export interface SessionStats {
   exitPages: Array<{ path: string; sessions: number }>;
   events: Array<{ name: string; prop: string | null; count: number; visitors: number }>;
   goals: GoalStats[];
+  /** All events in the range (also computed with totalsOnly, for deltas). */
+  eventsTotal: number;
+  /** Per-day series for the dashboard sparklines (empty with totalsOnly). */
+  daily: DailySessionPoint[];
+}
+
+export interface DailySessionPoint {
+  date: string;
+  sessions: number;
+  bounced: number;
+  engaged_seconds: number;
+  events: number;
 }
 
 const n = (v: unknown) => Number(v) || 0;
@@ -199,6 +211,8 @@ export const emptySessionStats = (): SessionStats => ({
   exitPages: [],
   events: [],
   goals: [],
+  eventsTotal: 0,
+  daily: [],
 });
 
 function bump(m: Map<string, number[]>, key: string, ...vals: number[]) {
@@ -212,7 +226,7 @@ export async function computeSessionStats(
   o: SessionStatsOpts,
 ): Promise<SessionStats> {
   const goals = GOALS;
-  const totals = { count: 0, bounced: 0, pv: 0, eng: 0 };
+  const totals = { count: 0, bounced: 0, pv: 0, eng: 0, events: 0 };
   const entry = new Map<string, number[]>();
   const exit = new Map<string, number[]>();
   const events = new Map<string, number[]>();
@@ -221,6 +235,7 @@ export async function computeSessionStats(
   const goalTotal = new Map<string, number>();
   const goalChan = new Map<string, Map<string, number[]>>();
   const goalEntry = new Map<string, Map<string, number[]>>();
+  const daily = new Map<string, number[]>();
 
   // Both sources are folded through the same function, whatever their shape.
   const fold = (table: SessionQuery["table"], r: Record<string, unknown>) => {
@@ -229,10 +244,15 @@ export async function computeSessionStats(
       totals.bounced += n(r.bounced_sessions);
       totals.pv += n(r.pageviews);
       totals.eng += n(r.engaged_seconds);
+      if (!o.totalsOnly && r.day) bump(daily, String(r.day), n(r.sessions), n(r.bounced_sessions), n(r.engaged_seconds), 0);
     } else if (table === "daily_entry_exit") {
       if (!o.totalsOnly) bump(r.kind === "entry" ? entry : exit, String(r.path), n(r.sessions));
     } else if (table === "daily_events") {
-      if (!o.totalsOnly) bump(events, `${String(r.name)}\u0000${String(r.prop ?? "")}`, n(r.count), n(r.visitors));
+      totals.events += n(r.count);
+      if (!o.totalsOnly) {
+        bump(events, `${String(r.name)}\u0000${String(r.prop ?? "")}`, n(r.count), n(r.visitors));
+        if (r.day) bump(daily, String(r.day), 0, 0, 0, n(r.count));
+      }
     } else {
       const goal = String(r.goal);
       const dim = String(r.dim);
@@ -275,16 +295,16 @@ export async function computeSessionStats(
     const base = [o.scope, ...o.rolledDays];
     const q = (sql: string) => db.execute({ sql, args: base });
     const [s, ee, ev, gl] = await Promise.all([
-      q(`SELECT SUM(sessions) AS sessions, SUM(bounced_sessions) AS bounced_sessions, SUM(pageviews) AS pageviews, SUM(engaged_seconds) AS engaged_seconds FROM daily_sessions WHERE scope = ? AND ${inDays}`),
+      q(`SELECT day, SUM(sessions) AS sessions, SUM(bounced_sessions) AS bounced_sessions, SUM(pageviews) AS pageviews, SUM(engaged_seconds) AS engaged_seconds FROM daily_sessions WHERE scope = ? AND ${inDays} GROUP BY day`),
       o.totalsOnly
         ? Promise.resolve({ rows: [] })
         : q(`SELECT kind, path, SUM(sessions) AS sessions FROM daily_entry_exit WHERE scope = ? AND ${inDays} GROUP BY kind, path`),
-      o.totalsOnly || !o.hasEvents
+      !o.hasEvents
         ? Promise.resolve({ rows: [] })
-        : q(`SELECT name, prop, SUM(count) AS count, SUM(visitors) AS visitors FROM daily_events WHERE scope = ? AND ${inDays} GROUP BY name, prop`),
+        : q(`SELECT day, name, prop, SUM(count) AS count, SUM(visitors) AS visitors FROM daily_events WHERE scope = ? AND ${inDays} GROUP BY day, name, prop`),
       q(`SELECT goal, dim, value, SUM(conversions) AS conversions FROM daily_goals WHERE scope = ? AND ${inDays}${o.totalsOnly ? " AND dim = 'total'" : ""} GROUP BY goal, dim, value`),
     ]);
-    fold("daily_sessions", s.rows[0] as Record<string, unknown>);
+    for (const r of s.rows) fold("daily_sessions", r as Record<string, unknown>);
     for (const r of ee.rows) fold("daily_entry_exit", r as Record<string, unknown>);
     for (const r of ev.rows) fold("daily_events", r as Record<string, unknown>);
     for (const r of gl.rows) fold("daily_goals", r as Record<string, unknown>);
@@ -324,5 +344,9 @@ export async function computeSessionStats(
       return { name, prop: prop === "" ? null : prop, count, visitors };
     }),
     goals: goalStats,
+    eventsTotal: totals.events,
+    daily: [...daily.entries()]
+      .sort((a, b) => cmp(a[0], b[0]))
+      .map(([date, [sessions, bounced, engaged_seconds, events]]) => ({ date, sessions, bounced, engaged_seconds, events })),
   };
 }

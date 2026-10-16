@@ -2,804 +2,75 @@
 import AdminNav from "~/components/AdminNav.astro";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
+import "~/styles/admin-analytics.css";
 
 export const prerender = false;
-
 
 if (!Astro.locals.isAdmin) {
   return new Response("Unauthorized", { status: 401 });
 }
+
+const TABS = [
+  { id: "panoramica", label: "Panoramica" },
+  { id: "utenti", label: "Utenti" },
+  { id: "acquisizione", label: "Acquisizione" },
+  { id: "coinvolgimento", label: "Coinvolgimento" },
+  { id: "tecnologia", label: "Tecnologia" },
+  { id: "bot", label: "Bot & qualità" },
+];
+const PERIODS = [
+  { id: "today", label: "Oggi" },
+  { id: "7d", label: "7g" },
+  { id: "30d", label: "30g" },
+  { id: "90d", label: "90g" },
+  { id: "12m", label: "12m" },
+];
+const CHANNELS = ["direct", "search", "social", "ai", "email", "referral", "campaign"];
+const LEGACY_HINT = "Sistema vecchio: sostituito da verdetto e regole bot, verrà rimosso dopo il periodo di confronto";
 ---
 
 <!doctype html>
-<html lang="it" class="foglio">
+<html lang="it" class="foglio" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex, nofollow" />
     <meta name="referrer" content="no-referrer" />
     <title>Analytics · Admin</title>
-    <style is:global>
-      /* Dark page chrome, cream Foglio surfaces */
-      :root {
-        --ax-page-bg: #131210;
-        --ax-page-bg-2: #1c1a16;
-        --ax-page-rule: #2e2a23;
-        --ax-page-ink: #f4f1e8;
-        --ax-page-ink-soft: rgba(255,255,255,0.86);
-        --ax-page-ink-mute: rgba(255,255,255,0.66);
-        --ax-pos: #2e8b57;
-        --ax-neg: #c0392b;
-        --ax-cyan: #00b4a6;
-      }
-
-      .foglio,
-      .foglio body.admin {
-        background: var(--ax-page-bg);
-        color: var(--ax-page-ink);
-        padding: 0;
-      }
-
-      .foglio body.admin .ax-wrap {
-        padding: 1.25rem 1rem 3rem;
-        max-width: 100%;
-      }
-
-      /* Header */
-      .foglio body.admin .ax-head {
-        border-bottom: 1px solid var(--ax-page-rule);
-        padding-bottom: 1.25rem;
-        margin-bottom: 1.5rem;
-      }
-      .foglio body.admin .ax-eyebrow {
-        font-family: var(--foglio-mono);
-        font-size: var(--foglio-fs-mono);
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        color: var(--ax-page-ink-soft);
-        margin: 0 0 0.9rem;
-        display: flex;
-        align-items: center;
-        gap: 0.7rem;
-        flex-wrap: wrap;
-      }
-      .foglio body.admin .ax-live {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.18rem 0.55rem;
-        border: 1px solid var(--foglio-accent);
-        border-radius: 999px;
-        color: var(--foglio-accent);
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-      .foglio body.admin .ax-live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--foglio-accent); animation: ax-pulse 2s ease-in-out infinite; }
-      @keyframes ax-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-      /* Page title — serif italic, like comments */
-      .foglio body.admin .ax-head h1 {
-        font-family: var(--foglio-serif);
-        font-weight: 500;
-        font-size: var(--foglio-fs-3xl);
-        letter-spacing: -0.01em;
-        line-height: 1.1;
-        color: var(--ax-page-ink);
-        margin: 0;
-      }
-      .foglio body.admin .ax-head h1 em.acc,
-      .foglio body.admin .ax-head h1 .acc {
-        color: var(--foglio-accent-soft);
-        font-style: italic;
-      }
-
-      /* Controls — period pills on dark */
-      .foglio body.admin .ax-controls {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.5rem;
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        margin-top: 1rem;
-      }
-      .foglio body.admin .ax-periods {
-        display: inline-flex;
-        gap: 0;
-        border: 1px solid var(--ax-page-rule);
-        border-radius: var(--foglio-radius-sm);
-        padding: 3px;
-        background: var(--ax-page-bg-2);
-        flex-wrap: wrap;
-      }
-      .foglio body.admin .ax-periods button {
-        padding: 0.4rem 0.8rem;
-        background: transparent;
-        border: none;
-        color: var(--ax-page-ink-soft);
-        cursor: pointer;
-        border-radius: var(--foglio-radius-sm);
-        font-family: var(--foglio-mono);
-        font-size: var(--foglio-fs-mono);
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        transition: color 0.15s, background 0.15s;
-      }
-      .foglio body.admin .ax-periods button:hover { color: var(--foglio-paper); background: rgba(255,255,255,0.04); }
-      .foglio body.admin .ax-periods button.active { background: var(--foglio-accent); color: var(--foglio-paper); }
-
-      .foglio body.admin .ax-navstrip {
-        display: inline-flex;
-        align-items: center;
-        border: 1px solid var(--ax-page-rule);
-        border-radius: var(--foglio-radius-sm);
-        overflow: hidden;
-        background: var(--ax-page-bg-2);
-      }
-      .foglio body.admin .ax-navstrip button {
-        background: transparent;
-        border: none;
-        padding: 0.35rem 0.55rem;
-        color: var(--ax-page-ink-soft);
-        cursor: pointer;
-        font-size: 12px;
-      }
-      .foglio body.admin .ax-navstrip button:hover:not(:disabled) { color: var(--foglio-accent-soft); }
-      .foglio body.admin .ax-navstrip button:disabled { opacity: 0.3; cursor: not-allowed; }
-      .foglio body.admin .ax-navstrip .ax-cal-label {
-        padding: 0.35rem 0.65rem;
-        border-left: 1px solid var(--ax-page-rule);
-        border-right: 1px solid var(--ax-page-rule);
-        color: var(--ax-page-ink);
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        cursor: pointer;
-        white-space: nowrap;
-      }
-
-      .foglio body.admin .ax-daterange { display: none; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-      .foglio body.admin .ax-daterange.open { display: inline-flex; }
-      .foglio body.admin .ax-daterange input[type="date"] {
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        padding: 0.3rem 0.45rem;
-        background: var(--ax-page-bg-2);
-        border: 1px solid var(--ax-page-rule);
-        border-radius: var(--foglio-radius-sm);
-        color: var(--ax-page-ink);
-        color-scheme: dark;
-      }
-      .foglio body.admin .ax-daterange button {
-        padding: 0.3rem 0.7rem;
-        background: var(--foglio-accent);
-        color: var(--foglio-paper);
-        border: none;
-        border-radius: var(--foglio-radius-sm);
-        cursor: pointer;
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-
-      /* Stats — cream paper cards on dark page */
-      .foglio body.admin .ax-stats {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.6rem;
-        margin: 0 0 2rem;
-      }
-      .foglio body.admin .ax-stat {
-        padding: 0.95rem 0.95rem;
-        background: var(--foglio-paper);
-        border: 1px solid var(--foglio-rule);
-        border-radius: var(--foglio-radius-md);
-        position: relative;
-        color: var(--foglio-ink);
-      }
-      .foglio body.admin .ax-stat-label {
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--foglio-ink-soft);
-        margin-bottom: 0.55rem;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-      }
-      .foglio body.admin .ax-stat-info {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 1px solid var(--foglio-rule);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 9px;
-        color: var(--foglio-ink-mute);
-        cursor: help;
-      }
-      .foglio body.admin .ax-stat-value {
-        font-family: var(--foglio-serif);
-        font-weight: 500;
-        font-size: 1.95rem;
-        line-height: 1;
-        color: var(--foglio-ink);
-        font-variant-numeric: tabular-nums;
-        letter-spacing: -0.01em;
-      }
-      .foglio body.admin .ax-stat-value.acc { color: var(--foglio-accent); font-style: italic; }
-      .foglio body.admin .ax-stat-delta {
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-top: 0.5rem;
-        color: var(--foglio-ink-mute);
-      }
-      .foglio body.admin .ax-stat-delta.up { color: var(--ax-pos); }
-      .foglio body.admin .ax-stat-delta.down { color: var(--ax-neg); }
-      .foglio body.admin .ax-stat-tooltip {
-        display: none;
-        position: absolute;
-        top: calc(100% + 4px);
-        left: 0;
-        right: 0;
-        z-index: 5;
-        background: var(--foglio-paper-2);
-        border: 1px solid var(--foglio-rule);
-        border-radius: var(--foglio-radius-sm);
-        padding: 0.6rem 0.8rem;
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        color: var(--foglio-ink-soft);
-        line-height: 1.4;
-        box-shadow: var(--foglio-shadow);
-      }
-      .foglio body.admin .ax-stat:hover .ax-stat-tooltip { display: block; }
-      .foglio body.admin .ax-stat.suspect { border-color: rgba(192, 57, 43, 0.45); background: var(--foglio-paper); }
-      .foglio body.admin .ax-stat.suspect .ax-stat-value { color: var(--ax-neg); }
-      .foglio body.admin .ax-flag-btn {
-        margin-top: 0.55rem;
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.3rem 0.6rem;
-        background: var(--ax-neg);
-        color: var(--foglio-paper);
-        border: none;
-        border-radius: var(--foglio-radius-sm);
-        cursor: pointer;
-        display: none;
-      }
-      .foglio body.admin .ax-flag-btn:hover { background: #a02d20; }
-
-      /* Section heads — serif italic, like comments card-title */
-      .foglio body.admin .ax-section-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 1rem;
-        margin: 2rem 0 0.9rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid var(--ax-page-rule);
-      }
-      .foglio body.admin .ax-section-head h2 {
-        font-family: var(--foglio-serif);
-        font-weight: 500;
-        font-style: italic;
-        font-size: var(--foglio-fs-lg);
-        text-transform: none;
-        letter-spacing: 0;
-        color: var(--foglio-accent-soft);
-        margin: 0;
-      }
-      .foglio body.admin .ax-section-head .ax-section-meta {
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--ax-page-ink-mute);
-      }
-
-      /* Phase 2: sessions / events / goals */
-      .foglio body.admin .ax-stats.ax-stats-4 { grid-template-columns: repeat(2, 1fr); }
-      .foglio body.admin .ax-goal { margin: 0 0 1.5rem; }
-      .foglio body.admin .ax-goal-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.75rem;
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: var(--ax-page-ink);
-        padding: 0 0 0.4rem;
-        border-bottom: 1px solid var(--foglio-rule);
-        margin: 0 0 0.3rem;
-      }
-      .foglio body.admin .ax-goal-head b { color: var(--foglio-accent-soft); font-weight: 600; }
-      .foglio body.admin .ax-goal .ax-section-meta {
-        display: block;
-        margin-top: 0.4rem;
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        letter-spacing: 0.08em;
-        color: var(--ax-page-ink-mute);
-        overflow-wrap: anywhere;
-      }
-      .foglio body.admin .ax-unavailable {
-        font-family: var(--foglio-mono);
-        font-size: 12px;
-        color: var(--ax-page-ink-mute);
-        margin: 0 0 1.5rem;
-      }
-
-      /* Chart container — cream paper card */
-      .foglio body.admin .ax-chart-wrap {
-        padding: 1rem;
-        min-height: 240px;
-        width: 100%;
-        background: var(--foglio-paper);
-        border: 1px solid var(--foglio-rule);
-        border-radius: var(--foglio-radius-md);
-      }
-      .foglio body.admin .ax-chart-wrap canvas { width: 100% !important; height: 240px !important; }
-
-      /* Grids */
-      .foglio body.admin .ax-grid-2,
-      .foglio body.admin .ax-grid-3 {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.25rem;
-      }
-
-      /* Lists — /visti style: borders only, no card surface, hover accent */
-      .foglio body.admin .ax-list { list-style: none; margin: 0; padding: 0; }
-      .foglio body.admin .ax-list li {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        gap: 0.8rem;
-        padding: 0.85rem 0.25rem;
-        border-bottom: 1px solid var(--ax-page-rule);
-        border-left: 2px solid transparent;
-        background: transparent;
-        font-family: var(--foglio-mono);
-        font-size: 13px;
-        color: var(--ax-page-ink);
-        transition: border-left-color 0.15s, padding-left 0.15s, color 0.15s;
-      }
-      .foglio body.admin .ax-list li:hover { border-left-color: var(--foglio-accent-soft); padding-left: 0.6rem; }
-      .foglio body.admin .ax-list .ax-key { color: var(--ax-page-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .foglio body.admin .ax-list .ax-key.path { font-family: var(--foglio-mono); color: var(--ax-page-ink); }
-      .foglio body.admin .ax-list .ax-val {
-        font-family: var(--foglio-mono);
-        font-size: 12px;
-        color: var(--foglio-accent-soft);
-        font-variant-numeric: tabular-nums;
-        white-space: nowrap;
-        font-weight: 600;
-      }
-      .foglio body.admin .ax-list .ax-bar { display: none; }
-
-      .foglio body.admin .ax-empty {
-        font-family: var(--foglio-mono);
-        font-style: italic;
-        color: var(--ax-page-ink-mute);
-        padding: 1rem 0.25rem;
-        font-size: 12px;
-        border-bottom: 1px solid var(--ax-page-rule);
-      }
-
-      /* Engaged */
-      .foglio body.admin .ax-engaged li { grid-template-columns: 1fr auto; align-items: center; }
-      .foglio body.admin .ax-engaged .ax-eng-main { min-width: 0; }
-      .foglio body.admin .ax-engaged .ax-eng-main .ax-eng-title {
-        font-family: var(--foglio-serif);
-        font-size: 14px;
-        color: var(--ax-page-ink);
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: block;
-      }
-      .foglio body.admin .ax-engaged .ax-eng-meta {
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        color: var(--ax-page-ink-soft);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-top: 0.25rem;
-      }
-      .foglio body.admin .ax-engaged .ax-eng-meta b { font-weight: 600; color: var(--foglio-accent-soft); }
-      .foglio body.admin .ax-engaged .ax-eng-pv {
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        color: var(--ax-cyan);
-        white-space: nowrap;
-      }
-
-      /* Map */
-      .foglio body.admin .ax-map-card {
-        margin: 0.5rem 0 0;
-        background: var(--foglio-paper);
-        border: 1px solid var(--foglio-rule);
-        border-radius: var(--foglio-radius-md);
-        padding: 0.6rem;
-      }
-      .foglio body.admin #world-map {
-        height: 280px;
-        width: 100%;
-        border: 1px solid var(--foglio-rule);
-        border-radius: var(--foglio-radius-sm);
-        background: var(--ax-page-bg-2);
-      }
-      .foglio body.admin .ax-map-legend {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin-top: 0.6rem;
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--foglio-ink-soft);
-      }
-      .foglio body.admin .ax-map-legend-bar {
-        width: 120px;
-        height: 6px;
-        border-radius: 3px;
-        background: linear-gradient(90deg, var(--foglio-paper-2), var(--foglio-accent));
-      }
-      .leaflet-container { background: var(--ax-page-bg-2) !important; font-family: var(--foglio-mono) !important; }
-      .leaflet-control-zoom a { background: var(--foglio-paper) !important; color: var(--foglio-ink) !important; border-color: var(--foglio-rule) !important; }
-      .leaflet-control-zoom a:hover { background: var(--foglio-paper-2) !important; color: var(--foglio-accent) !important; }
-      .ax-map-tip {
-        background: var(--foglio-paper) !important;
-        border: 1px solid var(--foglio-rule) !important;
-        color: var(--foglio-ink) !important;
-        padding: 0.4rem 0.6rem !important;
-        font-family: var(--foglio-mono) !important;
-        font-size: 11px !important;
-        box-shadow: var(--foglio-shadow) !important;
-        border-radius: var(--foglio-radius-sm) !important;
-      }
-      .ax-map-tip b { color: var(--foglio-accent); }
-
-      /* Recent visitors — featured live feed card */
-      .foglio body.admin .ax-section-head--live {
-        margin-top: 0.5rem;
-        padding-bottom: 0.4rem;
-        border-bottom: none;
-      }
-      .foglio body.admin .ax-section-head--live h2 {
-        font-size: var(--foglio-fs-xl);
-        font-style: italic;
-        color: var(--foglio-accent);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-      }
-      .foglio body.admin .ax-section-head--live h2 .ax-live-dot {
-        width: 9px;
-        height: 9px;
-        background: #2e8b57;
-        box-shadow: 0 0 0 0 rgba(46, 139, 87, 0.55);
-        animation: ax-live-pulse-lg 2.4s ease-out infinite;
-        position: relative;
-        top: 1px;
-      }
-      @keyframes ax-live-pulse-lg {
-        0%   { box-shadow: 0 0 0 0    rgba(46, 139, 87, 0.55); }
-        70%  { box-shadow: 0 0 0 12px rgba(46, 139, 87, 0); }
-        100% { box-shadow: 0 0 0 0    rgba(46, 139, 87, 0); }
-      }
-      .foglio body.admin .ax-recent-card {
-        background: var(--ax-page-bg-2);
-        border: 1px solid var(--ax-page-rule);
-        border-left: 3px solid var(--foglio-accent);
-        border-radius: var(--foglio-radius-md);
-        padding: 0.5rem 1.1rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 6px 20px -10px rgba(0,0,0,0.55);
-      }
-      .foglio body.admin .ax-recent { margin: 0; padding: 0; list-style: none; }
-      .foglio body.admin .ax-recent li {
-        display: grid;
-        grid-template-columns: auto 1fr auto auto;
-        gap: 0.85rem;
-        align-items: center;
-        padding: 0.95rem 0.25rem;
-        border-bottom: 1px solid var(--ax-page-rule);
-        border-left: 2px solid transparent;
-        background: transparent;
-        font-family: var(--foglio-mono);
-        font-size: 12px;
-        color: var(--ax-page-ink);
-        transition: border-left-color 0.15s, padding-left 0.15s;
-      }
-      .foglio body.admin .ax-recent li:last-child { border-bottom: none; }
-      .foglio body.admin .ax-recent li:hover { border-left-color: var(--foglio-accent-soft); padding-left: 0.6rem; }
-      .foglio body.admin .ax-recent li.flagged { opacity: 0.4; text-decoration: line-through; }
-      .foglio body.admin .ax-recent li.suspect { border-left-color: var(--ax-neg); }
-      .foglio body.admin .ax-recent .ax-flag { font-size: 1.25rem; line-height: 1; }
-      .foglio body.admin .ax-recent .ax-path { color: var(--ax-page-ink); overflow: hidden; min-width: 0; }
-      .foglio body.admin .ax-recent .ax-path > :first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        display: block;
-        font-family: var(--foglio-serif);
-        font-size: 15px;
-        font-weight: 500;
-        color: var(--ax-page-ink);
-      }
-      .foglio body.admin .ax-recent .ax-meta {
-        color: var(--ax-page-ink-soft);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        display: block;
-        margin-top: 0.25rem;
-        font-size: 10.5px;
-        white-space: normal;
-        font-family: var(--foglio-mono);
-      }
-      .foglio body.admin .ax-recent .ax-time {
-        color: var(--ax-page-ink-mute);
-        white-space: nowrap;
-        font-size: 11.5px;
-        font-variant-numeric: tabular-nums;
-      }
-      .foglio body.admin .ax-recent .ax-bot {
-        background: transparent;
-        border: 1px solid var(--ax-page-rule);
-        border-radius: var(--foglio-radius-sm);
-        padding: 0.25rem 0.45rem;
-        cursor: pointer;
-        color: var(--ax-page-ink-mute);
-        font-size: 12px;
-        transition: all 0.15s;
-      }
-      .foglio body.admin .ax-recent .ax-bot:hover { border-color: var(--ax-neg); color: var(--ax-neg); }
-
-      .foglio body.admin .ax-bulk-flag {
-        font-family: var(--foglio-mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.35rem 0.7rem;
-        background: transparent;
-        color: var(--ax-neg);
-        border: 1px solid var(--ax-neg);
-        border-radius: var(--foglio-radius-sm);
-        cursor: pointer;
-      }
-      .foglio body.admin #flag-all-bots { display: none; }
-      .foglio body.admin .ax-bulk-flag:hover { background: var(--ax-neg); color: var(--foglio-paper); }
-
-      .foglio body.admin .ax-loading,
-      .foglio body.admin .ax-error {
-        font-family: var(--foglio-mono);
-        font-style: italic;
-        padding: 1.2rem 0.25rem;
-        color: var(--ax-page-ink-mute);
-        text-align: center;
-        font-size: 12px;
-      }
-      .foglio body.admin .ax-error { color: var(--ax-neg); }
-
-      /* Bot detection: traffic quality, review list, rules */
-      .foglio body.admin .ax-qual { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin: 0 0 0.75rem; }
-      .foglio body.admin .ax-qual .ax-stat { padding: 0.8rem; }
-      .foglio body.admin .ax-qual .ax-stat-value { font-size: 1.7rem; }
-      .foglio body.admin .ax-qual .ax-stat.human .ax-stat-value { color: var(--foglio-pos); }
-      .foglio body.admin .ax-qual .ax-stat.unverified .ax-stat-value { color: var(--foglio-warn); }
-      .foglio body.admin .ax-qual .ax-stat.bot .ax-stat-value { color: var(--foglio-neg); }
-      .foglio body.admin .ax-qual-note {
-        font-family: var(--foglio-mono);
-        font-size: 11px;
-        color: var(--ax-page-ink-soft);
-        margin: 0 0 1.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem 1.25rem;
-        align-items: center;
-      }
-      .foglio body.admin .ax-qual-note label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; min-height: 32px; }
-      .foglio body.admin .ax-qual-note input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--foglio-accent); }
-      .foglio body.admin .ax-legacy-tag {
-        font-family: var(--foglio-mono);
-        font-size: 9px;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        padding: 1px 5px;
-        border: 1px solid currentColor;
-        border-radius: var(--foglio-radius-sm);
-        color: var(--foglio-warn);
-        background: var(--foglio-paper);
-        margin-left: 0.4rem;
-        vertical-align: middle;
-      }
-      .foglio body.admin .ax-btn {
-        font-family: var(--foglio-mono);
-        font-size: 10.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        padding: 0.4rem 0.8rem;
-        background: transparent;
-        color: var(--ax-page-ink);
-        border: 1px solid var(--ax-page-rule);
-        border-radius: var(--foglio-radius-sm);
-        cursor: pointer;
-      }
-      .foglio body.admin .ax-btn:hover:not(:disabled) { border-color: var(--foglio-accent); color: var(--foglio-accent); }
-      .foglio body.admin .ax-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-      .foglio body.admin .ax-btn.primary { background: var(--foglio-accent); border-color: var(--foglio-accent); color: var(--foglio-paper); }
-      .foglio body.admin .ax-btn.primary:hover:not(:disabled) { color: var(--foglio-paper); opacity: 0.9; }
-      .foglio body.admin .ax-btn.danger:hover:not(:disabled) { border-color: var(--ax-neg); color: var(--ax-neg); }
-      .foglio body.admin .ax-card-list { margin: 0; padding: 0; list-style: none; }
-      .foglio body.admin .ax-card-list > li {
-        padding: 0.8rem 0.25rem;
-        border-bottom: 1px solid var(--ax-page-rule);
-        font-family: var(--foglio-mono);
-        font-size: 12px;
-        color: var(--ax-page-ink);
-      }
-      .foglio body.admin .ax-card-list > li:last-child { border-bottom: none; }
-      .foglio body.admin .ax-row { display: flex; flex-wrap: wrap; gap: 0.5rem 0.9rem; align-items: center; justify-content: space-between; }
-      .foglio body.admin .ax-row .ax-grow { flex: 1 1 14rem; min-width: 0; overflow-wrap: anywhere; }
-      .foglio body.admin .ax-sub { display: block; margin-top: 0.2rem; font-size: 10.5px; color: var(--ax-page-ink-mute); text-transform: uppercase; letter-spacing: 0.06em; }
-      .foglio body.admin .ax-rule-off { opacity: 0.5; }
-      .foglio body.admin .ax-kind {
-        font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em;
-        border: 1px solid var(--foglio-info); color: var(--foglio-info);
-        background: var(--foglio-paper); border-radius: var(--foglio-radius-sm); padding: 1px 5px; margin-right: 0.4rem;
-      }
-      .foglio body.admin .ax-rule-form {
-        display: grid; gap: 0.6rem; margin-top: 0.7rem; padding: 0.8rem;
-        background: var(--ax-page-bg); border: 1px dashed var(--ax-page-rule); border-radius: var(--foglio-radius-sm);
-      }
-      .foglio body.admin .ax-rule-form .ax-fields { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-      .foglio body.admin .ax-rule-form select,
-      .foglio body.admin .ax-rule-form input[type="text"] {
-        font-family: var(--foglio-mono); font-size: 12px; padding: 0.45rem 0.6rem;
-        background: var(--ax-page-bg-2); color: var(--ax-page-ink);
-        border: 1px solid var(--ax-page-rule); border-radius: var(--foglio-radius-sm); min-width: 0;
-      }
-      .foglio body.admin .ax-rule-form input[name="value"] { flex: 1 1 14rem; }
-      .foglio body.admin .ax-rule-form input[name="note"] { flex: 1 1 10rem; }
-      .foglio body.admin .ax-preview { font-size: 11.5px; color: var(--ax-page-ink-soft); }
-      .foglio body.admin .ax-preview-warn {
-        padding: 0.5rem 0.7rem; background: var(--foglio-paper); color: var(--foglio-warn);
-        border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm); font-weight: 600;
-      }
-      .foglio body.admin .ax-legacy-note { font-family: var(--foglio-mono); font-size: 10.5px; color: var(--ax-page-ink-mute); margin: 0 0 0.6rem; }
-      @media (pointer: coarse) {
-        .foglio body.admin .ax-btn,
-        .foglio body.admin .ax-bulk-flag,
-        .foglio body.admin .ax-flag-btn,
-        .foglio body.admin .ax-recent .ax-bot,
-        .foglio body.admin .ax-rule-form select,
-        .foglio body.admin .ax-rule-form input[type="text"] { min-height: 44px; min-width: 44px; }
-        .foglio body.admin .ax-qual-note label { min-height: 44px; }
-      }
-      .foglio body.admin .ax-rollup-btn { min-height: 44px; min-width: 44px; color: var(--ax-page-ink-soft); border-color: currentColor; }
-
-      /* Phase 5: global filters, CSV export, Web Vitals */
-      .foglio body.admin .ax-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; margin-top: 0.8rem; font-family: var(--foglio-mono); font-size: 11px; color: var(--ax-page-ink-soft); }
-      .foglio body.admin .ax-filters label { display: inline-flex; align-items: center; gap: 0.4rem; text-transform: uppercase; letter-spacing: 0.1em; }
-      .foglio body.admin .ax-filters select {
-        font-family: var(--foglio-mono); font-size: 12px; min-height: 44px; padding: 0.4rem 0.6rem;
-        background: var(--ax-page-bg-2); color: var(--ax-page-ink);
-        border: 1px solid var(--ax-page-rule); border-radius: var(--foglio-radius-sm);
-      }
-      .foglio body.admin .ax-filter-note {
-        margin: 0.7rem 0 0; padding: 0.5rem 0.7rem; font-family: var(--foglio-mono); font-size: 11px;
-        background: var(--foglio-paper); color: var(--foglio-warn); border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm);
-      }
-      .foglio body.admin .ax-export {
-        display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; padding: 0 0.4rem;
-        color: var(--foglio-accent-soft); text-decoration: underline; text-underline-offset: 3px;
-      }
-      .foglio body.admin .ax-section-head .ax-section-meta { display: inline-flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; justify-content: flex-end; }
-      .foglio body.admin .ax-vitals { grid-template-columns: 1fr; margin-bottom: 1rem; }
-      .foglio body.admin .ax-vital .ax-stat-value { font-size: 2rem; }
-      .foglio body.admin .ax-vital.good .ax-stat-value { color: var(--foglio-pos); }
-      .foglio body.admin .ax-vital.ni .ax-stat-value { color: var(--foglio-warn); }
-      .foglio body.admin .ax-vital.poor .ax-stat-value { color: var(--foglio-neg); }
-      .foglio body.admin .ax-vital-state { font-family: var(--foglio-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 0.5rem; color: var(--foglio-ink-soft); }
-      .foglio body.admin .ax-vital-split { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--foglio-rule); margin: 0.4rem 0; }
-      .foglio body.admin .ax-vital-split span { display: block; height: 100%; }
-      .foglio body.admin .ax-vital-split .g { background: var(--foglio-pos); }
-      .foglio body.admin .ax-vital-split .n { background: var(--foglio-warn); }
-      .foglio body.admin .ax-vital-split .p { background: var(--foglio-neg); }
-      .foglio body.admin .ax-vital-meta { font-family: var(--foglio-mono); font-size: 10.5px; color: var(--foglio-ink-soft); margin: 0.15rem 0; overflow-wrap: anywhere; }
-      .foglio body.admin .ax-vital-dev b { font-weight: 600; }
-      .foglio body.admin .ax-vital-dev .good, .foglio body.admin .ax-vital-dev b.good { color: var(--foglio-pos); }
-      .foglio body.admin .ax-vital-dev b.ni { color: var(--foglio-warn); }
-      .foglio body.admin .ax-vital-dev b.poor { color: var(--foglio-neg); }
-      @media (min-width: 768px) { .foglio body.admin .ax-stats.ax-vitals { grid-template-columns: repeat(3, 1fr); } }
-
-      /* Tablet */
-      @media (min-width: 768px) {
-        .foglio body.admin .ax-wrap { padding: 1.75rem 1.75rem 4rem; }
-        .foglio body.admin .ax-head h1 { font-size: var(--foglio-fs-4xl); }
-        .foglio body.admin .ax-stats { grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
-        .foglio body.admin .ax-stat-value { font-size: 2.2rem; }
-        .foglio body.admin .ax-grid-2 { grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .foglio body.admin .ax-grid-3 { grid-template-columns: 1fr 1fr; gap: 2rem; }
-        .foglio body.admin #world-map { height: 360px; }
-        .foglio body.admin .ax-chart-wrap canvas { height: 280px !important; }
-
-        .foglio body.admin .ax-list li {
-          grid-template-columns: 1fr auto 80px;
-          padding: 0.7rem 0.25rem;
-        }
-        .foglio body.admin .ax-list .ax-bar {
-          display: block;
-          width: 80px;
-          height: 2px;
-          background: var(--ax-page-rule);
-          overflow: hidden;
-          align-self: center;
-        }
-        .foglio body.admin .ax-list .ax-bar-fill { display: block; height: 100%; background: var(--foglio-accent); }
-        .foglio body.admin .ax-engaged li { grid-template-columns: 1fr auto; }
-        .foglio body.admin .ax-recent li { grid-template-columns: auto 1fr auto auto; }
-      }
-
-      /* Desktop */
-      @media (min-width: 1024px) {
-        .foglio body.admin .ax-wrap { padding: 2rem 2.5rem 5rem; max-width: 1400px; }
-        .foglio body.admin .ax-head h1 { font-size: var(--foglio-fs-5xl); }
-        .foglio body.admin .ax-stats { grid-template-columns: repeat(6, 1fr); }
-        .foglio body.admin .ax-stats.ax-stats-4 { grid-template-columns: repeat(4, 1fr); }
-        .foglio body.admin .ax-grid-3 { grid-template-columns: 1fr 1fr 1fr; gap: 2.5rem; }
-        .foglio body.admin #world-map { height: 420px; }
-        .foglio body.admin .ax-chart-wrap canvas { height: 320px !important; }
-      }
-    </style>
   </head>
   <body class="admin">
     <AdminNav currentPage="analytics" />
 
-    <div class="ax-wrap">
-      <header class="ax-head">
-        <p class="ax-eyebrow">
-          <span>Admin · Analytics</span>
-          <span class="ax-live"><span class="ax-live-dot"></span><span id="live-count">—</span> ora</span>
-        </p>
-        <h1><em class="acc">Analytics.</em></h1>
+    <div class="ax" id="ax">
+      <header class="ax-bar" id="ax-bar">
+        <div class="ax-bar-row">
+          <h1 class="ax-title"><em class="acc">Analytics.</em></h1>
+          <button type="button" class="ax-live-pill" id="live-pill" aria-label="Utenti online ora: vai alla Panoramica">
+            <span class="ax-live-dot" aria-hidden="true"></span><span id="live-count">—</span> ora
+          </button>
+          <button type="button" class="ax-btn ax-filters-toggle" id="filters-toggle" aria-expanded="false" aria-controls="filters-panel">
+            Filtri <span id="filters-count" class="chip info" hidden></span>
+          </button>
+        </div>
 
-        <div class="ax-controls">
-          <div class="ax-periods" id="ax-periods">
-            <button data-period="today">Oggi</button>
-            <button data-period="7d">7g</button>
-            <button data-period="30d">30g</button>
-            <button data-period="90d">90g</button>
-            <button data-period="12m">12m</button>
+        <div class="ax-bar-row">
+          <div class="ax-seg" role="group" aria-label="Periodo" id="periods">
+            {PERIODS.map((p) => <button type="button" data-period={p.id} aria-pressed="false">{p.label}</button>)}
+            <button type="button" data-period="custom" aria-pressed="false" aria-controls="custom-range" aria-expanded="false">Date</button>
           </div>
-          <div class="ax-navstrip">
-            <button id="nav-prev" title="Periodo precedente">‹</button>
-            <span class="ax-cal-label" id="cal-label" title="Clicca per range custom">—</span>
-            <button id="nav-next" title="Periodo successivo">›</button>
+          <div class="ax-seg" role="group" aria-label="Sposta il periodo">
+            <button type="button" id="nav-prev" aria-label="Periodo precedente">‹</button>
+            <button type="button" id="nav-next" aria-label="Periodo successivo">›</button>
           </div>
-          <div class="ax-daterange" id="date-range">
-            <input type="date" id="date-from" />
-            <span>—</span>
-            <input type="date" id="date-to" />
-            <button id="date-go">Vai</button>
+          <span class="ax-range-label" id="range-label" aria-live="polite">—</span>
+          <div class="ax-custom" id="custom-range">
+            <label class="ax-vh" for="date-from">Dal</label><input type="date" id="date-from" />
+            <label class="ax-vh" for="date-to">Al</label><input type="date" id="date-to" />
+            <button type="button" class="ax-btn primary" id="date-go">Applica</button>
           </div>
         </div>
-        <div class="ax-filters" role="group" aria-label="Filtri globali">
+
+        <div class="ax-filters-panel" id="filters-panel" role="group" aria-label="Filtri globali">
           <label>Paese <select id="f-country"><option value="">Tutti</option></select></label>
           <label>Device
             <select id="f-device">
@@ -809,1152 +80,262 @@ if (!Astro.locals.isAdmin) {
           </label>
           <label>Canale
             <select id="f-channel">
-              <option value="">Tutti</option><option value="direct">direct</option><option value="search">search</option>
-              <option value="social">social</option><option value="ai">ai</option><option value="email">email</option>
-              <option value="referral">referral</option><option value="campaign">campaign</option>
+              <option value="">Tutti</option>
+              {CHANNELS.map((c) => <option value={c}>{c}</option>)}
             </select>
           </label>
           <button type="button" class="ax-btn" id="f-reset" hidden>Azzera filtri</button>
+          <div class="ax-fresh" id="data-source-note">
+            <span>Aggiornamento dati: <span id="data-source">—</span></span>
+            <button type="button" class="ax-btn" id="rollup-recalc" title="Ricalcola gli aggregati giornalieri del periodo (esclude oggi)">Ricalcola aggregati</button>
+            <span id="rollup-status" role="status" aria-live="polite"></span>
+          </div>
         </div>
-        <p class="ax-filter-note" id="filter-note" role="status" hidden></p>
+        <p class="ax-notice" id="filter-note" role="status" hidden></p>
+
+        <div class="ax-tabs" role="tablist" aria-label="Sezioni analytics" id="tabs">
+          {TABS.map((t) => (
+            <button type="button" role="tab" id={`tab-${t.id}`} data-tab={t.id} aria-controls={`panel-${t.id}`} aria-selected="false" tabindex="-1">{t.label}</button>
+          ))}
+        </div>
       </header>
 
-      <section class="ax-stats" id="summary">
-        <div class="ax-stat">
-          <div class="ax-stat-label">Pageviews <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value acc" id="s-pageviews">—</div>
-          <div class="ax-stat-delta" id="s-pageviews-delta"></div>
-          <div class="ax-stat-tooltip">Pagine totali viste nel periodo. Include visite ripetute.</div>
+      <main id="ax-main">
+        <div class="ax-vh" id="ax-status" role="status" aria-live="polite"></div>
+
+        <!-- ============ PANORAMICA ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-panoramica" aria-labelledby="tab-panoramica" tabindex="0" hidden>
+          <div class="ax-grid cols-21">
+            <section class="ax-card" aria-labelledby="rt-title">
+              <div class="ax-card-head">
+                <h2 class="ax-card-title" id="rt-title">In tempo reale</h2>
+                <span class="ax-card-meta">ultimi 5 minuti · aggiornato ogni 30 s</span>
+              </div>
+              <div class="ax-rt" id="rt-body"><div class="ax-skel tall"></div><div class="ax-skel"></div></div>
+            </section>
+            <section class="ax-card" aria-labelledby="ov-top-title">
+              <div class="ax-card-head">
+                <h2 class="ax-card-title" id="ov-top-title">Pagine principali</h2>
+                <a class="ax-link" href="#coinvolgimento">Tutte</a>
+              </div>
+              <div id="ov-top"></div>
+            </section>
+          </div>
+
+          <section aria-label="Indicatori principali">
+            <div class="ax-scorecards" id="scorecards"></div>
+          </section>
+
+          <section class="ax-card" aria-labelledby="chart-title" style="margin-bottom: var(--ax-gap)">
+            <div class="ax-card-head">
+              <h2 class="ax-card-title" id="chart-title">Andamento</h2>
+              <div class="ax-seg" role="group" aria-label="Metrica del grafico" id="metric-seg">
+                <button type="button" data-metric="visitors" aria-pressed="true">Utenti</button>
+                <button type="button" data-metric="sessions" aria-pressed="false">Sessioni</button>
+                <button type="button" data-metric="pageviews" aria-pressed="false">Pageview</button>
+              </div>
+              <span class="ax-card-meta"><a class="ax-link ax-export" data-export="daily" href="#" download>Esporta CSV</a></span>
+            </div>
+            <div id="chart-state"></div>
+            <div class="ax-chart-box"><canvas id="chart" role="img" aria-label="Grafico dell'andamento nel tempo"></canvas></div>
+          </section>
+
+          <div class="ax-grid cols-3">
+            <section class="ax-card" aria-labelledby="ov-ch-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ov-ch-title">Canali</h2><span class="ax-card-meta">sessioni</span></div>
+              <div id="ov-channels"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="ov-co-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ov-co-title">Paesi</h2><span class="ax-card-meta" id="geo-meta">—</span></div>
+              <div class="ax-map" id="world-map" aria-label="Mappa dei visitatori per paese" role="img"></div>
+              <div class="ax-map-legend"><span>0</span><i></i><span id="map-max-label">max</span></div>
+              <div id="ov-countries"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="ov-dev-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ov-dev-title">Dispositivi</h2><span class="ax-card-meta">utenti</span></div>
+              <div id="ov-devices"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ============ UTENTI ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-utenti" aria-labelledby="tab-utenti" tabindex="0" hidden>
+          <section class="ax-card" aria-labelledby="us-sum-title" style="margin-bottom: var(--ax-gap)">
+            <div class="ax-card-head">
+              <h2 class="ax-card-title" id="us-sum-title">Chi c'è ora</h2>
+              <span class="ax-card-meta">ultimi 5 minuti</span>
+            </div>
+            <div id="us-summary"></div>
+          </section>
+
+          <div class="ax-seg-wrap">
+            <div class="ax-seg" role="group" aria-label="Tipo di visitatore" id="verdict-seg">
+              <button type="button" data-verdict="human" aria-pressed="true">Solo umani</button>
+              <button type="button" data-verdict="all" aria-pressed="false">Tutti</button>
+              <button type="button" data-verdict="unverified" aria-pressed="false">Non verificati</button>
+              <button type="button" data-verdict="bot" aria-pressed="false">Bot</button>
+            </div>
+            <label class="ax-check"><input type="checkbox" id="us-events" /> Solo con eventi</label>
+          </div>
+
+          <section class="ax-card" aria-labelledby="us-list-title">
+            <div class="ax-card-head">
+              <h2 class="ax-card-title" id="us-list-title">Sessioni recenti</h2>
+              <span class="ax-card-meta" id="us-count">una riga = una visita</span>
+            </div>
+            <div id="us-state"></div>
+            <ul class="ax-sess-list" id="us-list"></ul>
+            <div class="ax-more"><button type="button" class="ax-btn" id="us-more" hidden>Carica altre</button></div>
+            <p class="ax-privacy">Gli identificativi (“Utente #a1b2c3”) sono anonimi e cambiano ogni giorno: chi torna il giorno dopo compare come un nuovo utente. Nessun IP è mostrato o conservato.</p>
+          </section>
+        </section>
+
+        <!-- ============ ACQUISIZIONE ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-acquisizione" aria-labelledby="tab-acquisizione" tabindex="0" hidden>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="aq-ch-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="aq-ch-title">Canali</h2><span class="ax-card-meta">sessioni per canale <a class="ax-link ax-export" data-export="channels" href="#" download>CSV</a></span></div>
+              <div id="aq-channels"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="aq-ref-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="aq-ref-title">Referrer</h2><span class="ax-card-meta">utenti <a class="ax-link ax-export" data-export="referrers" href="#" download>CSV</a></span></div>
+              <div id="aq-referrers"></div>
+            </section>
+          </div>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="aq-src-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="aq-src-title">UTM · sorgenti</h2><span class="ax-card-meta"><a class="ax-link ax-export" data-export="utm" href="#" download>CSV</a></span></div>
+              <div id="aq-utm-sources"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="aq-cmp-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="aq-cmp-title">UTM · campagne</h2></div>
+              <div id="aq-utm-campaigns"></div>
+            </section>
+          </div>
+          <section class="ax-card" aria-labelledby="aq-land-title">
+            <div class="ax-card-head">
+              <h2 class="ax-card-title" id="aq-land-title">Pagine di ingresso per canale</h2>
+              <label class="ax-card-meta">Canale
+                <select id="landing-channel" aria-label="Canale delle pagine di ingresso">
+                  <option value="">Tutti</option>
+                  {CHANNELS.map((c) => <option value={c}>{c}</option>)}
+                </select>
+              </label>
+            </div>
+            <div id="aq-landing"></div>
+          </section>
+        </section>
+
+        <!-- ============ COINVOLGIMENTO ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-coinvolgimento" aria-labelledby="tab-coinvolgimento" tabindex="0" hidden>
+          <section class="ax-card" aria-labelledby="en-pages-title" style="margin-bottom: var(--ax-gap)">
+            <div class="ax-card-head"><h2 class="ax-card-title" id="en-pages-title">Pagine principali</h2><span class="ax-card-meta">tempo e scroll solo per i post <a class="ax-link ax-export" data-export="top_pages" href="#" download>CSV</a></span></div>
+            <div id="en-pages"></div>
+          </section>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="en-sec-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-sec-title">Sezioni</h2><span class="ax-card-meta">dove leggono</span></div>
+              <div id="en-sections"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="en-eng-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-eng-title">Post più letti</h2><span class="ax-card-meta">engagement = tempo × scroll</span></div>
+              <div id="en-engaged"></div>
+            </section>
+          </div>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="en-entry-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-entry-title">Pagine di ingresso</h2><span class="ax-card-meta">prima pagina della sessione</span></div>
+              <div id="en-entry"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="en-exit-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-exit-title">Pagine di uscita</h2><span class="ax-card-meta">ultima pagina della sessione</span></div>
+              <div id="en-exit"></div>
+            </section>
+          </div>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="en-ev-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-ev-title">Eventi</h2><span class="ax-card-meta">azioni anonime <a class="ax-link ax-export" data-export="events" href="#" download>CSV</a></span></div>
+              <div id="en-events"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="en-goal-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="en-goal-title">Obiettivi</h2><span class="ax-card-meta">conversioni <a class="ax-link ax-export" data-export="goals" href="#" download>CSV</a></span></div>
+              <div id="en-goals"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ============ TECNOLOGIA ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-tecnologia" aria-labelledby="tab-tecnologia" tabindex="0" hidden>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="te-dev-title"><div class="ax-card-head"><h2 class="ax-card-title" id="te-dev-title">Dispositivi</h2></div><div id="te-devices"></div></section>
+            <section class="ax-card" aria-labelledby="te-br-title"><div class="ax-card-head"><h2 class="ax-card-title" id="te-br-title">Browser</h2></div><div id="te-browsers"></div></section>
+          </div>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="te-os-title"><div class="ax-card-head"><h2 class="ax-card-title" id="te-os-title">Sistemi operativi</h2></div><div id="te-os"></div></section>
+            <section class="ax-card" aria-labelledby="te-lang-title"><div class="ax-card-head"><h2 class="ax-card-title" id="te-lang-title">Lingua</h2></div><div id="te-languages"></div></section>
+          </div>
+          <h2 class="ax-section-h">Web Vitals</h2>
+          <div id="vitals-state"></div>
+          <div class="ax-grid cols-3" id="vitals-cards"></div>
+          <section class="ax-card" aria-labelledby="te-slow-title">
+            <div class="ax-card-head"><h2 class="ax-card-title" id="te-slow-title">Pagine più lente</h2><span class="ax-card-meta">LCP p75 · almeno 5 misure · dati grezzi</span></div>
+            <div id="te-slow"></div>
+          </section>
+        </section>
+
+        <!-- ============ BOT & QUALITÀ ============ -->
+        <section class="ax-panel" role="tabpanel" id="panel-bot" aria-labelledby="tab-bot" tabindex="0" hidden>
+          <section aria-labelledby="qu-title">
+            <h2 class="ax-section-h" id="qu-title" style="margin-top: 0">Qualità traffico</h2>
+            <div class="ax-qual" id="quality"></div>
+            <p class="ax-qual-note">
+              <label class="ax-check"><input type="checkbox" id="include-all" /> Includi non verificati (numeri come prima)</label>
+              <span id="q-mode">—</span>
+              <span id="q-legacy"></span>
+            </p>
+          </section>
+          <section class="ax-card" aria-labelledby="qu-review-title" style="margin-bottom: var(--ax-gap)">
+            <div class="ax-card-head"><h2 class="ax-card-title" id="qu-review-title">Da rivedere</h2><span class="ax-card-meta">non verificati, raggruppati per profilo</span></div>
+            <div id="review-box"></div>
+          </section>
+          <section class="ax-card" aria-labelledby="qu-rules-title" style="margin-bottom: var(--ax-gap)">
+            <div class="ax-card-head"><h2 class="ax-card-title" id="qu-rules-title">Regole bot</h2><span class="ax-card-meta">valgono dalle nuove visite</span></div>
+            <div id="rules-box"></div>
+          </section>
+          <section class="ax-card" aria-labelledby="qu-legacy-title">
+            <div class="ax-card-head">
+              <h2 class="ax-card-title" id="qu-legacy-title">Strumenti legacy <span class="ax-legacy-tag" title={LEGACY_HINT}>legacy</span></h2>
+              <span class="ax-card-meta">flag per hash, sostituito dalle regole bot</span>
+            </div>
+            <p class="ax-qual-note">
+              <span>Sospetti (zero engagement): <b id="s-suspects">—</b></span>
+              <button type="button" class="ax-btn legacy" id="flag-suspects-btn" hidden title="Legacy: flag per hash, sostituito dalle regole bot">Flag come bot (legacy)</button>
+              <button type="button" class="ax-btn legacy" id="flag-all-bots" hidden title="Legacy: flag per hash">Flag zero-engagement (legacy)</button>
+              <button type="button" class="ax-btn legacy" id="unflag-recent" title="Legacy: rimuove dai bot gli hash flaggati nelle ultime 24 ore">Annulla flag fatti oggi (legacy)</button>
+              <button type="button" class="ax-btn legacy" id="unflag-all" title="Legacy: rimuove TUTTI gli hash dalla bot list (paracadute)">Annulla TUTTI (legacy)</button>
+            </p>
+            <h3 class="ax-card-title" style="margin: 0.5rem 0">Visitatori recenti <span class="ax-legacy-tag">legacy</span></h3>
+            <div id="recent-box"></div>
+          </section>
+        </section>
+      </main>
+
+      <div class="ax-scrim" id="sheet-scrim" hidden></div>
+      <aside class="ax-sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden tabindex="-1">
+        <div class="ax-sheet-head">
+          <h2 id="sheet-title">Sessione</h2>
+          <button type="button" class="ax-btn" id="sheet-close" aria-label="Chiudi dettaglio">Chiudi</button>
         </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Visitatori <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="s-visitors">—</div>
-          <div class="ax-stat-delta" id="s-visitors-delta"></div>
-          <div class="ax-stat-tooltip">Visitatori unici giornalieri (hash anonimo IP+UA+data). Nessun cookie.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Tempo medio <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="s-time">—</div>
-          <div class="ax-stat-tooltip">Tempo sulla pagina misurato fino all'uscita o cambio tab. Max 60 min.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Scroll <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="s-scroll">—</div>
-          <div class="ax-stat-tooltip">Percentuale media di scroll. 100% = fondo pagina.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Bounce <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="s-bounce">—</div>
-          <div class="ax-stat-tooltip">Visitatori con &lt;5s sulla pagina o nessuna interazione.</div>
-        </div>
-        <div class="ax-stat suspect">
-          <div class="ax-stat-label">Sospetti <span class="ax-legacy-tag" title="Sistema vecchio: sostituito da verdetto e regole bot, verrà rimosso dopo il periodo di confronto">legacy</span> <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="s-suspects">—</div>
-          <button class="ax-flag-btn" id="flag-suspects-btn" title="Legacy: flag per hash, sostituito dalle regole bot">Flag come bot (legacy)</button>
-          <div class="ax-stat-tooltip">LEGACY. Visitatori con zero engagement (tempo ≤5s e scroll 0%), non ancora flaggati. Usa "Da rivedere" e le regole bot al suo posto.</div>
-        </div>
-      </section>
-
-      <!-- Qualità traffico: umano / non verificato / bot -->
-      <div class="ax-section-head">
-        <h2>Qualità traffico</h2>
-        <span class="ax-section-meta" id="qual-meta">visite uniche per verdetto</span>
-      </div>
-      <div class="ax-qual" id="quality">
-        <div class="ax-stat human">
-          <div class="ax-stat-label">Umani</div>
-          <div class="ax-stat-value" id="q-human">—</div>
-        </div>
-        <div class="ax-stat unverified">
-          <div class="ax-stat-label">Non verificati</div>
-          <div class="ax-stat-value" id="q-unverified">—</div>
-          <div class="ax-stat-delta" id="q-pct"></div>
-        </div>
-        <div class="ax-stat bot">
-          <div class="ax-stat-label">Bot</div>
-          <div class="ax-stat-value" id="q-bot">—</div>
-        </div>
-      </div>
-      <p class="ax-qual-note">
-        <label>
-          <input type="checkbox" id="include-all" />
-          Includi non verificati (numeri come prima)
-        </label>
-        <span id="q-mode">—</span>
-        <span id="q-legacy"></span>
-      </p>
-      <p class="ax-qual-note" id="data-source-note">
-        <span>Aggiornamento dati: <span id="data-source">—</span></span>
-        <button type="button" class="ax-bulk-flag ax-rollup-btn" id="rollup-recalc" title="Ricalcola gli aggregati giornalieri del periodo (esclude oggi)">Ricalcola aggregati</button>
-        <span id="rollup-status" role="status"></span>
-      </p>
-
-      <div class="ax-section-head">
-        <h2>Da rivedere</h2>
-        <span class="ax-section-meta">non verificati, raggruppati per profilo</span>
-      </div>
-      <div class="ax-recent-card">
-        <ul class="ax-card-list" id="review-list"><li class="ax-loading">Caricamento…</li></ul>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Regole bot</h2>
-        <span class="ax-section-meta">valgono dalle nuove visite</span>
-      </div>
-      <div class="ax-recent-card">
-        <ul class="ax-card-list" id="rules-list"><li class="ax-loading">Caricamento…</li></ul>
-      </div>
-
-      <!-- Visitatori recenti — featured: live feed -->
-      <div class="ax-section-head ax-section-head--live">
-        <h2>
-          <span class="ax-live-dot" aria-hidden="true"></span>
-          Visitatori recenti
-        </h2>
-        <div class="ax-bulk-actions">
-          <span class="ax-legacy-tag" title="Sistema vecchio: sostituito da verdetto e regole bot, verrà rimosso dopo il periodo di confronto">legacy</span>
-          <button class="ax-bulk-flag" id="flag-all-bots" title="Legacy: flag per hash">Flag zero-engagement (legacy)</button>
-          <button class="ax-bulk-flag" id="unflag-recent" title="Legacy: rimuove dai bot gli hash flaggati nelle ultime 24 ore">Annulla flag fatti oggi (legacy)</button>
-          <button class="ax-bulk-flag" id="unflag-all" title="Legacy: rimuove TUTTI gli hash dalla bot list (paracadute)">Annulla TUTTI (legacy)</button>
-        </div>
-      </div>
-      <div class="ax-recent-card">
-        <ul class="ax-recent" id="recent-list"><li class="ax-loading">Caricamento…</li></ul>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Traffico nel tempo</h2>
-        <span class="ax-section-meta" id="chart-meta">pageviews · visitatori <a class="ax-export" data-export="daily" href="#" download>Esporta CSV</a></span>
-      </div>
-      <div class="ax-chart-wrap"><canvas id="chart"></canvas></div>
-
-      <div class="ax-section-head">
-        <h2>Distribuzione geografica</h2>
-        <span class="ax-section-meta" id="geo-meta">—</span>
-      </div>
-      <div class="ax-map-card">
-        <div id="world-map"></div>
-        <div class="ax-map-legend">
-          <span>0</span>
-          <div class="ax-map-legend-bar"></div>
-          <span id="map-max-label">max</span>
-        </div>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Sezioni</h2>
-        <span class="ax-section-meta">dove leggono <a class="ax-export" data-export="top_pages" href="#" download>Esporta CSV</a></span>
-      </div>
-      <div class="ax-grid-2">
-        <div>
-          <ul class="ax-list" id="sections-list"></ul>
-        </div>
-        <div>
-          <ul class="ax-list" id="top-pages-list"></ul>
-        </div>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Post più letti</h2>
-        <span class="ax-section-meta">engagement = tempo × scroll</span>
-      </div>
-      <ul class="ax-list ax-engaged" id="engaged-list"></ul>
-
-      <div class="ax-section-head">
-        <h2>Sessioni</h2>
-        <span class="ax-section-meta">visite con pausa &lt; 30 min · senza cookie</span>
-      </div>
-      <p class="ax-unavailable" id="sess-unavailable" hidden>Sessioni non ancora attive: applica la migrazione Fase 2.</p>
-      <section class="ax-stats ax-stats-4" id="sessions-stats">
-        <div class="ax-stat">
-          <div class="ax-stat-label">Sessioni <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value acc" id="se-count">—</div>
-          <div class="ax-stat-delta" id="se-count-delta"></div>
-          <div class="ax-stat-tooltip">Una sessione = stesso visitatore anonimo con pause &lt; 30 minuti. A mezzanotte UTC l'identificativo cambia: una visita a cavallo si divide in due.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Bounce reale <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="se-bounce">—</div>
-          <div class="ax-stat-delta" id="se-bounce-delta"></div>
-          <div class="ax-stat-tooltip">Sessioni con 1 sola pagina e meno di 10 s di tempo attivo. Il "Bounce" in alto e il vecchio calcolo per visitatore.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Pagine / sessione <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="se-pages">—</div>
-          <div class="ax-stat-tooltip">Pageview medie per sessione.</div>
-        </div>
-        <div class="ax-stat">
-          <div class="ax-stat-label">Tempo attivo medio <span class="ax-stat-info">?</span></div>
-          <div class="ax-stat-value" id="se-time">—</div>
-          <div class="ax-stat-tooltip">Somma del tempo visibile sulle pagine della sessione, in media.</div>
-        </div>
-      </section>
-
-      <div class="ax-section-head">
-        <h2>Ingresso e uscita</h2>
-        <span class="ax-section-meta">prima e ultima pagina della sessione</span>
-      </div>
-      <div class="ax-grid-2">
-        <ul class="ax-list" id="entry-list"></ul>
-        <ul class="ax-list" id="exit-list"></ul>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Canali</h2>
-        <span class="ax-section-meta">sessioni per canale di provenienza <a class="ax-export" data-export="channels" href="#" download>Esporta CSV</a></span>
-      </div>
-      <ul class="ax-list" id="channels-list"></ul>
-
-      <div class="ax-section-head">
-        <h2>Eventi</h2>
-        <span class="ax-section-meta">azioni anonime · conteggio <a class="ax-export" data-export="events" href="#" download>Esporta CSV</a></span>
-      </div>
-      <ul class="ax-list" id="events-list"></ul>
-
-      <div class="ax-section-head">
-        <h2>Obiettivi</h2>
-        <span class="ax-section-meta">sessioni con conversione · tasso sulle sessioni <a class="ax-export" data-export="goals" href="#" download>Esporta CSV</a></span>
-      </div>
-      <div class="ax-grid-2" id="goals-grid"></div>
-
-      <div class="ax-section-head">
-        <h2>Web Vitals</h2>
-        <span class="ax-section-meta" id="vitals-meta">p75 · utenti reali</span>
-      </div>
-      <p class="ax-unavailable" id="vitals-unavailable" hidden>Web Vitals non ancora attivi: applica la migrazione Fase 5.</p>
-      <section class="ax-stats ax-vitals" id="vitals-cards" aria-label="Core Web Vitals"></section>
-      <div class="ax-section-head">
-        <h2>Pagine più lente</h2>
-        <span class="ax-section-meta">LCP p75 · almeno 5 misure · dati grezzi</span>
-      </div>
-      <ul class="ax-list" id="slow-pages-list"></ul>
-
-      <div class="ax-section-head">
-        <h2>Provenienza</h2>
-        <span class="ax-section-meta">referrer · paesi · lingua <a class="ax-export" data-export="referrers" href="#" download>Esporta CSV</a></span>
-      </div>
-      <div class="ax-grid-3">
-        <ul class="ax-list" id="referrers-list"></ul>
-        <ul class="ax-list" id="countries-list"></ul>
-        <ul class="ax-list" id="languages-list"></ul>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>Pubblico</h2>
-        <span class="ax-section-meta">device · browser · OS</span>
-      </div>
-      <div class="ax-grid-3">
-        <ul class="ax-list" id="devices-list"></ul>
-        <ul class="ax-list" id="browsers-list"></ul>
-        <ul class="ax-list" id="os-list"></ul>
-      </div>
-
-      <div class="ax-section-head">
-        <h2>UTM</h2>
-        <span class="ax-section-meta">campagne · sorgenti <a class="ax-export" data-export="utm" href="#" download>Esporta CSV</a></span>
-      </div>
-      <div class="ax-grid-2">
-        <ul class="ax-list" id="utm-sources-list"></ul>
-        <ul class="ax-list" id="utm-campaigns-list"></ul>
-      </div>
-
+        <div id="sheet-body"></div>
+      </aside>
     </div>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" integrity="sha384-b8ANgTJvdlAnWM5YGMpKn7Kodm+1k7NYNG9zdjTCcZcKatzYHwZ0RLdWarbJJVzU" crossorigin="anonymous" />
     <script is:inline src="/admin/admin-client.js"></script>
     <script is:inline src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js" integrity="sha384-u5N8qJeJOO2iqNjIKTdl6KeKsEikMAmCUBPc6sC6uGpgL34aPJ4VgNhuhumedpEk" crossorigin="anonymous"></script>
     <script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC" crossorigin="anonymous"></script>
-    <script is:inline>
-      var chartInstance = null;
-
-      function cssVar(name, fallback) {
-        var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-        return v || fallback;
-      }
-      var FOGLIO_ACCENT = cssVar("--foglio-accent", "#a8451a");
-      var FOGLIO_ACCENT_SOFT = cssVar("--foglio-accent-soft", "#c8714a");
-      var FOGLIO_PAPER = cssVar("--foglio-paper", "#fbf7ee");
-      var FOGLIO_PAPER_2 = cssVar("--foglio-paper-2", "#f1ebdd");
-      var FOGLIO_INK = cssVar("--foglio-ink", "#221a12");
-      var FOGLIO_INK_SOFT = cssVar("--foglio-ink-soft", "#5e4d3a");
-      var FOGLIO_RULE = cssVar("--foglio-rule", "#d8cebd");
-      var CYAN = cssVar("--ax-cyan", "#00b4a6");
-      function withAlpha(hex, a) {
-        var m = /^#?([0-9a-f]{6})$/i.exec(hex);
-        if (!m) return hex;
-        var n = parseInt(m[1], 16);
-        return "rgba(" + (n >> 16 & 255) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")";
-      }
-
-      function fmt(n) { n = Number(n) || 0; return n >= 1000 ? (n / 1000).toFixed(1) + "k" : String(n); }
-      function fmtTime(s) { s = Number(s) || 0; return s >= 60 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : s + "s"; }
-
-      var DAYS_SHORT = ["Dom", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
-      var MONTHS_SHORT = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
-
-      function fmtChartLabel(dateStr, groupBy) {
-        if (groupBy === "hour") return dateStr.slice(11, 16);
-        if (groupBy === "month") { var p = dateStr.split("-"); return MONTHS_SHORT[parseInt(p[1], 10) - 1] + " " + p[0].slice(2); }
-        var d = new Date(dateStr + "T00:00:00");
-        return DAYS_SHORT[d.getDay()] + " " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()];
-      }
-      function fmtTooltipTitle(dateStr, groupBy) {
-        if (groupBy === "hour") return dateStr;
-        if (groupBy === "month") { var p = dateStr.split("-"); return MONTHS_SHORT[parseInt(p[1], 10) - 1] + " " + p[0]; }
-        var d = new Date(dateStr + "T00:00:00");
-        return DAYS_SHORT[d.getDay()] + " " + d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();
-      }
-      // UTC, to match src/lib/date-range.ts (isoDate)
-      function dateStr(d) { return d.toISOString().slice(0, 10); }
-
-      function fmtCalDate(iso) { var d = new Date(iso + "T00:00:00"); return d.getDate() + " " + MONTHS_SHORT[d.getMonth()]; }
-      function fmtCalDateFull(iso) { var d = new Date(iso + "T00:00:00"); return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear(); }
-
-      function setDelta(el, pct) {
-        if (pct == null) { el.textContent = ""; el.className = "ax-stat-delta"; return; }
-        var prefix = pct > 0 ? "▲ " : pct < 0 ? "▼ " : "= ";
-        el.textContent = prefix + Math.abs(pct).toFixed(1) + "% vs periodo prec.";
-        el.className = "ax-stat-delta " + (pct > 0 ? "up" : pct < 0 ? "down" : "");
-      }
-
-      function renderListRows(rows, keyField, valueField, isPath, ulId, emptyMsg) {
-        var ul = document.getElementById(ulId);
-        if (!ul) return;
-        if (!rows || !rows.length) { ul.innerHTML = '<li class="ax-empty">' + escapeHtml(emptyMsg || "Nessun dato.") + '</li>'; return; }
-        var max = Number(rows[0][valueField]) || 1;
-        ul.innerHTML = rows.map(function(r) {
-          var key = r[keyField] != null && r[keyField] !== "" ? r[keyField] : "(diretto)";
-          var val = Number(r[valueField]) || 0;
-          var pct = Math.round(val / max * 100);
-          return '<li>' +
-            '<span class="ax-key' + (isPath ? ' path' : '') + '" title="' + escapeHtml(key) + '">' + escapeHtml(key) + '</span>' +
-            '<span class="ax-val">' + fmt(val) + '</span>' +
-            '<span class="ax-bar"><span class="ax-bar-fill" style="width:' + pct + '%"></span></span>' +
-            '</li>';
-        }).join("");
-      }
-
-      function pctText(n) { return (Number(n) || 0).toFixed(1).replace(".", ",") + "%"; }
-
-      function renderSessions(d) {
-        var se = d.sessions || {};
-        var off = !se.available;
-        document.getElementById("sess-unavailable").hidden = !off;
-        document.getElementById("se-count").textContent = off ? "—" : fmt(se.count);
-        document.getElementById("se-bounce").textContent = off ? "—" : pctText(se.bounce_rate);
-        document.getElementById("se-pages").textContent = off ? "—" : String(se.pages_per_session);
-        document.getElementById("se-time").textContent = off ? "—" : fmtTime(se.avg_engaged_seconds);
-        setDelta(document.getElementById("se-count-delta"), off ? null : se.count_delta_pct);
-        var bd = document.getElementById("se-bounce-delta");
-        if (off || se.bounce_rate_delta_pp == null) { bd.textContent = ""; bd.className = "ax-stat-delta"; }
-        else {
-          var pp = se.bounce_rate_delta_pp;
-          bd.textContent = (pp > 0 ? "▲ " : pp < 0 ? "▼ " : "= ") + Math.abs(pp).toFixed(1) + " pp vs periodo prec.";
-          // a higher bounce is worse
-          bd.className = "ax-stat-delta " + (pp > 0 ? "down" : pp < 0 ? "up" : "");
-        }
-        renderListRows(d.entry_pages, "path", "sessions", true, "entry-list", "Nessuna sessione nel periodo.");
-        renderListRows(d.exit_pages, "path", "sessions", true, "exit-list", "Nessuna sessione nel periodo.");
-        renderListRows((se.by_channel || []), "channel", "sessions", false, "channels-list", "Nessuna sessione nel periodo.");
-        var ev = (d.events || []).map(function(e) {
-          return { label: e.name + (e.prop ? " · " + e.prop : ""), count: e.count };
-        });
-        renderListRows(ev, "label", "count", false, "events-list", "Nessun evento nel periodo.");
-        renderGoals(d.goals || []);
-      }
-
-      function renderGoals(goals) {
-        var grid = document.getElementById("goals-grid");
-        if (!goals.length) { grid.innerHTML = '<p class="ax-empty">Nessun obiettivo.</p>'; return; }
-        grid.innerHTML = goals.map(function(g) {
-          var rows = (g.by_channel || []).map(function(c) {
-            return '<li><span class="ax-key">' + escapeHtml(c.channel) + '</span>' +
-              '<span class="ax-val" title="' + escapeHtml(c.conversions + " / " + c.sessions + " sessioni") + '">' + fmt(c.conversions) + ' · ' + pctText(c.rate) + '</span></li>';
-          }).join("");
-          var entries = (g.by_entry || []).slice(0, 3).map(function(c) {
-            return escapeHtml(c.path) + " (" + fmt(c.conversions) + ")";
-          }).join(" · ");
-          return '<div class="ax-goal">' +
-            '<div class="ax-goal-head"><span>' + escapeHtml(g.label) + '</span><span><b>' + fmt(g.conversions) + '</b> · ' + pctText(g.rate) + '</span></div>' +
-            '<ul class="ax-list">' + (rows || '<li class="ax-empty">Nessuna conversione.</li>') + '</ul>' +
-            (entries ? '<div class="ax-section-meta" title="Pagine di ingresso con più conversioni">Da: ' + entries + '</div>' : '') +
-            '</div>';
-        }).join("");
-      }
-
-      function renderEngaged(rows) {
-        var ul = document.getElementById("engaged-list");
-        if (!rows || !rows.length) { ul.innerHTML = '<li class="ax-empty">Nessun post con dati di engagement nel periodo.</li>'; return; }
-        ul.innerHTML = rows.map(function(r) {
-          var t = Number(r.avg_time) || 0;
-          var s = Number(r.avg_scroll) || 0;
-          var pv = Number(r.pageviews) || 0;
-          return '<li>' +
-            '<div class="ax-eng-main">' +
-              '<span class="ax-eng-title" title="' + escapeHtml(r.pathname) + '">' + escapeHtml(r.pathname) + '</span>' +
-              '<span class="ax-eng-meta"><b>' + fmtTime(t) + '</b> · scroll <b>' + s + '%</b></span>' +
-            '</div>' +
-            '<span class="ax-eng-pv">' + pv + ' pv</span>' +
-            '</li>';
-        }).join("");
-      }
-
-      var COUNTRY_FLAGS = {"IT":"🇮🇹","GB":"🇬🇧","FR":"🇫🇷","DE":"🇩🇪","ES":"🇪🇸","US":"🇺🇸","NL":"🇳🇱","BE":"🇧🇪","CH":"🇨🇭","AT":"🇦🇹","PT":"🇵🇹","PL":"🇵🇱","CZ":"🇨🇿","HU":"🇭🇺","RO":"🇷🇴","BG":"🇧🇬","GR":"🇬🇷","FI":"🇫🇮","SE":"🇸🇪","NO":"🇳🇴","DK":"🇩🇰","IE":"🇮🇪","UA":"🇺🇦","RU":"🇷🇺","TR":"🇹🇷","JP":"🇯🇵","KR":"🇰🇷","CN":"🇨🇳","IN":"🇮🇳","BR":"🇧🇷","CA":"🇨🇦","AU":"🇦🇺","MX":"🇲🇽","AR":"🇦🇷","EG":"🇪🇬","ZA":"🇿🇦","NZ":"🇳🇿","SG":"🇸🇬","AE":"🇦🇪","SA":"🇸🇦","IL":"🇮🇱"};
-      function countryFlag(c) { return c && COUNTRY_FLAGS[c] ? COUNTRY_FLAGS[c] : "🌐"; }
-      function deviceIcon(t) { return t === "mobile" ? "📱" : t === "tablet" ? "📋" : "💻"; }
-
-      function timeAgo(dateStr) {
-        var diff = Math.floor((new Date() - parseDbDate(dateStr)) / 1000);
-        if (diff < 60) return "ora";
-        if (diff < 3600) return Math.floor(diff / 60) + "m";
-        if (diff < 86400) return Math.floor(diff / 3600) + "h";
-        var d = Math.floor(diff / 86400);
-        return d === 1 ? "ieri" : d + "g";
-      }
-
-      var _lastVisitors = [];
-      var _suspectCountries = {};
-
-      function flagAsBot(hash, btn) {
-        var row = btn.closest("li");
-        btn.disabled = true;
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hash: hash }) })
-          .then(function(r) {
-            btn.disabled = false;
-            if (!r.ok) return;
-            row.classList.add("flagged");
-            btn.textContent = "↺";
-            btn.title = "Annulla flag bot";
-            btn.onclick = function() { unflagAsBot(hash, btn); };
-          });
-      }
-      function unflagAsBot(hash, btn) {
-        var row = btn.closest("li");
-        btn.disabled = true;
-        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hash: hash }) })
-          .then(function(r) {
-            btn.disabled = false;
-            if (!r.ok) return;
-            row.classList.remove("flagged");
-            btn.textContent = "🤖";
-            btn.title = "Flag come bot (legacy: flag per hash, sostituito dalle regole bot)";
-            btn.onclick = function() { flagAsBot(hash, btn); };
-          });
-      }
-      window.flagAsBot = flagAsBot;
-      window.unflagAsBot = unflagAsBot;
-
-      function flagAllBots() {
-        var hashes = [];
-        _lastVisitors.forEach(function(v) {
-          if (!v.visitor_hash) return;
-          var noTime = v.time_on_page == null || Number(v.time_on_page) <= 5;
-          var noScroll = v.scroll_depth == null || Number(v.scroll_depth) === 0;
-          if (noTime && noScroll) hashes.push(v.visitor_hash);
-        });
-        if (!hashes.length) return;
-        var btn = document.getElementById("flag-all-bots");
-        btn.disabled = true; btn.textContent = "Flagging…";
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hashes: hashes }) })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) { btn.textContent = d.flagged + " flaggati"; })
-          .catch(function(e) { console.error("flagAllBots failed", e); btn.disabled = false; btn.textContent = "Errore"; });
-      }
-
-      function renderRecentVisitors(visitors) {
-        _lastVisitors = visitors || [];
-        var zero = _lastVisitors.filter(function(v) {
-          if (!v.visitor_hash) return false;
-          var noTime = v.time_on_page == null || Number(v.time_on_page) <= 5;
-          var noScroll = v.scroll_depth == null || Number(v.scroll_depth) === 0;
-          return noTime && noScroll;
-        }).length;
-        var bulk = document.getElementById("flag-all-bots");
-        bulk.style.display = zero > 0 ? "inline-block" : "none";
-        bulk.disabled = false;
-        bulk.textContent = "Flag zero-engagement (" + zero + ") (legacy)";
-
-        var ul = document.getElementById("recent-list");
-        if (!visitors || !visitors.length) { ul.innerHTML = '<li class="ax-loading">Nessun visitatore recente.</li>'; return; }
-
-        ul.innerHTML = visitors.map(function(v) {
-          var flag = countryFlag(v.country);
-          var page = escapeHtml(v.pathname || "/");
-          var device = deviceIcon(v.device_type);
-          var browser = escapeHtml(v.browser || "?");
-          var os = escapeHtml(v.os || "?");
-          var ref = v.referrer ? escapeHtml(v.referrer) : "";
-          var time = v.time_on_page != null ? fmtTime(Number(v.time_on_page)) : "";
-          var scroll = v.scroll_depth != null ? Number(v.scroll_depth) + "%" : "";
-          var ago = timeAgo(v.created_at);
-          var hash = v.visitor_hash || "";
-
-          var metaParts = [device + " " + browser + " / " + os];
-          if (ref) metaParts.push("da " + ref);
-          if (time) metaParts.push("⏱ " + time);
-          if (scroll) metaParts.push("↓ " + scroll);
-
-          if (v.verdict === "unverified") metaParts.push("non verificato");
-          else if (v.verdict === "bot") metaParts.push("bot");
-          var botBtn = hash ? '<button class="ax-bot" data-hash="' + escapeHtml(hash) + '" title="Flag come bot (legacy: flag per hash, sostituito dalle regole bot)">🤖</button>' : '';
-          var noTime = v.time_on_page == null || Number(v.time_on_page) <= 5;
-          var noScroll = v.scroll_depth == null || Number(v.scroll_depth) === 0;
-          var suspect = (noTime && noScroll && hash) ? ' suspect' : '';
-
-          return '<li class="' + suspect.trim() + '">' +
-            '<span class="ax-flag">' + flag + '</span>' +
-            '<span class="ax-path"><span>' + page + '</span><span class="ax-meta">' + metaParts.join(" · ") + '</span></span>' +
-            '<span class="ax-time">' + ago + '</span>' +
-            botBtn +
-            '</li>';
-        }).join("");
-        ul.querySelectorAll("button.ax-bot").forEach(function(b) {
-          b.onclick = function() { flagAsBot(b.dataset.hash, b); };
-        });
-      }
-
-      /* Bot detection: quality card, review list, rules */
-      var includeAll = false;
-      var _review = [];
-      var filters = { country: "", device: "", channel: "" };
-      function filterQuery() {
-        return ["country", "device", "channel"].filter(function(k) { return filters[k]; })
-          .map(function(k) { return "&" + k + "=" + encodeURIComponent(filters[k]); }).join("");
-      }
-      function statsUrl(period) { return "/api/stats?period=" + period + (includeAll ? "&include=all" : "") + filterQuery(); }
-      function reloadStats() { loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : "")); }
-
-      function renderQuality(d) {
-        var q = d.quality || { human: 0, unverified: 0, bot: 0, unverified_pct: 0 };
-        document.getElementById("q-human").textContent = fmt(q.human);
-        document.getElementById("q-unverified").textContent = fmt(q.unverified);
-        document.getElementById("q-bot").textContent = fmt(q.bot);
-        document.getElementById("q-pct").textContent = q.unverified_pct + "% dei non-bot";
-        document.getElementById("q-mode").textContent = d.mode === "all"
-          ? "Numeri principali: tutte le visite non flaggate (come prima)"
-          : "Numeri principali: solo visite umane";
-        var sl = d.summary_legacy;
-        document.getElementById("q-legacy").textContent = sl
-          ? "Numeri vecchi: " + fmt(sl.pageviews) + " pageviews · " + fmt(sl.visitors) + " visitatori"
-          : "";
-      }
-
-      /* Daily rollups: where the numbers come from + manual recompute (cookie session, no tokens). */
-      var _period = null;
-      function renderDataSource(d) {
-        _period = d.period || null;
-        var src = d.source || { rollup_days: 0, raw_days: 0 };
-        document.getElementById("data-source").textContent =
-          src.rollup_days + " giorni da aggregati, " + src.raw_days + " dal vivo";
-      }
-      function recalcRollups() {
-        if (!_period) return;
-        var btn = document.getElementById("rollup-recalc");
-        var status = document.getElementById("rollup-status");
-        var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-        var to = _period.to < yesterday ? _period.to : yesterday;
-        var from = _period.from;
-        var maxFrom = new Date(new Date(to + "T00:00:00Z").getTime() - 399 * 86400000).toISOString().slice(0, 10);
-        if (from < maxFrom) from = maxFrom;
-        if (from > to) { status.textContent = "Nessun giorno chiuso nel periodo"; return; }
-        btn.disabled = true;
-        status.textContent = "Ricalcolo " + from + " → " + to + "…";
-        apiFetch("/api/admin/analytics-rollup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ from: from, to: to }),
-        })
-          .then(function(r) { return r.json(); })
-          .then(function(j) { status.textContent = "Ricalcolati " + j.days + " giorni"; reloadStats(); })
-          .catch(function(e) { status.textContent = "Errore: " + e.message; })
-          .then(function() { btn.disabled = false; });
-      }
-      document.getElementById("rollup-recalc").addEventListener("click", recalcRollups);
-
-      function ruleKindLabel(k) {
-        return { ua_contains: "user-agent contiene", referrer_host: "referrer", path_prefix: "percorso inizia con", hash_today: "visitatore (oggi)" }[k] || k;
-      }
-
-      function suggestRule(row) {
-        if (row.referrer) return { kind: "referrer_host", value: row.referrer };
-        var p = String(row.path_pattern || "");
-        if (p.length > 1 && p.charAt(p.length - 1) === "*") p = p.slice(0, -1);
-        if (p.length > 1) return { kind: "path_prefix", value: p };
-        return { kind: "ua_contains", value: "" };
-      }
-
-      function renderReview(rows) {
-        _review = rows || [];
-        var ul = document.getElementById("review-list");
-        if (!_review.length) { ul.innerHTML = '<li class="ax-loading">Niente da rivedere nel periodo.</li>'; return; }
-        ul.innerHTML = _review.map(function(r, i) {
-          var parts = [deviceIcon(r.device_type) + " " + escapeHtml(r.browser || "?") + " / " + escapeHtml(r.os || "?")];
-          if (r.referrer) parts.push("da " + escapeHtml(r.referrer));
-          if (Number(r.max_score) > 0) parts.push("score " + Number(r.max_score));
-          return '<li data-i="' + i + '"><div class="ax-row">' +
-            '<span class="ax-grow">' + countryFlag(r.country) + " " + escapeHtml(r.path_pattern || "/") +
-            '<span class="ax-sub">' + parts.join(" · ") + '</span></span>' +
-            '<span>' + fmt(r.pageviews) + ' pv · ' + fmt(r.visits) + ' visite</span>' +
-            '<button class="ax-btn" data-act="rule">Crea regola</button>' +
-            '</div></li>';
-        }).join("");
-      }
-
-      function openRuleForm(li) {
-        var existing = li.querySelector(".ax-rule-form");
-        if (existing) { existing.remove(); return; }
-        var s = suggestRule(_review[Number(li.dataset.i)]);
-        var form = document.createElement("div");
-        form.className = "ax-rule-form";
-        form.innerHTML =
-          '<div class="ax-fields">' +
-            '<select name="kind" aria-label="Tipo regola">' +
-              ["ua_contains", "referrer_host", "path_prefix"].map(function(k) {
-                return '<option value="' + k + '"' + (k === s.kind ? " selected" : "") + ">" + escapeHtml(ruleKindLabel(k)) + "</option>";
-              }).join("") +
-            '</select>' +
-            '<input type="text" name="value" maxlength="200" aria-label="Valore" placeholder="es. HeadlessChrome" value="' + escapeHtml(s.value) + '" />' +
-            '<input type="text" name="note" maxlength="300" aria-label="Nota" placeholder="nota (facoltativa)" />' +
-          '</div>' +
-          '<div class="ax-preview" data-role="preview">Scrivi un valore per vedere l\'anteprima.</div>' +
-          '<div class="ax-fields">' +
-            '<button class="ax-btn primary" data-act="save" disabled>Salva regola</button>' +
-            '<button class="ax-btn" data-act="cancel">Annulla</button>' +
-          '</div>';
-        li.appendChild(form);
-        var timer = null;
-        var kindEl = form.querySelector('[name="kind"]'), valueEl = form.querySelector('[name="value"]');
-        function schedule() {
-          form.querySelector('[data-act="save"]').disabled = true;
-          clearTimeout(timer);
-          timer = setTimeout(function() { previewRule(form); }, 350);
-        }
-        kindEl.addEventListener("change", schedule);
-        valueEl.addEventListener("input", schedule);
-        valueEl.focus();
-        if (valueEl.value) previewRule(form);
-      }
-
-      function previewRule(form) {
-        var kind = form.querySelector('[name="kind"]').value;
-        var value = form.querySelector('[name="value"]').value.trim();
-        var box = form.querySelector('[data-role="preview"]');
-        var save = form.querySelector('[data-act="save"]');
-        form._ready = false;
-        if (!value) { box.textContent = "Scrivi un valore per vedere l'anteprima."; return; }
-        box.textContent = "Calcolo anteprima…";
-        apiJson("/api/admin/bot-rules/preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: kind, value: value }) })
-          .then(function(p) {
-            form._ready = true; save.disabled = false;
-            if (!p.supported) {
-              form._risky = true;
-              box.innerHTML = '<div class="ax-preview-warn">Anteprima non disponibile per user-agent (non viene salvato). La regola colpirà ogni nuovo visitatore il cui user-agent contiene questo testo: usa una stringa specifica.</div>';
-              return;
-            }
-            form._risky = Number(p.human) > 0;
-            var msg = "Negli ultimi " + p.days + " giorni escluderebbe " + fmt(p.excluded) + " pageviews, di cui " + fmt(p.human) + " con segnale umano.";
-            box.innerHTML = Number(p.human) > 0
-              ? '<div class="ax-preview-warn">Attenzione: ' + escapeHtml(msg) + ' Potresti escludere lettori veri.</div>'
-              : escapeHtml(msg);
-          })
-          .catch(function(e) { box.textContent = "Errore: " + e.message; });
-      }
-
-      function saveRule(form, btn) {
-        if (!form._ready) return;
-        if (form._risky && !confirm("Questa regola potrebbe colpire visite umane (o non è verificabile). Salvarla comunque?")) return;
-        btn.disabled = true;
-        var body = {
-          kind: form.querySelector('[name="kind"]').value,
-          value: form.querySelector('[name="value"]').value.trim(),
-          note: form.querySelector('[name="note"]').value.trim() || undefined
-        };
-        apiJson("/api/admin/bot-rules", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-          .then(function() {
-            form.innerHTML = '<div class="ax-preview">Regola salvata. Vale per le nuove visite; quelle già registrate restano come sono.</div>';
-            loadRules();
-          })
-          .catch(function(e) { btn.disabled = false; form.querySelector('[data-role="preview"]').textContent = "Errore: " + e.message; });
-      }
-
-      document.getElementById("review-list").addEventListener("click", function(ev) {
-        var btn = ev.target.closest("button[data-act]");
-        if (!btn) return;
-        var li = btn.closest("li");
-        var act = btn.dataset.act;
-        if (act === "rule") openRuleForm(li);
-        else if (act === "cancel") btn.closest(".ax-rule-form").remove();
-        else if (act === "save") saveRule(btn.closest(".ax-rule-form"), btn);
-      });
-
-      function loadRules() {
-        var ul = document.getElementById("rules-list");
-        apiJson("/api/admin/bot-rules")
-          .then(function(d) {
-            var rules = (d && d.rules) || [];
-            if (!rules.length) { ul.innerHTML = '<li class="ax-loading">Nessuna regola. Creane una da "Da rivedere".</li>'; return; }
-            ul.innerHTML = rules.map(function(r) {
-              var on = Number(r.enabled) === 1;
-              var sub = ["colpi " + fmt(r.hits)];
-              if (r.expires_at) sub.push("scade " + escapeHtml(r.expires_at) + " UTC");
-              if (r.note) sub.push(escapeHtml(r.note));
-              return '<li class="' + (on ? "" : "ax-rule-off") + '" data-id="' + Number(r.id) + '" data-on="' + (on ? 1 : 0) + '"><div class="ax-row">' +
-                '<span class="ax-grow"><span class="ax-kind">' + escapeHtml(ruleKindLabel(r.kind)) + '</span>' + escapeHtml(r.value) +
-                '<span class="ax-sub">' + sub.join(" · ") + '</span></span>' +
-                '<button class="ax-btn" data-act="toggle">' + (on ? "Disattiva" : "Attiva") + '</button>' +
-                '<button class="ax-btn danger" data-act="delete">Elimina</button>' +
-                '</div></li>';
-            }).join("");
-          })
-          .catch(function(e) { ul.innerHTML = '<li class="ax-error">Errore: ' + escapeHtml(e.message) + '</li>'; });
-      }
-
-      document.getElementById("rules-list").addEventListener("click", function(ev) {
-        var btn = ev.target.closest("button[data-act]");
-        if (!btn) return;
-        var li = btn.closest("li");
-        var id = Number(li.dataset.id);
-        var json = { "Content-Type": "application/json" };
-        btn.disabled = true;
-        var req = btn.dataset.act === "toggle"
-          ? apiJson("/api/admin/bot-rules", { method: "PATCH", headers: json, body: JSON.stringify({ id: id, enabled: li.dataset.on !== "1" }) })
-          : (confirm("Eliminare la regola?") ? apiJson("/api/admin/bot-rules", { method: "DELETE", headers: json, body: JSON.stringify({ id: id }) }) : Promise.resolve());
-        req.then(loadRules).catch(function(e) { btn.disabled = false; console.error("rule action failed", e); });
-      });
-
-      document.getElementById("include-all").addEventListener("change", function(ev) {
-        includeAll = ev.target.checked;
-        reloadStats();
-      });
-
-      /* Map */
-      var leafletMap = null;
-      var geoLayer = null;
-      var GEOJSON_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json";
-      var _topoCache = null;
-
-      function hexToRgb(hex) {
-        var m = hex.replace("#", "").match(/.{2}/g);
-        return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
-      }
-      var PAPER2_RGB = hexToRgb(FOGLIO_PAPER_2);
-      var ACCENT_RGB = hexToRgb(FOGLIO_ACCENT);
-
-      function getMapColor(val, maxVal) {
-        if (!val || !maxVal) return "rgba(241,235,221,0.18)";
-        var t = Math.max(0.22, val / maxVal);
-        var r = Math.round(PAPER2_RGB[0] + (ACCENT_RGB[0] - PAPER2_RGB[0]) * t);
-        var g = Math.round(PAPER2_RGB[1] + (ACCENT_RGB[1] - PAPER2_RGB[1]) * t);
-        var b = Math.round(PAPER2_RGB[2] + (ACCENT_RGB[2] - PAPER2_RGB[2]) * t);
-        return "rgb(" + r + "," + g + "," + b + ")";
-      }
-
-      var NUM_TO_ALPHA2 = {"840":"US","124":"CA","076":"BR","484":"MX","032":"AR","826":"GB","250":"FR","276":"DE","724":"ES","380":"IT","620":"PT","528":"NL","056":"BE","756":"CH","040":"AT","616":"PL","203":"CZ","752":"SE","578":"NO","246":"FI","208":"DK","372":"IE","642":"RO","348":"HU","300":"GR","100":"BG","804":"UA","643":"RU","792":"TR","392":"JP","410":"KR","156":"CN","356":"IN","036":"AU","554":"NZ","682":"SA","784":"AE","818":"EG","710":"ZA","566":"NG","376":"IL","404":"KE","360":"ID","702":"SG","764":"TH","704":"VN","608":"PH","586":"PK","458":"MY","170":"CO","152":"CL","604":"PE","862":"VE","191":"HR","705":"SI","703":"SK","688":"RS","233":"EE","428":"LV","440":"LT","442":"LU","470":"MT","050":"BD","364":"IR","504":"MA"};
-
-      function initLeafletMap() {
-        if (leafletMap) return;
-        leafletMap = L.map("world-map", { center: [30, 10], zoom: 2, minZoom: 1, maxZoom: 6, zoomControl: true, attributionControl: false, scrollWheelZoom: true });
-        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png", { subdomains: "abcd", maxZoom: 6 }).addTo(leafletMap);
-      }
-
-      function renderWorldMap(countries) {
-        initLeafletMap();
-        var countryMap = {};
-        var maxVal = 0;
-        (countries || []).forEach(function(c) {
-          var v = Number(c.visitors) || 0;
-          if (c.country) { countryMap[c.country] = v; if (v > maxVal) maxVal = v; }
-        });
-        document.getElementById("map-max-label").textContent = maxVal > 0 ? fmt(maxVal) : "0";
-        document.getElementById("geo-meta").textContent = (countries || []).length + " paesi";
-
-        if (geoLayer) { leafletMap.removeLayer(geoLayer); geoLayer = null; }
-
-        function applyGeo(topoData) {
-          var objects = topoData.objects;
-          var key = Object.keys(objects)[0];
-          var geometries = objects[key].geometries;
-          var arcs = topoData.arcs;
-          var transform = topoData.transform;
-
-          function decodeArc(arcIdx) {
-            var reverse = arcIdx < 0;
-            var arc = arcs[reverse ? ~arcIdx : arcIdx];
-            var coords = [];
-            var x = 0, y = 0;
-            for (var i = 0; i < arc.length; i++) {
-              x += arc[i][0]; y += arc[i][1];
-              var lng = x * transform.scale[0] + transform.translate[0];
-              var lat = y * transform.scale[1] + transform.translate[1];
-              coords.push([lng, lat]);
-            }
-            if (reverse) coords.reverse();
-            return coords;
-          }
-          function decodeRing(ring) { var c = []; for (var i = 0; i < ring.length; i++) c = c.concat(decodeArc(ring[i])); return c; }
-
-          var features = geometries.map(function(geom) {
-            var id = geom.id || (geom.properties && geom.properties.iso_a2);
-            var alpha2 = NUM_TO_ALPHA2[id] || id;
-            if (geom.type === "Polygon") {
-              return { type: "Feature", properties: { code: alpha2 }, geometry: { type: "Polygon", coordinates: geom.arcs.map(decodeRing) } };
-            } else if (geom.type === "MultiPolygon") {
-              return { type: "Feature", properties: { code: alpha2 }, geometry: { type: "MultiPolygon", coordinates: geom.arcs.map(function(p) { return p.map(decodeRing); }) } };
-            }
-            return null;
-          }).filter(Boolean);
-
-          geoLayer = L.geoJSON({ type: "FeatureCollection", features: features }, {
-            style: function(feature) {
-              var code = feature.properties.code;
-              var val = countryMap[code] || 0;
-              return {
-                fillColor: val > 0 ? getMapColor(val, maxVal) : "rgba(255,255,255,0.06)",
-                weight: val > 0 ? 0.8 : 0.4,
-                color: val > 0 ? FOGLIO_PAPER : "rgba(255,255,255,0.18)",
-                fillOpacity: val > 0 ? 0.92 : 0.35
-              };
-            },
-            onEachFeature: function(feature, layer) {
-              var code = feature.properties.code;
-              var val = countryMap[code] || 0;
-              if (val > 0) {
-                layer.bindTooltip("<b>" + (countryFlag(code) + " " + code) + "</b> — " + fmt(val) + " visitatori", { className: "ax-map-tip", sticky: true });
-                layer.on("mouseover", function() { layer.setStyle({ weight: 2, color: FOGLIO_ACCENT_SOFT, fillOpacity: 1 }); layer.bringToFront(); });
-                layer.on("mouseout", function() { geoLayer.resetStyle(layer); });
-              }
-            }
-          }).addTo(leafletMap);
-        }
-
-        if (_topoCache) applyGeo(_topoCache);
-        else fetch(GEOJSON_URL).then(function(r) { return r.json(); }).then(function(d) { _topoCache = d; applyGeo(d); }).catch(function(e) { console.error("world map load failed", e); });
-      }
-
-      /* Period state */
-      /* Phase 5: filters note, CSV links, Web Vitals */
-      var knownCountries = {};
-      function syncCountryOptions(rows) {
-        (rows || []).forEach(function(r) { if (r.country) knownCountries[r.country] = true; });
-        if (filters.country) knownCountries[filters.country] = true;
-        var sel = document.getElementById("f-country");
-        sel.innerHTML = '<option value="">Tutti</option>' + Object.keys(knownCountries).sort().map(function(c) {
-          return '<option value="' + escapeHtml(c) + '"' + (c === filters.country ? " selected" : "") + '>' + escapeHtml(countryFlag(c) + " " + c) + '</option>';
-        }).join("");
-      }
-      function renderFilters(d) {
-        var f = d.filters || {};
-        var note = document.getElementById("filter-note");
-        document.getElementById("f-reset").hidden = !f.active;
-        if (!f.active) { note.hidden = true; note.textContent = ""; return; }
-        note.hidden = false;
-        note.textContent = "Filtri attivi: i dati vengono letti dalle visite grezze (conservate " + (f.retention_days || 90) + " giorni), non dagli aggregati." +
-          (f.clamped ? " Periodo ridotto a partire dal " + (d.period && d.period.from) + "." : "") +
-          " Il confronto col periodo precedente c'è solo se rientra nella finestra.";
-      }
-      function updateExportLinks() {
-        document.querySelectorAll("a.ax-export").forEach(function(a) {
-          a.href = csvExportUrl(a.dataset.export, {
-            from: currentFrom, to: currentTo, include: includeAll ? "all" : "",
-            country: filters.country, device: filters.device, channel: filters.channel
-          });
-        });
-      }
-      var VITAL_LABELS = { lcp: "LCP", inp: "INP", cls: "CLS" };
-      var VITAL_HINT = { lcp: "Largest Contentful Paint: quando compare il contenuto principale", inp: "Interaction to Next Paint: reattività a tocchi e click", cls: "Cumulative Layout Shift: quanto salta il layout" };
-      var STATE_TXT = { good: "Buono", ni: "Da migliorare", poor: "Scarso" };
-      function vitalCard(metric, v, byDev) {
-        v = v || { n: 0, good: 0, ni: 0, poor: 0, p75: null };
-        var st = v.n > 0 ? vitalState(metric, v.p75) : null;
-        var tot = v.good + v.ni + v.poor;
-        var pc = function(x) { return tot > 0 ? Math.round(x / tot * 100) : 0; };
-        var dev = ["mobile", "desktop"].map(function(dn) {
-          var x = byDev && byDev[dn] ? byDev[dn][metric] : null;
-          if (!x || !x.n) return '<span>' + escapeHtml(dn) + ' <b>—</b></span>';
-          return '<span class="ax-vital-dev">' + escapeHtml(dn) + ' <b class="' + escapeHtml(vitalState(metric, x.p75) || "") + '">' + escapeHtml(fmtVital(metric, x.p75)) + '</b> (' + fmt(x.n) + ')</span>';
-        }).join(" · ");
-        return '<div class="ax-stat ax-vital ' + (st || "") + '" title="' + escapeHtml(VITAL_HINT[metric]) + '">' +
-          '<div class="ax-stat-label">' + escapeHtml(VITAL_LABELS[metric]) + ' · p75</div>' +
-          '<div class="ax-stat-value">' + escapeHtml(v.n > 0 ? fmtVital(metric, v.p75) : "—") + '</div>' +
-          '<p class="ax-vital-state">' + escapeHtml(st ? STATE_TXT[st] : "Nessun dato") + ' · ' + fmt(v.n) + ' misure</p>' +
-          '<div class="ax-vital-split" role="img" aria-label="' + escapeHtml("Buono " + pc(v.good) + "%, da migliorare " + pc(v.ni) + "%, scarso " + pc(v.poor) + "%") + '">' +
-            '<span class="g" style="width:' + pc(v.good) + '%"></span><span class="n" style="width:' + pc(v.ni) + '%"></span><span class="p" style="width:' + pc(v.poor) + '%"></span></div>' +
-          '<p class="ax-vital-meta">buono ' + pc(v.good) + '% · da migliorare ' + pc(v.ni) + '% · scarso ' + pc(v.poor) + '%</p>' +
-          '<p class="ax-vital-meta">' + dev + '</p>' +
-          '</div>';
-      }
-      function renderVitals(d) {
-        var v = d.vitals || {};
-        document.getElementById("vitals-unavailable").hidden = v.available !== false;
-        var box = document.getElementById("vitals-cards");
-        box.hidden = v.available === false;
-        box.innerHTML = v.available === false ? "" : ["lcp", "inp", "cls"].map(function(m) { return vitalCard(m, v[m], v.by_device); }).join("");
-        var ul = document.getElementById("slow-pages-list");
-        var rows = d.vitals_pages || [];
-        if (!rows.length) { ul.innerHTML = '<li class="ax-empty">Nessuna pagina con almeno 5 misure LCP.</li>'; return; }
-        ul.innerHTML = rows.map(function(r) {
-          var st = vitalState("lcp", r.lcp_p75) || "";
-          return '<li><span class="ax-key path" title="' + escapeHtml(r.pathname) + '">' + escapeHtml(r.pathname) + '</span>' +
-            '<span class="ax-val ax-vital-dev"><b class="' + escapeHtml(st) + '">' + escapeHtml(fmtVital("lcp", r.lcp_p75)) + '</b> · ' + fmt(r.n) + '</span></li>';
-        }).join("");
-      }
-      function onFilterChange() {
-        filters.country = document.getElementById("f-country").value;
-        filters.device = document.getElementById("f-device").value;
-        filters.channel = document.getElementById("f-channel").value;
-        reloadStats();
-      }
-      ["f-country", "f-device", "f-channel"].forEach(function(id) { document.getElementById(id).addEventListener("change", onFilterChange); });
-      document.getElementById("f-reset").addEventListener("click", function() {
-        ["f-country", "f-device", "f-channel"].forEach(function(id) { document.getElementById(id).value = ""; });
-        onFilterChange();
-      });
-
-      var PERIOD_DAYS = { "today": 1, "7d": 7, "30d": 30, "90d": 90, "12m": 365 };
-      var currentPeriod = "30d";
-      var currentFrom = null;
-      var currentTo = null;
-
-      function updatePeriodLabel() {
-        var label = document.getElementById("cal-label");
-        if (!currentFrom || !currentTo) { label.textContent = "—"; return; }
-        var text;
-        if (currentFrom === currentTo) {
-          var d = new Date(currentFrom + "T00:00:00");
-          text = DAYS_SHORT[d.getDay()] + " " + fmtCalDateFull(currentFrom);
-        } else if (currentPeriod === "12m") {
-          var fromD = new Date(currentFrom + "T00:00:00");
-          var toD = new Date(currentTo + "T00:00:00");
-          text = MONTHS_SHORT[fromD.getMonth()] + " " + fromD.getFullYear() + " — " + MONTHS_SHORT[toD.getMonth()] + " " + toD.getFullYear();
-        } else {
-          var fy = currentFrom.slice(0, 4), ty = currentTo.slice(0, 4);
-          text = fy === ty ? (fmtCalDate(currentFrom) + " — " + fmtCalDateFull(currentTo)) : (fmtCalDateFull(currentFrom) + " — " + fmtCalDateFull(currentTo));
-        }
-        label.textContent = text;
-      }
-
-      function updateNavButtons() {
-        var nextBtn = document.getElementById("nav-next");
-        var today = dateStr(new Date());
-        nextBtn.disabled = !currentTo || currentTo >= today;
-      }
-
-      function navigatePeriod(direction) {
-        var days = PERIOD_DAYS[currentPeriod] || 30;
-        var shift = days * direction;
-        var from, to;
-        if (currentFrom && currentTo) {
-          from = new Date(currentFrom + "T12:00:00");
-          to = new Date(currentTo + "T12:00:00");
-        } else {
-          to = new Date(); to.setHours(12, 0, 0, 0);
-          from = new Date(to); from.setDate(from.getDate() - (days - 1));
-        }
-        from.setDate(from.getDate() + shift);
-        to.setDate(to.getDate() + shift);
-        var today = new Date();
-        if (to > today) to = today;
-        var fromStr = dateStr(from), toStr = dateStr(to);
-        document.querySelectorAll(".ax-periods button").forEach(function(b) { b.classList.remove("active"); });
-        currentFrom = fromStr; currentTo = toStr;
-        updatePeriodLabel(); updateNavButtons();
-        loadData("custom&from=" + fromStr + "&to=" + toStr);
-      }
-
-      function loadData(period) {
-        var basePeriod = period.split("&")[0];
-        if (basePeriod !== "custom") {
-          currentPeriod = basePeriod;
-          var days = PERIOD_DAYS[basePeriod] || 30;
-          var now = new Date();
-          currentTo = dateStr(now);
-          var fromD = new Date(now); fromD.setDate(fromD.getDate() - (days - 1));
-          currentFrom = dateStr(fromD);
-        } else {
-          var m = period.match(/from=(\d{4}-\d{2}-\d{2}).*to=(\d{4}-\d{2}-\d{2})/);
-          if (m) { currentFrom = m[1]; currentTo = m[2]; }
-        }
-        updatePeriodLabel(); updateNavButtons();
-        document.querySelectorAll(".ax-periods button").forEach(function(b) { b.classList.toggle("active", b.dataset.period === basePeriod); });
-
-        fetch(statsUrl(period), { credentials: "same-origin" })
-          .then(function(r) { if (!r.ok) throw new Error("Failed"); return r.json(); })
-          .then(function(d) {
-            renderQuality(d);
-            renderFilters(d);
-            syncCountryOptions(d.countries);
-            renderVitals(d);
-            updateExportLinks();
-            renderDataSource(d);
-            renderReview(d.review);
-            var s = d.summary;
-            document.getElementById("s-pageviews").textContent = fmt(s.pageviews);
-            document.getElementById("s-visitors").textContent = fmt(s.visitors);
-            document.getElementById("s-time").textContent = fmtTime(s.avg_time_on_page);
-            document.getElementById("s-scroll").textContent = s.avg_scroll_depth + "%";
-            document.getElementById("s-bounce").textContent = s.bounce_rate + "%";
-            setDelta(document.getElementById("s-pageviews-delta"), s.pageviews_delta_pct);
-            setDelta(document.getElementById("s-visitors-delta"), s.visitors_delta_pct);
-
-            var suspectN = d.suspicious ? d.suspicious.count : 0;
-            document.getElementById("s-suspects").textContent = fmt(suspectN);
-            var flagBtn = document.getElementById("flag-suspects-btn");
-            flagBtn.style.display = suspectN > 0 ? "inline-block" : "none";
-            flagBtn.disabled = false;
-            flagBtn.textContent = "Flag come bot (" + suspectN + ") (legacy)";
-
-            _suspectCountries = {};
-            if (d.suspicious && d.suspicious.countries) d.suspicious.countries.forEach(function(c) { if (c.country) _suspectCountries[c.country] = Number(c.suspects) || 0; });
-
-            var groupBy = d.period.groupBy || (period === "today" ? "hour" : period === "12m" ? "month" : "day");
-            var rawDates = d.chart.map(function(c) { return c.date; });
-            var labels = rawDates.map(function(dt) { return fmtChartLabel(dt, groupBy); });
-            var pvData = d.chart.map(function(c) { return Number(c.pageviews); });
-            var vData = d.chart.map(function(c) { return Number(c.visitors); });
-
-            if (chartInstance) chartInstance.destroy();
-            var ctx = document.getElementById("chart").getContext("2d");
-            var axisColor = withAlpha(FOGLIO_INK, 0.75);
-            var gridColor = withAlpha(FOGLIO_INK, 0.12);
-            chartInstance = new Chart(ctx, {
-              type: "line",
-              data: {
-                labels: labels,
-                datasets: [
-                  { label: "Pageviews", data: pvData, borderColor: FOGLIO_ACCENT, backgroundColor: withAlpha(FOGLIO_ACCENT, 0.14), fill: true, tension: 0.35, pointRadius: 4, pointHoverRadius: 7, pointBackgroundColor: FOGLIO_ACCENT, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3 },
-                  { label: "Visitatori", data: vData, borderColor: CYAN, backgroundColor: withAlpha(CYAN, 0.08), fill: true, tension: 0.35, pointRadius: 3, pointHoverRadius: 6, pointBackgroundColor: CYAN, pointBorderColor: FOGLIO_PAPER, pointBorderWidth: 2, borderWidth: 3, borderDash: [6, 4] }
-                ]
-              },
-              options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                  legend: { labels: { color: FOGLIO_INK_SOFT, font: { family: "JetBrains Mono, monospace", size: 11 }, usePointStyle: true, pointStyle: "circle", padding: 16 } },
-                  tooltip: {
-                    backgroundColor: FOGLIO_PAPER, titleColor: FOGLIO_INK, bodyColor: FOGLIO_INK,
-                    borderColor: FOGLIO_RULE, borderWidth: 1, cornerRadius: 4, padding: 10,
-                    titleFont: { family: "JetBrains Mono, monospace", size: 11, weight: "600" },
-                    bodyFont: { family: "JetBrains Mono, monospace", size: 11 },
-                    callbacks: { title: function(items) { return fmtTooltipTitle(rawDates[items[0].dataIndex], groupBy); } }
-                  }
-                },
-                scales: {
-                  x: { ticks: { color: axisColor, font: { family: "JetBrains Mono, monospace", size: 10 }, maxRotation: 45, maxTicksLimit: 14, autoSkip: true }, grid: { color: gridColor, drawTicks: false }, border: { color: gridColor } },
-                  y: { ticks: { color: axisColor, font: { family: "JetBrains Mono, monospace", size: 10 }, padding: 8 }, grid: { color: gridColor, drawTicks: false }, border: { display: false }, beginAtZero: true }
-                },
-                interaction: { intersect: false, mode: "index" }
-              }
-            });
-
-            renderWorldMap(d.countries);
-            renderListRows(d.sections, "section", "visitors", false, "sections-list", "Niente.");
-            renderListRows(d.top_pages, "pathname", "visitors", true, "top-pages-list", "Niente.");
-            renderEngaged(d.top_engaged_posts);
-            renderSessions(d);
-            renderListRows(d.referrers, "referrer", "visitors", false, "referrers-list", "Solo traffico diretto.");
-            renderListRows(d.countries, "country", "visitors", false, "countries-list", "—");
-            renderListRows(d.languages, "lang", "visitors", false, "languages-list", "—");
-            renderListRows(d.devices, "device_type", "visitors", false, "devices-list", "—");
-            renderListRows(d.browsers, "browser", "visitors", false, "browsers-list", "—");
-            renderListRows(d.os, "os", "visitors", false, "os-list", "—");
-            renderListRows(d.utm_sources, "utm_source", "visitors", false, "utm-sources-list", "Nessuna UTM nel periodo.");
-            renderListRows(d.utm_campaigns, "utm_campaign", "visitors", false, "utm-campaigns-list", "Nessuna campagna nel periodo.");
-            renderRecentVisitors(d.recent_visitors);
-          })
-          .catch(function(e) {
-            document.getElementById("recent-list").innerHTML = '<li class="ax-error">Errore: ' + escapeHtml(e.message) + '</li>';
-          });
-      }
-
-      function loadLive() {
-        fetch("/api/stats/live", { credentials: "same-origin" })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) { document.getElementById("live-count").textContent = d.active; })
-          .catch(function(e) { console.error("loadLive failed", e); });
-      }
-
-      function pollRecent() {
-        if (document.hidden) return;
-        if (currentPeriod !== "today") return;
-        fetch(statsUrl("today"), { credentials: "same-origin" })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) {
-            if (d && d.recent_visitors) renderRecentVisitors(d.recent_visitors);
-          })
-          .catch(function(e) { console.error("pollRecent failed", e); });
-      }
-
-      document.querySelectorAll(".ax-periods button").forEach(function(b) {
-        b.addEventListener("click", function() { currentPeriod = b.dataset.period; loadData(b.dataset.period); });
-      });
-      document.getElementById("date-go").addEventListener("click", function() {
-        var f = document.getElementById("date-from").value;
-        var t = document.getElementById("date-to").value;
-        if (f && t) {
-          currentFrom = f; currentTo = t;
-          document.querySelectorAll(".ax-periods button").forEach(function(b) { b.classList.remove("active"); });
-          document.getElementById("date-range").classList.remove("open");
-          loadData("custom&from=" + f + "&to=" + t);
-        }
-      });
-      document.getElementById("nav-prev").addEventListener("click", function() { navigatePeriod(-1); });
-      document.getElementById("nav-next").addEventListener("click", function() { navigatePeriod(1); });
-      document.getElementById("flag-all-bots").addEventListener("click", flagAllBots);
-      document.getElementById("unflag-all").addEventListener("click", function() {
-        if (!confirm("Rimuovere TUTTI gli hash flaggati come bot? L'azione ricalcolerà is_unique per ogni hash.")) return;
-        var btn = document.getElementById("unflag-all");
-        var orig = btn.textContent;
-        btn.disabled = true; btn.textContent = "Annullamento…";
-        fetch("/api/admin/bot?_=" + Date.now(), { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) {
-            btn.disabled = false;
-            btn.textContent = d.unflagged > 0 ? d.unflagged + " annullati" : "Nessuno da annullare";
-            setTimeout(function() { btn.textContent = orig; }, 3000);
-            loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : ""));
-          })
-          .catch(function(e) { console.error("unflag failed", e); btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 3000); });
-      });
-      document.getElementById("unflag-recent").addEventListener("click", function() {
-        var btn = document.getElementById("unflag-recent");
-        var orig = btn.textContent;
-        btn.disabled = true; btn.textContent = "Annullamento…";
-        fetch("/api/admin/bot", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ recentMinutes: 1440 }) })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) {
-            btn.disabled = false;
-            btn.textContent = d.unflagged > 0 ? d.unflagged + " annullati" : "Nessuno da annullare";
-            setTimeout(function() { btn.textContent = orig; }, 2500);
-            loadData(currentPeriod + (currentFrom && currentTo ? "&from=" + currentFrom + "&to=" + currentTo : ""));
-          })
-          .catch(function(e) { console.error("unflag failed", e); btn.disabled = false; btn.textContent = "Errore"; setTimeout(function() { btn.textContent = orig; }, 2500); });
-      });
-      document.getElementById("flag-suspects-btn").addEventListener("click", function() {
-        var btn = document.getElementById("flag-suspects-btn");
-        if (!currentFrom || !currentTo) return;
-        btn.disabled = true; btn.textContent = "Flagging…";
-        fetch("/api/admin/bot", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ flagSuspicious: true, from: currentFrom, to: currentTo }) })
-          .then(function(r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-          .then(function(d) {
-            btn.textContent = d.flagged + " flaggati";
-            setTimeout(function() { loadData("custom&from=" + currentFrom + "&to=" + currentTo); }, 800);
-          })
-          .catch(function(e) { console.error("flag suspects failed", e); btn.textContent = "Errore"; });
-      });
-      document.getElementById("cal-label").addEventListener("click", function() {
-        document.getElementById("date-range").classList.toggle("open");
-      });
-
-      var todayStr = dateStr(new Date());
-      document.getElementById("date-to").value = todayStr;
-      document.getElementById("date-from").value = todayStr;
-
-      loadData("today");
-      loadRules();
-      loadLive();
-      function visibleTick(fn) { return function() { if (!document.hidden) fn(); }; }
-      setInterval(visibleTick(loadLive), 30000);
-      setInterval(pollRecent, 30000);
-      document.addEventListener("visibilitychange", function() { if (!document.hidden) { loadLive(); pollRecent(); } });
-    </script>
+    <!-- Dashboard logic: native ES modules under public/admin/analytics/ (same place and style as admin-client.js,
+         which they use via window globals; Chart.js and Leaflet stay classic SRI scripts above). -->
+    <script is:inline type="module" src="/admin/analytics/main.js"></script>
   </body>
 </html>

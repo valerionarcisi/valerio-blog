@@ -71,6 +71,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 **Admin (cookie session or Bearer token):**
 
 - `GET /api/stats` — analytics aggregates (pageviews, visitors, top pages, devices, geo, UTM, recent visitors, suspicious)
+- `GET /api/stats/sessions` — admin: recent sessions for the dashboard "Utenti" view (keyset pagination, verdict/country/device/channel filters); `GET /api/stats/sessions/[id]` — session timeline; `GET /api/stats/live` — online now + `active_sessions`
 - `GET /api/stats/export?kind=top_pages|referrers|utm|channels|events|goals|daily` — CSV export of analytics tables (admin; CSV-injection safe)
 - `POST /api/admin/analytics-report` — weekly analytics Telegram report: dry run by default (`{}`), `{"send":true}` delivers; the Scheduled Function `netlify/functions/analytics-weekly-report.mts` sends it on Mondays
 - `GET /api/stats/live` — online-now counter (distinct visitor_hash in last 5 min, excludes flagged bots)
@@ -120,7 +121,7 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 
 | Page                | What                                                                                                            |
 | ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/admin/analytics`  | Cookieless analytics with live "online now" counter, GSC-ready aggregates, geo map, bot flagging, weekly trends |
+| `/admin/analytics`  | GA-style analytics dashboard (Panoramica, Utenti, Acquisizione, Coinvolgimento, Tecnologia, Bot & qualità): live users, sessions timeline, scorecards with deltas, geo map, bot rules |
 | `/admin/comments`   | Moderation queue + claps recap + activity feed                                                                  |
 | `/admin`            | "Oggi" home: next event countdown, today's analytics and meals, links to every page                             |
 | `/admin/strava` → `/admin/training` | Training plan, week stats, race target; the "Attività" tab has the Strava donut, recent activities and yearly heatmap |

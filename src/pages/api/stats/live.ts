@@ -3,6 +3,7 @@ import { requireAdmin } from "~/lib/admin-auth";
 import getDb from "~/lib/turso";
 import { BOT_SQL } from "~/lib/bot-verdict";
 import { tableExists } from "~/lib/analytics-rollup";
+import { listActiveSessions, type ActiveSession } from "~/lib/analytics-sessions-list";
 
 export const prerender = false;
 
@@ -17,8 +18,10 @@ export const GET: APIRoute = async ({ request }) => {
   // Phase 2: with the sessions table, "active" = sessions seen in the last 5 minutes
   // (indexed on last_seen_at; bot sessions excluded). Falls back to the pageviews query.
   let activeSql = `SELECT COUNT(DISTINCT visitor_hash) as n FROM pageviews WHERE ${where}`;
+  let list: ActiveSession[] = [];
   try {
     if (await tableExists(db, "sessions")) {
+      list = await listActiveSessions(db);
       activeSql = `SELECT COUNT(DISTINCT visitor_hash) as n FROM sessions WHERE last_seen_at > datetime('now', '-5 minutes') AND NOT ${BOT_SQL}`;
     }
   } catch {
@@ -36,6 +39,9 @@ export const GET: APIRoute = async ({ request }) => {
     JSON.stringify({
       active: Number(active.rows[0].n) || 0,
       pageviews5m: Number(pageviews.rows[0].n) || 0,
+      // Who is on the site now: anonymous 6-char user prefix + current page (max 20).
+      // `active` is already the numeric count (HAL / existing clients), so the list lives here.
+      active_sessions: list,
     }),
     {
       status: 200,

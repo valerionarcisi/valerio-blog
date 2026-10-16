@@ -142,7 +142,9 @@ export const GET: APIRoute = async ({ url, request }) => {
 
   const prevFromDate = new Date(range.from + "T00:00:00Z");
   const prevToDate = new Date(range.to + "T00:00:00Z");
-  const spanMs = Math.max(prevToDate.getTime() - prevFromDate.getTime(), 24 * 60 * 60 * 1000);
+  // Same length as the current range: for a single day (period=today) the span is 0 and the
+  // previous period is exactly yesterday.
+  const spanMs = prevToDate.getTime() - prevFromDate.getTime();
   const prevFrom = new Date(prevFromDate.getTime() - spanMs - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const prevTo = new Date(prevFromDate.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
   const prevOpts = { ...blockOpts, from: prevFrom, to: prevTo, groupBy: "day", totalsOnly: true };
@@ -234,10 +236,18 @@ export const GET: APIRoute = async ({ url, request }) => {
         pages_per_session: sess.count > 0 ? round1(sess.pageviews / sess.count) : 0,
         avg_engaged_seconds: sess.count > 0 ? Math.round(sess.engagedSeconds / sess.count) : 0,
         by_channel: sess.channels,
+        // per-bucket series for the dashboard sparklines (sessions, bounced, engaged_seconds, events per day)
+        daily: sess.daily,
+        events_total: sess.eventsTotal,
         count_delta_pct: pctChange(sess.count, prevSess.count),
         // difference in percentage points vs the previous period (null when it has no sessions)
         bounce_rate_delta_pp: prevSess.count > 0 ? round1(sessionsBounceRate - prevBounceRate) : null,
-        prev_period: { count: prevSess.count, bounce_rate: prevBounceRate },
+        prev_period: {
+          count: prevSess.count,
+          bounce_rate: prevBounceRate,
+          avg_engaged_seconds: prevSess.count > 0 ? Math.round(prevSess.engagedSeconds / prevSess.count) : 0,
+          events_total: prevSess.eventsTotal,
+        },
       },
       channels: block.channels,
       entry_pages: sess.entryPages,
