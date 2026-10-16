@@ -108,6 +108,24 @@ export async function rollupDay(
   day: string,
   caps?: Caps,
 ): Promise<RollupResult> {
+  const stmts = await buildRollupStatements(db, day, caps);
+  await db.batch(stmts, "write");
+  const log = await db.execute({
+    sql: "SELECT rows_in FROM rollup_log WHERE day = ?",
+    args: [day],
+  });
+  return { day, rowsIn: Number(log.rows[0]?.rows_in) || 0 };
+}
+
+/**
+ * The statements rollupDay runs, in order (the first ones delete the day's old rows). Exposed so
+ * scripts/analytics-sql-check.ts can dry-run them one by one against a real database.
+ */
+export async function buildRollupStatements(
+  db: Client,
+  day: string,
+  caps?: Caps,
+): Promise<InStatement[]> {
   if (!DAY_RE.test(day)) throw new Error(`Invalid day: ${day}`);
   await ensureRollupTables(db);
   const c = caps ?? (await detectCaps(db));
@@ -130,11 +148,15 @@ export async function rollupDay(
     const where = `${DAY_WHERE} AND ${scopes[scope]}`;
     const args = [day, scope, day, day];
     stmts.push({
+      // No "HAVING COUNT(*) > 0" without GROUP BY: the Turso server's SQL parser rejects it (local SQLite accepts it).
       sql: `INSERT INTO daily_stats (day, scope, pageviews, visitors, bounced, sum_time, n_time, sum_scroll, n_scroll)
-            SELECT ?, ?, COUNT(*), COALESCE(SUM(is_unique), 0),
-              COALESCE(SUM(CASE WHEN is_unique = 1 AND (${time} IS NULL OR ${time} < 5) THEN 1 ELSE 0 END), 0),
-              COALESCE(SUM(${time}), 0), COUNT(${time}), COALESCE(SUM(${scroll}), 0), COUNT(${scroll})
-            FROM pageviews WHERE ${where} HAVING COUNT(*) > 0`,
+            SELECT d, s, pv, vis, bounced, st, nt, ss, ns FROM (
+              SELECT ? AS d, ? AS s, COUNT(*) AS pv, COALESCE(SUM(is_unique), 0) AS vis,
+                COALESCE(SUM(CASE WHEN is_unique = 1 AND (${time} IS NULL OR ${time} < 5) THEN 1 ELSE 0 END), 0) AS bounced,
+                COALESCE(SUM(${time}), 0) AS st, COUNT(${time}) AS nt,
+                COALESCE(SUM(${scroll}), 0) AS ss, COUNT(${scroll}) AS ns
+              FROM pageviews WHERE ${where}
+            ) WHERE pv > 0`,
       args,
     });
     stmts.push({
@@ -192,12 +214,7 @@ export async function rollupDay(
     args: [day, day, day],
   });
 
-  await db.batch(stmts, "write");
-  const log = await db.execute({
-    sql: "SELECT rows_in FROM rollup_log WHERE day = ?",
-    args: [day],
-  });
-  return { day, rowsIn: Number(log.rows[0]?.rows_in) || 0 };
+  return stmts;
 }
 
 export function eachDay(from: string, to: string): string[] {
