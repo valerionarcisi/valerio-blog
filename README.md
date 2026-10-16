@@ -64,7 +64,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 - `POST /api/comments/like` — toggle like on a comment (visitor hash anti-double-vote)
 - `GET/POST /api/posts/claps` — Medium-style claps on blog posts (max 50 per visitor)
 - `GET/POST /api/non-fa-ridere/scores` — global leaderboard for the "Non Fa Ridere" mini-game (top 10, best score per name, server-side score clamping)
-- `GET /api/letterboxd` `GET /api/lastfm` `GET /api/strava` `GET /api/training` `GET /api/contact` — data fetchers + form
+- `GET /api/letterboxd` `GET /api/lastfm` `GET /api/strava` `GET /api/contact` — data fetchers + form
 - `GET /api/search.json` — full-text site search
 - `POST /api/e` — privacy-first analytics tracker (no cookies, anonymous visitor hash)
 - `GET /api/t` — legacy bot-trap endpoint, kept as no-op
@@ -125,7 +125,7 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 | `/admin/analytics`                  | GA-style analytics dashboard (Panoramica, Utenti, Acquisizione, Coinvolgimento, Tecnologia, Bot & qualità): live users, sessions timeline, scorecards with deltas, geo map, bot rules |
 | `/admin/comments`                   | Moderation queue + claps recap + activity feed                                                                                                                                        |
 | `/admin`                            | "Oggi" home: next event countdown, today's analytics and meals, links to every page                                                                                                   |
-| `/admin/strava` → `/admin/training` | Training plan, week stats, race target; the "Attività" tab has the Strava donut, recent activities and yearly heatmap                                                                 |
+| `/admin/strava` | Strava summary, activity donut, yearly heatmap and recent activities |
 | `/admin/body-comp`                  | BIA body composition with charts (FFM, FM, BMI, BMR, PhA) and a "last measurement" banner                                                                                             |
 | `/admin/meal-plan`                  | Tabs: weekly plan, shopping list (`#spesa`), recipes (`#ricette`); `/admin/grocery` and `/admin/recipes` redirect                                                                     |
 | `/admin/arte-di-narrare`            | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                                                                                            |
@@ -246,7 +246,7 @@ Feature-level specs are in `docs/`. Each adds context that a future developer (o
 | `contact-spec.md`                                                           | Contact form + Resend transactional email                                      |
 | `lastfm-spec.md`                                                            | Last.FM ingestion + `/ascolti`                                                 |
 | `letterboxd-spec.md`                                                        | Letterboxd RSS + TMDB enrichment + `/visti` client refresh                     |
-| `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` `training-spec.md` | Admin dashboards                                                               |
+| `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` | Admin dashboards                                                               |
 | `post-claps-spec.md`                                                        | Medium-style claps system                                                      |
 | `telegram-bot-spec.md`                                                      | Idea Catcher Telegram bot details                                              |
 | `editorial-strategy.md`                                                     | Editorial constitution (audience, columns, cadence)                            |

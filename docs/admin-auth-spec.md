@@ -3,7 +3,7 @@
 ## Flow
 1. Visit any `/admin/...` URL with `?token=<ADMIN_TOKEN>` once (GET/HEAD).
 2. `src/middleware.ts` verifies the token (constant time), renders the page normally and sets the `vb_admin` cookie on that response. It does NOT redirect: Netlify re-appends the original query string to any relative `Location` returned by a function, so a "strip the token" redirect loops forever (`ERR_TOO_MANY_REDIRECTS`, seen in production). `AdminNav` removes `?token=` from the address bar with `history.replaceState`, and `Referrer-Policy: no-referrer` keeps it from leaking.
-3. From then on admin pages, `/api/admin/*`, `/api/stats*`, `/api/training` and the public comment form (author mode) authenticate via the cookie. `Authorization: Bearer <ADMIN_TOKEN>` and `?token=` keep working (scripts, the email link in `email.ts`).
+3. From then on admin pages, `/api/admin/*`, `/api/stats*` and the public comment form (author mode) authenticate via the cookie. `Authorization: Bearer <ADMIN_TOKEN>` and `?token=` keep working (scripts, the email link in `email.ts`).
 4. `/admin/logout` clears the cookie and redirects to `/`. "Esci" link is at the bottom of `AdminNav`.
 
 `locals.isAdmin` (cookie OR Bearer OR `?token=` on `/admin` paths) is set for every SSR request; admin pages return 401 when false. API routes call `requireAdmin(request)` (`src/lib/admin-auth.ts`), which parses the cookie itself.

@@ -1,5 +1,141 @@
 ---
+import AdminNav from "~/components/AdminNav.astro";
+import ActivityHeatmap from "~/components/ActivityHeatmap.astro";
+import StravaSummary from "~/components/StravaSummary.astro";
+import ActivityDonut from "~/components/ActivityDonut.astro";
+import { fetchFullStats, fetchRecentActivities } from "~/services/strava";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+
 export const prerender = false;
 
-return Astro.redirect(`/admin/training#attivita`, 302);
+if (!Astro.locals.isAdmin) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+// Una sola fetch per richiesta.
+const [fullStats, recentActivities] = await Promise.all([
+  fetchFullStats().catch((e) => {
+    console.error("[admin/strava] fetchFullStats failed:", e);
+    return null;
+  }),
+  fetchRecentActivities(10).catch((e) => {
+    console.error("[admin/strava] fetchRecentActivities failed:", e);
+    return [];
+  }),
+]);
+const stravaMissing = !fullStats;
+const heatmapDays = fullStats?.yearlyBreakdown ?? fullStats?.dailyBreakdown ?? [];
+
+const fmtPaceRun = (speed: number) => {
+  const secPerKm = 1000 / speed;
+  const m = Math.floor(secPerKm / 60);
+  const s = Math.round(secPerKm % 60);
+  return `${m}:${String(s).padStart(2, "0")}/km`;
+};
+const sportColor = (t: string) =>
+  t === "Run" ? "var(--foglio-accent)"
+  : t === "WeightTraining" ? "var(--foglio-accent-soft)"
+  : t === "Ride" || t === "VirtualRide" ? "var(--foglio-info)"
+  : "var(--foglio-ink-mute)";
 ---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Strava</title>
+    <style is:global>
+      .foglio body.admin .activity-list { display: flex; flex-direction: column; }
+      .foglio body.admin .activity-row {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.8rem 0.25rem;
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.15s;
+        border-bottom: 1px solid var(--foglio-rule);
+      }
+      .foglio body.admin .activity-row:last-child { border-bottom: none; }
+      .foglio body.admin .activity-row:hover { color: var(--foglio-accent); }
+      .foglio body.admin .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+      .foglio body.admin .activity-name { flex: 1; font-family: var(--foglio-serif); font-size: var(--foglio-fs-sm); color: var(--foglio-ink); }
+      .foglio body.admin .activity-meta { display: flex; gap: 0.6rem; font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); }
+      .foglio body.admin .activity-meta .pace { color: var(--foglio-accent); }
+      .foglio body.admin .activity-date { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-mute); white-space: nowrap; text-transform: uppercase; letter-spacing: 0.08em; }
+      .foglio body.admin .strava-top { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+      @media (min-width: 768px) { .foglio body.admin .strava-top { grid-template-columns: 1.4fr 1fr; align-items: start; } }
+        .foglio body.admin .activity-meta { flex-wrap: wrap; gap: 0.4rem; }
+      @media (max-width: 768px) {
+        .foglio body.admin .activity-meta { flex-wrap: wrap; gap: 0.4rem; }
+      }
+    </style>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="strava" />
+
+    <h1><em class="acc">Strava.</em></h1>
+    <p class="subtitle">Sintesi, heatmap annuale e ultime attività</p>
+
+    {stravaMissing && (
+      <div class="state-error" role="alert">Impossibile caricare i dati Strava: sintesi, grafico e heatmap non disponibili.</div>
+    )}
+
+    {fullStats && (
+      <>
+        <div class="section">
+          <div class="section-title">Sintesi</div>
+          <div class="strava-top">
+            <StravaSummary stats={fullStats.periodStats} />
+            <ActivityDonut
+              distribution={fullStats.typeDistribution}
+              totalActivities={fullStats.periodStats.monthly.totalActivities}
+            />
+          </div>
+        </div>
+
+        {heatmapDays.length > 0 && (
+          <div class="section">
+            <ActivityHeatmap days={heatmapDays} title="Heatmap annuale" />
+          </div>
+        )}
+      </>
+    )}
+
+    {recentActivities.length > 0 ? (
+      <div class="section">
+        <div class="section-title">Attività recenti</div>
+        <div class="activity-list">
+          {recentActivities.map((a) => {
+            const km = a.distance > 0 ? (a.distance / 1000).toFixed(1) + " km" : "";
+            const pace = a.averageSpeed > 0 && a.sportType === "Run" ? fmtPaceRun(a.averageSpeed) : "";
+            const elev = a.elevation > 10 ? `↑${Math.round(a.elevation)}m` : "";
+            const hours = Math.floor(a.movingTime / 3600);
+            const mins = Math.floor((a.movingTime % 3600) / 60);
+            const dur = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+            const dateLabel = new Date(a.date).toLocaleDateString("it-IT", { day: "numeric", month: "short" });
+            return (
+              <a href={a.url} target="_blank" rel="noopener" class="activity-row">
+                <div class="activity-dot" style={`background:${sportColor(a.sportType)}`}></div>
+                <div class="activity-name">{a.name}</div>
+                <div class="activity-meta">
+                  {km && <span>{km}</span>}
+                  {pace && <span class="pace">{pace}</span>}
+                  {elev && <span>{elev}</span>}
+                  <span>{dur}</span>
+                </div>
+                <div class="activity-date">{dateLabel}</div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    ) : (
+      !stravaMissing && <div class="state-empty">Nessuna attività recente.</div>
+    )}
+  </body>
+</html>
