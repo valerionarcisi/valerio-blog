@@ -568,6 +568,34 @@ Decisioni del proprietario: Web Vitals SI (~1 KB nel tracker), report Telegram s
 
 `ANALYTICS_REPORT_CHAT_ID` (opzionale, chat del report; fallback primo id di `TELEGRAM_USER_ID_WHITELIST`), `ANALYTICS_REPORT_DISABLED` (`1` = nessun invio). Gia necessarie: `TELEGRAM_BOT_TOKEN`, `TURSO_*`, `ADMIN_TOKEN`.
 
+## Dashboard in stile GA con vista Utenti (2026-10)
+
+Sostituisce il layout a pagina unica di `/admin/analytics`. Look Foglio (tema scuro via `data-theme="dark"`, solo token `--foglio-*`; aggiunto `--foglio-scrim`), mobile-first, bersagli da 44px.
+
+**Architettura**: scheletro HTML in `src/pages/admin/analytics.astro`, stile in `src/styles/admin-analytics.css`, logica in moduli ES nativi `public/admin/analytics/*.js` (stesso posto e stile di `admin-client.js`, di cui usa i globali `escapeHtml/apiJson/vitalState...`; Chart.js e Leaflet restano script classici con SRI). Nessuna dipendenza nuova.
+
+**Informazione**: barra superiore (periodo Oggi/7g/30g/90g/12m + date personalizzate, filtri paese/device/canale con la nota sul limite raw 90 giorni, "Aggiornamento dati" + "Ricalcola aggregati") e tab ARIA nell'hash URL: `#panoramica`, `#utenti`, `#acquisizione`, `#coinvolgimento`, `#tecnologia`, `#bot`. I tab si disegnano in modo pigro da un solo payload `/api/stats`; "Utenti" ha il suo feed paginato.
+
+- **Panoramica**: "In tempo reale" (`/api/stats/live`, ogni 30 s, in pausa a tab nascosto), 6 scorecard (Utenti, Sessioni, Pageview, Tempo attivo medio, Tasso di coinvolgimento = 100 - bounce reale delle sessioni, Eventi) con delta (freccia + testo) e sparkline SVG, grafico Chart.js con scelta metrica e periodo precedente tratteggiato (seconda chiamata `/api/stats` sul periodo `summary.prev_period`), canali, paesi (mappa + lista), dispositivi.
+- **Utenti**: elenco di sessioni recenti (una riga = una visita) con verdetto, filtri rapidi (solo umani / tutti / non verificati / bot, solo con eventi) e i filtri globali; riepilogo "chi c'e ora" dagli utenti attivi; pannello dettaglio (bottom sheet su mobile, laterale su desktop) con cronologia di pagine ed eventi, Web Vitals se presenti, "Crea regola da questo visitatore" (stesso flusso anteprima/salvataggio delle regole bot, su referrer o pagina di ingresso) e "Flag come bot (legacy)".
+- **Acquisizione**, **Coinvolgimento**, **Tecnologia**, **Bot & qualita**: tutto cio che mostrava la vecchia pagina (qualita traffico + "Includi non verificati", Da rivedere, Regole bot, pulsanti legacy, mappa, sezioni, post piu letti, sessioni/ingresso-uscita/canali/eventi/obiettivi, Web Vitals, UTM, export CSV). Tempo e scroll per pagina esistono solo per i post (rollup `daily_pages`); il trend per canale non e disponibile (nessuna serie per canale).
+
+### Endpoint nuovi (admin, cookie o Bearer)
+
+- `GET /api/stats/sessions?from&to&limit(30, max 100)&cursor&verdict(human|unverified|bot|all, default human)&country&device&channel&with_events=1` -> `{sessions:[{id,user,started_at,last_seen_at,country,device,browser,os,channel,referrer,entry_path,exit_path,pageviews,engaged_seconds,verdict,human,events_count}], next_cursor, available}`. Solo tabelle raw (`sessions` 180 giorni); ordine `started_at DESC, id DESC` con cursore keyset opaco (base64url di `started_at|id`), stabile anche con timestamp uguali. Browser/OS dalla prima pageview della sessione (indice `(visitor_hash, created_at)`, nessun indice nuovo). Senza tabella `sessions`: `{sessions:[], next_cursor:null, available:false}`. 400 per date/limit/cursor/verdict/filtri non validi.
+- `GET /api/stats/sessions/[id]` -> `{session, pageviews:[{path,at,time_on_page,scroll_depth,lcp_ms,inp_ms,cls}], events:[{name,prop,path,at}]}` in ordine cronologico; `session` aggiunge `language` e UTM. 400 id non numerico, 404 inesistente.
+- `GET /api/stats/live`: invariati `active` (numero) e `pageviews5m`; nuovo `active_sessions:[{user,country,device,path,last_seen_at}]` (sessioni viste negli ultimi 5 minuti, max 20, bot esclusi). Il campo si chiama `active_sessions` perche `active` e gia il conteggio.
+- `/api/stats`: nuovi campi `sessions.daily` (serie giornaliera per le sparkline), `sessions.events_total`, `sessions.prev_period.{avg_engaged_seconds,events_total}`. Corretto il periodo precedente per `period=today` (prima era 2 giorni, ora esattamente ieri).
+- `POST /api/admin/bot` accetta anche `{sessionId}` (LEGACY): il pannello Utenti non conosce mai l'hash.
+
+### Privacy
+
+Mai IP ne hash completo nelle risposte: solo `user` = primi 6 caratteri dell'hash, mostrati come "Utente #a1b2c3". L'hash ruota ogni giorno (salt giornaliero): chi torna il giorno dopo compare come un nuovo utente, e la dashboard lo dichiara in una riga. Coperto dai test (`src/pages/api/stats/_sessions.test.ts`).
+
+### Dati demo
+
+`scripts/seed-analytics-demo.ts` riempie un DB sqlite LOCALE con ~30 giorni di traffico sintetico (paesi, device, browser, canali, umani/non verificati/bot, 1-6 pageview per sessione, eventi, Web Vitals, regole bot con colpi, sessioni in tempo reale), dopo `migrateAnalyticsV2`, e ricalcola i rollup dei giorni chiusi. **Rifiuta di partire** (exit 1) se `TURSO_DATABASE_URL` non inizia con `file:`, perche svuota le tabelle analytics. Uso: `TURSO_DATABASE_URL=file:/tmp/demo.db TURSO_AUTH_TOKEN=x npx -y tsx scripts/seed-analytics-demo.ts`, poi `TURSO_DATABASE_URL=file:/tmp/demo.db TURSO_AUTH_TOKEN=x ADMIN_TOKEN=localtest pnpm start`.
+
 ## Env vars
 
 ```

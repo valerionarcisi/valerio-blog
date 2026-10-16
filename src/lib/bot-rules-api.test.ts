@@ -272,7 +272,7 @@ describe("GET /api/stats/live", () => {
     await seedVisits();
     await db.execute("DROP TABLE sessions");
     const r = await call(live.GET, req("GET"));
-    expect(await r.json()).toEqual({ active: 2, pageviews5m: 2 });
+    expect(await r.json()).toEqual({ active: 2, pageviews5m: 2, active_sessions: [] });
   });
 
   test("with the sessions table: sessions seen in the last 5 minutes, bots excluded", async () => {
@@ -283,6 +283,8 @@ describe("GET /api/stats/live", () => {
     await addSession("legacy1", { human: 1 });
     await addSession("old1", { human: 1, seen: "2000-01-01 00:00:00" });
     const r = await call(live.GET, req("GET"));
-    expect(await r.json()).toEqual({ active: 2, pageviews5m: 2 });
+    const body = await r.json();
+    expect(body).toMatchObject({ active: 2, pageviews5m: 2 });
+    expect(body.active_sessions.map((a: { user: string }) => a.user).sort()).toEqual(["human1", "unver1"]);
   });
 });

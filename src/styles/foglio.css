@@ -26,6 +26,8 @@
   --foglio-neg: #a52a1e;
   --foglio-info: #1d5a8a;
   --foglio-warn: #8a5a00;
+  /* Overlay behind modal sheets / drawers */
+  --foglio-scrim: rgba(34, 26, 18, 0.45);
 
   /* Type stack */
   --foglio-serif: "EB Garamond", "Iowan Old Style", Georgia, serif;
@@ -72,6 +74,7 @@
     --foglio-neg: #f08a7c;
     --foglio-info: #7ab8ea;
     --foglio-warn: #e3b653;
+    --foglio-scrim: rgba(0, 0, 0, 0.62);
   }
 }
 
@@ -93,6 +96,7 @@ html[data-theme="dark"] {
   --foglio-neg: #f08a7c;
   --foglio-info: #7ab8ea;
   --foglio-warn: #e3b653;
+  --foglio-scrim: rgba(0, 0, 0, 0.62);
 }
 html[data-theme="light"] {
   --foglio-bg: #f6f1e8;
@@ -111,6 +115,7 @@ html[data-theme="light"] {
   --foglio-neg: #a52a1e;
   --foglio-info: #1d5a8a;
   --foglio-warn: #8a5a00;
+  --foglio-scrim: rgba(34, 26, 18, 0.45);
 }
 
 /* Base body scope — applied via .foglio class on html */
