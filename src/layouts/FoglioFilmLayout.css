@@ -64,12 +64,12 @@ a.ff-poster-link:hover {
   text-transform: uppercase;
   letter-spacing: -0.03em;
   line-height: 0.85;
-  overflow-wrap: break-word;
+  overflow-wrap: normal;
 }
 .dc .ff-title--xl {
   font-size: min(
     clamp(36px, 11.5vw, 170px),
-    calc(var(--dc-fit-w) / (var(--lw, 8) * 0.8))
+    calc(var(--dc-fit-w) / (var(--lw, 8) * 1.04))
   );
   transform: scaleY(1.25);
   transform-origin: top left;
@@ -78,7 +78,7 @@ a.ff-poster-link:hover {
 .dc .ff-title--l {
   font-size: min(
     clamp(32px, 9vw, 140px),
-    calc(var(--dc-fit-w) / (var(--lw, 8) * 0.8))
+    calc(var(--dc-fit-w) / (var(--lw, 8) * 1.04))
   );
 }
 .ff-lbxd-title {
