@@ -263,7 +263,7 @@
 .Comments-reply-btn {
   background: transparent;
   border: 1px solid var(--border-subtle);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--color-secondary);
   font-family: var(--fontFamily-mono);
   font-size: var(--fontSize-very-small);
@@ -387,7 +387,7 @@ button[type="submit"]:disabled,
 .foglio .Comments {
   max-width: 720px;
   margin: 4rem auto 0;
-  padding: 3rem 3rem;
+  padding: 3rem var(--dc-gutter);
   border-top: 1px solid var(--foglio-rule);
   border-bottom: 1px solid var(--foglio-rule);
 }
@@ -395,7 +395,7 @@ button[type="submit"]:disabled,
 @media (max-width: 767px) {
   .foglio .Comments {
     margin: 2.5rem 0 0;
-    padding: 2rem 1.4rem;
+    padding: 2rem var(--dc-gutter);
   }
   .foglio .Comments-children {
     padding-left: 0.8rem;
@@ -587,7 +587,7 @@ button[type="submit"]:disabled,
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  padding: 0.6rem 1.4rem;
+  padding: 0.6rem var(--dc-gutter);
   cursor: pointer;
   transition: opacity 0.15s;
 }

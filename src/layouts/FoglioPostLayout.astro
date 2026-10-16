@@ -8,6 +8,7 @@ import ShareButtons from "~/components/ShareButtons.astro";
 import ReaderMode from "~/components/ReaderMode.astro";
 import { SITE_TITLE } from "~/consts";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "./FoglioPostLayout.css";
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
   slug: string;
   lang?: "it" | "en";
   headings?: Array<{ depth: number; slug: string; text: string }>;
+  mood?: "full" | "quiet";
 }
 
 const {
@@ -36,14 +38,10 @@ const {
   slug,
   lang = "it",
   headings = [],
+  mood = "full",
 } = Astro.props;
 
 const isEn = lang === "en";
-const langSwitchHref = isEn
-  ? `/blog/${slug}`
-  : `/en/blog/${slug}`;
-const langSwitchLabel = isEn ? "IT" : "EN";
-
 const formattedDate = new Date(date).toLocaleDateString(
   isEn ? "en-GB" : "it-IT",
   { day: "numeric", month: "long", year: "numeric" }
@@ -55,9 +53,13 @@ function tagHref(tag: string): string {
 }
 
 const h2Headings = headings.filter((h) => h.depth === 2);
+
+const isQuiet = mood === "quiet";
+const titleSize = title.length <= 22 ? "xl" : title.length <= 48 ? "l" : "m";
+const longestWord = Math.max(...title.split(/\s+/).map((w) => w.length));
 ---
 
-<html lang={lang} class="foglio">
+<html lang={lang} class="foglio dc">
   <head>
     <BaseHead
       title={`${title} | ${SITE_TITLE}`}
@@ -96,17 +98,35 @@ const h2Headings = headings.filter((h) => h.depth === 2);
     <ReaderMode lang={lang} />
     <main>
 
-    <!-- Cover hero -->
+    <!-- Post header -->
+    <header class={`fp-head fp-head--${mood}`}>
+      <p class="fp-eyebrow">
+        {tags.map((tag, i) => (
+          <>
+            {i > 0 && <span class="fp-eyebrow-sep"> · </span>}
+            <a href={tagHref(tag)} class="fp-eyebrow-tag">{tag}</a>
+          </>
+        ))}
+        {tags.length > 0 && <span class="fp-eyebrow-sep"> — </span>}
+        <time datetime={date}>{formattedDate}</time>
+      </p>
+      <h1 class={`fp-title fp-title--${titleSize}${isQuiet ? "" : " dc-warp-type"}`} style={`--lw:${longestWord}`}>{title}</h1>
+      {extract && <p class="fp-extract">{extract}</p>}
+    </header>
+
+    <!-- Cover -->
     {coverImage && (
-      <section class="fp-cover-hero">
-        <img
-          class="fp-cover-hero-img"
-          src={coverImage}
-          alt={title}
-          loading="eager"
-        />
+      <figure class={`fp-cover fp-cover--${mood}`}>
+        {isQuiet ? (
+          <img class="fp-cover-img" src={coverImage} alt={title} loading="eager" />
+        ) : (
+          <div class="dc-face fp-cover-face">
+            <img src={coverImage} alt={title} loading="eager" />
+            <img src={coverImage} alt="" aria-hidden="true" class="dc-face-split" />
+          </div>
+        )}
         {(coverAuthorName || coverDescription) && (
-          <div class="fp-cover-hero-caption">
+          <figcaption class="fp-cover-caption">
             {coverDescription && <span>{coverDescription}</span>}
             {coverAuthorName && (
               <span>
@@ -116,31 +136,13 @@ const h2Headings = headings.filter((h) => h.depth === 2);
                   : coverAuthorName}
               </span>
             )}
-          </div>
+          </figcaption>
         )}
-      </section>
+      </figure>
     )}
 
-    <!-- Post header -->
-    <header class="fp-head">
-      <div class="fp-eyebrow">
-        <span class="fp-eyebrow-tags-date">
-          {tags.map((tag, i) => (
-            <>
-              {i > 0 && <span class="fp-eyebrow-sep"> · </span>}
-              <a href={tagHref(tag)} class="fp-eyebrow-tag">{tag}</a>
-            </>
-          ))}
-          {tags.length > 0 && <span class="fp-eyebrow-sep"> · </span>}
-          {formattedDate}
-        </span>
-      </div>
-      <h1 class="fp-title">{title}</h1>
-      {extract && <p class="fp-extract">{extract}</p>}
-    </header>
-
     <!-- Layout -->
-    <div class={`fp-layout${h2Headings.length === 0 ? " fp-layout--no-toc" : ""}`}>
+    <div class={`fp-layout${h2Headings.length === 0 ? " fp-layout--no-toc" : ""}${isQuiet ? " fp-layout--quiet" : ""}`}>
       <!-- Left: Table of Contents -->
       {h2Headings.length > 0 && (
         <details class="fp-toc" open>

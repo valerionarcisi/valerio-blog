@@ -6,6 +6,7 @@ tags: ["thoughts"]
 coverImage: "https://images.unsplash.com/photo-1605026187659-a83756e22e43?q=80&w=1600&auto=format&fit=crop"
 coverAuthorName: "Tim Hüfner"
 coverAuthorLink: "https://unsplash.com/@huefnerdesign"
+mood: quiet
 ---
 
 Sabato scorso ero allo stremo delle mie energie. Davanti a me un ragazzo aveva allungato il passo e io non sono riuscito a seguirlo. Il caldo per me era estremo. Le gambe non ne avevano più. Ho rallentato per un chilometro, dopodiché ho trovato la forza per spingere ancora un po', ancora un pochino, e ho tagliato il mio primo traguardo di una gara podistica.

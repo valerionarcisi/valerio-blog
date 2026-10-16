@@ -10,8 +10,11 @@ import { SITE_TITLE } from "~/consts";
   pageId="about"
 >
   <header class="about-head">
-    <h1><em class="acc">Who</em><br />I am.</h1>
-    <div class="about-portrait"></div>
+    <h1 class="dc-page-title"><em class="acc">Who</em><br />I am.</h1>
+    <div class="dc-face about-portrait">
+      <img src="/img/me.jpg" alt="Valerio, portrait" width="1200" height="1600" />
+      <img src="/img/me.jpg" alt="" aria-hidden="true" class="dc-face-split" />
+    </div>
   </header>
 
   <article class="about-body">
@@ -22,10 +25,7 @@ import { SITE_TITLE } from "~/consts";
       Since 2020 I've been part of five short films. The ones I directed are <em>Candy</em> — winner at the Fano International Film Festival 2025 and the Premio GASP — and <em>It's Not Funny</em>, currently in editing after four days of shooting at Ristorante L'Oasi del Gusto in Piane di Falerone. On <em>Arturo</em> I co-wrote the story and screenplay with the director. On <em>Pochi Istanti</em> and <em>Metanaro</em> I worked as assistant director or screenplay supervisor.
     </p>
     <p>
-      I'm also building <em>Oh Writers</em>: a screenplay editor designed for how scripts are actually written in Italy. It's the place where my two things — code and cinema — finally talk to each other.
-    </p>
-    <p>
-      By day I work at <a href="https://www.cleafy.com/">Cleafy</a>, where I've been since 2022 as a Senior Software Engineer. I write software — TypeScript, React, PHP — on a real-time fraud-detection dashboard for online banking, on a platform protecting 250M+ end users across 150+ financial institutions. Honestly I'm not sure what to call what I do anymore: with AI the craft is changing as I practice it, and "fullstack developer" no longer covers it. Before that I was at TeamSystem, Fieldtronics and New System.
+      By day I work at <a href="https://www.cleafy.com/">Cleafy</a>, where I've been since 2022 as a Senior Software Engineer. I write software — TypeScript, React, Java, PHP — on a real-time fraud-detection dashboard for online banking, on a platform protecting 250M+ end users across 150+ financial institutions. Honestly I'm not sure what to call what I do anymore: with AI the craft is changing as I practice it, and "fullstack developer" no longer covers it. Before that I was at TeamSystem, Fieldtronics and New System.
     </p>
     <p>
       Outside of all this there's <strong>Adriana</strong>, and our daughters <strong>Bianca</strong> and <strong>Lea</strong>. That's the thing that keeps me together when everything else moves too fast.
@@ -38,13 +38,6 @@ import { SITE_TITLE } from "~/consts";
   <section class="cv">
     <h2>Recent work.</h2>
 
-    <div class="cv-row">
-      <div class="cv-year">2026 —</div>
-      <div class="cv-content">
-        <h3>Building · <em>Oh Writers</em></h3>
-        <p>Screenplay editor designed for the Italian market. Dashboard, story outline, scene breakdown, budget, locations, schedule in one unified flow.</p>
-      </div>
-    </div>
 
     <div class="cv-row">
       <div class="cv-year">2026 —</div>
@@ -82,7 +75,7 @@ import { SITE_TITLE } from "~/consts";
       <div class="cv-year">2022 —</div>
       <div class="cv-content">
         <h3>Senior Software Engineer · <a href="https://www.cleafy.com/">Cleafy</a></h3>
-        <p>TypeScript, React, PHP. Real-time fraud-detection dashboard for online banking, on a platform protecting 250M+ end users across 150+ financial institutions.</p>
+        <p>TypeScript, React, Java, PHP. Real-time fraud-detection dashboard for online banking, on a platform protecting 250M+ end users across 150+ financial institutions.</p>
       </div>
     </div>
 
@@ -131,45 +124,39 @@ import { SITE_TITLE } from "~/consts";
 
 <style is:global>
   .about-head {
-    max-width: 720px;
+    max-width: var(--foglio-maxw);
     margin: 0 auto;
-    padding: 5rem 3rem 3rem;
+    padding: 64px var(--dc-gutter) 48px;
     display: grid;
-    grid-template-columns: 1fr 200px;
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 340px);
     gap: 3rem;
     align-items: end;
   }
-  .about-head h1 {
-    font-family: var(--foglio-serif);
-    font-weight: 500;
-    font-size: clamp(2.8rem, 5vw, 4rem);
-    line-height: 1;
-    margin: 0;
+  html.dc .about-head h1.dc-page-title {
+    font-size: clamp(48px, 9vw, 132px);
+    margin: 0 0 0.3em;
   }
-  .about-head h1 em { font-style: italic; }
   .about-portrait {
     aspect-ratio: 4 / 5;
-    background: url("/img/me.jpg") center / cover, var(--foglio-paper);
-    border: 1px solid var(--foglio-rule);
-    border-radius: var(--foglio-radius-md);
+    min-height: 0;
   }
   @media (max-width: 767px) {
     .about-head {
       grid-template-columns: 1fr;
-      padding: 3rem 1.4rem;
+      padding: 40px var(--dc-gutter);
       gap: 2rem;
     }
-    .about-portrait { max-width: 200px; }
+    .about-portrait { max-width: 240px; }
   }
 
   .about-body {
     max-width: 720px;
     margin: 0 auto;
-    padding: 0 3rem;
-    font-family: var(--foglio-serif);
-    font-size: 1.25rem;
-    line-height: 1.65;
-    color: var(--foglio-ink);
+    padding: 0 var(--dc-gutter);
+    font-family: var(--foglio-sans);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--dc-text);
   }
   .about-body p { margin: 0 0 1.4rem; }
   .about-body p:first-child::first-letter {
@@ -188,14 +175,14 @@ import { SITE_TITLE } from "~/consts";
     border-bottom: 1px solid var(--foglio-accent-soft);
   }
   @media (max-width: 767px) {
-    .about-body { padding: 0 1.4rem; font-size: 1.1rem; }
+    .about-body { padding: 0 var(--dc-gutter); font-size: 1.1rem; }
   }
 
   /* CV-style section */
   .cv {
     max-width: 880px;
     margin: 5rem auto 0;
-    padding: 0 3rem;
+    padding: 0 var(--dc-gutter);
   }
   .cv h2 {
     font-family: var(--foglio-serif);
@@ -237,14 +224,14 @@ import { SITE_TITLE } from "~/consts";
   }
   .cv-content a { color: var(--foglio-accent); }
   @media (max-width: 767px) {
-    .cv { padding: 0 1.4rem; }
+    .cv { padding: 0 var(--dc-gutter); }
     .cv-row { grid-template-columns: 1fr; gap: 0.3rem; }
   }
 
   .contact {
     max-width: 720px;
     margin: 6rem auto 0;
-    padding: 0 3rem;
+    padding: 0 var(--dc-gutter);
     text-align: center;
   }
   .contact h2 {
@@ -267,6 +254,6 @@ import { SITE_TITLE } from "~/consts";
     padding-bottom: 2px;
   }
   @media (max-width: 767px) {
-    .contact { padding: 0 1.4rem; }
+    .contact { padding: 0 var(--dc-gutter); }
   }
 </style>

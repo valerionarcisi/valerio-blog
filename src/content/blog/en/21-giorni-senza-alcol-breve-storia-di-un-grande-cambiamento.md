@@ -5,6 +5,7 @@ extract: Follow my account of 21 days without alcohol, an intimate and honest jo
 tags:
   - "thoughts"
 coverImage: "/img/blog/21-giorni-senza-alcol-breve-storia-di-un-grande-cambiamento/cm8zxole91sgu07liktp4qse4.png"
+mood: quiet
 ---
 
 ## December 31, 2024. New Year's Eve Party.

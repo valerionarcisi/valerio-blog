@@ -120,7 +120,7 @@ textarea.cf-input {
   min-height: 44px;
   padding: 0 1rem;
   border: 1px solid var(--foglio-rule-strong, var(--foglio-rule));
-  border-radius: 999px;
+  border-radius: 0;
   font-family: var(--foglio-serif);
   font-size: 0.98rem;
   color: var(--foglio-ink-soft);
@@ -171,7 +171,7 @@ textarea.cf-input {
 .cf-submit,
 .cf-again {
   min-height: 46px;
-  padding: 0 1.4rem;
+  padding: 0 var(--dc-gutter);
   border: 1px solid var(--foglio-accent);
   border-radius: var(--foglio-radius-sm, 4px);
   font-family: var(--foglio-mono);

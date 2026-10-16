@@ -6,7 +6,7 @@
 .as-head {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 4rem 3rem 2.5rem;
+  padding: 4rem var(--dc-gutter) 2.5rem;
   border-bottom: 1px solid var(--foglio-rule);
 }
 .as-eyebrow {
@@ -49,7 +49,7 @@
   letter-spacing: 0.12em;
   padding: 0.4rem 0.9rem;
   border: 1px solid var(--foglio-rule);
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--foglio-ink-soft);
   text-decoration: none;
   transition: color 0.15s, border-color 0.15s, background 0.15s;
@@ -103,7 +103,7 @@
 .as-main {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 3rem 3rem 5rem;
+  padding: 3rem var(--dc-gutter) 5rem;
 }
 .as-section + .as-section { margin-top: 5rem; }
 .as-section-title {
@@ -347,8 +347,8 @@
   .as-stats { grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
 }
 @media (max-width: 600px) {
-  .as-head { padding: 2.5rem 1.4rem 1.5rem; }
-  .as-main { padding: 2rem 1.4rem 3rem; }
+  .as-head { padding: 2.5rem var(--dc-gutter) 1.5rem; }
+  .as-main { padding: 2rem var(--dc-gutter) 3rem; }
   .as-album-grid { grid-template-columns: repeat(2, 1fr); gap: 1.4rem 1rem; }
   .as-artist-row { grid-template-columns: 40px 1fr; }
   .as-artist-plays { grid-column: 2; }

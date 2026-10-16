@@ -13,6 +13,7 @@ const blog = defineCollection({
     coverAuthorName: z.string().nullable().optional(),
     coverAuthorLink: z.string().nullable().optional(),
     coverDescription: z.string().nullable().optional(),
+    mood: z.enum(["full", "quiet"]).default("full"),
   }),
 });
 

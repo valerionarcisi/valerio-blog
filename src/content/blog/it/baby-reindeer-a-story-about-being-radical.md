@@ -15,7 +15,7 @@ Baby Reindeer è basata sulla storia vera di Richard Gadd, il creatore e attore 
 
 > da Letterboxd
 >
-> # Baby Reindeer
+> **Baby Reindeer**
 >
 > Diretto da [Weronika Tofilska](https://letterboxd.com/director/weronika-tofilska/), [Josephine Bornebusch](https://letterboxd.com/director/josephine-bornebusch/)
 >

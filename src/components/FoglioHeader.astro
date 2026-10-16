@@ -1,4 +1,9 @@
 ---
+import DcFilters from "~/components/DcFilters.astro";
+import { getCollection } from "astro:content";
+import { getLangFromId, getSlugFromId } from "~/i18n/utils";
+import { alternatePath, type Lang } from "~/lib/alt-lang";
+
 interface Props {
   lang?: "it" | "en";
   active?: string;
@@ -8,134 +13,151 @@ const { lang = "it", active = "" } = Astro.props;
 
 const isEn = lang === "en";
 
-const t = {
-  films: isEn ? "Films" : "Film",
-  blog: "Blog",
-  about: isEn ? "About" : "Chi",
-  contact: isEn ? "Contact" : "Contatti",
-};
-
 const links = [
-  { id: "films", label: t.films, href: isEn ? "/en/films" : "/films" },
-  { id: "blog", label: t.blog, href: isEn ? "/en/blog" : "/blog" },
-  { id: "about", label: t.about, href: isEn ? "/en/who-i-am" : "/who-i-am" },
-  { id: "contact", label: t.contact, href: isEn ? "/en/contact" : "/contatti" },
+  { id: "films", label: isEn ? "Films" : "Film", href: isEn ? "/en/films" : "/films" },
+  { id: "code", label: isEn ? "Code" : "Codice", href: isEn ? "/en/code" : "/codice" },
+  { id: "blog", label: "Blog", href: isEn ? "/en/blog" : "/blog" },
+  { id: "watched", label: isEn ? "Watched" : "Visti", href: isEn ? "/en/watched" : "/visti" },
+  { id: "listening", label: isEn ? "Listening" : "Ascolti", href: isEn ? "/en/listening" : "/ascolti" },
+  { id: "about", label: isEn ? "About" : "Chi sono", href: isEn ? "/en/who-i-am" : "/who-i-am" },
+  { id: "contact", label: isEn ? "Contact" : "Contatti", href: isEn ? "/en/contact" : "/contatti" },
 ];
 
-const langSwitchHref = isEn ? "/" : "/en/";
+const idsOf = async (collection: "blog" | "films") =>
+  new Set((await getCollection(collection)).map((e) => `${getLangFromId(e.id)}/${getSlugFromId(e.id)}`));
+const [blogIds, filmIds] = await Promise.all([idsOf("blog"), idsOf("films")]);
+const langSwitchHref = alternatePath(Astro.url.pathname, lang as Lang, {
+  blog: (l, slug) => blogIds.has(`${l}/${slug}`),
+  films: (l, slug) => filmIds.has(`${l}/${slug}`),
+});
 const langSwitchLabel = isEn ? "IT" : "EN";
-
-function isActive(id: string): boolean {
-  return active === id;
-}
 ---
 
-<nav class="foglio-nav">
-  <a href={isEn ? "/en/" : "/"} class="foglio-nav-brand">Valerio Narcisi</a>
-  <div class="foglio-nav-right">
-    <div class="foglio-nav-links">
+<DcFilters />
+<header class="dc-header" id="dc-header">
+  <div class="dc-header-inner">
+    <a href={isEn ? "/en/" : "/"} class="dc-brand">Valerio Narcisi</a>
+    <button type="button" class="dc-menu-btn" id="dc-menu-btn" aria-expanded="false" aria-controls="dc-nav">
+      {isEn ? "Menu" : "Menu"}
+    </button>
+    <nav class="dc-nav" id="dc-nav" aria-label={isEn ? "Main" : "Principale"}>
       {links.map((link) => (
-        <a href={link.href} class={isActive(link.id) ? "is-active" : ""}>
+        <a href={link.href} aria-current={active === link.id ? "page" : undefined}>
           {link.label}
         </a>
       ))}
-    </div>
-    <div class="foglio-nav-meta">
-    <a href={langSwitchHref}>{langSwitchLabel}</a>
-    <button id="ft-toggle" class="ft-toggle" aria-label="Toggle theme">
-      <svg class="ft-sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="8" cy="8" r="3"/>
-        <line x1="8" y1="1" x2="8" y2="2.5"/>
-        <line x1="8" y1="13.5" x2="8" y2="15"/>
-        <line x1="1" y1="8" x2="2.5" y2="8"/>
-        <line x1="13.5" y1="8" x2="15" y2="8"/>
-        <line x1="3.05" y1="3.05" x2="4.11" y2="4.11"/>
-        <line x1="11.89" y1="11.89" x2="12.95" y2="12.95"/>
-        <line x1="12.95" y1="3.05" x2="11.89" y2="4.11"/>
-        <line x1="4.11" y1="11.89" x2="3.05" y2="12.95"/>
-      </svg>
-      <svg class="ft-moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/>
-      </svg>
-    </button>
-    </div>
+    </nav>
+    <a href={langSwitchHref} class="dc-lang" hreflang={isEn ? "it" : "en"} lang={isEn ? "it" : "en"}>{langSwitchLabel}</a>
   </div>
-</nav>
-
-<style>
-  .ft-toggle {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--foglio-ink-soft);
-    vertical-align: middle;
-    padding: 0;
-    line-height: 0;
-  }
-
-  .ft-toggle:hover {
-    color: var(--foglio-accent);
-  }
-
-  .ft-sun {
-    display: none;
-  }
-
-  .ft-moon {
-    display: inline;
-  }
-
-  html[data-theme="dark"] .ft-sun {
-    display: inline;
-  }
-
-  html[data-theme="dark"] .ft-moon {
-    display: none;
-  }
-
-  html[data-theme="light"] .ft-sun {
-    display: none;
-  }
-
-  html[data-theme="light"] .ft-moon {
-    display: inline;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .ft-sun {
-      display: inline;
-    }
-
-    .ft-moon {
-      display: none;
-    }
-  }
-</style>
+</header>
 
 <script is:inline>
   (function () {
-    var saved = localStorage.getItem("foglio-theme");
-    if (saved) {
-      document.documentElement.dataset.theme = saved;
-    }
-  })();
-
-  document.addEventListener("DOMContentLoaded", function () {
-    var btn = document.getElementById("ft-toggle");
-    if (!btn) return;
+    var header = document.getElementById("dc-header");
+    var btn = document.getElementById("dc-menu-btn");
+    if (!header || !btn) return;
+    header.classList.add("is-ready");
     btn.addEventListener("click", function () {
-      var current = document.documentElement.dataset.theme;
-      var next;
-      if (current === "dark") {
-        next = "light";
-      } else if (current === "light") {
-        next = "dark";
-      } else {
-        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        next = prefersDark ? "light" : "dark";
-      }
-      document.documentElement.dataset.theme = next;
-      localStorage.setItem("foglio-theme", next);
+      var open = header.classList.toggle("is-open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
     });
-  });
+  })();
 </script>
+
+<style is:global>
+  .dc-header {
+    border-bottom: 1px solid var(--foglio-rule);
+  }
+  .dc-header-inner {
+    max-width: var(--foglio-maxw);
+    margin: 0 auto;
+    padding: 8px var(--dc-gutter, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 32px;
+  }
+  .dc-brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--dc-display, var(--foglio-sans));
+    font-weight: 800;
+    font-stretch: 125%;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--foglio-ink);
+  }
+  .dc-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 22px;
+    font-family: var(--foglio-mono);
+    font-size: 13px;
+  }
+  .dc-nav a,
+  .dc-lang {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 4px;
+    color: var(--foglio-ink);
+  }
+  .dc-nav a:hover,
+  .dc-lang:hover {
+    color: var(--foglio-accent);
+  }
+  .dc-nav a[aria-current="page"] {
+    color: var(--foglio-accent);
+  }
+  .dc-lang {
+    min-width: 44px;
+    justify-content: center;
+    border: 1px solid var(--foglio-rule-strong);
+    font-family: var(--foglio-mono);
+    font-size: 12px;
+    color: var(--foglio-ink-soft);
+  }
+  .dc-menu-btn {
+    display: none;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 14px;
+    background: transparent;
+    border: 1px solid var(--foglio-rule-strong);
+    color: var(--foglio-ink);
+    font-family: var(--foglio-mono);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 899px) {
+    .dc-header-inner {
+      gap: 0 12px;
+    }
+    .dc-brand {
+      flex: 1 1 auto;
+    }
+    .dc-header.is-ready .dc-menu-btn {
+      display: inline-flex;
+      align-items: center;
+    }
+    .dc-nav {
+      order: 5;
+      flex-basis: 100%;
+      flex-direction: column;
+      gap: 0;
+      padding: 8px 0 12px;
+      border-top: 1px solid var(--foglio-rule);
+    }
+    .dc-header.is-ready:not(.is-open) .dc-nav {
+      display: none;
+    }
+    .dc-nav a {
+      min-height: 48px;
+      font-size: 15px;
+    }
+  }
+</style>

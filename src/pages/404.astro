@@ -10,7 +10,7 @@ import { SITE_TITLE } from "~/consts";
 >
   <section class="nf-section">
     <p class="nf-eyebrow">PAGINA NON TROVATA</p>
-    <h1 class="nf-title"><em class="acc">404</em>.</h1>
+    <h1 class="nf-title dc-page-title"><em class="acc">404</em>.</h1>
     <p class="nf-body">Questa pagina non esiste. Forse è stata spostata, o forse non è mai nata.</p>
     <a href="/" class="foglio-readmore">← Torna alla home</a>
   </section>
@@ -30,7 +30,7 @@ import { SITE_TITLE } from "~/consts";
   .nf-section {
     max-width: 680px;
     margin: 0 auto;
-    padding: 8rem 3rem 10rem;
+    padding: 8rem var(--dc-gutter) 10rem;
     text-align: center;
   }
   .nf-eyebrow {
@@ -57,6 +57,6 @@ import { SITE_TITLE } from "~/consts";
     margin: 0 0 3rem;
   }
   @media (max-width: 767px) {
-    .nf-section { padding: 5rem 1.4rem 7rem; }
+    .nf-section { padding: 5rem var(--dc-gutter) 7rem; }
   }
 </style>

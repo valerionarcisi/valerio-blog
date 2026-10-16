@@ -11,6 +11,7 @@ import {
   type Period,
 } from "~/services/audioscrobbler";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "../Ascolti.css";
 
 export const prerender = false;
@@ -49,7 +50,7 @@ function fmtTrackDate(raw?: string): string {
 ---
 
 <!doctype html>
-<html lang="en" class="foglio">
+<html lang="en" class="foglio dc">
   <head>
     <BaseHead
       title={`Listening · ${SITE_TITLE}`}
@@ -61,7 +62,7 @@ function fmtTrackDate(raw?: string): string {
 
     <header class="as-head">
       <p class="as-eyebrow">Listening log</p>
-      <h1><em class="acc">Listening.</em></h1>
+      <h1 class="dc-page-title" style="--lw:10"><em class="acc">Listening.</em></h1>
       <p class="as-lede">
         What I've been listening to — Last.FM feed with total scrobbles and most-played albums.
         {info ? info.playcount.toLocaleString("en-GB") : "—"} scrobbles since {info ? new Date(parseInt(info.registered) * 1000).getFullYear() : "—"}.

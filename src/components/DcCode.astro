@@ -1,0 +1,285 @@
+---
+import { getCollection } from "astro:content";
+import { getLangFromId, getSlugFromId } from "~/i18n/utils";
+import { isTechnicalPost } from "~/lib/tech-posts";
+import "./DcCode.css";
+
+interface Props {
+  lang: "it" | "en";
+}
+
+const { lang } = Astro.props;
+const isEn = lang === "en";
+const prefix = isEn ? "/en" : "";
+const locale = isEn ? "en-GB" : "it-IT";
+
+const posts = (await getCollection("blog"))
+  .filter((e) => getLangFromId(e.id) === lang && isTechnicalPost(e.data.tags))
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 6)
+  .map((e) => ({
+    slug: getSlugFromId(e.id),
+    title: e.data.title,
+    date: new Date(e.data.date)
+      .toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "numeric" })
+      .replaceAll("/", "."),
+  }));
+
+const copy = isEn
+  ? {
+      scene: "INT. TERMINAL — NIGHT",
+      title: "CODE",
+      lead: "Product engineer, full-stack and AI automation. Fifteen years of software in production.",
+      stats: [
+        { value: "15", label: "years of web applications in production" },
+        { value: "250M+", label: "end users protected by Cleafy's fraud-detection platform" },
+        { value: "150+", label: "financial institutions using it" },
+        { value: "300k", label: "concurrent users at peak on the football sites at New System" },
+      ],
+      expScene: "PRODUCTIONS · 2011 — NOW",
+      expTitle: "experience",
+      jobs: [
+        {
+          years: "2022 — NOW",
+          company: "Cleafy",
+          role: "Senior Software Engineer",
+          context: "Real-time fraud detection for online banking and payments.",
+          points: [
+            "I own the analyst-facing fraud-detection dashboard: millions of security events a day turned into signal analysts can act on.",
+            "I build and maintain the Java REST APIs that power the dashboard.",
+            "I maintain a core PHP component of the detection pipeline, a high-throughput, business-critical service.",
+            "I drive AI adoption and automation across the company, with internal tooling that cuts manual work for engineering and business teams.",
+          ],
+        },
+        {
+          years: "2020 — 2022",
+          company: "TeamSystem",
+          role: "Full-Stack Developer",
+          context: "ERP products and web portals for Italian SMEs.",
+          points: [
+            "Full-stack features on business-critical financial and inventory workflows.",
+            "Maintainer of the company-wide design system used by 15+ product teams.",
+            "Mentored developers on non-Italian teams, in English, on front-end and design-system adoption.",
+          ],
+        },
+        {
+          years: "2016 — 2020",
+          company: "Fieldtronics",
+          role: "Full-Stack Developer (JavaScript)",
+          context: "IoT platforms for aquaculture and precision agriculture.",
+          points: [
+            "Real-time dashboards and platforms (React and Node.js) that turned live sensor streams into daily decisions for field operators.",
+          ],
+        },
+        {
+          years: "2011 — 2016",
+          company: "New System",
+          role: "PHP Developer & Designer",
+          context: "Editorial websites for regional amateur and youth football.",
+          points: ["PHP sites with UIs I designed, up to about 300,000 concurrent users at peak traffic."],
+        },
+      ],
+      methodScene: "METHOD",
+      methodTitle: "how I work",
+      method: [
+        { b: "End to end.", t: "I frame the problem, ship it, then watch how it is really used and iterate." },
+        { b: "Explicit trade-offs.", t: "Time, quality and cost, measured against product metrics." },
+        { b: "Close to product and design.", t: "I turn ambiguity into shipped work." },
+      ],
+      methodClose: "Film taught me narrative clarity. <em>Code taught me to finish things.</em>",
+      kitScene: "EQUIPMENT",
+      kitTitle: "tools",
+      skills: [
+        { group: "LANGUAGES", items: ["TypeScript", "JavaScript", "Java", "PHP", "HTML", "CSS"] },
+        { group: "FRONTEND", items: ["React", "React Query", "Design systems", "Component architecture"] },
+        { group: "BACKEND AND TOOLING", items: ["Node.js", "Java REST APIs", "PostgreSQL", "Docker", "Jest", "Git"] },
+        { group: "PRODUCT AND AI", items: ["Discovery-to-delivery", "AI-enabled automation", "Experimentation", "Product metrics"] },
+        { group: "PARADIGM", items: ["Functional-oriented"] },
+        { group: "EDUCATION", items: ["BSc/MSc Biomedical Engineering · UNIVPM, 2010"] },
+      ],
+      postsScene: "FROM THE BLOG",
+      postsTitle: "technical writing",
+      contactLabel: "COLLABORATIONS AND PROPOSALS",
+      contactMeta: "Porto Sant'Elpidio · CET · Italian, English",
+      github: "github",
+      linkedin: "linkedin",
+    }
+  : {
+      scene: "INT. TERMINALE — NOTTE",
+      title: "CODICE",
+      lead: "Product engineer, full-stack e automazione con l'AI. Quindici anni di software in produzione.",
+      stats: [
+        { value: "15", label: "anni di applicazioni web in produzione" },
+        { value: "250M+", label: "utenti finali protetti dalla piattaforma antifrode di Cleafy" },
+        { value: "150+", label: "istituti finanziari che la usano" },
+        { value: "300k", label: "utenti contemporanei al picco sui siti di calcio di New System" },
+      ],
+      expScene: "PRODUZIONI · 2011 — OGGI",
+      expTitle: "esperienza",
+      jobs: [
+        {
+          years: "2022 — OGGI",
+          company: "Cleafy",
+          role: "Senior Software Engineer",
+          context: "Rilevamento delle frodi in tempo reale per online banking e pagamenti.",
+          points: [
+            "Responsabile della dashboard antifrode per gli analisti: milioni di eventi di sicurezza al giorno trasformati in segnali su cui agire.",
+            "Sviluppo e mantengo le API REST in Java che alimentano la dashboard.",
+            "Mantengo un componente PHP centrale della pipeline di rilevamento, un servizio ad alto throughput e critico per il business.",
+            "Guido l'adozione dell'AI e dell'automazione in azienda, con strumenti interni che tagliano lavoro manuale a team tecnici e di business.",
+          ],
+        },
+        {
+          years: "2020 — 2022",
+          company: "TeamSystem",
+          role: "Full-Stack Developer",
+          context: "Prodotti ERP e portali web per le PMI italiane.",
+          points: [
+            "Funzionalità full-stack su flussi finanziari e di magazzino critici per il business.",
+            "Maintainer del design system aziendale usato da più di 15 team di prodotto.",
+            "Mentoring in inglese per sviluppatori di team non italiani su front-end e design system.",
+          ],
+        },
+        {
+          years: "2016 — 2020",
+          company: "Fieldtronics",
+          role: "Full-Stack Developer (JavaScript)",
+          context: "Piattaforme IoT per acquacoltura e agricoltura di precisione.",
+          points: [
+            "Piattaforme e dashboard in tempo reale (React e Node.js) che trasformavano i dati dei sensori in decisioni quotidiane per gli operatori sul campo.",
+          ],
+        },
+        {
+          years: "2011 — 2016",
+          company: "New System",
+          role: "PHP Developer & Designer",
+          context: "Siti editoriali per il calcio dilettantistico e giovanile regionale.",
+          points: ["Siti in PHP con interfacce disegnate da me, fino a circa 300.000 utenti contemporanei nei picchi di traffico."],
+        },
+      ],
+      methodScene: "METODO",
+      methodTitle: "come lavoro",
+      method: [
+        { b: "Dall'inizio alla fine.", t: "Inquadro il problema, lo porto in produzione, poi guardo come viene usato davvero e itero." },
+        { b: "Compromessi espliciti.", t: "Tempo, qualità e costo, misurati sulle metriche di prodotto." },
+        { b: "Vicino a prodotto e design.", t: "Trasformo l'ambiguità in cose rilasciate." },
+      ],
+      methodClose: "Il set mi ha insegnato la chiarezza del racconto. <em>Il codice, a finire le cose.</em>",
+      kitScene: "ATTREZZATURA",
+      kitTitle: "strumenti",
+      skills: [
+        { group: "LINGUAGGI", items: ["TypeScript", "JavaScript", "Java", "PHP", "HTML", "CSS"] },
+        { group: "FRONTEND", items: ["React", "React Query", "Design system", "Architettura a componenti"] },
+        { group: "BACKEND E TOOLING", items: ["Node.js", "API REST in Java", "PostgreSQL", "Docker", "Jest", "Git"] },
+        { group: "PRODOTTO E AI", items: ["Discovery-to-delivery", "Automazione con l'AI", "Sperimentazione", "Metriche di prodotto"] },
+        { group: "PARADIGMA", items: ["Orientato al funzionale"] },
+        { group: "FORMAZIONE", items: ["Laurea in Ingegneria Biomedica · UNIVPM, 2010"] },
+      ],
+      postsScene: "DAL BLOG",
+      postsTitle: "scritti tecnici",
+      contactLabel: "COLLABORAZIONI E PROPOSTE",
+      contactMeta: "Porto Sant'Elpidio · CET · italiano, inglese",
+      github: "github",
+      linkedin: "linkedin",
+    };
+---
+
+
+<div class="dcc">
+  <section class="dcc-hero">
+    <p class="dc-scene">{copy.scene}</p>
+    <h1 class="dcc-title dc-warp-type">{copy.title}</h1>
+    <p class="dcc-lead">{copy.lead}</p>
+    <div class="dcc-links">
+      <a class="dc-btn dc-btn--solid" href="https://github.com/valerionarcisi" target="_blank" rel="noopener">{copy.github}</a>
+      <a class="dc-btn" href="https://www.linkedin.com/in/cv-valerio-narcisi/" target="_blank" rel="noopener">{copy.linkedin}</a>
+    </div>
+  </section>
+
+  <section class="dcc-stats" aria-label={isEn ? "Numbers" : "Numeri"}>
+    <dl>
+      {copy.stats.map((s) => (
+        <div class="dcc-stat">
+          <dt>{s.label}</dt>
+          <dd>{s.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="dcc-section">
+    <p class="dc-scene">{copy.expScene}</p>
+    <div class="dc-section-title"><h2>{copy.expTitle}</h2></div>
+    <ol class="dcc-jobs">
+      {copy.jobs.map((j) => (
+        <li class="dcc-job">
+          <div class="dcc-job-head">
+            <span class="dcc-job-years">{j.years}</span>
+            <h3>{j.company}</h3>
+            <span class="dcc-job-role">{j.role}</span>
+          </div>
+          <div class="dcc-job-body">
+            <p class="dcc-job-context">{j.context}</p>
+            <ul>{j.points.map((p) => <li>{p}</li>)}</ul>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="dcc-section dcc-two">
+    <div class="dcc-col">
+      <p class="dc-scene">{copy.methodScene}</p>
+      <div class="dc-section-title"><h2>{copy.methodTitle}</h2></div>
+      <ol class="dcc-method">
+        {copy.method.map((m, i) => (
+          <li>
+            <span class="dcc-method-n">{String(i + 1).padStart(2, "0")}</span>
+            <span><strong>{m.b}</strong> {m.t}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="dcc-close" set:html={copy.methodClose} />
+    </div>
+    <div class="dcc-col">
+      <p class="dc-scene">{copy.kitScene}</p>
+      <div class="dc-section-title"><h2>{copy.kitTitle}</h2></div>
+      <dl class="dcc-skills">
+        {copy.skills.map((k) => (
+          <div>
+            <dt>{k.group}</dt>
+            <dd>{k.items.map((it) => <span>{it}</span>)}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  {posts.length > 0 && (
+    <section class="dcc-section">
+      <p class="dc-scene">{copy.postsScene}</p>
+      <div class="dc-section-title">
+        <h2>{copy.postsTitle}</h2>
+        <a href={`${prefix}/blog/`}>{isEn ? "all posts →" : "tutto il blog →"}</a>
+      </div>
+      <ul class="dcc-posts">
+        {posts.map((p) => (
+          <li>
+            <span class="dcc-post-date">{p.date}</span>
+            <a href={`${prefix}/blog/${p.slug}/`} set:html={p.title} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="dcc-section">
+    <div class="dcc-contact">
+      <div>
+        <span class="dcc-contact-label">{copy.contactLabel}</span>
+        <a class="dcc-contact-mail" href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com</a>
+      </div>
+      <span class="dcc-contact-meta">{copy.contactMeta}</span>
+    </div>
+  </section>
+</div>

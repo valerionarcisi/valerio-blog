@@ -1,0 +1,461 @@
+---
+import { formatMoneyCompact } from "~/lib/format-money";
+import { letterboxdFilmUrl } from "~/lib/letterboxd-slug";
+import "./DcHome.css";
+
+interface Props {
+  lang: "it" | "en";
+  featuredPost?: any;
+  secondaryPosts: any[];
+  postStats: { claps: Record<string, number>; comments: Record<string, number> };
+  films: any[];
+  lastWatched: any[];
+  lastSongs: any[];
+  latestReview?: any;
+  latestReviewExcerpt?: string;
+  latestReviewClaps?: number;
+}
+
+const {
+  lang,
+  featuredPost,
+  secondaryPosts,
+  postStats,
+  films,
+  lastWatched,
+  lastSongs,
+  latestReview = null,
+  latestReviewExcerpt = "",
+  latestReviewClaps = 0,
+} = Astro.props;
+
+const isEn = lang === "en";
+const prefix = isEn ? "/en" : "";
+const locale = isEn ? "en-GB" : "it-IT";
+
+const t = isEn
+  ? {
+      rec: "● REC",
+      place: "PORTO SANT'ELPIDIO — MARCHE",
+      portraitAlt: "Valerio, close-up portrait",
+      lede1: "I make films and write code.",
+      lede2: "In both, I solve problems.",
+      doors: [
+        { who: "FOR FESTIVALS", what: "Candy, 2025", cta: "page and screener", href: `${prefix}/films/caramella/` },
+        { who: "FOR DEVELOPERS", what: "Code", cta: "CV and technical writing", href: `${prefix}/code` },
+        { who: "FOR READERS", what: "The blog", cta: "latest writing", href: `${prefix}/blog/` },
+      ],
+      doorsLabel: "Where to start",
+      scene1: "SEQ. 01 — INT. DESK — NIGHT",
+      writing: "writing",
+      allPosts: "all posts →",
+      mostRead: "most read",
+      reads: "reads",
+      comments: "comments",
+      scene2: "SEQ. 02 — EXT. MARCHE — DAY",
+      filmography: "filmography",
+      allFilms: "all films →",
+      scene3: "SEQ. 03 — INT. EDIT SUITE — NIGHT",
+      nfrTitle: "IT'S NOT FUNNY",
+      nfrAlt: "The open mic stage on the set of It's Not Funny",
+      nfrLede:
+        "A small-town pizzeria, an improvised open mic. Filippo wants to make people laugh, but the night doesn't cooperate. Four shooting days, sixty people on set.",
+      nfrSteps: [
+        { label: "WRITING ✓", state: "done" },
+        { label: "SHOOT ✓", state: "done" },
+        { label: "● EDIT", state: "now" },
+        { label: "GRADE", state: "todo" },
+        { label: "MIX", state: "todo" },
+        { label: "FESTIVALS", state: "todo" },
+      ],
+      nfrStatus: "Production status",
+      nfrCta: "THE PROJECT",
+      nfrPlay: "play while you wait →",
+      scene4: "SEQ. 04 — INT. SMALL-TOWN CINEMA — EVENING",
+      lastReview: "my latest review",
+      by: "by",
+      watchedOn: "watched on",
+      liked: "I liked it",
+      readOn: "Read on Watched →",
+      claps: "claps",
+      watched: "recently watched",
+      allWatched: "full diary →",
+      watchedHref: `${prefix}/watched`,
+      listening: "now playing",
+      allListening: "all tracks →",
+      listeningHref: "/en/listening",
+      unavailable: "Data not available right now.",
+      howBuilt: "how I built it →",
+      watchedBuild: "/en/blog/",
+      musicBuild: "/en/blog/",
+      quote:
+        "Making a film or building a product is always the same thing: a group of people who trust a vision — and get there together.",
+      aboutCta: "About me →",
+      aboutHref: `${prefix}/who-i-am`,
+      recently: "recently",
+      likedTitle: "I liked it",
+      byLabel: "by",
+    }
+  : {
+      rec: "● REC",
+      place: "PORTO SANT'ELPIDIO — MARCHE",
+      portraitAlt: "Valerio, ritratto in primo piano",
+      lede1: "Faccio film e scrivo codice.",
+      lede2: "In tutti e due risolvo problemi.",
+      doors: [
+        { who: "PER I FESTIVAL", what: "Caramella, 2025", cta: "scheda e screener", href: `${prefix}/films/caramella/` },
+        { who: "PER CHI PROGRAMMA", what: "Codice", cta: "CV e scritti tecnici", href: `${prefix}/codice` },
+        { who: "PER CHI LEGGE", what: "Il blog", cta: "ultimi scritti", href: `${prefix}/blog/` },
+      ],
+      doorsLabel: "Da dove cominciare",
+      scene1: "SEQ. 01 — INT. SCRIVANIA — NOTTE",
+      writing: "scritti",
+      allPosts: "tutto il blog →",
+      mostRead: "più letto",
+      reads: "letture",
+      comments: "commenti",
+      scene2: "SEQ. 02 — EST. MARCHE — GIORNO",
+      filmography: "filmografia",
+      allFilms: "tutti i film →",
+      scene3: "SEQ. 03 — INT. SALA MONTAGGIO — NOTTE",
+      nfrTitle: "NON FA RIDERE",
+      nfrAlt: "Il palco dell'open mic sul set di Non fa ridere",
+      nfrLede:
+        "Una pizzeria di provincia, un open mic improvvisato. Filippo vuole far ridere, ma la serata non collabora. Quattro giorni di riprese, sessanta persone sul set.",
+      nfrSteps: [
+        { label: "SCRITTURA ✓", state: "done" },
+        { label: "RIPRESE ✓", state: "done" },
+        { label: "● MONTAGGIO", state: "now" },
+        { label: "COLOR", state: "todo" },
+        { label: "MIX", state: "todo" },
+        { label: "FESTIVAL", state: "todo" },
+      ],
+      nfrStatus: "Stato della lavorazione",
+      nfrCta: "IL PROGETTO",
+      nfrPlay: "gioca mentre aspetti →",
+      scene4: "SEQ. 04 — INT. CINEMA DI PROVINCIA — SERA",
+      lastReview: "la mia ultima recensione",
+      by: "di",
+      watchedOn: "visto il",
+      liked: "mi è piaciuto",
+      readOn: "Leggi su Visti →",
+      claps: "applausi",
+      watched: "visti di recente",
+      allWatched: "diario completo →",
+      watchedHref: `${prefix}/visti`,
+      listening: "in cuffia adesso",
+      allListening: "tutti gli ascolti →",
+      listeningHref: "/ascolti",
+      unavailable: "Dati non disponibili al momento.",
+      howBuilt: "come l'ho costruito →",
+      watchedBuild: "/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed",
+      musicBuild: "/blog/how-i-display-my-recently-played-music-using-lastfm-api",
+      quote:
+        "Fare un film o costruire un prodotto, alla fine è sempre la stessa cosa: un gruppo di persone che si fidano di una visione, e ci arrivano insieme.",
+      aboutCta: "Chi sono →",
+      aboutHref: `${prefix}/who-i-am`,
+      recently: "di recente",
+      likedTitle: "Mi è piaciuto",
+      byLabel: "di",
+    };
+
+const nfrHref = `${prefix}/non-fa-ridere/`;
+
+function formatDate(d: string | Date): string {
+  return new Date(d).toLocaleDateString(locale, { day: "2-digit", month: "2-digit", year: "numeric" }).replaceAll("/", ".");
+}
+
+function shortDate(raw?: string): string {
+  if (!raw) return "";
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? raw : d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+}
+
+const rows = [featuredPost, ...secondaryPosts].filter(Boolean);
+const libSceneNum = latestReview ? "05" : "04";
+---
+
+
+<main class="dch">
+  <!-- Hero -->
+  <section class="dch-hero">
+    <div class="dch-rec">
+      <span><span class="dch-rec-dot">{t.rec}</span>  00:00:04:12  ·  ROLL 01  ·  2.39:1</span>
+      <span>{t.place}</span>
+    </div>
+    <div class="dc-frame">
+      <div class="dc-face dch-face">
+        <img src="/img/me.jpg" alt={t.portraitAlt} width="1200" height="1600" fetchpriority="high" />
+        <img src="/img/me.jpg" alt="" aria-hidden="true" class="dc-face-split" />
+      </div>
+      <span class="dc-mark dc-mark--tl"></span>
+      <span class="dc-mark dc-mark--tr"></span>
+      <span class="dc-mark dc-mark--bl"></span>
+      <span class="dc-mark dc-mark--br"></span>
+    </div>
+    <h1 class="dch-title">
+      <span class="dch-title-a">Valerio</span>
+      <span class="dch-title-b">narcisi</span>
+    </h1>
+  </section>
+
+  <section class="dch-intro">
+    <p class="dch-lede">{t.lede1} <em>{t.lede2}</em></p>
+    <nav class="dch-doors" aria-label={t.doorsLabel}>
+      {t.doors.map((d) => (
+        <a href={d.href} class="dch-door">
+          <span class="dch-door-who">{d.who}</span>
+          <span class="dch-door-what">{d.what}</span>
+          <span class="dch-door-cta">{d.cta} →</span>
+        </a>
+      ))}
+    </nav>
+  </section>
+
+  <!-- Writing -->
+  {rows.length > 0 && (
+    <section class="dch-section">
+      <p class="dc-scene">{t.scene1}</p>
+      <div class="dc-section-title">
+        <h2>{t.writing}</h2>
+        <a href={`${prefix}/blog/`}>{t.allPosts}</a>
+      </div>
+      <ul class="dch-posts">
+        {rows.map((post) => {
+          const claps = postStats.claps[post.slug] ?? 0;
+          const comments = postStats.comments[post.slug] ?? 0;
+          return (
+            <li class="dch-post">
+              <div class="dch-post-meta">
+                <span>{formatDate(post.date)}</span>
+                {post.tags?.[0] && <span class="dch-post-tag">{post.tags[0]}</span>}
+              </div>
+              <a href={`${prefix}/blog/${post.slug}/`} class="dch-post-link">
+                <span class="dch-post-title" set:html={post.title} />
+                {post.extract && <span class="dch-post-extract">{post.extract}</span>}
+                {(claps > 0 || comments > 0 || post.views > 0) && (
+                  <span class="dch-post-stats">
+                    {post.views > 0 && <span>{post.views} {t.reads}</span>}
+                    {claps > 0 && <span>♥ {claps}</span>}
+                    {comments > 0 && <span>{comments} {t.comments}</span>}
+                  </span>
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
+  <!-- Filmography -->
+  <section class="dch-section">
+    <p class="dc-scene">{t.scene2}</p>
+    <div class="dc-section-title">
+      <h2>{t.filmography}</h2>
+      <a href={`${prefix}/films/`}>{t.allFilms}</a>
+    </div>
+    <div class="dc-strip dch-strip">
+      <div class="dc-strip-edge"></div>
+      <div class="dch-frames">
+        {films.map((film, i) => (
+          <a href={`${prefix}/films/${film.slug}/`} class="dch-frame">
+            <div class="dc-grade dch-frame-img">
+              <img
+                src={film.coverImage ?? film.posterImage}
+                alt={film.title}
+                loading="lazy"
+                width="640"
+                height="268"
+              />
+            </div>
+            <div class="dch-frame-meta">
+              <span class="dch-frame-fr">FR {String(i + 1).padStart(2, "0")}A · {film.year}</span>
+              <span class="dch-frame-title">{film.title}</span>
+              <span class="dch-frame-role">{film.role}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="dc-strip-edge"></div>
+    </div>
+  </section>
+
+  <!-- Non fa ridere -->
+  <section class="dch-section">
+    <p class="dc-scene">{t.scene3}</p>
+    <div class="dch-nfr">
+      <div class="dc-grade dch-nfr-img">
+        <img src="/img/blog/non-fa-ridere-backstage/open-grezzo-palco.jpg" alt={t.nfrAlt} loading="lazy" />
+      </div>
+      <div class="dch-nfr-body">
+        <h2>{t.nfrTitle}</h2>
+        <p>{t.nfrLede}</p>
+        <ol class="dch-steps" aria-label={t.nfrStatus}>
+          {t.nfrSteps.map((s) => (
+            <li class={`dch-step dch-step--${s.state}`} aria-current={s.state === "now" ? "step" : undefined}>{s.label}</li>
+          ))}
+        </ol>
+        <div class="dch-nfr-actions">
+          <a href={nfrHref} class="dc-btn dc-btn--solid">{t.nfrCta}</a>
+          <a href={nfrHref} class="dch-nfr-play">{t.nfrPlay}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest review -->
+  {latestReview && (
+    <section class="dch-section">
+      <p class="dc-scene">{t.scene4}</p>
+      <div class="dc-section-title dc-section-title--sm">
+        <h2>{t.lastReview}</h2>
+      </div>
+      <div class="dch-review">
+        <a
+          class="dch-review-poster"
+          href={`/visti#review-${latestReview.slug}`}
+          style={latestReview.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w342/${latestReview.poster_path}')` : ""}
+          aria-label={latestReview["letterboxd:filmTitle"]?.[0]}
+        ></a>
+        <div class="dch-review-body">
+          <h3>
+            {letterboxdFilmUrl(latestReview.slug) ? (
+              <a href={letterboxdFilmUrl(latestReview.slug)} target="_blank" rel="noopener noreferrer">{latestReview["letterboxd:filmTitle"]?.[0]}</a>
+            ) : latestReview["letterboxd:filmTitle"]?.[0]}
+          </h3>
+          {latestReview.directors?.length > 0 && (
+            <p class="dch-review-dir">{t.by} {latestReview.directors.join(", ")}</p>
+          )}
+          <p class="dch-review-meta">
+            {latestReview.release_date && <span>{latestReview.release_date.slice(0, 4)}</span>}
+            {typeof latestReview.runtime === "number" && latestReview.runtime > 0 && <span>{latestReview.runtime}′</span>}
+            {latestReview["letterboxd:watchedDate"]?.[0] && (
+              <span>{t.watchedOn} {shortDate(latestReview["letterboxd:watchedDate"][0])}</span>
+            )}
+            {latestReview["letterboxd:memberLike"]?.[0] === "Yes" && <span class="dch-review-like">♥ {t.liked}</span>}
+          </p>
+          {latestReviewExcerpt && <p class="dch-review-quote" set:html={latestReviewExcerpt} />}
+          <div class="dch-review-actions">
+            <a href={`/visti#review-${latestReview.slug}`} class="dc-btn">{t.readOn}</a>
+            {latestReviewClaps > 0 && <span class="dch-review-claps">♥ {latestReviewClaps} {t.claps}</span>}
+          </div>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Library -->
+  <section class="dch-section dch-library">
+    <p class="dc-scene">{`SEQ. ${libSceneNum} — ${isEn ? "INT. CAR — DUSK" : "INT. AUTO — TRAMONTO"}`}</p>
+    <div class="dch-lib-grid">
+      <div class="fh-lib-block" data-watched-home>
+        <h3>{t.watched}</h3>
+        {lastWatched.length > 0 ? (
+          <ul class="fh-lib-list fh-lib-list--films" data-watched-list>
+            {lastWatched.slice(0, 5).map((movie: any) => (
+              <li>
+                {letterboxdFilmUrl(movie.slug) ? (
+                  <a
+                    class="fh-lib-cover fh-lib-cover-link"
+                    href={letterboxdFilmUrl(movie.slug)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
+                    aria-label={`${movie["letterboxd:filmTitle"]?.[0]} su Letterboxd`}
+                  ></a>
+                ) : (
+                  <div
+                    class="fh-lib-cover"
+                    style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
+                  ></div>
+                )}
+                <div class="fh-lib-title">
+                  {letterboxdFilmUrl(movie.slug) ? (
+                    <a class="fh-lib-title-link" href={letterboxdFilmUrl(movie.slug)} target="_blank" rel="noopener noreferrer"><em>{movie["letterboxd:filmTitle"]?.[0]}</em></a>
+                  ) : (
+                    <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
+                  )}
+                  {movie["letterboxd:memberLike"]?.[0] === "Yes" && <span class="fh-lib-like" title={t.likedTitle}>♥</span>}
+                  {movie.review && <span class="fh-lib-review-dot" title="Review"></span>}
+                  {(() => {
+                    const b = formatMoneyCompact(movie.budget);
+                    const r = formatMoneyCompact(movie.revenue);
+                    if (!b && !r) return null;
+                    return (
+                      <span class="fh-lib-money" title="Budget → Box office">
+                        {b ?? "—"} <span class="fh-lib-money-arrow">→</span> {r ?? "—"}
+                      </span>
+                    );
+                  })()}
+                  {movie.directors && movie.directors.length > 0 && (
+                    <span class="fh-lib-director">{t.byLabel} {movie.directors.join(", ")}</span>
+                  )}
+                </div>
+                <div class="fh-lib-detail">{shortDate(movie["letterboxd:watchedDate"]?.[0])}</div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="fh-lib-fallback">{t.unavailable}</p>
+        )}
+        <div class="fh-lib-actions">
+          <a href={t.watchedHref} class="dch-lib-link">{t.allWatched}</a>
+          <a href={t.watchedBuild} class="dch-lib-link dch-lib-secondary">{t.howBuilt}</a>
+        </div>
+      </div>
+
+      <div class="fh-lib-block">
+        <h3>{t.listening}</h3>
+        {lastSongs.length > 0 ? (
+          <ul class="fh-lib-list fh-lib-list--music">
+            {lastSongs.slice(0, 5).map((song: any) => (
+              <li>
+                <div
+                  class="fh-lib-cover"
+                  style={song.image?.[3]?.["#text"] ? `background-image: url('${song.image[3]["#text"]}')` : ""}
+                ></div>
+                <div class="fh-lib-title">
+                  {song.artist?.["#text"]} — <em>{song.name}</em>
+                </div>
+                <div class="fh-lib-detail">{(() => {
+                  const raw = song.date?.["#text"];
+                  if (!raw) return t.recently;
+                  const d = new Date(raw + " UTC");
+                  return isNaN(d.getTime()) ? raw : d.toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" });
+                })()}</div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="fh-lib-fallback">{t.unavailable}</p>
+        )}
+        <div class="fh-lib-actions">
+          <a href={t.listeningHref} class="dch-lib-link">{t.allListening}</a>
+          <a href={t.musicBuild} class="dch-lib-link dch-lib-secondary">{t.howBuilt}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="dch-about">
+    <p class="dch-quote">{t.quote}</p>
+    <a href={t.aboutHref} class="dc-btn">{t.aboutCta}</a>
+  </section>
+</main>
+
+<script define:vars={{ locale, byLabel: t.byLabel, likedLabel: t.likedTitle }}>
+  window.__dchWatched = { locale, byLabel, likedLabel };
+</script>
+<script>
+  import { fetchWatched, renderCompact } from "~/scripts/watched-movies";
+  const block = document.querySelector<HTMLElement>("[data-watched-home]");
+  const opts = (window as unknown as { __dchWatched: { locale: string; byLabel: string; likedLabel: string } }).__dchWatched;
+  if (block && opts) {
+    fetchWatched()
+      .then((movies) => {
+        if (movies.length > 0) renderCompact(block, movies, opts);
+      })
+      .catch(() => {});
+  }
+</script>

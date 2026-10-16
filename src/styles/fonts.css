@@ -106,3 +106,33 @@
   font-style: normal;
   font-display: optional;
 }
+
+/* ============================================
+   Dopamine Chamber redesign — Archivo (wdth + wght axes),
+   Instrument Serif (lead/italic only), JetBrains Mono above
+   ============================================ */
+@font-face {
+  font-family: "Archivo Variable";
+  src: url("@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2")
+    format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: optional;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: optional;
+}

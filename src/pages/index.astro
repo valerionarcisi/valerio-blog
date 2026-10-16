@@ -3,6 +3,7 @@ import BaseHead from "~/components/BaseHead.astro";
 import StructuredData from "~/components/StructuredData.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
+import DcHome from "~/components/DcHome.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
 import {
   getLetterboxdRss,
@@ -12,14 +13,12 @@ import {
 } from "~/services/letterboxd";
 import { getMovieById, extractDirectors } from "~/services/tmdb";
 import { fetchRecentTracks } from "~/services/audioscrobbler";
-import { formatMoneyCompact } from "~/lib/format-money";
-import { letterboxdFilmUrl } from "~/lib/letterboxd-slug";
 import { getTopPosts } from "~/lib/top-posts";
 import { fetchPostStats, fetchReviewClaps } from "~/lib/post-stats";
 import { getCollection } from "astro:content";
 import { getLangFromId, getSlugFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
-import "./FoglioHome.css";
+import "~/styles/dc.css";
 
 const lastWatchedMovies = async () => {
   const xml = await getLetterboxdRss();
@@ -82,7 +81,6 @@ const fallbackPosts = postsByDate
 
 const secondaryPosts = [...topPosts, ...fallbackPosts];
 
-const posts = postsByDate.slice(0, 5);
 
 const allFilmEntries = await getCollection("films");
 const films = allFilmEntries
@@ -108,14 +106,11 @@ const latestReviewExcerpt = latestReview
   : "";
 const latestReviewClaps = latestReview ? (reviewClaps[latestReview.slug] ?? 0) : 0;
 
-function formatDate(dateStr: string | Date): string {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
-}
+
 ---
 
 <!doctype html>
-<html lang="it" class="foglio">
+<html lang="it" class="foglio dc">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} lang="it" />
     <StructuredData
@@ -128,302 +123,18 @@ function formatDate(dateStr: string | Date): string {
   </head>
   <body>
     <FoglioHeader lang="it" />
-    <main>
-    <hr class="foglio-rule" />
-
-    <!-- 1. Hero -->
-    <section class="fh-hero">
-      <div class="fh-hero-text">
-        <h1>Scrivo storie. <em>Le più fortunate</em> diventano film.</h1>
-        <p class="fh-hero-lede">
-          <strong>Faccio film e scrivo codice</strong>. In tutti e due, <em class="acc">quello che faccio davvero è risolvere problemi</em> — cercare il punto in cui qualcosa sta in piedi da solo. Vivo a Porto Sant'Elpidio. Ho diretto <strong>Caramella</strong> (2025), sto montando <strong>Non fa ridere</strong>, sto scrivendo il prossimo. In parallelo costruisco <strong>Oh Writers</strong>, l'editor di sceneggiature italiano che avrei voluto io.
-        </p>
-      </div>
-      <aside class="fh-portrait">
-        <div class="fh-portrait-img"></div>
-        <div class="fh-portrait-caption">Valerio · 2026</div>
-      </aside>
-    </section>
-
-    <!-- 2. Adesso -->
-    <section class="fh-now">
-      <div class="fh-now-inner">
-        <h2>Adesso.</h2>
-        <div class="fh-now-body">
-          <p>
-            <em class="acc">Oh Writers</em> — un editor per sceneggiature, italiano, costruito per come si scrive un copione qui da noi. Soggetto, scaletta, breakdown, budget, location, schedule: tutto nello stesso posto.
-          </p>
-          <p>
-            <em class="acc">Non fa ridere</em> — il mio nuovo cortometraggio. Quattro giorni di riprese al Ristorante L'Oasi del Gusto a Piane di Falerone, sessanta persone sul set. Ora è in montaggio.
-          </p>
-          <a href="mailto:valerio.narcisi@gmail.com?subject=Richiesta%20tour%20Oh%20Writers&body=Ciao%20Valerio%2C%0A%0AVorrei%20vedere%20una%20demo%2Ftour%20di%20Oh%20Writers.%0A%0AGrazie%21" class="foglio-readmore fh-now-link">Richiedi il tour di Oh Writers →</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2b. Non fa ridere promo -->
-    <section class="fh-nfr">
-      <a href="/non-fa-ridere/" class="fh-nfr-inner">
-        <figure class="fh-nfr-figure">
-          <div class="fh-nfr-img" role="img" aria-label="Dal set di Non Fa Ridere"></div>
-        </figure>
-        <div class="fh-nfr-body">
-          <p class="fh-nfr-eyebrow">Cortometraggio · In lavorazione</p>
-          <h2>Non Fa Ridere</h2>
-          <p class="fh-nfr-lede">Una pizzeria di provincia, un open mic improvvisato. Filippo vuole far ridere — ma la serata non collabora. Mentre aspetti: gioca e finisci in classifica.</p>
-          <span class="fh-nfr-cta">Gioca <span class="fh-nfr-arrow">→</span></span>
-        </div>
-      </a>
-    </section>
-
-    <!-- 3. Film grid -->
-    <section class="fh-films">
-      <div class="fh-section-head">
-        <h2>Film</h2>
-        <a href="/films/" class="foglio-readmore">Vedi tutto →</a>
-      </div>
-      <div class="fh-films-grid">
-        {films.map((film) => (
-          <a
-            href={`/films/${film.slug}/`}
-            class={`fh-film${film.status === "in-production" ? " fh-film--wip" : ""}`}
-          >
-            <div class="fh-film-frame">
-              <div
-                class="fh-film-poster"
-                style={`background-image: url('${film.posterImage ?? film.coverImage}')`}
-              >
-                {film.status === "in-production" && (
-                  <span class="fh-film-wip-badge">in lavorazione</span>
-                )}
-              </div>
-            </div>
-            <div class="fh-film-meta">{film.year} · {film.role}</div>
-            <h3>{film.title}</h3>
-            {film.plot && <p>{film.plot.slice(0, 80)}…</p>}
-          </a>
-        ))}
-      </div>
-    </section>
-
-    <!-- 4. Blog spread -->
-    <section class="fh-writing">
-      <div class="fh-section-head">
-        <h2>Blog</h2>
-        <a href="/blog/" class="foglio-readmore">Vedi tutto →</a>
-      </div>
-      {featuredPost && (
-        <div class="fh-writing-grid">
-          <a href={`/blog/${featuredPost.slug}/`} class="fh-post-featured">
-            {featuredPost.coverImage && (
-              <div
-                class="fh-post-featured-cover"
-                style={`background-image: url('${featuredPost.coverImage}')`}
-                role="img"
-                aria-label={featuredPost.title}
-              />
-            )}
-            <div class="fh-post-featured-body">
-              <div class="fh-post-featured-num">N° 01 · l'ultimo</div>
-              <h3 set:html={featuredPost.title} />
-              {featuredPost.extract && <p>{featuredPost.extract}</p>}
-              <div class="fh-post-featured-meta">
-                <span>{formatDate(featuredPost.date)}</span>
-                {featuredPost.tags?.[0] && <span>{featuredPost.tags[0]}</span>}
-                {(postStats.claps[featuredPost.slug] ?? 0) > 0 && (
-                  <span>♥ {postStats.claps[featuredPost.slug]}</span>
-                )}
-                {(postStats.comments[featuredPost.slug] ?? 0) > 0 && (
-                  <span>{postStats.comments[featuredPost.slug]} commenti</span>
-                )}
-              </div>
-            </div>
-          </a>
-
-          <div class="fh-post-secondary">
-            <div class="fh-post-secondary-label">I più letti</div>
-            {secondaryPosts.map((post) => {
-              const claps = postStats.claps[post.slug] ?? 0;
-              const comments = postStats.comments[post.slug] ?? 0;
-              return (
-                <a href={`/blog/${post.slug}/`} class="fh-post-row">
-                  <div class="fh-post-row-meta">
-                    {formatDate(post.date)}{post.tags?.[0] ? ` · ${post.tags[0]}` : ""}
-                    {post.views > 0 && <span class="fh-post-row-views">{post.views} letture</span>}
-                    {claps > 0 && <span class="fh-post-row-stat">♥ {claps}</span>}
-                    {comments > 0 && <span class="fh-post-row-stat fh-post-row-stat-dim">{comments} commenti</span>}
-                  </div>
-                  <h4 set:html={post.title} />
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </section>
-
-    <!-- 4b. Latest film review -->
-    {latestReview && (
-      <section class="fh-review">
-        <div class="fh-review-inner">
-          <p class="fh-review-eyebrow">La mia ultima recensione</p>
-          <div class="fh-review-grid">
-            <a class="fh-review-poster" href={`/visti#review-${latestReview.slug}`}
-              style={latestReview.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w342/${latestReview.poster_path}')` : ""}
-              aria-label={latestReview["letterboxd:filmTitle"]?.[0]}
-            ></a>
-            <div class="fh-review-body">
-              <h3 class="fh-review-filmtitle">
-                {letterboxdFilmUrl(latestReview.slug) ? (
-                  <a class="fh-review-lbxd" href={letterboxdFilmUrl(latestReview.slug)} target="_blank" rel="noopener noreferrer">{latestReview["letterboxd:filmTitle"]?.[0]}</a>
-                ) : latestReview["letterboxd:filmTitle"]?.[0]}
-              </h3>
-              {latestReview.directors?.length > 0 && (
-                <p class="fh-review-dir">di {latestReview.directors.join(", ")}</p>
-              )}
-              <div class="fh-review-meta">
-                {latestReview.release_date && <span>{latestReview.release_date.slice(0, 4)}</span>}
-                {typeof latestReview.runtime === "number" && latestReview.runtime > 0 && (
-                  <span>{latestReview.runtime}′</span>
-                )}
-                {latestReview["letterboxd:watchedDate"]?.[0] && (
-                  <span>visto il {formatDate(latestReview["letterboxd:watchedDate"][0])}</span>
-                )}
-                {latestReview["letterboxd:memberLike"]?.[0] === "Yes" && (
-                  <span class="rating">♥ mi è piaciuto</span>
-                )}
-              </div>
-              {latestReviewExcerpt && (
-                <p class="fh-review-quote" set:html={latestReviewExcerpt} />
-              )}
-              <div class="fh-review-actions">
-                <a href={`/visti#review-${latestReview.slug}`} class="foglio-readmore">Leggi su Visti →</a>
-                {latestReviewClaps > 0 && (
-                  <span class="fh-review-claps">♥ {latestReviewClaps} applausi</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    )}
-
-    <!-- 5. Library -->
-    <section class="fh-library">
-      <div class="fh-library-inner">
-        <div class="fh-lib-block" data-watched-home>
-          <h3>Visti di recente.</h3>
-          {lastWatched.length > 0 ? (
-            <ul class="fh-lib-list fh-lib-list--films" data-watched-list>
-              {(lastWatched as any[]).slice(0, 5).map((movie: any) => (
-                <li>
-                  {letterboxdFilmUrl(movie.slug) ? (
-                    <a
-                      class="fh-lib-cover fh-lib-cover-link"
-                      href={letterboxdFilmUrl(movie.slug)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
-                      aria-label={`${movie["letterboxd:filmTitle"]?.[0]} su Letterboxd`}
-                    ></a>
-                  ) : (
-                    <div
-                      class="fh-lib-cover"
-                      style={movie.poster_path ? `background-image: url('https://image.tmdb.org/t/p/w92/${movie.poster_path}')` : ""}
-                    ></div>
-                  )}
-                  <div class="fh-lib-title">
-                    {letterboxdFilmUrl(movie.slug) ? (
-                      <a class="fh-lib-title-link" href={letterboxdFilmUrl(movie.slug)} target="_blank" rel="noopener noreferrer"><em>{movie["letterboxd:filmTitle"]?.[0]}</em></a>
-                    ) : (
-                      <em>{movie["letterboxd:filmTitle"]?.[0]}</em>
-                    )}
-                    {movie["letterboxd:memberLike"]?.[0] === "Yes" && <span class="fh-lib-like" title="Mi è piaciuto">♥</span>}
-                    {movie.review && <span class="fh-lib-review-dot" title="Ha una recensione"></span>}
-                    {(() => {
-                      const b = formatMoneyCompact(movie.budget);
-                      const r = formatMoneyCompact(movie.revenue);
-                      if (!b && !r) return null;
-                      return (
-                        <span class="fh-lib-money" title="Budget → Box office">
-                          {b ?? "—"} <span class="fh-lib-money-arrow">→</span> {r ?? "—"}
-                        </span>
-                      );
-                    })()}
-                    {movie.directors && movie.directors.length > 0 && (
-                      <span class="fh-lib-director">di {movie.directors.join(", ")}</span>
-                    )}
-                  </div>
-                  <div class="fh-lib-detail">{(() => {
-                    const raw = movie["letterboxd:watchedDate"]?.[0];
-                    if (!raw) return "";
-                    const d = new Date(raw);
-                    return isNaN(d.getTime()) ? raw : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
-                  })()}</div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="fh-lib-fallback">Dati non disponibili al momento.</p>
-          )}
-          <div class="fh-lib-actions">
-            <a href="/visti" class="foglio-readmore">Vedi tutti →</a>
-            <a href="/blog/how-i-display-my-latest-watched-movies-using-letterboxd-rss-feed" class="foglio-readmore fh-lib-secondary">Come l'ho costruito →</a>
-          </div>
-        </div>
-
-        <div class="fh-lib-block">
-          <h3>Ascoltato.</h3>
-          {lastSongs.length > 0 ? (
-            <ul class="fh-lib-list fh-lib-list--music">
-              {(lastSongs as any[]).slice(0, 5).map((song: any) => (
-                <li>
-                  <div
-                    class="fh-lib-cover"
-                    style={song.image?.[3]?.["#text"] ? `background-image: url('${song.image[3]["#text"]}')` : ""}
-                  ></div>
-                  <div class="fh-lib-title">
-                    {song.artist?.["#text"]} — <em>{song.name}</em>
-                  </div>
-                  <div class="fh-lib-detail">{(() => {
-                    const raw = song.date?.["#text"];
-                    if (!raw) return "di recente";
-                    const d = new Date(raw + " UTC");
-                    return isNaN(d.getTime()) ? raw : d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
-                  })()}</div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p class="fh-lib-fallback">Dati non disponibili al momento.</p>
-          )}
-          <div class="fh-lib-actions">
-            <a href="/ascolti" class="foglio-readmore">Vedi tutti →</a>
-            <a href="/blog/how-i-display-my-recently-played-music-using-lastfm-api" class="foglio-readmore fh-lib-secondary">Come l'ho costruito →</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 6. About strip -->
-    <section class="fh-about-strip">
-      <p class="fh-quote">"Fare un film o costruire un prodotto, alla fine è sempre la stessa cosa. <em class="acc">Un gruppo di persone che si fidano di una visione</em> — e ci arrivano insieme."</p>
-      <a href="/who-i-am" class="foglio-readmore">Chi sono →</a>
-    </section>
-
-    </main>
+    <DcHome
+      lang="it"
+      featuredPost={featuredPost}
+      secondaryPosts={secondaryPosts}
+      postStats={postStats}
+      films={films}
+      lastWatched={lastWatched as any[]}
+      lastSongs={lastSongs as any[]}
+      latestReview={latestReview}
+      latestReviewExcerpt={latestReviewExcerpt}
+      latestReviewClaps={latestReviewClaps}
+    />
     <FoglioFooter lang="it" />
-
-    <script>
-      import { fetchWatched, renderCompact } from "~/scripts/watched-movies";
-      const block = document.querySelector<HTMLElement>("[data-watched-home]");
-      if (block) {
-        fetchWatched()
-          .then((movies) => {
-            if (movies.length > 0) renderCompact(block, movies, { locale: "it-IT", byLabel: "di", likedLabel: "Mi è piaciuto" });
-          })
-          .catch(() => {});
-      }
-    </script>
   </body>
 </html>

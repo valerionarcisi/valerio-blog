@@ -5,6 +5,8 @@ import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { getLangFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
+import "~/layouts/FoglioListLayout.css";
 
 const allEntries = await getCollection("blog");
 const langPosts = allEntries.filter((e) => getLangFromId(e.id) === "en");
@@ -26,7 +28,7 @@ function label(tag: string): string {
 ---
 
 <!doctype html>
-<html lang="en" class="foglio">
+<html lang="en" class="foglio dc">
   <head>
     <BaseHead
       title="Tags | Valerio Narcisi"
@@ -39,7 +41,7 @@ function label(tag: string): string {
     <main>
 
     <header class="fl-head">
-      <h1><em class="acc">Tags</em>.</h1>
+      <h1 class="dc-page-title" style="--lw:5"><em class="acc">Tags</em>.</h1>
       <p>All blog topics, ordered by post count.</p>
     </header>
 
@@ -58,15 +60,18 @@ function label(tag: string): string {
       .fl-tag-cloud {
         max-width: var(--foglio-maxw);
         margin: 2rem auto 4rem;
-        padding: 0 3rem;
+        padding: 0 var(--dc-gutter);
         display: flex;
         flex-wrap: wrap;
         gap: 0.6rem;
       }
       .fl-tag-chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
         padding: 0.5rem 1rem;
-        border: 1px solid var(--foglio-rule);
-        border-radius: 100px;
+        border: 1px solid var(--foglio-rule-strong);
+        border-radius: 0;
         color: var(--foglio-ink);
         text-decoration: none;
         font-family: var(--foglio-mono);
@@ -84,7 +89,6 @@ function label(tag: string): string {
         color: var(--foglio-ink-soft);
       }
       @media (max-width: 767px) {
-        .fl-tag-cloud { padding: 0 1.4rem; }
       }
     </style>
   </body>

@@ -1,6 +1,6 @@
 # valerionarcisi.me
 
-Personal site of Valerio Narcisi — filmmaker, sceneggiatore, sviluppatore. Cortometraggi, blog tecnico-narrativo, prodotti in costruzione (Oh Writers), dashboard private.
+Personal site of Valerio Narcisi — filmmaker, sceneggiatore, sviluppatore. Cortometraggi, blog tecnico-narrativo, pagina Codice (CV), dashboard private.
 
 Live: <https://valerionarcisi.me>. Built with **Astro 7** on **Netlify**, content in Markdown, data layer on **Turso**.
 
@@ -8,17 +8,17 @@ Live: <https://valerionarcisi.me>. Built with **Astro 7** on **Netlify**, conten
 
 ## Stack
 
-| Layer           | Choice                                                                         |
-| --------------- | ------------------------------------------------------------------------------ |
-| Framework       | Astro 7 (static + Netlify Functions for server endpoints)                      |
-| Language        | TypeScript strict, ESM                                                         |
-| Package manager | pnpm                                                                           |
-| Node            | 20+ (pnpm requires it)                                                         |
-| Styling         | Plain CSS, co-located per component (no framework)                             |
-| Design system   | **Foglio** — cream paper, EB Garamond serif, JetBrains Mono, terracotta accent |
-| Database        | **Turso** (libsql) — comments, claps, analytics, editorial agents             |
-| Deployment      | Netlify (auto-deploy on push to `main`)                                        |
-| i18n            | Italian (default, no prefix) + English (`/en/`)                                |
+| Layer           | Choice                                                                                    |
+| --------------- | ----------------------------------------------------------------------------------------- |
+| Framework       | Astro 7 (static + Netlify Functions for server endpoints)                                 |
+| Language        | TypeScript strict, ESM                                                                    |
+| Package manager | pnpm                                                                                      |
+| Node            | 20+ (pnpm requires it)                                                                    |
+| Styling         | Plain CSS, co-located per component (no framework)                                        |
+| Design system   | **Dopamine Chamber** (public, dark) on top of **Foglio** tokens (admin keeps cream paper) |
+| Database        | **Turso** (libsql) — comments, claps, analytics, editorial agents                         |
+| Deployment      | Netlify (auto-deploy on push to `main`)                                                   |
+| i18n            | Italian (default, no prefix) + English (`/en/`)                                           |
 
 ---
 
@@ -35,11 +35,12 @@ Live: <https://valerionarcisi.me>. Built with **Astro 7** on **Netlify**, conten
 | `/visti/`                                    | Films watched (Letterboxd + TMDB), with budget/revenue and unique directors stats                                           |
 | `/ascolti/`                                  | Music listening from Last.FM (top albums, top artists, recent scrobbles)                                                    |
 | `/tag/` `/tag/[tag]/[...page]`               | Tag index + per-tag archive (all tag pages noindex,follow)                                                                  |
+| `/codice/` (`/en/code/`)                     | Code page built from the CV: numbers, experience, method, tools, technical posts                                            |
 | `/who-i-am/` `/contatti/` `/privacy-policy/` | About, contact, privacy                                                                                                     |
 | `/non-fa-ridere/`                            | Coming-soon page for the short film, with a Canvas mini-game (Filippo throws pizzas at the cast) + global Turso leaderboard |
 | `/en/...`                                    | English mirror                                                                                                              |
 
-The home → film/blog/visti/ascolti → post/film detail flow uses the **Foglio** design system: `src/styles/foglio.css` defines the token vocabulary (`--foglio-*` for colors, fluid type scale, layout), individual layouts compose them.
+Public pages use the **Dopamine Chamber** design system (`src/styles/dc.css`, spec: `docs/dopamine-chamber-spec.md`): dark-only, cinema vocabulary, `<html class="foglio dc">`. It remaps the **Foglio** tokens (`src/styles/foglio.css`, `--foglio-*`), which admin pages still use as-is. Blog posts take an optional `mood: quiet` frontmatter field for personal posts (no distortion).
 
 ### Content layer
 
@@ -105,7 +106,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 
 Built with co-located CSS files. Key reusable atoms:
 
-- `FoglioHeader` `FoglioFooter` — Foglio layout chrome with theme toggle (light/dark)
+- `FoglioHeader` `FoglioFooter` — public chrome (nav with phone menu, end-credits footer); `DcHome` `DcCode` `DcFilters` — Dopamine Chamber home, code page, shared SVG filters
 - `BaseHead` — meta tags, hreflang, OG, JSON-LD, analytics injection
 - `Comments` — full comment thread with auto-login, likes, nested replies
 - `ShareButtons` — X/LinkedIn/Reddit + Web Share API fallback
@@ -119,16 +120,16 @@ Built with co-located CSS files. Key reusable atoms:
 
 Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an HttpOnly session cookie is set and the token is stripped from the URL; see `docs/admin-auth-spec.md`):
 
-| Page                | What                                                                                                            |
-| ------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/admin/analytics`  | GA-style analytics dashboard (Panoramica, Utenti, Acquisizione, Coinvolgimento, Tecnologia, Bot & qualità): live users, sessions timeline, scorecards with deltas, geo map, bot rules |
-| `/admin/comments`   | Moderation queue + claps recap + activity feed                                                                  |
-| `/admin`            | "Oggi" home: next event countdown, today's analytics and meals, links to every page                             |
-| `/admin/strava` → `/admin/training` | Training plan, week stats, race target; the "Attività" tab has the Strava donut, recent activities and yearly heatmap |
-| `/admin/body-comp`  | BIA body composition with charts (FFM, FM, BMI, BMR, PhA) and a "last measurement" banner                        |
-| `/admin/meal-plan`  | Tabs: weekly plan, shopping list (`#spesa`), recipes (`#ricette`); `/admin/grocery` and `/admin/recipes` redirect |
-| `/admin/arte-di-narrare` | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                  |
-| `/admin/radar`      | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `src/data/radar.json` (served via `GET /api/admin/radar`), filters + search  |
+| Page                                | What                                                                                                                                                                                  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/admin/analytics`                  | GA-style analytics dashboard (Panoramica, Utenti, Acquisizione, Coinvolgimento, Tecnologia, Bot & qualità): live users, sessions timeline, scorecards with deltas, geo map, bot rules |
+| `/admin/comments`                   | Moderation queue + claps recap + activity feed                                                                                                                                        |
+| `/admin`                            | "Oggi" home: next event countdown, today's analytics and meals, links to every page                                                                                                   |
+| `/admin/strava` → `/admin/training` | Training plan, week stats, race target; the "Attività" tab has the Strava donut, recent activities and yearly heatmap                                                                 |
+| `/admin/body-comp`                  | BIA body composition with charts (FFM, FM, BMI, BMR, PhA) and a "last measurement" banner                                                                                             |
+| `/admin/meal-plan`                  | Tabs: weekly plan, shopping list (`#spesa`), recipes (`#ricette`); `/admin/grocery` and `/admin/recipes` redirect                                                                     |
+| `/admin/arte-di-narrare`            | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                                                                                            |
+| `/admin/radar`                      | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `src/data/radar.json` (served via `GET /api/admin/radar`), filters + search                                  |
 
 `src/data/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
 GitHub Actions workflow (`.github/workflows/radar-weekly.yml`): `scripts/radar-update.mjs`
@@ -237,25 +238,25 @@ pnpm test:watch   # Vitest watch mode
 
 Feature-level specs are in `docs/`. Each adds context that a future developer (or future me) needs to understand a decision or a non-obvious mechanism.
 
-| Doc                                                                                                                | What                                                                           |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `analytics-spec.md`                                                                                                | Cookieless analytics system, bot detection, suspect flagging                   |
-| `blog-spec.md`                                                                                                     | Blog list + post layout decisions                                              |
-| `comments-spec.md`                                                                                                 | Comments + likes + moderation flow                                             |
-| `contact-spec.md`                                                                                                  | Contact form + Resend transactional email                                      |
-| `lastfm-spec.md`                                                                                                   | Last.FM ingestion + `/ascolti`                                                 |
-| `letterboxd-spec.md`                                                                                               | Letterboxd RSS + TMDB enrichment + `/visti` client refresh                     |
+| Doc                                                                         | What                                                                           |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `analytics-spec.md`                                                         | Cookieless analytics system, bot detection, suspect flagging                   |
+| `blog-spec.md`                                                              | Blog list + post layout decisions                                              |
+| `comments-spec.md`                                                          | Comments + likes + moderation flow                                             |
+| `contact-spec.md`                                                           | Contact form + Resend transactional email                                      |
+| `lastfm-spec.md`                                                            | Last.FM ingestion + `/ascolti`                                                 |
+| `letterboxd-spec.md`                                                        | Letterboxd RSS + TMDB enrichment + `/visti` client refresh                     |
 | `meal-plan-spec.md` `body-comp-spec.md` `strava-spec.md` `training-spec.md` | Admin dashboards                                                               |
-| `post-claps-spec.md`                                                                                               | Medium-style claps system                                                      |
-| `telegram-bot-spec.md`                                                                                             | Idea Catcher Telegram bot details                                              |
-| `editorial-strategy.md`                                                                                            | Editorial constitution (audience, columns, cadence)                            |
-| `voice-profile.md`                                                                                                 | Voice profile loaded by agents at runtime                                      |
-| `non-fa-ridere-spec.md`                                                                                            | `/non-fa-ridere/` coming-soon page + arcade mini-game + leaderboard (as built) |
-| `non-fa-ridere-game-spec.md`                                                                                       | Superseded early brainstorm (interactive-fiction concept)                      |
-| `porting-foglio-plan.md`                                                                                           | Migration plan to the Foglio design system                                     |
-| `setup/telegram-bot.md`                                                                                            | Telegram bot setup walkthrough                                                 |
-| `superpowers/specs/`                                                                                               | Larger system designs                                                          |
-| `superpowers/plans/`                                                                                               | Step-by-step implementation plans for agentic subagent execution               |
+| `post-claps-spec.md`                                                        | Medium-style claps system                                                      |
+| `telegram-bot-spec.md`                                                      | Idea Catcher Telegram bot details                                              |
+| `editorial-strategy.md`                                                     | Editorial constitution (audience, columns, cadence)                            |
+| `voice-profile.md`                                                          | Voice profile loaded by agents at runtime                                      |
+| `non-fa-ridere-spec.md`                                                     | `/non-fa-ridere/` coming-soon page + arcade mini-game + leaderboard (as built) |
+| `non-fa-ridere-game-spec.md`                                                | Superseded early brainstorm (interactive-fiction concept)                      |
+| `porting-foglio-plan.md`                                                    | Migration plan to the Foglio design system                                     |
+| `setup/telegram-bot.md`                                                     | Telegram bot setup walkthrough                                                 |
+| `superpowers/specs/`                                                        | Larger system designs                                                          |
+| `superpowers/plans/`                                                        | Step-by-step implementation plans for agentic subagent execution               |
 
 ---
 

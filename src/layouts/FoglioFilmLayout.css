@@ -3,124 +3,129 @@
    Tokens from foglio.css (--foglio-* prefix)
    ============================================ */
 
+/* Film poster: cold viewfinder frame, before the title */
+.ff-poster {
+  max-width: var(--foglio-maxw);
+  margin: 0 auto;
+  padding: 40px var(--dc-gutter) 0;
+}
+.ff-poster-img {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.39 / 1;
+  min-height: 220px;
+  overflow: hidden;
+  background: #000;
+}
+.ff-poster-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+a.ff-poster-link:hover {
+  opacity: 0.92;
+}
+
 /* Film header */
 .ff-head {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 3rem 3rem 0;
+  padding: 32px var(--dc-gutter) 0;
 }
-
 .ff-eyebrow {
+  margin: 0 0 8px;
   font-family: var(--foglio-mono);
-  font-size: 0.72rem;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--foglio-ink-soft);
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--foglio-rule);
-  margin-bottom: 2rem;
+  letter-spacing: 0.14em;
+  color: var(--foglio-ink-mute);
   display: flex;
-  gap: 1.5rem;
+  gap: 0 1.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
-
-.ff-eyebrow span:not(.foglio-status):not(.ff-eyebrow-awards):not(:last-child)::after {
+.ff-eyebrow
+  span:not(.foglio-status):not(.ff-eyebrow-awards):not(:last-child)::after {
   content: "·";
   margin-left: 1.5rem;
-  color: var(--foglio-ink-mute);
 }
-
 .ff-eyebrow-awards {
-  font-family: var(--foglio-mono);
   color: var(--foglio-accent);
 }
-
-.foglio .ff-title {
-  font-family: var(--foglio-serif);
-  font-weight: 500;
-  font-size: clamp(2.4rem, 4.8vw, 3.8rem);
-  line-height: 1.06;
-  letter-spacing: -0.01em;
-  margin: 0 0 1rem;
-  color: var(--foglio-ink);
+.dc .ff-title {
+  margin: 0;
+  color: var(--dc-blue);
+  font-family: var(--dc-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  overflow-wrap: break-word;
 }
-
-.ff-title em {
-  font-style: italic;
-  color: var(--foglio-accent);
-  font-weight: 500;
+.dc .ff-title--xl {
+  font-size: min(
+    clamp(36px, 11.5vw, 170px),
+    calc(var(--dc-fit-w) / (var(--lw, 8) * 0.8))
+  );
+  transform: scaleY(1.25);
+  transform-origin: top left;
+  margin-bottom: 0.4em;
 }
-
-/* Titolo come link a Letterboxd */
+.dc .ff-title--l {
+  font-size: min(
+    clamp(32px, 9vw, 140px),
+    calc(var(--dc-fit-w) / (var(--lw, 8) * 0.8))
+  );
+}
 .ff-lbxd-title {
   color: inherit;
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.18s ease, color 0.18s ease;
 }
 .ff-lbxd-title:hover {
   color: var(--foglio-accent);
-  border-bottom-color: var(--foglio-accent-soft);
 }
-
 .ff-credit {
+  margin: 24px 0 0;
   font-family: var(--foglio-serif);
-  font-size: 1.4rem;
-  color: var(--foglio-ink-soft);
-  margin: 0 0 0.6rem;
+  font-size: clamp(24px, 2.6vw, 34px);
+  color: var(--foglio-ink);
 }
-
-/* Link "Su Letterboxd" sotto il credito */
-.ff-lbxd-link {
-  display: inline-block;
-  margin-bottom: 2.4rem;
-  font-family: var(--foglio-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--foglio-accent);
-  text-decoration: none;
-  border-bottom: 1px solid var(--foglio-accent-soft);
-  padding-bottom: 2px;
+.ff-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 32px;
+  margin-top: 40px;
+  padding-bottom: 8px;
 }
-.ff-lbxd-link:hover {
-  opacity: 0.8;
+.ff-laurels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  align-items: center;
 }
-
-.ff-credit em {
-  font-style: italic;
+.ff-laurels img {
+  height: 92px;
+  width: auto;
 }
-
-/* Main poster */
-.ff-poster {
-  max-width: var(--foglio-maxw);
-  margin: 0 auto;
-  padding: 0 3rem;
-}
-
-.ff-poster-img {
-  aspect-ratio: 16 / 9;
-  background-size: cover;
-  background-position: center;
-  border: 1px solid var(--foglio-rule);
-  border-radius: var(--foglio-radius-lg);
-}
-
-/* Poster cliccabile verso Letterboxd */
-a.ff-poster-link {
-  display: block;
-  transition: box-shadow 0.18s ease, transform 0.18s ease;
-}
-a.ff-poster-link:hover {
-  box-shadow: var(--foglio-shadow);
+.ff-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 /* Two-column film body */
 .ff-body {
   max-width: var(--foglio-maxw);
   margin: 5rem auto 0;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 5rem;
@@ -171,7 +176,9 @@ a.ff-poster-link:hover {
   position: relative;
   align-items: center;
 }
-.ff-awards-item:last-child { border-bottom: none; }
+.ff-awards-item:last-child {
+  border-bottom: none;
+}
 .ff-awards-item--laurel {
   grid-template-columns: 64px 1fr;
 }
@@ -224,7 +231,9 @@ html[data-theme="light"] .ff-awards-laurel img {
   color: var(--foglio-accent);
   font-weight: 600;
 }
-.ff-awards-item:last-child { border-bottom: none; }
+.ff-awards-item:last-child {
+  border-bottom: none;
+}
 .ff-awards-item--winner::before {
   content: "";
   position: absolute;
@@ -247,7 +256,9 @@ html[data-theme="light"] .ff-awards-laurel img {
   color: var(--foglio-accent);
   font-weight: 600;
 }
-.ff-awards-body { min-width: 0; }
+.ff-awards-body {
+  min-width: 0;
+}
 .ff-awards-name {
   font-family: var(--foglio-serif);
   font-size: 1.05rem;
@@ -426,7 +437,7 @@ html[data-theme="light"] .ff-awards-laurel img {
 .ff-stills {
   max-width: var(--foglio-maxw);
   margin: 6rem auto 0;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
 }
 
 .ff-stills h2 {
@@ -467,7 +478,7 @@ html[data-theme="light"] .ff-awards-laurel img {
 .ff-trailer {
   max-width: var(--foglio-maxw);
   margin: 5rem auto 0;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
 }
 
 .ff-trailer-video {
@@ -483,7 +494,7 @@ html[data-theme="light"] .ff-awards-laurel img {
 .ff-comments-wrap {
   max-width: var(--foglio-maxw);
   margin: 6rem auto 0;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
 }
 
 /* Lightbox */
@@ -573,18 +584,18 @@ html[data-theme="light"] .ff-awards-laurel img {
 /* Responsive */
 @media (max-width: 767px) {
   .ff-head {
-    padding: 2rem 1.4rem 0;
+    padding: 2rem var(--dc-gutter) 0;
   }
 
   .ff-poster {
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
   }
 
   .ff-body {
     grid-template-columns: 1fr;
     gap: 3rem;
     margin-top: 3rem;
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
   }
 
   .ff-awards {
@@ -595,7 +606,7 @@ html[data-theme="light"] .ff-awards-laurel img {
   }
 
   .ff-stills {
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
     margin-top: 4rem;
   }
 
@@ -604,12 +615,12 @@ html[data-theme="light"] .ff-awards-laurel img {
   }
 
   .ff-trailer {
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
     margin-top: 3rem;
   }
 
   .ff-comments-wrap {
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
     margin-top: 4rem;
   }
 
@@ -621,7 +632,8 @@ html[data-theme="light"] .ff-awards-laurel img {
     gap: 0.8rem;
   }
 
-  .ff-eyebrow span:not(.foglio-status):not(.ff-eyebrow-awards):not(:last-child)::after {
+  .ff-eyebrow
+    span:not(.foglio-status):not(.ff-eyebrow-awards):not(:last-child)::after {
     margin-left: 0.8rem;
   }
 
@@ -636,4 +648,12 @@ html[data-theme="light"] .ff-awards-laurel img {
   .ff-lightbox-next {
     right: 0.5rem;
   }
+}
+
+/* The site is dark-only: laurels are always light-on-dark, whatever the OS theme. */
+html.dc .ff-awards-laurel img,
+html.dc .ff-laurels img {
+  mix-blend-mode: normal;
+  filter: invert(1) brightness(1.6) contrast(1.3);
+  opacity: 1;
 }

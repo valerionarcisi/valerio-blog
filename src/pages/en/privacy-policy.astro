@@ -1,26 +1,17 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import Title from "~/components/Title.astro";
-import "~/layouts/BlogPost.css";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import "~/pages/privacy-policy.css";
 const LAST_UPDATE = "October 16, 2026";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <BaseHead
-      title={`Privacy Policy | ${SITE_TITLE}`}
-      description={SITE_DESCRIPTION}
-    />
-  </head>
-  <body>
-    <Header />
-    <main class="BlogPost">
-      <Title title="Privacy Policy" />
-      <section class="prose">
+<FoglioLayout
+  title="Privacy Policy | Valerio Narcisi"
+  description="How valerionarcisi.me handles data: cookieless analytics, comments, the contact form and third-party content."
+  lang="en"
+>
+  <article class="priv">
+    <h1 class="dc-page-title" style="--lw: 7">Privacy policy</h1>
+    <section class="priv-body">
         <h2>Last updated: {LAST_UPDATE}</h2>
 
         <p>
@@ -54,7 +45,7 @@ const LAST_UPDATE = "October 16, 2026";
           The browser stores a <code>notrack</code> flag in localStorage only if the
           visitor or the site owner chooses to opt out of being counted: it is a plain
           flag with no identifiers and it is never sent anywhere. The other localStorage entries
-          are only preferences (light or dark theme, a game score) and stay on your device.
+          are only preferences (reader-mode settings, a game score) and stay on your device.
         </p>
 
         <hr />
@@ -118,8 +109,5 @@ const LAST_UPDATE = "October 16, 2026";
           >
         </p>
       </section>
-    </main>
-
-    <Footer />
-  </body>
-</html>
+  </article>
+</FoglioLayout>

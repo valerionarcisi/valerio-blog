@@ -5,18 +5,155 @@ interface Props {
 
 const { lang = "it" } = Astro.props;
 const year = new Date().getFullYear();
+const isEn = lang === "en";
+
+const social = [
+  { label: "Instagram", href: "https://www.instagram.com/narcisi.valerio/" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/cv-valerio-narcisi/" },
+  { label: "Letterboxd", href: "https://letterboxd.com/valenar/" },
+  { label: "BlueSky", href: "https://bsky.app/profile/valerionarcisi.me" },
+  { label: "GitHub", href: "https://github.com/valerionarcisi" },
+];
 ---
 
-<footer class="foglio-footer">
-  <div class="foglio-footer-inner">
-    <div>© {year} Valerio Narcisi · Porto Sant'Elpidio</div>
-    <div class="foglio-footer-social">
-      <a href="https://www.instagram.com/narcisi.valerio/" target="_blank" rel="noopener">Instagram</a>
-      <a href="https://www.linkedin.com/in/cv-valerio-narcisi/" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="https://letterboxd.com/valenar/" target="_blank" rel="noopener">Letterboxd</a>
-      <a href="https://bsky.app/profile/valerionarcisi.me" target="_blank" rel="noopener">BlueSky</a>
-      <a href="https://github.com/valerionarcisi" target="_blank" rel="noopener">GitHub</a>
-      <a href={lang === "en" ? "/en/rss.xml" : "/rss.xml"}>RSS</a>
-    </div>
+<footer class="dc-footer">
+  <div class="dc-footer-inner">
+    <p class="dc-credits-title">{isEn ? "END CREDITS" : "TITOLI DI CODA"}</p>
+    <dl class="dc-credits">
+      <div>
+        <dt>{isEn ? "WRITTEN AND DIRECTED BY" : "SCRITTO E DIRETTO DA"}</dt>
+        <dd>Valerio Narcisi</dd>
+      </div>
+      <div>
+        <dt>{isEn ? "CODE" : "CODICE"}</dt>
+        <dd>Valerio Narcisi</dd>
+      </div>
+      <div>
+        <dt>{isEn ? "FIND ME ON" : "SI TROVA SU"}</dt>
+        <dd class="dc-credits-links">
+          {social.map((s) => <a href={s.href} target="_blank" rel="noopener">{s.label}</a>)}
+          <a href={isEn ? "/en/rss.xml" : "/rss.xml"}>RSS</a>
+        </dd>
+      </div>
+    </dl>
+    <a class="dc-write-me" href={isEn ? "/en/contact" : "/contatti"}>{isEn ? "WRITE ME" : "SCRIVIMI"}<span>.</span></a>
+    <p class="dc-footer-inspired">
+      {isEn ? "Design inspired by " : "Design ispirato a "}
+      <a href="https://fontainesdc.com" target="_blank" rel="noopener"><em>Dopamine Chamber</em></a>
+      {isEn ? " by Fontaines D.C." : " dei Fontaines D.C."}
+    </p>
+    <p class="dc-footer-legal">
+      © {year} Valerio Narcisi · Porto Sant'Elpidio ·
+      <a href={isEn ? "/en/privacy-policy" : "/privacy-policy"}>privacy</a>
+    </p>
   </div>
 </footer>
+
+<style is:global>
+  .dc-footer {
+    margin-top: 6rem;
+    border-top: var(--dc-hairline, 1px solid var(--foglio-rule));
+  }
+  .dc-footer-inner {
+    max-width: var(--foglio-maxw);
+    margin: 0 auto;
+    padding: 96px var(--dc-gutter, 40px) 48px;
+    text-align: center;
+  }
+  .dc-credits-title {
+    margin: 0 0 48px;
+    font-family: var(--foglio-mono);
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--foglio-ink-mute);
+  }
+  .dc-credits {
+    margin: 0 auto;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .dc-credits dt {
+    font-family: var(--foglio-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    color: var(--foglio-ink-mute);
+  }
+  .dc-credits dd {
+    margin: 6px 0 0;
+    font-family: var(--dc-display, var(--foglio-sans));
+    font-weight: 200;
+    font-stretch: 62%;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .dc-credits .dc-credits-links {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 20px;
+    font-family: var(--foglio-mono);
+    font-stretch: 100%;
+    font-weight: 400;
+    font-size: 13px;
+  }
+  .dc-credits-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 6px;
+  }
+  .dc-credits-links a:hover,
+  .dc-footer-legal a:hover {
+    color: var(--foglio-accent);
+  }
+  .dc-footer .dc-write-me {
+    display: inline-block;
+    margin-top: 72px;
+    font-family: var(--dc-display, var(--foglio-sans));
+    font-weight: 900;
+    font-stretch: 125%;
+    font-size: clamp(48px, 10vw, 150px);
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+    color: var(--dc-blue, var(--foglio-accent));
+  }
+  .dc-write-me span {
+    font-family: var(--foglio-serif);
+    font-style: italic;
+    font-weight: 400;
+  }
+  .dc-footer .dc-write-me:hover {
+    color: var(--foglio-accent);
+  }
+  .dc-footer-inspired {
+    margin: 40px auto 0;
+    max-width: 30rem;
+    text-wrap: balance;
+    font-family: var(--foglio-mono);
+    font-size: 12px;
+    color: var(--foglio-ink-soft);
+  }
+  .dc-footer-inspired a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    border-bottom: 1px solid var(--foglio-rule-strong);
+  }
+  .dc-footer-inspired a:hover {
+    color: var(--foglio-accent);
+    border-color: var(--foglio-accent);
+  }
+  .dc-footer-inspired em {
+    font-family: var(--foglio-serif);
+    font-size: 1.25em;
+  }
+  .dc-footer-legal {
+    margin: 16px 0 0;
+    font-family: var(--foglio-mono);
+    font-size: 11px;
+    color: var(--foglio-ink-mute);
+  }
+</style>

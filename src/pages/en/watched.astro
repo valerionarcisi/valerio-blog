@@ -14,6 +14,7 @@ import { formatMoneyCompact } from "~/lib/format-money";
 import { letterboxdDirectorUrl, letterboxdFilmUrl } from "~/lib/letterboxd-slug";
 import { Icon } from "astro-icon/components";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "../Visti.css";
 
 interface WatchedMovie {
@@ -121,7 +122,7 @@ if (myRatings.length > 0) {
 ---
 
 <!doctype html>
-<html lang="en" class="foglio">
+<html lang="en" class="foglio dc">
   <head>
     <BaseHead
       title={`Watched · ${SITE_TITLE}`}
@@ -133,7 +134,7 @@ if (myRatings.length > 0) {
 
     <header class="vw-head">
       <p class="vw-eyebrow">Viewing log</p>
-      <h1><em class="acc">Watched.</em></h1>
+      <h1 class="dc-page-title" style="--lw:8"><em class="acc">Watched.</em></h1>
       <p class="vw-lede">
         What I've watched recently — Letterboxd feed, metadata from TMDB.
         Budget and box office when available.

@@ -5,6 +5,7 @@ import FoglioFooter from "~/components/FoglioFooter.astro";
 import { getCollection } from "astro:content";
 import { getLangFromId } from "~/i18n/utils";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "~/layouts/FoglioListLayout.css";
 
 interface Props {
@@ -126,7 +127,7 @@ const pageDescription = isEn
 ---
 
 <!doctype html>
-<html lang={lang} class="foglio">
+<html lang={lang} class="foglio dc">
   <head>
     <BaseHead title={pageTitle} description={pageDescription} lang={lang} />
     {noindex && <meta name="robots" content="noindex, follow" />}
@@ -136,7 +137,7 @@ const pageDescription = isEn
     <main>
 
     <header class="fl-head">
-      <h1><em class="acc">Blog</em>.</h1>
+      <h1 class="dc-warp-type">Blog</h1>
       <p>{subtitle}</p>
     </header>
 

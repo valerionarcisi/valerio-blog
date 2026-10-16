@@ -6,7 +6,7 @@
 .vw-head {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 4rem 3rem 2.5rem;
+  padding: 4rem var(--dc-gutter) 2.5rem;
   border-bottom: 1px solid var(--foglio-rule);
 }
 .vw-eyebrow {
@@ -76,7 +76,7 @@
 .vw-main {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 3rem 3rem 5rem;
+  padding: 3rem var(--dc-gutter) 5rem;
 }
 .vw-empty {
   font-family: var(--foglio-serif);
@@ -293,7 +293,7 @@ a.vw-cover-link:hover {
   gap: 0.5rem;
   background: none;
   border: 1px solid var(--foglio-rule-strong);
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.4rem 0.95rem;
   cursor: pointer;
   color: var(--foglio-ink);
@@ -337,8 +337,8 @@ a.vw-cover-link:hover {
 }
 
 @media (max-width: 767px) {
-  .vw-head { padding: 2.5rem 1.4rem 1.5rem; }
-  .vw-main { padding: 2rem 1.4rem 3rem; }
+  .vw-head { padding: 2.5rem var(--dc-gutter) 1.5rem; }
+  .vw-main { padding: 2rem var(--dc-gutter) 3rem; }
   .vw-stats { grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
   .vw-row {
     grid-template-columns: 60px 1fr;

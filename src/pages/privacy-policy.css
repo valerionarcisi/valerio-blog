@@ -1,0 +1,50 @@
+.priv {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 64px var(--dc-gutter) 96px;
+}
+.priv-body {
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: var(--dc-text);
+}
+.priv-body p {
+  margin: 0 0 1.2rem;
+}
+.priv-body h2 {
+  margin: 2.6rem 0 0.8rem;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 0.95;
+}
+.priv-body h2:first-child {
+  margin-top: 0;
+  font-family: var(--foglio-mono);
+  font-weight: 400;
+  font-stretch: 100%;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  color: var(--foglio-ink-mute);
+}
+.priv-body hr {
+  border: 0;
+  border-top: 0.5px solid var(--foglio-ink-mute);
+  margin: 2.4rem 0 0;
+}
+.priv-body a {
+  color: var(--dc-link);
+  border-bottom: 1px solid var(--dc-link);
+  overflow-wrap: anywhere;
+}
+.priv-body a:hover {
+  color: var(--foglio-accent);
+  border-bottom-color: var(--foglio-accent);
+}
+.priv-body code {
+  font-family: var(--foglio-mono);
+  font-size: 0.88em;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--foglio-rule-strong);
+  background: var(--foglio-paper);
+}

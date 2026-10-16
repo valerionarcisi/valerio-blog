@@ -32,6 +32,7 @@ const slug = getSlugFromId(entry.id);
   tags={entry.data.tags}
   coverDescription={entry.data.coverDescription}
   headings={headings}
+  mood={entry.data.mood}
 >
   <Content />
   <PostClaps postId={`blog/${slug}`} lang="it" />

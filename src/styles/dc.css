@@ -1,0 +1,456 @@
+/* ============================================
+   DOPAMINE CHAMBER — public-site design system
+   Cold, synthetic, cinema. Dark only. Layered on top of Foglio:
+   public pages carry <html class="foglio dc">, which re-maps every
+   --foglio-* token; admin pages keep plain Foglio (cream paper).
+
+   Palette discipline: blue = display type, pink = flesh/emphasis,
+   everything else is cold grey. No other hues.
+   ============================================ */
+
+html.dc,
+html.dc[data-theme="light"],
+html.dc[data-theme="dark"] {
+  color-scheme: dark;
+
+  --foglio-bg: #04050a;
+  --foglio-paper: #0b0d12;
+  --foglio-paper-2: #10131a;
+  --foglio-ink: #e6e9ee;
+  --foglio-ink-soft: #a3a9b3;
+  --foglio-ink-mute: #8b929c;
+  --foglio-rule: #1a1d22;
+  --foglio-rule-strong: #3b414c;
+  --foglio-accent: #ff4fa3;
+  --foglio-accent-soft: #ff7ab8;
+  --foglio-shadow: none;
+  --foglio-shadow-strong: none;
+  --foglio-pos: #6cc58f;
+  --foglio-neg: #ff8a8a;
+  --foglio-info: #8fa2ff;
+  --foglio-warn: #e3b653;
+  --foglio-scrim: rgba(4, 5, 10, 0.78);
+
+  --foglio-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --foglio-sans:
+    "Archivo Variable", "Archivo", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  --foglio-radius-sm: 0;
+  --foglio-radius-md: 0;
+  --foglio-radius-lg: 0;
+  --foglio-maxw: 1360px;
+
+  --dc-display:
+    "Archivo Variable", "Archivo", -apple-system, BlinkMacSystemFont, sans-serif;
+  --dc-blue: #3355ff;
+  --dc-link: #8fa2ff;
+  --dc-text: #cfd3da;
+  --dc-hairline: 0.5px solid var(--foglio-ink-mute);
+  --dc-gutter: clamp(16px, 3vw, 40px);
+  --dc-fit-w: min(
+    calc(100vw - 2 * var(--dc-gutter) - 24px),
+    calc(var(--foglio-maxw) - 2 * var(--dc-gutter))
+  );
+}
+
+html.dc body {
+  background: var(--foglio-bg);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-sans);
+}
+
+/* Default heading voice: h1 is the loud wide cut, the rest is thin and condensed. */
+html.dc h1 {
+  font-family: var(--dc-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  line-height: 0.85;
+  color: var(--dc-blue);
+}
+html.dc h2,
+html.dc h3 {
+  font-family: var(--dc-display);
+  font-weight: 200;
+  font-stretch: 62%;
+  letter-spacing: 0;
+  line-height: 0.9;
+  color: var(--dc-blue);
+}
+
+html.dc a:focus-visible,
+html.dc button:focus-visible,
+html.dc summary:focus-visible,
+html.dc input:focus-visible,
+html.dc textarea:focus-visible,
+html.dc select:focus-visible,
+html.dc [tabindex]:focus-visible {
+  outline: 3px solid var(--dc-link);
+  outline-offset: 3px;
+  border-radius: 0;
+}
+
+html.dc ::selection {
+  background: var(--foglio-accent);
+  color: #04050a;
+}
+
+/* Scene heading: "SEQ. 01 — INT. SCRIVANIA — NOTTE" */
+.dc-scene {
+  margin: 0 0 8px;
+  font-family: var(--foglio-mono);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--foglio-accent);
+}
+
+/* Section header: scene line + thin condensed title + hairline */
+.dc-section-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: var(--dc-hairline);
+  padding-bottom: 12px;
+}
+.dc-section-title h2 {
+  font-size: clamp(56px, 10vw, 150px);
+  line-height: 0.85;
+}
+.dc-section-title a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--foglio-mono);
+  font-size: 13px;
+  color: var(--dc-link);
+}
+.dc-section-title a:hover {
+  color: var(--foglio-accent);
+}
+
+/* Photo treatment: pink flesh + stretched face + offset ghost + scanlines.
+   Needs <DcFilters /> once per page for #dc-warp. */
+.dc-face {
+  position: relative;
+  overflow: hidden;
+  background: #ff3d9a;
+}
+.dc-face img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  filter: url(#dc-warp) grayscale(1) contrast(1.35);
+  mix-blend-mode: multiply;
+}
+.dc-face img.dc-face-split {
+  filter: grayscale(1) contrast(2);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  transform: translate(8px, -3px);
+}
+.dc-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(4, 5, 10, 0.22) 0 1px,
+    transparent 1px 3px
+  );
+  pointer-events: none;
+}
+
+/* Cold-graded film frame: desaturated, colour on hover/focus. */
+.dc-grade img {
+  filter: saturate(0.3) contrast(1.1) brightness(0.85);
+  transition: filter 0.3s;
+}
+.dc-grade:hover img,
+.dc-grade:focus-visible img,
+a:hover .dc-grade img,
+a:focus-visible .dc-grade img {
+  filter: none;
+}
+
+/* Camera viewfinder corner marks */
+.dc-frame {
+  position: relative;
+}
+.dc-frame > .dc-mark {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 0 solid var(--foglio-ink);
+  pointer-events: none;
+}
+.dc-mark--tl {
+  top: 16px;
+  left: 16px;
+  border-top-width: 2px !important;
+  border-left-width: 2px !important;
+}
+.dc-mark--tr {
+  top: 16px;
+  right: 16px;
+  border-top-width: 2px !important;
+  border-right-width: 2px !important;
+}
+.dc-mark--bl {
+  bottom: 16px;
+  left: 16px;
+  border-bottom-width: 2px !important;
+  border-left-width: 2px !important;
+}
+.dc-mark--br {
+  bottom: 16px;
+  right: 16px;
+  border-bottom-width: 2px !important;
+  border-right-width: 2px !important;
+}
+
+/* Film strip */
+.dc-strip {
+  background: var(--foglio-paper);
+  padding: 10px 0;
+}
+.dc-strip-edge {
+  height: 14px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 10px,
+    #2a2f38 10px 22px
+  );
+}
+
+/* Clapperboard stripe */
+.dc-clapper {
+  height: 40px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--foglio-ink) 0 26px,
+    var(--foglio-bg) 26px 52px
+  );
+}
+
+/* Distorted display type (needs #dc-warp-type) */
+.dc-warp-type {
+  filter: url(#dc-warp-type);
+}
+
+/* Shared buttons */
+.dc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 0 24px;
+  border: 1px solid var(--foglio-ink);
+  background: transparent;
+  color: var(--foglio-ink);
+  font-family: var(--foglio-mono);
+  font-size: 13px;
+  cursor: pointer;
+}
+.dc-btn:hover {
+  color: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+}
+.dc-btn--solid {
+  background: var(--dc-blue);
+  border-color: var(--dc-blue);
+  color: #04050a;
+  font-family: var(--dc-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+.dc-btn--solid:hover {
+  background: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+  color: #04050a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dc-grade img {
+    transition: none;
+  }
+}
+
+/* Inner-page headline: wide, stretched, slightly glitched (needs #dc-warp-type from the header). */
+html.dc h1.dc-page-title {
+  font-family: var(--dc-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: min(
+    clamp(40px, 14vw, 200px),
+    calc(var(--dc-fit-w) / (var(--lw, 6) * 0.8))
+  );
+  overflow-wrap: break-word;
+  line-height: 0.85;
+  transform: scaleY(1.2);
+  transform-origin: top left;
+  margin: 0 0 0.45em;
+  filter: url(#dc-warp-type);
+  color: var(--dc-blue);
+}
+html.dc h1.dc-page-title em,
+html.dc h1.dc-page-title em.acc {
+  font-style: normal;
+  color: inherit;
+}
+
+/* Touch targets: at least 44px on the controls people tap on a phone. */
+html.dc .fl-pagination a,
+html.dc .foglio-readmore,
+html.dc .ct-page .ct-link,
+html.dc .ff-aside a,
+html.dc .nfr-sysbtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+html.dc .nfr-sysbtn {
+  min-width: 44px;
+  justify-content: center;
+}
+html.dc .Comments-field input,
+html.dc .Comments-form .Button,
+html.dc .Comments-form button[type="submit"] {
+  min-height: 48px;
+}
+html.dc .fp-toc summary {
+  min-height: 44px;
+}
+
+html.dc .fp-article img,
+html.dc .fp-cover img,
+html.dc .ff-poster img {
+  border-radius: 0;
+}
+
+/* Legacy widgets (claps, share, comments) re-skinned for the dark, squared look. */
+html.dc .PostClaps-button {
+  min-height: 52px;
+  border-radius: 0;
+  border: 1px solid var(--foglio-ink);
+  color: var(--foglio-ink);
+  font-family: var(--foglio-mono);
+  box-shadow: none;
+}
+html.dc .PostClaps-button:hover:not(.is-capped) {
+  background: transparent;
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+  box-shadow: none;
+  transform: none;
+}
+html.dc .PostClaps-button.is-active {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+html.dc .PostClaps-yours {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-mute);
+}
+html.dc .fp-share-btn {
+  min-height: 44px;
+  border-radius: 0;
+  border-color: var(--foglio-rule-strong);
+}
+html.dc .Comments-field input,
+html.dc .Comments-field textarea,
+html.dc .Comments-form .Button {
+  border-radius: 0;
+}
+html.dc .Comments {
+  padding-left: 0;
+  padding-right: 0;
+}
+html.dc .Comments h2 {
+  font-family: var(--dc-display);
+  font-style: normal;
+  font-weight: 200;
+  font-stretch: 62%;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.9;
+  color: var(--dc-blue);
+}
+
+/* global.css gives every img/video/iframe a margin and rounded corners; neither belongs in this design. */
+html.dc img,
+html.dc video,
+html.dc iframe {
+  margin-top: 0;
+  margin-bottom: 0;
+  border-radius: 0;
+}
+html.dc .fp-article img,
+html.dc .fp-article video,
+html.dc .fp-article iframe {
+  margin-top: 1.8rem;
+  margin-bottom: 1.8rem;
+}
+
+html.dc .contact-email,
+html.dc .ct-page .ct-primary-link,
+html.dc .nfr-readmore,
+html.dc .dc-credits-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+html.dc .Comments-field input,
+html.dc .Comments-field textarea,
+html.dc .cf input,
+html.dc .cf textarea {
+  font-family: var(--foglio-sans);
+  font-size: 17px;
+}
+
+/* Watched and listening pages */
+html.dc .as-section-title {
+  margin: 0 0 2rem;
+  padding-bottom: 0.2em;
+  font-family: var(--dc-display);
+  font-style: normal;
+  font-weight: 200;
+  font-stretch: 62%;
+  font-size: clamp(44px, 6vw, 80px);
+  line-height: 1;
+  color: var(--dc-blue);
+  border-bottom: var(--dc-hairline);
+}
+html.dc .as-section-period {
+  font-family: var(--foglio-mono);
+  font-stretch: 100%;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: var(--foglio-ink-mute);
+}
+html.dc .as-album-rank {
+  background: rgba(4, 5, 10, 0.88);
+  color: var(--foglio-ink);
+  border-radius: 0;
+}
+html.dc .vw-year-label {
+  color: var(--foglio-ink-mute);
+  font-family: var(--foglio-mono);
+  font-stretch: 100%;
+  line-height: 1.4;
+  border-bottom: var(--dc-hairline);
+}
+.dc-section-title--sm h2 {
+  font-size: clamp(40px, 6vw, 84px);
+}

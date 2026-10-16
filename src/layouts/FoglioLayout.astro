@@ -3,6 +3,7 @@ import BaseHead from "~/components/BaseHead.astro";
 import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 
 interface Props {
   title: string;
@@ -15,7 +16,7 @@ interface Props {
 const { title, description, image, lang = "it", pageId } = Astro.props;
 ---
 
-<html lang={lang} class="foglio">
+<html lang={lang} class="foglio dc">
   <head>
     <BaseHead title={title} description={description} image={image} lang={lang} />
   </head>

@@ -5,6 +5,7 @@ import FoglioFooter from "~/components/FoglioFooter.astro";
 import Comments from "~/components/Comments.astro";
 import { SITE_TITLE } from "~/consts";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "./FoglioFilmLayout.css";
 
 interface TechnicalSpecs {
@@ -104,9 +105,11 @@ function statusLabel(s?: string): string {
 }
 
 const awardsCount = festivals.filter((f) => f.award).length;
+const laurels = festivals.filter((f) => f.laurel);
+const longestWord = Math.max(...title.split(/\s+/).map((w) => w.length));
 ---
 
-<html lang={lang} class="foglio">
+<html lang={lang} class="foglio dc">
   <head>
     <BaseHead
       title={`${title} (${year}) | ${SITE_TITLE}`}
@@ -119,8 +122,34 @@ const awardsCount = festivals.filter((f) => f.award).length;
     <FoglioHeader lang={lang} active="films" />
     <main>
 
+    {coverImage && (
+      <section class="ff-poster">
+        <div class="dc-frame">
+          {letterboxdUrl ? (
+            <a
+              class="ff-poster-img ff-poster-link"
+              href={letterboxdUrl}
+              target="_blank"
+              rel="noopener"
+              aria-label={`${title} ${isEn ? "on Letterboxd" : "su Letterboxd"}`}
+            >
+              <img src={coverImage} alt="" fetchpriority="high" />
+            </a>
+          ) : (
+            <div class="ff-poster-img">
+              <img src={coverImage} alt={title} fetchpriority="high" />
+            </div>
+          )}
+          <span class="dc-mark dc-mark--tl"></span>
+          <span class="dc-mark dc-mark--tr"></span>
+          <span class="dc-mark dc-mark--bl"></span>
+          <span class="dc-mark dc-mark--br"></span>
+        </div>
+      </section>
+    )}
+
     <header class="ff-head">
-      <div class="ff-eyebrow">
+      <p class="ff-eyebrow">
         <span>{year}</span>
         <span>{role}</span>
         {status && status !== "completed" && (
@@ -131,43 +160,34 @@ const awardsCount = festivals.filter((f) => f.award).length;
             {awardsCount} {isEn ? (awardsCount === 1 ? "award" : "awards") : (awardsCount === 1 ? "premio" : "premi")}
           </span>
         )}
-      </div>
+      </p>
       {letterboxdUrl ? (
-        <h1 class="ff-title">
+        <h1 class={`ff-title dc-warp-type ff-title--${title.length <= 9 ? "xl" : "l"}`} style={`--lw:${longestWord}`}>
           <a class="ff-lbxd-title" href={letterboxdUrl} target="_blank" rel="noopener" set:html={title} />
         </h1>
       ) : (
-        <h1 class="ff-title" set:html={title} />
+        <h1 class={`ff-title dc-warp-type ff-title--${title.length <= 9 ? "xl" : "l"}`} style={`--lw:${longestWord}`} set:html={title} />
       )}
       <p class="ff-credit"><em>{role} {isEn ? "by" : (/\b(Scritto|Diretto|Montato|Prodotto|Sceneggiato|Girato)\b/i.test(role) ? "da" : "di")} Valerio Narcisi</em></p>
-      {letterboxdUrl && (
-        <a class="ff-lbxd-link" href={letterboxdUrl} target="_blank" rel="noopener">
-          {isEn ? "On Letterboxd ↗" : "Su Letterboxd ↗"}
-        </a>
-      )}
-    </header>
-
-    {coverImage && (
-      <section class="ff-poster">
-        {letterboxdUrl ? (
-          <a
-            class="ff-poster-img ff-poster-link"
-            href={letterboxdUrl}
-            target="_blank"
-            rel="noopener"
-            style={`background-image: url('${coverImage}')`}
-            aria-label={`${title} ${isEn ? "on Letterboxd" : "su Letterboxd"}`}
-          ></a>
-        ) : (
-          <div
-            class="ff-poster-img"
-            style={`background-image: url('${coverImage}')`}
-            role="img"
-            aria-label={title}
-          ></div>
+      <div class="ff-hero-actions">
+        {laurels.length > 0 && (
+          <ul class="ff-laurels" aria-label={isEn ? "Festival selections" : "Selezioni nei festival"}>
+            {laurels.map((l) => (
+              <li><img src={l.laurel} alt={`${l.name} ${l.year}`} height="92" loading="lazy" /></li>
+            ))}
+          </ul>
         )}
-      </section>
-    )}
+        <div class="ff-cta-row">
+          {trailerLocalPath && <a class="dc-btn dc-btn--solid" href="#trailer">{isEn ? "Trailer" : "Trailer"}</a>}
+          <a class="dc-btn" href={`mailto:valerio.narcisi@gmail.com?subject=${encodeURIComponent((isEn ? "Screener request: " : "Richiesta screener: ") + title)}`}>
+            {isEn ? "screener on request" : "screener su richiesta"}
+          </a>
+          {letterboxdUrl && (
+            <a class="dc-btn" href={letterboxdUrl} target="_blank" rel="noopener">{isEn ? "Letterboxd ↗" : "Letterboxd ↗"}</a>
+          )}
+        </div>
+      </div>
+    </header>
 
     <section class="ff-body">
       <div class="ff-synopsis">
@@ -359,7 +379,7 @@ const awardsCount = festivals.filter((f) => f.award).length;
     )}
 
     {trailerLocalPath && (
-      <section class="ff-trailer">
+      <section class="ff-trailer" id="trailer">
         <video
           src={trailerLocalPath}
           controls

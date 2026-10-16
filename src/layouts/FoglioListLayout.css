@@ -7,19 +7,14 @@
 .fl-head {
   max-width: var(--foglio-maxw);
   margin: 0 auto;
-  padding: 4rem 3rem 3rem;
+  padding: 64px var(--dc-gutter) 48px;
 }
 
-.fl-head h1 {
-  font-family: var(--foglio-serif);
-  font-weight: 500;
-  font-size: clamp(2.6rem, 5vw, 4rem);
-  line-height: 1.04;
-  margin: 0 0 1rem;
-}
-
-.fl-head h1 em {
-  font-style: italic;
+.dc .fl-head h1 {
+  font-size: clamp(64px, 16vw, 240px);
+  transform: scaleY(1.25);
+  transform-origin: top left;
+  margin: 0 0 0.4em;
 }
 
 .fl-head p {
@@ -34,7 +29,7 @@
 .fl-filters {
   max-width: var(--foglio-maxw);
   margin: 3rem auto 1rem;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
   display: flex;
   gap: 0.4rem;
   align-items: center;
@@ -48,11 +43,13 @@
 .fl-chip {
   padding: 0.3rem 0.8rem;
   border: 1px solid var(--foglio-rule);
-  border-radius: 100px;
+  border-radius: 0;
   color: var(--foglio-ink-soft);
   cursor: pointer;
   text-decoration: none;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .fl-chip:hover {
@@ -75,8 +72,12 @@
   user-select: none;
   /* inherit chip styling via .fl-chip--more class */
 }
-.fl-overflow > summary::-webkit-details-marker { display: none; }
-.fl-overflow > summary::marker { display: none; }
+.fl-overflow > summary::-webkit-details-marker {
+  display: none;
+}
+.fl-overflow > summary::marker {
+  display: none;
+}
 
 .fl-chip--more {
   cursor: pointer;
@@ -107,7 +108,7 @@
 .fl-posts {
   max-width: var(--foglio-maxw);
   margin: 3rem auto 0;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
   border-top: 1px solid var(--foglio-ink);
 }
 
@@ -173,7 +174,7 @@
 .fl-pagination {
   max-width: var(--foglio-maxw);
   margin: 3rem auto;
-  padding: 0 3rem;
+  padding: 0 var(--dc-gutter);
   display: flex;
   justify-content: center;
   gap: 3rem;
@@ -196,7 +197,7 @@
 /* Mobile responsive */
 @media (max-width: 767px) {
   .fl-head {
-    padding: 2.5rem 1.4rem 2rem;
+    padding: 2.5rem var(--dc-gutter) 2rem;
   }
 
   .fl-head h1 {
@@ -205,12 +206,12 @@
 
   .fl-filters {
     margin: 2rem auto 0.5rem;
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
   }
 
   .fl-posts {
     margin: 2rem auto 0;
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
   }
 
   .fl-row {
@@ -228,7 +229,7 @@
   }
 
   .fl-pagination {
-    padding: 0 1.4rem;
+    padding: 0 var(--dc-gutter);
     gap: 2rem;
   }
 }

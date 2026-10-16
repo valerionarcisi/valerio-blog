@@ -9,7 +9,7 @@ Personal blog and portfolio site for Valerio Narcisi (filmmaker, sceneggiatore, 
 - **Package Manager**: pnpm
 - **Node**: 22.12+ (required by Astro 7). Always `nvm use 22` before pnpm commands.
 - **Styling**: Plain CSS, co-located CSS files next to components. No CSS framework.
-- **Design system**: **Foglio** — cream paper (`#f6f1e8`), EB Garamond serif (display + prose), Inter sans (body fallback), JetBrains Mono, terracotta accent (`#a8451a`). Tokens in `src/styles/foglio.css` (`--foglio-*`).
+- **Design system**: **Dopamine Chamber** for public pages (`<html class="foglio dc">`): dark only, near-black `#04050a`, blue display type `#3355ff`, pink `#ff4fa3`, Archivo Variable (width axis) + Instrument Serif (lead only) + JetBrains Mono. Tokens in `src/styles/dc.css`, which remaps the **Foglio** tokens (`src/styles/foglio.css`, `--foglio-*`); admin pages keep Foglio (cream paper `#f6f1e8`, EB Garamond, terracotta `#a8451a`). Spec: `docs/dopamine-chamber-spec.md`.
 - **Deployment**: Netlify (static pages + serverless functions). Auto-deploy on push to `main`.
 - **Database**: Turso (libsql) for comments, claps, analytics, editorial agents queue, game leaderboard (`/non-fa-ridere/`).
 
@@ -25,7 +25,7 @@ Note: the legacy client-side language redirect (BaseHead detected navigator.lang
 
 ## Content Architecture
 
-- **Blog posts**: Astro Content Collections in `src/content/blog/{locale}/{slug}.md`
+- **Blog posts**: Astro Content Collections in `src/content/blog/{locale}/{slug}.md`. Optional `mood: quiet` frontmatter for personal posts (thin title, natural photo, no distortion); default `full`.
 - **Films**: Astro Content Collections in `src/content/films/{locale}/{slug}.md`
 - **Movies watched**: Fetched from Letterboxd RSS + TMDB API at build time, then refreshed client-side from `/api/letterboxd` so freshly-logged films appear without a redeploy
 - **Music**: Last.FM at build time, served via `/ascolti` (top albums, top artists, recent scrobbles)
@@ -41,10 +41,11 @@ src/
     films/{it,en}/   # Film data
   i18n/              # Translation dictionary + locale helpers
   layouts/           # Page layouts
-    Foglio*.astro    # Foglio design-system layouts (Post, List, Film, FilmsIndex, Layout)
+    Foglio*.astro    # Layouts shared by the public pages (Post, List, Film, FilmsIndex, Layout), styled by Dopamine Chamber
   lib/               # Functional core (Result pattern, validators, DB helpers, API clients)
   pages/             # Routes
-    index.astro      # Home with Foglio hero
+    index.astro      # Home (data only; markup in components/DcHome.astro, shared with /en/)
+    codice.astro     # Code page from the CV (components/DcCode.astro)
     blog/            # Blog list + post detail
     films/           # Film index + per-film detail
     tag/             # Tag cloud + per-tag archive (noindex,follow)
@@ -79,7 +80,7 @@ docs/
 ## Conventions
 
 - **Path alias**: Use `~/` to reference `src/` (configured in tsconfig.json)
-- **CSS**: Co-located CSS files next to components (e.g., `Card.astro` + `Card.css`). Foglio layouts have their own CSS file (e.g. `FoglioPostLayout.astro` + `.css`).
+- **CSS**: Co-located CSS files next to components (e.g., `Card.astro` + `Card.css`). Layouts have their own CSS file (e.g. `FoglioPostLayout.astro` + `.css`). Public-page rules that must beat legacy Foglio CSS are scoped `.dc ...` / `html.dc ...`. The SVG filters behind the distortion (`#dc-warp`, `#dc-warp-type`) are mounted once, in `FoglioHeader`.
 - **No `:global()` in plain `.css` files** — only works inside Astro scoped `<style>` blocks. Use direct selectors instead.
 - **No comments explaining what**: Self-documenting code via well-named functions. Comments only for _why_.
 - **Content collections**: Astro 7 glob loader. Slugs derived from filenames. Locale from directory (`it/`, `en/`).

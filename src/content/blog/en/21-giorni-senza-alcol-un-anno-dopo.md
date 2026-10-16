@@ -6,6 +6,7 @@ tags: ["thoughts"]
 coverImage: "https://images.unsplash.com/photo-1605026187659-a83756e22e43?q=80&w=1600&auto=format&fit=crop"
 coverAuthorName: "Tim Hüfner"
 coverAuthorLink: "https://unsplash.com/@huefnerdesign"
+mood: quiet
 ---
 
 Last Saturday I was completely out of energy. Ahead of me a guy had picked up the pace and I couldn't keep up with him. The heat, for me, was extreme. My legs had nothing left. I slowed down for a kilometer, then I found the strength to push a little more, just a little bit more, and I crossed my first finish line at a running race.

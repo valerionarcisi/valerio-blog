@@ -1,26 +1,17 @@
 ---
-import BaseHead from "~/components/BaseHead.astro";
-import Header from "~/components/Header.astro";
-import Footer from "~/components/Footer.astro";
-import { SITE_TITLE, SITE_DESCRIPTION } from "~/consts";
-import Title from "~/components/Title.astro";
-import "~/layouts/BlogPost.css";
+import FoglioLayout from "~/layouts/FoglioLayout.astro";
+import "~/pages/privacy-policy.css";
 const LAST_UPDATE = "16 ottobre 2026";
 ---
 
-<!doctype html>
-<html lang="it">
-  <head>
-    <BaseHead
-      title={`Privacy Policy | ${SITE_TITLE}`}
-      description={SITE_DESCRIPTION}
-    />
-  </head>
-  <body>
-    <Header />
-    <main class="BlogPost">
-      <Title title="Privacy Policy" />
-      <section class="prose">
+<FoglioLayout
+  title="Privacy Policy | Valerio Narcisi"
+  description="Come tratta i dati valerionarcisi.me: analytics senza cookie, commenti, modulo di contatto e contenuti di terze parti."
+  lang="it"
+>
+  <article class="priv">
+    <h1 class="dc-page-title" style="--lw: 7">Privacy policy</h1>
+    <section class="priv-body">
         <h2>Ultimo aggiornamento: {LAST_UPDATE}</h2>
 
         <p>
@@ -58,7 +49,7 @@ const LAST_UPDATE = "16 ottobre 2026";
           <code>notrack</code> soltanto se il visitatore o il proprietario del sito
           decide di escludersi dal conteggio: è un semplice flag, senza alcun
           identificativo, e non viene inviato a nessuno. Le altre voci nel localStorage
-          sono solo preferenze (tema chiaro o scuro, punteggio di un gioco) e restano sul
+          sono solo preferenze (impostazioni della modalità lettura, punteggio di un gioco) e restano sul
           tuo dispositivo.
         </p>
 
@@ -123,8 +114,5 @@ const LAST_UPDATE = "16 ottobre 2026";
           >
         </p>
       </section>
-    </main>
-
-    <Footer />
-  </body>
-</html>
+  </article>
+</FoglioLayout>

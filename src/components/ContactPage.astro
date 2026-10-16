@@ -50,7 +50,7 @@ const LINKS = [
       <div class="ct-main">
         <header class="ct-head">
           <p class="ct-eyebrow">{COPY.eyebrow}</p>
-          <h1><em class="acc">{COPY.h1}</em></h1>
+          <h1 class="dc-page-title"><em class="acc">{COPY.h1}</em></h1>
           <p class="ct-lede">{COPY.lede[0]} {COPY.lede[1]}</p>
         </header>
 
@@ -91,7 +91,7 @@ const LINKS = [
   .ct-page {
     max-width: var(--foglio-maxw);
     margin: 0 auto;
-    padding: 3.5rem 3rem 7rem;
+    padding: 3.5rem var(--dc-gutter) 7rem;
   }
 
   .ct-page .ct-grid {
@@ -120,13 +120,9 @@ const LINKS = [
     margin: 0 0 0.9rem;
   }
 
-  .ct-page .ct-head h1 {
-    font-family: var(--foglio-serif);
-    font-weight: 500;
-    font-size: clamp(2.6rem, 5vw, 3.8rem);
-    line-height: 1.02;
-    letter-spacing: -0.015em;
-    margin: 0 0 1rem;
+  html.dc .ct-page .ct-head h1.dc-page-title {
+    font-size: clamp(44px, 7vw, 104px);
+    margin: 0 0 0.5em;
   }
 
   .ct-page .ct-lede {
@@ -224,7 +220,7 @@ const LINKS = [
 
   @media (max-width: 600px) {
     .ct-page {
-      padding: 2.2rem 1.4rem 5rem;
+      padding: 2.2rem var(--dc-gutter) 5rem;
     }
   }
 </style>

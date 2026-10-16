@@ -4,6 +4,7 @@ import FoglioHeader from "~/components/FoglioHeader.astro";
 import FoglioFooter from "~/components/FoglioFooter.astro";
 import { SITE_TITLE } from "~/consts";
 import "~/styles/foglio.css";
+import "~/styles/dc.css";
 import "./FoglioFilmsIndexLayout.css";
 
 interface FilmEntry {
@@ -50,7 +51,7 @@ function awardCount(film: FilmEntry): number {
 }
 ---
 
-<html lang={lang} class="foglio">
+<html lang={lang} class="foglio dc">
   <head>
     <BaseHead title={pageTitle} description={pageDescription} lang={lang} />
   </head>
@@ -59,7 +60,7 @@ function awardCount(film: FilmEntry): number {
     <main>
 
     <header class="fi-head">
-      <h1><em class="acc">Film</em>.</h1>
+      <h1 class="dc-page-title"><em class="acc">Film</em>.</h1>
       <p>{subtitle}</p>
     </header>
 

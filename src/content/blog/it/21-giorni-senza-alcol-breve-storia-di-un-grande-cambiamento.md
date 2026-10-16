@@ -5,6 +5,7 @@ extract: "Cosa succede al corpo e alla testa dopo 21 giorni senza alcol. Raccont
 tags:
   - "thoughts"
 coverImage: "/img/blog/21-giorni-senza-alcol-breve-storia-di-un-grande-cambiamento/cm8zxole91sgu07liktp4qse4.png"
+mood: quiet
 ---
 
 ## 31 Dicembre 2024. Festa di Capodanno.
