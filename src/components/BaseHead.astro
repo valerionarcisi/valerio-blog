@@ -128,14 +128,14 @@ const fullImageUrl = new URL(socialImage, Astro.url);
   function tick(){if(visible){var n=Date.now();acc+=n-last;last=n;}}
   function onScroll(){var h=document.documentElement.scrollHeight-innerHeight;if(h>0){var pct=Math.round(scrollY/h*100/5)*5;if(pct>maxScroll)maxScroll=pct;if(blog){if(pct>=75&&!s75){s75=1;va.track("scroll_75");}if(pct>=100&&!s100){s100=1;va.track("scroll_100");}}}}
   window.addEventListener("scroll",onScroll,{passive:true});
-  var eng=0,et;
+  var eng=0;
   function engage(){
-    if(eng)return;eng=1;clearInterval(et);
+    if(eng)return;eng=1;
     ["scroll","pointerdown","keydown","touchstart"].forEach(function(t){removeEventListener(t,engage);});
     send({type:"engage",page_id:id,hostname:location.hostname}).catch(function(){});
   }
+  // only a real interaction vouches for a human: headless crawlers and link previewers sit "visible" for seconds too
   ["scroll","pointerdown","keydown","touchstart"].forEach(function(t){addEventListener(t,engage,{passive:true});});
-  et=setInterval(function(){tick();if(acc>=3000)engage();},1000);
   // Web Vitals (no library): last LCP, CLS = worst 5 s session window, INP = p98 of interactions. Absent if unsupported.
   var lcp,cls,inp,sv=0,sf=0,sl=0,im={},st;
   function ob(t,f,o){try{o=o||{};o.type=t;o.buffered=true;new PerformanceObserver(function(l){l.getEntries().forEach(f);}).observe(o);}catch(e){}}

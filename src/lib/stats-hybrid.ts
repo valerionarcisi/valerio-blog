@@ -179,7 +179,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
     if (!o.totalsOnly) {
       const [c, p, ref, chn, cou, bro, osr, dev, lan, us, uc, sec, eng] = await Promise.all([
         q(`SELECT ${dateExpr} as d, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis FROM pageviews ${where} GROUP BY d`),
-        q(`SELECT pathname as v, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis FROM pageviews ${where} GROUP BY v ORDER BY pv DESC, v ASC LIMIT ${lim(20)}`),
+        q(`SELECT pathname as v, COUNT(*) as pv, COUNT(DISTINCT date(created_at) || visitor_hash) as vis FROM pageviews ${where} GROUP BY v ORDER BY pv DESC, v ASC LIMIT ${lim(20)}`),
         dimQuery("referrer", false, "ASC", lim(20)),
         dimQuery("channel", true, "ASC", NONE).catch(() => ({ rows: [] })), // column absent pre-migration
         dimQuery("country", true, "ASC", lim(20)),
@@ -191,7 +191,7 @@ export async function computeBlock(db: Client, o: BlockOpts): Promise<StatsBlock
         dimQuery("utm_campaign", true, "ASC", lim(10)),
         q(`SELECT ${SECTION_SQL} as v, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis FROM pageviews ${where} GROUP BY v`),
         q(
-          `SELECT pathname as v, COUNT(*) as pv, COALESCE(SUM(is_unique), 0) as vis, COALESCE(SUM(time_on_page), 0) as st,
+          `SELECT pathname as v, COUNT(*) as pv, COUNT(DISTINCT date(created_at) || visitor_hash) as vis, COALESCE(SUM(time_on_page), 0) as st,
              COALESCE(SUM(scroll_depth), 0) as ss, COUNT(scroll_depth) as ns
            FROM pageviews ${where} AND ${BLOG_PATH_SQL} AND time_on_page IS NOT NULL GROUP BY v`,
         ),

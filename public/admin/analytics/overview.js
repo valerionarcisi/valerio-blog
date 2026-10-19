@@ -9,7 +9,7 @@ let chart = null;
 let metric = "visitors";
 let current = null; // {stats, prev}
 
-const METRIC_LABEL = { visitors: "Utenti", sessions: "Sessioni", pageviews: "Pageview" };
+const METRIC_LABEL = { visitors: "Visitatori giornalieri", sessions: "Sessioni", pageviews: "Pageview" };
 
 // ---------- time axis ----------
 // The API only returns buckets that have data, so both periods are rebuilt on a full axis
@@ -76,7 +76,7 @@ function scorecards(stats) {
   const engagement = off ? null : Math.round((100 - se.bounce_rate) * 10) / 10;
   const prevTime = se.prev_period && se.prev_period.avg_engaged_seconds;
   return [
-    { id: "visitors", label: "Utenti", value: fmt(s.visitors), delta: s.visitors_delta_pct, series: chartVals("visitors"), tip: "Visitatori unici giornalieri: un hash anonimo (IP + browser + data) che cambia ogni giorno. Nessun cookie." },
+    { id: "visitors", label: "Visitatori giornalieri", value: fmt(s.visitors), delta: s.visitors_delta_pct, series: chartVals("visitors"), tip: "Somma dei visitatori unici di ogni giorno: l'hash anonimo (IP + browser + data) cambia ogni giorno, quindi chi torna in 3 giorni diversi conta 3. Nessun cookie." },
     { id: "sessions", label: "Sessioni", value: off ? "—" : fmt(se.count), delta: off ? null : se.count_delta_pct, series: off ? [] : fillDaily(stats, (d) => d.sessions), tip: "Una sessione è una visita: stesso visitatore anonimo, pause inferiori a 30 minuti. A mezzanotte UTC l'identificativo cambia e una visita a cavallo si divide in due." },
     { id: "pageviews", label: "Pageview", value: fmt(s.pageviews), delta: s.pageviews_delta_pct, series: chartVals("pageviews"), tip: "Pagine totali viste nel periodo, comprese le visite ripetute." },
     { id: "time", label: "Tempo attivo medio", value: off ? "—" : fmtDur(se.avg_engaged_seconds), delta: off ? null : pctChange(se.avg_engaged_seconds, prevTime), series: off ? [] : fillDaily(stats, (d) => (d.sessions ? d.engaged_seconds / d.sessions : null)), tip: "Tempo medio in cui la pagina è rimasta visibile durante una sessione." },

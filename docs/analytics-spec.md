@@ -32,9 +32,11 @@ Il bot vince sull'umano: un client scriptato puo mandare anche `engage`. La perc
 
 ### Segnale umano: `engage`
 
-Il tracker invia `{type:"engage", page_id, hostname}` **una sola volta per pagina**: alla prima interazione reale (`scroll`, `pointerdown`, `keydown`, `touchstart`) oppure dopo 3 s di tempo visibile accumulato. `/api/e` fa `UPDATE pageviews SET human = 1 WHERE page_id = ? AND visitor_hash IN (hash di oggi, hash di ieri)`: stesso legame page_id + visitor_hash dei beacon, stessa tolleranza a cavallo della mezzanotte UTC. Non dipende dal beacon finale (che si perde spesso su iOS).
+Il tracker invia `{type:"engage", page_id, hostname}` **una sola volta per pagina**: alla prima interazione reale (`scroll`, `pointerdown`, `keydown`, `touchstart`). Fino al 19/10/2026 bastavano anche 3 s di tempo visibile: crawler headless e generatori di anteprime dei link li superavano sempre (sessioni da 1 pagina e 0 s attivi contate come umane), quindi il tempo da solo non vale piu. `/api/e` fa `UPDATE pageviews SET human = 1 WHERE page_id = ? AND visitor_hash IN (hash di oggi, hash di ieri)`: stesso legame page_id + visitor_hash dei beacon, stessa tolleranza a cavallo della mezzanotte UTC. Non dipende dal beacon finale (che si perde spesso su iOS).
 
-Limite noto: `human` e per riga (pageview). Un visitatore la cui *prima* pagina del giorno non ha prodotto engage ma la seconda si, ha `is_unique = 1` sulla riga non verificata: nei "visitatori" umani non compare (raro: bastano 3 s di lettura o un tocco sulla prima pagina).
+Limite noto: `human` e per riga (pageview). Un visitatore la cui *prima* pagina del giorno non ha prodotto engage ma la seconda si, ha `is_unique = 1` sulla riga non verificata: nei "visitatori" umani non compare (raro: `markVisitorDayHuman` segna come umane tutte le righe del visitatore nel giorno appena arriva un engage).
+
+Visitatori per pagina (`top_pages`, `daily_pages.visitors`/`tp_visitors`): `COUNT(DISTINCT visitor_hash)` per pagina e giorno. Prima era `SUM(is_unique)`, cioe gli *ingressi* sulla pagina (es. `/ascolti` 17 pageview, 0 visitatori). Su piu giorni e la somma dei distinti giornalieri, come i visitatori totali. Dopo il deploy rilanciare il rollup (`POST /api/admin/analytics-rollup`) sui giorni con raw per riscrivere `daily_pages`.
 
 ### Punteggio al momento dell'ingest (`src/lib/bot-score.ts`, funzioni pure)
 

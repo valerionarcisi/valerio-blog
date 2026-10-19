@@ -166,7 +166,7 @@ export interface EngageInput {
   hostname: string;
 }
 
-/** Human signal: first real interaction (or 3 s of visible time) on a page. */
+/** Human signal: first real interaction on a page. */
 export function parseEngage(
   body: Record<string, unknown>,
 ): Parsed<EngageInput> {

@@ -6,7 +6,7 @@ function topPagesTable(stats) {
   if (!rows.length) return stateEmpty("Nessuna pagina nel periodo");
   const eng = new Map((stats.top_engaged_posts || []).map((p) => [p.pathname, p]));
   return (
-    '<div class="table-wrap"><table class="ax-table"><thead><tr><th scope="col">Pagina</th><th scope="col" class="num">Visualizzazioni</th><th scope="col" class="num">Utenti</th>' +
+    '<div class="table-wrap"><table class="ax-table"><thead><tr><th scope="col">Pagina</th><th scope="col" class="num">Visualizzazioni</th><th scope="col" class="num">Visitatori</th>' +
     '<th scope="col" class="num">Tempo attivo medio</th><th scope="col" class="num">Scroll medio</th></tr></thead><tbody>' +
     rows
       .map((p) => {

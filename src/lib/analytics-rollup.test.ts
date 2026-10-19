@@ -310,6 +310,18 @@ describe("rollupDay", () => {
     expect(s.all).toBe(`(NOT ${BOT_SQL})`);
   });
 
+  test("page visitors are distinct visitors of that page, not entries", async () => {
+    await insert({ visitor_hash: "v1", pathname: "/", is_unique: 1, created_at: "2026-03-03 10:00:00" });
+    await insert({ visitor_hash: "v1", pathname: "/ascolti", is_unique: 0, created_at: "2026-03-03 10:01:00" });
+    await insert({ visitor_hash: "v1", pathname: "/ascolti", is_unique: 0, created_at: "2026-03-03 10:02:00" });
+    await insert({ visitor_hash: "v2", pathname: "/", is_unique: 1, created_at: "2026-03-03 11:00:00" });
+    await insert({ visitor_hash: "v2", pathname: "/ascolti", is_unique: 0, created_at: "2026-03-03 11:01:00" });
+    await rollupDay(db, "2026-03-03");
+    const body = await stats({ period: "custom", from: "2026-03-01", to: "2026-03-05" });
+    const ascolti = body.top_pages.find((p: { pathname: string }) => p.pathname === "/ascolti");
+    expect(ascolti).toMatchObject({ pageviews: 3, visitors: 2 });
+  });
+
   test("rejects an invalid day", async () => {
     await expect(rollupDay(db, "2026-3-3")).rejects.toThrow();
   });

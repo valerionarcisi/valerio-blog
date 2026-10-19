@@ -161,9 +161,9 @@ export async function buildRollupStatements(
     });
     stmts.push({
       sql: `INSERT INTO daily_pages (day, scope, pathname, pageviews, visitors, sum_time, n_time, sum_scroll, n_scroll, tp_visitors, tp_sum_scroll, tp_n_scroll)
-            SELECT ?, ?, pathname, COUNT(*), COALESCE(SUM(is_unique), 0),
+            SELECT ?, ?, pathname, COUNT(*), COUNT(DISTINCT visitor_hash),
               COALESCE(SUM(${time}), 0), COUNT(${time}), COALESCE(SUM(${scroll}), 0), COUNT(${scroll}),
-              COALESCE(SUM(CASE WHEN ${time} IS NOT NULL THEN is_unique END), 0),
+              COUNT(DISTINCT CASE WHEN ${time} IS NOT NULL THEN visitor_hash END),
               COALESCE(SUM(CASE WHEN ${time} IS NOT NULL THEN ${scroll} END), 0),
               COUNT(CASE WHEN ${time} IS NOT NULL THEN ${scroll} END)
             FROM pageviews WHERE ${where} GROUP BY pathname`,
