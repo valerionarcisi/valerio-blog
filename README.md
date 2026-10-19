@@ -72,6 +72,7 @@ parseJsonBody → parseInput → dbQuery → jsonOk / jsonErr
 
 - `GET /api/stats` — analytics aggregates (pageviews, visitors, top pages, devices, geo, UTM, recent visitors, suspicious)
 - `GET /api/stats/sessions` — admin: recent sessions for the dashboard "Utenti" view (keyset pagination, verdict/country/device/channel filters); `GET /api/stats/sessions/[id]` — session timeline; `GET /api/stats/live` — online now + `active_sessions`
+- `GET /api/stats/ai-bots?from&to` — admin: AI crawler fetches (counted by the `ai-crawlers` edge function, never mixed with visits) + human sessions from the "ai" channel
 - `GET /api/stats/export?kind=top_pages|referrers|utm|channels|events|goals|daily` — CSV export of analytics tables (admin; CSV-injection safe)
 - `POST /api/admin/analytics-report` — weekly analytics Telegram report: dry run by default (`{}`), `{"send":true}` delivers; the Scheduled Function `netlify/functions/analytics-weekly-report.mts` sends it on Mondays
 - `GET /api/stats/live` — online-now counter (distinct visitor_hash in last 5 min, excludes flagged bots)
@@ -236,6 +237,7 @@ Feature-level specs are in `docs/`. Each adds context that a future developer (o
 | Doc                                                      | What                                                                           |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | `analytics-spec.md`                                      | Cookieless analytics system, bot detection, suspect flagging                   |
+| `ai-crawlers-spec.md`                                    | AI crawler counter (edge function, "Bot AI" dashboard tab)                     |
 | `blog-spec.md`                                           | Blog list + post layout decisions                                              |
 | `comments-spec.md`                                       | Comments + likes + moderation flow                                             |
 | `contact-spec.md`                                        | Contact form + Resend transactional email                                      |

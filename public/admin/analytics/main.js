@@ -12,8 +12,9 @@ import { renderEngagement } from "./engagement.js";
 import { renderTech } from "./tech.js";
 import { initQuality, renderQuality } from "./quality.js";
 import { initRules, loadRules } from "./rules.js";
+import { markAiBotsDirty, showAiBots } from "./aibots.js";
 
-const TAB_IDS = ["panoramica", "utenti", "acquisizione", "coinvolgimento", "tecnologia", "bot"];
+const TAB_IDS = ["panoramica", "utenti", "acquisizione", "coinvolgimento", "tecnologia", "bot", "botai"];
 // Containers filled from the stats payload, per panel (used for the shared loading / error states).
 const BODIES = {
   panoramica: ["scorecards", "ov-top", "ov-channels", "ov-countries", "ov-devices"],
@@ -57,6 +58,10 @@ function selectTab(id, { focus = false, updateHash = true } = {}) {
 function showTab(id) {
   if (id === "utenti") {
     showUsers();
+    return;
+  }
+  if (id === "botai") {
+    showAiBots();
     return;
   }
   if (data.status === "ready" && rendered[id] !== data.version) {
@@ -252,6 +257,8 @@ function initBar() {
 onChange((why) => {
   renderRange();
   markUsersDirty();
+  markAiBotsDirty();
+  if (activeTab === "botai" && why !== "include" && why !== "filters") showAiBots();
   if (why === "include" || why === "period" || why === "filters") loadStats();
   if (activeTab === "utenti" && why !== "include") showUsers();
 });

@@ -8,7 +8,7 @@ import { listActiveSessions, type ActiveSession } from "~/lib/analytics-sessions
 export const prerender = false;
 
 // Live = everyone who is NOT a bot (human OR unverified). A visitor who just arrived has not
-// had time to scroll/click or sit 3 s yet, so requiring human = 1 would always undercount "now".
+// had time to scroll or click yet, so requiring human = 1 would always undercount "now".
 export const GET: APIRoute = async ({ request }) => {
   const denied = requireAdmin(request);
   if (denied) return denied;

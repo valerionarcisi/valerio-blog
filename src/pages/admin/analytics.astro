@@ -17,6 +17,7 @@ const TABS = [
   { id: "coinvolgimento", label: "Coinvolgimento" },
   { id: "tecnologia", label: "Tecnologia" },
   { id: "bot", label: "Bot & qualità" },
+  { id: "botai", label: "Bot AI" },
 ];
 const PERIODS = [
   { id: "today", label: "Oggi" },
@@ -317,6 +318,32 @@ const LEGACY_HINT = "Sistema vecchio: sostituito da verdetto e regole bot, verr�
             <h3 class="ax-card-title" style="margin: 0.5rem 0">Visitatori recenti <span class="ax-legacy-tag">legacy</span></h3>
             <div id="recent-box"></div>
           </section>
+        </section>
+        <section class="ax-panel" role="tabpanel" id="panel-botai" aria-labelledby="tab-botai" tabindex="0" hidden>
+          <p class="ax-qual-note" style="margin-top: 0">
+            Crawler AI riconosciuti dallo user agent, contati lato server (edge) e mai mescolati alle visite: bot, pagina, giorno, nient'altro.
+            <strong>addestramento</strong> = dataset dei modelli · <strong>ricerca</strong> = indice delle risposte con citazione · <strong>utente</strong> = pagina aperta dall'assistente perché qualcuno gliel'ha chiesto.
+          </p>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="ai-bots-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ai-bots-title">Bot AI</h2><span class="ax-card-meta" id="ai-total">richieste</span></div>
+              <div id="ai-bots"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="ai-human-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ai-human-title">Persone arrivate da un'AI</h2><span class="ax-card-meta" id="ai-human-total">sessioni umane, canale "ai"</span></div>
+              <div id="ai-human"></div>
+            </section>
+          </div>
+          <div class="ax-grid cols-2">
+            <section class="ax-card" aria-labelledby="ai-pages-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ai-pages-title">Pagine più lette dai bot AI</h2><span class="ax-card-meta">richieste · bot</span></div>
+              <div id="ai-pages"></div>
+            </section>
+            <section class="ax-card" aria-labelledby="ai-daily-title">
+              <div class="ax-card-head"><h2 class="ax-card-title" id="ai-daily-title">Giorno per giorno</h2><span class="ax-card-meta">richieste dei bot AI</span></div>
+              <div id="ai-daily"></div>
+            </section>
+          </div>
         </section>
       </main>
 
