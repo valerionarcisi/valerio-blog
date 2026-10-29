@@ -35,7 +35,7 @@ export const snacks: SnackSection[] = [
     ],
   },
   {
-    name: "Mattino e Pomeriggio",
+    name: "Mattino",
     options: [
       [
         "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa + 50g affettato magro (crudo, cotto, fesa di tacchino/pollo, bresaola)",
@@ -64,6 +64,31 @@ export const snacks: SnackSection[] = [
       ],
       ["1 dessert proteico (170-200g; es. Milk, Milbona, Dolciando, Stuffer)"],
       ["1 yogurt greco 0% alla frutta (150g; es. fage, pathos, delta)"],
+    ],
+  },
+  {
+    name: "Pomeriggio",
+    options: [
+      ["1 yogurt magro bianco (125g) + 8 mandorle/nocciole non pelate"],
+      [
+        "1 barretta ai cereali da circa 100 kcal (es. Aptonia, Kellogg's Protein, Misura frutta e verdure, Gran Cereale, Naturemix, Crownfield, Enervit) + 8 mandorle/nocciole non pelate",
+      ],
+      [
+        "1 pacchetto crackers magri (es. Magretti Galbusera) + 8 mandorle/nocciole non pelate / 20g parmigiano stagionato",
+      ],
+      [
+        "1 fetta pane integrale (30g) / 2 gallette / 2 fette wasa + 40g affettato magro (cotto magro, speck, fesa di tacchino) / 1 cucchiaio raso di patè di olive o hummus di ceci",
+      ],
+      ["1 frutto fresco di stagione + 8 mandorle/nocciole non pelate"],
+      [
+        "1 fetta pane integrale (30g) / 2 gallette / 2 fette wasa + 1 cucchiaino di olio EVO a crudo + pizzico di sale, aglio e origano",
+      ],
+      [
+        "1 fetta pane integrale (30g) / 2 gallette / 2 fette wasa + 1 cucchiaino colmo di crema di nocciole (es. Novi, Rigoni di Asiago)",
+      ],
+      [
+        "1 dessert proteico al gusto che preferisci (170g; es. Milk, Milbona, Stuffer, Dolciando)",
+      ],
     ],
   },
 ];
@@ -168,9 +193,10 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "2 cucchiaini olio EVO a crudo",
+            oil: "3 cucchiaini olio EVO a crudo o in cottura",
             items: [
-              "2 friselle integrali da circa 60g l'una (o 4 fette pane tostato) con 100g mozzarella light (Galbani Santa Lucia o Granarolo da 100g) + 1 scatoletta da 80g tonno al naturale ben sgocciolata + pomodorini/funghi + verdure a piacimento + sale ed origano o altre spezie a piacere",
+              "2 piatti mediamente colmi di minestrone di legumi + 1 cucchiaino di parmigiano grattugiato a piatto",
+              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
         ],
@@ -252,10 +278,9 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "2 cucchiaini olio EVO a crudo",
+            oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "150g crudo magro sgrassato + 350g melone estivo",
-              "Verdure a sazietà (prediligi i cucchiaini di olio sulle verdure)",
+              "Vellutata: 250g carota/zucca + verdura a scelta cotta in padella o bollita + 1 cucchiaio di parmigiano grattugiato (se non lo vuoi, aggiungi un cucchiaino di olio in più) + 1 patata piccola bollita + ceci/fagioli / 160g lenticchie in scatola ben sciacquati",
               "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
@@ -299,7 +324,7 @@ export const days: DayPlan[] = [
           {
             oil: "3 cucchiaini olio EVO a crudo",
             items: [
-              "Insalata con 250g melone estivo + 80g ceci/fagioli in scatola ben sciacquati + 10g noci secche o altra frutta secca + verdure a scelta (puoi aggiungere basilico o altri aromi) + salsa yogurt fatta con 3 cucchiai colmi di yogurt greco 0% bianco + erba cipollina o altra spezia + succo di limone (in base al gusto) + olio (senza sforare la dose di olio prevista dal piano)",
+              "Frecantò di verdure: zucchine + peperoni o altra verdura + carote/zucca + 150g patate (peso a crudo) bollite + 1 cucchiaio di semi di lino/zucca/girasole (sempre da aggiungere a fine cottura) + 120g ceci in scatola ben sciacquati",
               "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },
@@ -381,10 +406,10 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "3 cucchiaini olio EVO a crudo",
+            oil: "NO olio EVO se non lo prendi pre-cotto, altrimenti 3 cucchiaini a crudo o in cottura",
             items: [
-              "Caesar salad: 200g petto di pollo cotto alla piastra + zucchine + salsa yogurt (100g yogurt greco 0% bianco + erba cipollina o altra spezia + succo di limone a piacere) + 1 cucchiaio di semi di lino/zucca/girasole (senza sforare la dose di olio prevista dal piano)",
-              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
+              "1 piatto di minestra con brodo vegetale (o dado senza glutammato monosodico) con 80g pasta o altro cereale (totali) — evita il parmigiano grattugiato",
+              "Verdure a sazietà",
             ],
           },
         ],
@@ -424,10 +449,11 @@ export const days: DayPlan[] = [
             ],
           },
           {
-            oil: "3 cucchiaini olio EVO a crudo",
+            oil: "2 cucchiaini olio EVO a crudo",
             items: [
-              "Insalata con 250g melone estivo + carote crude + 15g noci secche + verdure a scelta (puoi aggiungere basilico o altri aromi) + 100g formaggio magro (es. linea Osella, primo sale, bianconanni, mozzarella light) / 100g salmone affumicato + erba cipollina + pizzico di sale + altra spezia a piacere",
-              "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
+              "150g galantina",
+              "Verdure a sazietà (prediligi il cucchiaino di olio sulle verdure)",
+              "3 fette pane integrale (90g) / 6 gallette / 6 fette wasa",
             ],
           },
         ],
@@ -436,10 +462,9 @@ export const days: DayPlan[] = [
         name: "Cena",
         options: [
           {
-            oil: "3 cucchiaini olio EVO a crudo",
+            oil: "3 cucchiaini olio EVO (2 per la crema, 1 per il merluzzo)",
             items: [
-              "100g salmone affumicato + 4 cucchiai di formaggio magro spalmabile (es. Exquisa Fitline / Philadelphia Protein) con una manciata di olive nere e valeriana/songino",
-              "Verdure a sazietà",
+              "Merluzzo con crema di zucca: 250g merluzzo + 125g zucca, cipolla, sale e pepe",
               "2 fette pane integrale (60g) / 4 gallette / 4 fette wasa",
             ],
           },

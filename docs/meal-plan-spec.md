@@ -58,16 +58,17 @@ interface DayPlan {
 
 ```typescript
 interface SnackSection {
-  name: string;        // "Pre-Allenamento" | "Mattino e Pomeriggio"
+  name: string;        // "Pre-Allenamento" | "Mattino" | "Pomeriggio"
   options: string[][]; // ogni opzione e un array di stringhe (alimenti combinabili con "+")
 }
 ```
 
 ### Struttura dati
 
+- Piano di ottobre 2026 (Dott. Cardinali, obiettivo mantenimento, prossimo controllo 22 dicembre 18:15). "Giorno I-VI" del PDF = lun-sab; il "giorno tipo con cena fuori" = domenica
 - **7 giorni** (lun-dom), ognuno con 3-4 pasti
 - Ogni pasto ha 1-3 opzioni (la prima e quella principale)
-- **2 sezioni spuntini** separate dai giorni, con 3-11 opzioni ciascuna
+- **3 sezioni spuntini** separate dai giorni (Pre-Allenamento, Mattino, Pomeriggio), con 3-11 opzioni ciascuna
 - La domenica ha una struttura speciale: colazione libera, pranzo con 3 opzioni, spuntino dedicato, cena libera (pizza o ristorante)
 
 ## Componenti UI
