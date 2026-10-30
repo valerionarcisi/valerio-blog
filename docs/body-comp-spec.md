@@ -95,7 +95,7 @@ Dashboard admin privata per monitorare l'andamento della composizione corporea n
 | `ecw_pct_tbw` | number | solo cardinali | ECW come % di TBW |
 | `nak` | number | solo cardinali | Rapporto Na/K |
 
-Serie storica: 14 misurazioni dal 2023-09-28 al 2026-06-24. Le prime 7 da "mancini", le ultime 7 da "cardinali".
+Serie storica: 15 misurazioni dal 2023-09-28 al 2026-10-27. Le prime 7 da "mancini", le ultime 8 da "cardinali".
 
 ### `nutrition_plan`
 
