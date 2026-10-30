@@ -1,0 +1,130 @@
+---
+import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+import "~/styles/admin-contatti.css";
+
+export const prerender = false;
+
+if (!Astro.locals.isAdmin) {
+  return new Response("Unauthorized", { status: 401 });
+}
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Contatti · Admin</title>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="contatti" />
+    <div class="ct-wrap">
+      <header class="ct-head">
+        <div>
+          <div class="ct-eyebrow" id="ct-date"></div>
+          <h1>Radar <em class="acc">contatti</em></h1>
+        </div>
+        <nav class="ct-tabs" aria-label="Sezioni">
+          <a href="#oggi" data-view="oggi">Oggi</a>
+          <a href="#pipeline" data-view="pipeline">Pipeline</a>
+          <a href="#motore" data-view="motore">Motore</a>
+        </nav>
+      </header>
+
+      <p class="ct-toast" id="ct-toast" role="status" aria-live="polite" hidden></p>
+
+      <section id="view-oggi" class="ct-view" hidden>
+        <p class="ct-lede" id="oggi-lede"></p>
+        <div class="ct-tiles" id="oggi-tiles">
+          <div class="ct-tile is-loading"><span class="ct-eyebrow">…</span><b>0</b></div>
+          <div class="ct-tile is-loading"><span class="ct-eyebrow">…</span><b>0</b></div>
+          <div class="ct-tile is-loading"><span class="ct-eyebrow">…</span><b>0</b></div>
+          <div class="ct-tile is-loading"><span class="ct-eyebrow">…</span><b>0</b></div>
+        </div>
+        <div class="ct-cols">
+          <div class="ct-main">
+            <section class="card">
+              <h2>Bozze da approvare</h2>
+              <div id="oggi-drafts" class="ct-list"><p class="loading">Carico…</p></div>
+            </section>
+            <section class="card">
+              <h2>Follow-up scaduti</h2>
+              <div id="oggi-due" class="ct-list"><p class="loading">Carico…</p></div>
+            </section>
+          </div>
+          <aside class="ct-side">
+            <section class="card">
+              <h2>Relazioni calde</h2>
+              <div id="oggi-warm" class="ct-list"></div>
+            </section>
+            <section class="card">
+              <h2>Motore</h2>
+              <div id="oggi-engine" class="ct-mono"></div>
+              <a href="#motore">Dettagli del motore</a>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="view-pipeline" class="ct-view" hidden>
+        <div class="ct-toolbar">
+          <div class="tabs" role="group" aria-label="Film">
+            <button type="button" data-project="non-fa-ridere">Non fa ridere · distribuzione</button>
+            <button type="button" data-project="walkie-talkie">Walkie Talkie · produzione</button>
+          </div>
+          <label for="pl-min">Punteggio min.</label>
+          <select id="pl-min"><option value="0">0</option><option value="50">50</option><option value="70">70</option></select>
+          <label for="pl-q">Cerca</label>
+          <input id="pl-q" type="search" placeholder="Nome, città…" />
+        </div>
+        <div class="ct-board-wrap"><div class="ct-board" id="pl-board"><p class="loading">Carico…</p></div></div>
+      </section>
+
+      <section id="view-casa" class="ct-view" hidden>
+        <a href="#pipeline" class="ct-mono ct-back" data-back>← Pipeline</a>
+        <div id="casa-body" class="ct-stack"><p class="loading">Carico…</p></div>
+      </section>
+
+      <section id="view-bozza" class="ct-view" hidden>
+        <a href="#oggi" class="ct-mono ct-back" data-back>← Oggi</a>
+        <div id="bozza-body" class="ct-stack"><p class="loading">Carico…</p></div>
+      </section>
+
+      <section id="view-motore" class="ct-view" hidden>
+        <div class="ct-cols">
+          <div class="ct-main">
+            <section class="card">
+              <h2>Ultimi giri</h2>
+              <div class="table-wrap"><table id="mt-runs"><tbody><tr><td class="loading">Carico…</td></tr></tbody></table></div>
+            </section>
+            <section class="card">
+              <h2>Fonti</h2>
+              <div class="table-wrap"><table id="mt-sources"><tbody><tr><td class="loading">Carico…</td></tr></tbody></table></div>
+            </section>
+          </div>
+          <aside class="ct-side">
+            <section class="card">
+              <h2>Invii</h2>
+              <p class="muted" id="mt-send-state"></p>
+              <div class="ct-actions">
+                <button type="button" id="mt-send-toggle"></button>
+                <button type="button" id="mt-pause-toggle"></button>
+              </div>
+            </section>
+            <section class="card">
+              <h2>Regole</h2>
+              <form id="mt-settings" class="ct-settings"></form>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    <script is:inline src="/admin/admin-client.js"></script>
+    <script is:inline src="/admin/contatti.js"></script>
+  </body>
+</html>

@@ -108,6 +108,7 @@ docs/
 **Core (data):**
 
 - `TURSO_DATABASE_URL` `TURSO_AUTH_TOKEN`
+- `TURSO_RADAR_URL` `TURSO_RADAR_TOKEN` — a **different** Turso DB (`cinema-contacts`), the Python contacts-radar engine on the NAS; used only by `/admin/contatti` (`~/lib/radar-db`). The site never sends email: approving a draft queues it, the NAS sends. See `docs/radar-contatti-spec.md`.
 - `TMDB_API_KEY` — Movie metadata
 - `LASTFM_API_KEY` — Last.FM / Audioscrobbler
 - `RESEND_API_KEY` — transactional email (contact form, comment notifications)

@@ -130,6 +130,8 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 | `/admin/arte-di-narrare` | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                                                                                            |
 | `/admin/radar`           | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `src/data/radar.json` (served via `GET /api/admin/radar`), filters + search                                  |
 
+`/admin/contatti` is the contacts radar for the films (production and distribution companies to write to): it reads and writes the **separate** Turso DB of the Python engine running on the NAS (`TURSO_RADAR_URL`, `TURSO_RADAR_TOKEN`). The site never sends email; approving a draft only queues it for the NAS. See `docs/radar-contatti-spec.md`.
+
 `src/data/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
 GitHub Actions workflow (`.github/workflows/radar-weekly.yml`): `scripts/radar-update.mjs`
 web-researches film opportunities via the Anthropic API (Haiku + web search), rewrites the file,
@@ -193,6 +195,8 @@ pnpm dev              # dev server on :4321
 ```
 TURSO_DATABASE_URL
 TURSO_AUTH_TOKEN
+TURSO_RADAR_URL             # contacts radar DB (NAS engine), read by /admin/contatti
+TURSO_RADAR_TOKEN
 TMDB_API_KEY
 LASTFM_API_KEY
 RESEND_API_KEY              # transactional email (contact form, comment notifications)

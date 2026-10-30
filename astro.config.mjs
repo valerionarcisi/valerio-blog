@@ -10,6 +10,9 @@ const envKeys = [
   "ADMIN_TOKEN",
   "TURSO_DATABASE_URL",
   "TURSO_AUTH_TOKEN",
+  // DB del motore radar (contatti di produzione/distribuzione), letto da /admin/contatti
+  "TURSO_RADAR_URL",
+  "TURSO_RADAR_TOKEN",
   "TMDB_API_KEY",
   "LASTFM_API_KEY",
   "RESEND_API_KEY",
