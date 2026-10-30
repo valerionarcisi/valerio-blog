@@ -62,7 +62,7 @@ const groups = [
     { label: "Piano & spesa", desc: "Menu, lista e ricette", href: link("meal-plan") },
     { label: "Body Comp", desc: "Composizione corporea", href: link("body-comp") },
   ]},
-  { title: "Eventi", items: events.map((e) => ({ label: e.title, desc: e.date, href: e.href })) },
+  { title: "Eventi", items: events.filter((e) => dayDiff(e.date) >= 0).map((e) => ({ label: e.title, desc: e.date, href: e.href })) },
 ];
 ---
 
@@ -160,7 +160,7 @@ const groups = [
         </section>
       )}
 
-      {groups.map((g) => (
+      {groups.filter((g) => g.items.length > 0).map((g) => (
         <section aria-label={g.title}>
           <h2 class="home-group-title">{g.title}</h2>
           <div class="home-grid">

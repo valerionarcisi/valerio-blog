@@ -298,7 +298,7 @@ export const days: DayPlan[] = [
         options: [
           {
             items: [
-              "1 tazza di tisana/caffè d'orzo",
+              "1 tazza di tisana/caffè d'orzo/caffè/tè",
               "2 fette di dolce fatto in casa (farina tipo 1/2, integrale, avena o mix) — peso totale circa 80g",
               "1 frutto fresco di stagione",
             ],

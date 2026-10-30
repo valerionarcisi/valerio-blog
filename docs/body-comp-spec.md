@@ -99,9 +99,11 @@ Serie storica: 15 misurazioni dal 2023-09-28 al 2026-10-27. Le prime 7 da "manci
 
 ### `nutrition_plan`
 
+Aggiornare a ogni nuovo piano alimentare, insieme a `meal-plan.ts`. Il PDF di ottobre 2026 non riporta kcal né macro: finché non arrivano, i grafici restano quelli del piano di aprile 2026 e la pagina ne mostra la data.
+
 ```json
 {
-  "date": "2026-03-17",
+  "date": "2026-04-27",
   "source": "cardinali",
   "macros_target": { "protein_pct": 29.56, "fat_pct": 22.62, "carb_pct": 47.53 },
   "macros_average": { "protein_pct": 28.71, "fat_pct": 22.69, "carb_pct": 46.35 },

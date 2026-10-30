@@ -65,7 +65,7 @@ interface SnackSection {
 
 ### Struttura dati
 
-- Piano di ottobre 2026 (Dott. Cardinali, obiettivo mantenimento, prossimo controllo 22 dicembre 18:15). "Giorno I-VI" del PDF = lun-sab; il "giorno tipo con cena fuori" = domenica
+- Piano di ottobre 2026 (Dott. Cardinali, obiettivo mantenimento, controllo 22 dicembre 2026 ore 18:15). "Giorno I-VI" del PDF = lun-sab; il "giorno tipo con cena fuori" = domenica
 - **7 giorni** (lun-dom), ognuno con 3-4 pasti
 - Ogni pasto ha 1-3 opzioni (la prima e quella principale)
 - **3 sezioni spuntini** separate dai giorni (Pre-Allenamento, Mattino, Pomeriggio), con 3-11 opzioni ciascuna

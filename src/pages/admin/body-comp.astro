@@ -13,6 +13,7 @@ if (!Astro.locals.isAdmin) {
 
 const measurements = rawData.measurements;
 const nutritionPlan = rawData.nutrition_plan;
+const nutritionPlanDate = new Date(`${nutritionPlan.date}T12:00:00Z`).toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Rome" });
 const sources = rawData.sources;
 
 // Ultima misurazione (data ISO), giorni trascorsi calcolati su Europe/Rome.
@@ -230,7 +231,7 @@ const isStale = daysAgo !== null && daysAgo > 21;
         </div>
       </div>
       <div class="donut-card">
-        <h3>Macros Target</h3>
+        <h3>Macros Target <small>· piano del {nutritionPlanDate}</small></h3>
         <div class="donut-wrap">
           <canvas id="macros-donut"></canvas>
           <div class="donut-center">
@@ -243,7 +244,7 @@ const isStale = daysAgo !== null && daysAgo > 21;
 
     <div class="charts-grid">
       <div class="chart-card full">
-        <h3>Piano Alimentare — Kcal Settimanali</h3>
+        <h3>Piano Alimentare — Kcal Settimanali <small>· piano del {nutritionPlanDate}</small></h3>
         <div class="chart-wrap"><canvas id="kcal-bar"></canvas></div>
       </div>
     </div>
