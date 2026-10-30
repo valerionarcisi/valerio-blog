@@ -1,0 +1,453 @@
+/* /admin/contatti — dal mockup "Admin Contatti". Foglio tokens only. */
+.foglio body.admin .ct-wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.foglio body.admin .ct-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+.foglio body.admin .ct-eyebrow,
+.foglio body.admin .ct-mono {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  letter-spacing: 0.06em;
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.foglio body.admin .ct-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.foglio body.admin .ct-tabs a {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--foglio-rule-strong);
+  border-radius: var(--foglio-radius-sm);
+  color: var(--foglio-ink);
+  text-decoration: none;
+  font-weight: 500;
+  min-height: 24px;
+}
+.foglio body.admin .ct-tabs a[aria-current="page"] {
+  background: var(--foglio-ink);
+  color: var(--foglio-paper);
+  border-color: var(--foglio-ink);
+}
+.foglio body.admin .ct-lede {
+  color: var(--foglio-ink-soft);
+  margin: 0;
+  max-width: 64ch;
+}
+.foglio body.admin .ct-toast {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--foglio-radius-sm);
+  border: 1px solid var(--foglio-pos);
+  color: var(--foglio-pos);
+  background: var(--foglio-paper);
+}
+.foglio body.admin .ct-toast.is-error {
+  border-color: var(--foglio-neg);
+  color: var(--foglio-neg);
+}
+
+.foglio body.admin .ct-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+}
+.foglio body.admin .ct-tile {
+  background: var(--foglio-paper);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  padding: 0.9rem 1rem;
+}
+.foglio body.admin .ct-tile b {
+  display: block;
+  font-family: var(--foglio-serif);
+  font-weight: 400;
+  font-size: 2.3rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.foglio body.admin .ct-cols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+.foglio body.admin .ct-main {
+  flex: 999 1 520px;
+  min-width: 0;
+}
+.foglio body.admin .ct-side {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.foglio body.admin .ct-list {
+  display: flex;
+  flex-direction: column;
+}
+.foglio body.admin .ct-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--foglio-rule);
+}
+.foglio body.admin .ct-row:first-child {
+  border-top: none;
+}
+.foglio body.admin .ct-row-main {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.foglio body.admin .ct-row-title {
+  font-weight: 600;
+}
+.foglio body.admin .ct-row-sub {
+  color: var(--foglio-ink-soft);
+  font-size: var(--foglio-fs-sm);
+  margin-top: 0.15rem;
+}
+.foglio body.admin .ct-score {
+  font-family: var(--foglio-serif);
+  font-size: 1.7rem;
+  line-height: 1;
+  min-width: 2.6rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.foglio body.admin .ct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.foglio body.admin .ct-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: 999px;
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-soft);
+  white-space: nowrap;
+  margin-left: 0.35rem;
+}
+.foglio body.admin .ct-chip.nfr {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+.foglio body.admin .ct-chip.wt {
+  border-color: var(--foglio-info);
+  color: var(--foglio-info);
+}
+.foglio body.admin .ct-chip.ok {
+  border-color: var(--foglio-pos);
+  color: var(--foglio-pos);
+}
+.foglio body.admin .ct-chip.warn {
+  border-color: var(--foglio-warn);
+  color: var(--foglio-warn);
+}
+
+.foglio body.admin .btn-pri {
+  background: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.foglio body.admin .btn-pri:hover {
+  filter: brightness(0.92);
+  color: var(--foglio-paper);
+}
+
+.foglio body.admin .ct-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.foglio body.admin .ct-toolbar label {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-board-wrap {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+.foglio body.admin .ct-board {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  min-width: max-content;
+}
+.foglio body.admin .ct-col {
+  flex: 0 0 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: color-mix(in srgb, var(--foglio-rule) 45%, var(--foglio-bg));
+  border-radius: var(--foglio-radius-md);
+  padding: 0.75rem;
+}
+.foglio body.admin .ct-col h3 {
+  margin: 0;
+  font-size: var(--foglio-fs-sm);
+  display: flex;
+  justify-content: space-between;
+}
+.foglio body.admin .ct-card {
+  display: block;
+  background: var(--foglio-paper);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  padding: 0.7rem;
+  color: var(--foglio-ink);
+  text-decoration: none;
+}
+.foglio body.admin .ct-card:hover {
+  border-color: var(--foglio-accent);
+}
+.foglio body.admin .ct-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin .ct-card-top span:last-child {
+  font-family: var(--foglio-serif);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.foglio body.admin .ct-alert {
+  border: 1px solid var(--foglio-accent-soft);
+  background: color-mix(in srgb, var(--foglio-accent) 7%, var(--foglio-paper));
+  border-radius: var(--foglio-radius-md);
+  padding: 0.8rem 1rem;
+}
+.foglio body.admin .ct-bars {
+  display: grid;
+  grid-template-columns: minmax(130px, 190px) 1fr 3rem;
+  gap: 0.5rem 0.8rem;
+  align-items: center;
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin .ct-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--foglio-rule);
+  overflow: hidden;
+}
+.foglio body.admin .ct-bar span {
+  display: block;
+  height: 100%;
+  background: var(--foglio-accent);
+}
+.foglio body.admin .ct-notes {
+  white-space: pre-wrap;
+  font-size: var(--foglio-fs-sm);
+  color: var(--foglio-ink-soft);
+  max-height: 16rem;
+  overflow: auto;
+}
+.foglio body.admin .ct-draft textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 22rem;
+  font-family: var(--foglio-serif);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+.foglio body.admin .ct-field {
+  display: grid;
+  grid-template-columns: 5rem 1fr;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+.foglio body.admin .ct-field input {
+  min-width: 0;
+}
+.foglio body.admin .ct-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.foglio body.admin .ct-settings label {
+  display: grid;
+  grid-template-columns: 1fr 6rem;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: var(--foglio-fs-sm);
+}
+.foglio body.admin .ct-check {
+  display: flex;
+  gap: 0.5rem;
+  font-size: var(--foglio-fs-sm);
+  padding: 0.2rem 0;
+}
+
+/* Rifiniture dopo la prova nel browser */
+.foglio body.admin .ct-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.foglio body.admin .ct-back {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  text-decoration: none;
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .ct-back:hover {
+  color: var(--foglio-accent);
+}
+.foglio body.admin .ct-col.is-empty {
+  flex-basis: 128px;
+  background: transparent;
+  border: 1px dashed var(--foglio-rule);
+}
+.foglio body.admin .ct-col.is-empty h3 {
+  color: var(--foglio-ink-mute);
+  font-weight: 400;
+}
+.foglio body.admin .ct-tile .ct-chip {
+  margin-top: 0.3rem;
+}
+.foglio body.admin .ct-tile.is-loading b {
+  color: transparent;
+  background: var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  width: 3.5rem;
+  margin-top: 0.3rem;
+}
+.foglio body.admin .ct-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.foglio body.admin .ct-row-title,
+.foglio body.admin .ct-card-top {
+  overflow-wrap: anywhere;
+}
+.foglio body.admin .ct-side .ct-row-title {
+  word-break: break-all;
+}
+.foglio body.admin .ct-notes {
+  max-height: 12rem;
+  overflow: auto;
+  padding-right: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+.foglio body.admin .ct-alert {
+  line-height: 1.5;
+}
+.foglio body.admin .ct-head h1 + .ct-mono {
+  margin-top: 0.4rem;
+}
+.foglio body.admin .ct-toolbar select {
+  min-width: 4.5rem;
+}
+.foglio body.admin .ct-toast[hidden] {
+  display: none;
+}
+.foglio body.admin .ct-card-top span:last-child {
+  flex: none;
+  white-space: nowrap;
+}
+.foglio body.admin .ct-toast button {
+  flex: none;
+}
+
+/* Carte spostabili + telefono */
+.foglio body.admin .ct-card {
+  position: relative;
+  cursor: grab;
+}
+.foglio body.admin .ct-card.dragging {
+  opacity: 0.4;
+}
+.foglio body.admin .ct-card-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.foglio body.admin .ct-col.is-over {
+  outline: 2px dashed var(--foglio-accent);
+  outline-offset: -2px;
+}
+.foglio body.admin .ct-sr {
+  position: absolute;
+  left: -9999px;
+}
+.foglio body.admin .ct-move {
+  display: none;
+  margin-top: 0.5rem;
+}
+.foglio body.admin .ct-move select {
+  width: 100%;
+  min-height: 36px;
+  font-size: var(--foglio-fs-mono);
+}
+.foglio body.admin .ct-card:hover .ct-move,
+.foglio body.admin .ct-card:focus-within .ct-move {
+  display: block;
+}
+@media (hover: none) {
+  .foglio body.admin .ct-move {
+    display: block;
+  }
+  .foglio body.admin .ct-card {
+    cursor: default;
+  }
+}
+@media (max-width: 640px) {
+  .foglio body.admin .ct-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .foglio body.admin .ct-board {
+    flex-direction: column;
+    min-width: 0;
+  }
+  .foglio body.admin .ct-col,
+  .foglio body.admin .ct-col.is-empty {
+    flex: none;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .foglio body.admin .ct-col.is-empty h3 {
+    margin: 0;
+  }
+  .foglio body.admin .ct-field {
+    grid-template-columns: 1fr;
+  }
+  .foglio body.admin .ct-bars {
+    grid-template-columns: minmax(0, 1fr) 3rem;
+  }
+  .foglio body.admin .ct-bars .ct-bar {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+  .foglio body.admin .ct-head {
+    align-items: flex-start;
+  }
+}
