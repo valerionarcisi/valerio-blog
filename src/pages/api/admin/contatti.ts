@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { requireAdmin } from "~/lib/admin-auth";
 import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { listTables, loadRow, loadTable } from "~/lib/radar-browse";
 import {
   PROJECTS,
   type Project,
@@ -24,6 +25,7 @@ function withNoStore(res: Response): Response {
 }
 
 // GET ?view=today | pipeline&project=… | contact&id=… | draft&id=… | engine
+//   | tables | table&name=…&page=…&sort=…&dir=…&q=… | row&name=…&rowid=…  (Dati, sola lettura)
 export const GET: APIRoute = async ({ request, url }) => {
   const denied = requireAdmin(request);
   if (denied) return denied;
@@ -65,6 +67,31 @@ export const GET: APIRoute = async ({ request, url }) => {
       }
       case "engine":
         return withNoStore(jsonOk(await loadEngine(db)));
+      case "tables":
+        return withNoStore(jsonOk(await listTables(db)));
+      case "table": {
+        const res = await loadTable(db, {
+          table: url.searchParams.get("name") ?? "",
+          page: Number(url.searchParams.get("page")) || 1,
+          sort: url.searchParams.get("sort"),
+          dir: url.searchParams.get("dir"),
+          q: url.searchParams.get("q"),
+        });
+        return res.ok
+          ? withNoStore(jsonOk(res.value))
+          : jsonErr(res.error, 400);
+      }
+      case "row": {
+        const res = await loadRow(
+          db,
+          url.searchParams.get("name") ?? "",
+          Number(url.searchParams.get("rowid")),
+        );
+        if (!res.ok) return jsonErr(res.error, 400);
+        return res.value
+          ? withNoStore(jsonOk(res.value))
+          : jsonErr("Riga non trovata", 404);
+      }
       default:
         return jsonErr("Vista sconosciuta", 400);
     }

@@ -31,6 +31,7 @@ if (!Astro.locals.isAdmin) {
         <nav class="ct-tabs" aria-label="Sezioni">
           <a href="#oggi" data-view="oggi">Oggi</a>
           <a href="#pipeline" data-view="pipeline">Pipeline</a>
+          <a href="#dati" data-view="dati">Dati</a>
           <a href="#motore" data-view="motore">Motore</a>
         </nav>
       </header>
@@ -92,6 +93,10 @@ if (!Astro.locals.isAdmin) {
       <section id="view-bozza" class="ct-view" hidden>
         <a href="#oggi" class="ct-mono ct-back" data-back>← Oggi</a>
         <div id="bozza-body" class="ct-stack"><p class="loading">Carico…</p></div>
+      </section>
+
+      <section id="view-dati" class="ct-view" hidden>
+        <div id="dati-body" class="ct-stack"><p class="loading">Carico…</p></div>
       </section>
 
       <section id="view-motore" class="ct-view" hidden>

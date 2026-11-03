@@ -412,6 +412,33 @@
 .foglio body.admin .ct-card:focus-within .ct-move {
   display: block;
 }
+.foglio body.admin .ct-data th,
+.foglio body.admin .ct-data td {
+  max-width: 28ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
+}
+.foglio body.admin .ct-data tbody th {
+  white-space: nowrap;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-data td.ct-pre {
+  max-width: none;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.foglio body.admin .ct-pager {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+}
+
 @media (hover: none) {
   .foglio body.admin .ct-move {
     display: block;

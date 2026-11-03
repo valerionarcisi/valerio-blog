@@ -1,5 +1,5 @@
 // /admin/contatti — viste Oggi, Pipeline, Scheda casa, Bozza, Motore su /api/admin/contatti.
-// Routing con l'hash: #oggi, #pipeline, #casa-<id>, #bozza-<id>, #motore.
+// Routing con l'hash: #oggi, #pipeline, #casa-<id>, #bozza-<id>, #dati, #dati/<tabella>?q=&sort=&dir=&page=, #dati/<tabella>/<rowid>, #motore.
 (function () {
   var API = "/api/admin/contatti";
   var esc = window.escapeHtml;
@@ -971,14 +971,227 @@
   }
 
   // ─── Router ────────────────────────────────────────────
+  // ── Dati: navigazione in sola lettura del DB del motore ──────────
+  function dataLink(table, o) {
+    var qs = [];
+    ["q", "sort", "dir", "page"].forEach(function (k) {
+      if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
+    });
+    return "#dati/" + table + (qs.length ? "?" + qs.join("&") : "");
+  }
+  function cellHtml(v) {
+    if (v === null || v === undefined) return '<span class="muted">—</span>';
+    return esc(String(v));
+  }
+  function renderData(h) {
+    var body = $("dati-body");
+    var parts = h.split("?");
+    var path = parts[0].split("/");
+    var params = new URLSearchParams(parts[1] || "");
+    if (!path[1]) return renderDataTables(body);
+    if (path[2]) return renderDataRow(body, path[1], path[2]);
+    renderDataTable(body, path[1], params);
+  }
+  function renderDataTables(body) {
+    body.innerHTML = SKELETON;
+    window
+      .apiJson(API + "?view=tables")
+      .then(function (list) {
+        body.innerHTML =
+          '<section class="card"><h2>Tabelle del radar</h2>' +
+          '<p class="muted">Sola lettura. Le tabelle di sistema del motore non sono consultabili.</p>' +
+          '<div class="table-wrap"><table><thead><tr><th>Tabella</th><th class="num">Righe</th></tr></thead><tbody>' +
+          list
+            .map(function (t) {
+              return (
+                '<tr><td><a href="#dati/' +
+                esc(t.name) +
+                '">' +
+                esc(t.name) +
+                '</a></td><td class="num">' +
+                t.rows.toLocaleString("it-IT") +
+                "</td></tr>"
+              );
+            })
+            .join("") +
+          "</tbody></table></div></section>";
+      })
+      .catch(function (e) {
+        body.innerHTML = '<p class="error">' + esc(e.message) + "</p>";
+      });
+  }
+  function renderDataTable(body, table, params) {
+    var q = params.get("q") || "",
+      sort = params.get("sort") || "",
+      dir = params.get("dir") || "asc",
+      page = Number(params.get("page")) || 1;
+    body.innerHTML = SKELETON;
+    var qs =
+      "&name=" +
+      encodeURIComponent(table) +
+      "&page=" +
+      page +
+      "&dir=" +
+      encodeURIComponent(dir) +
+      (sort ? "&sort=" + encodeURIComponent(sort) : "") +
+      (q ? "&q=" + encodeURIComponent(q) : "");
+    window
+      .apiJson(API + "?view=table" + qs)
+      .then(function (d) {
+        var head = d.columns
+          .map(function (c) {
+            var on = d.sort === c;
+            var next = on && d.dir === "asc" ? "desc" : "asc";
+            return (
+              '<th><a href="' +
+              dataLink(table, { q: q, sort: c, dir: next }) +
+              '">' +
+              esc(c) +
+              (on ? (d.dir === "asc" ? " ▲" : " ▼") : "") +
+              "</a></th>"
+            );
+          })
+          .join("");
+        var rows = d.rows
+          .map(function (r) {
+            return (
+              "<tr>" +
+              '<td><a href="#dati/' +
+              esc(table) +
+              "/" +
+              r._rowid +
+              '">apri</a></td>' +
+              d.columns
+                .map(function (c) {
+                  return "<td>" + cellHtml(r[c]) + "</td>";
+                })
+                .join("") +
+              "</tr>"
+            );
+          })
+          .join("");
+        var o = { q: d.q, sort: d.sort, dir: d.dir };
+        var prev =
+          d.page > 1
+            ? '<a href="' +
+              dataLink(table, Object.assign({}, o, { page: d.page - 1 })) +
+              '">← Prima</a>'
+            : "";
+        var next =
+          d.page < d.pages
+            ? '<a href="' +
+              dataLink(table, Object.assign({}, o, { page: d.page + 1 })) +
+              '">Dopo →</a>'
+            : "";
+        body.innerHTML =
+          '<a href="#dati" class="ct-mono ct-back">← Tabelle</a>' +
+          '<section class="card"><h2>' +
+          esc(table) +
+          "</h2>" +
+          '<form class="ct-toolbar" id="dati-search"><label for="dati-q">Cerca</label>' +
+          '<input id="dati-q" type="search" value="' +
+          esc(d.q) +
+          '" placeholder="In tutte le colonne" />' +
+          '<button type="submit">Cerca</button></form>' +
+          '<p class="muted">' +
+          d.total.toLocaleString("it-IT") +
+          " righe · pagina " +
+          d.page +
+          " di " +
+          d.pages +
+          "</p>" +
+          '<div class="table-wrap"><table class="ct-data"><thead><tr><th></th>' +
+          head +
+          "</tr></thead><tbody>" +
+          (rows ||
+            '<tr><td class="muted" colspan="' +
+              (d.columns.length + 1) +
+              '">Nessuna riga.</td></tr>') +
+          '</tbody></table></div><div class="ct-pager">' +
+          prev +
+          " " +
+          next +
+          "</div></section>";
+        $("dati-search").addEventListener("submit", function (e) {
+          e.preventDefault();
+          location.hash = dataLink(table, {
+            q: $("dati-q").value.trim(),
+            sort: d.sort,
+            dir: d.dir,
+          });
+        });
+      })
+      .catch(function (e) {
+        body.innerHTML =
+          '<a href="#dati" class="ct-mono ct-back">← Tabelle</a><p class="error">' +
+          esc(e.message) +
+          "</p>";
+      });
+  }
+  function renderDataRow(body, table, rowid) {
+    body.innerHTML = SKELETON;
+    window
+      .apiJson(
+        API +
+          "?view=row&name=" +
+          encodeURIComponent(table) +
+          "&rowid=" +
+          encodeURIComponent(rowid),
+      )
+      .then(function (d) {
+        var fields = Object.keys(d.values)
+          .map(function (k) {
+            return (
+              "<tr><th>" +
+              esc(k) +
+              '</th><td class="ct-pre">' +
+              cellHtml(d.values[k]) +
+              "</td></tr>"
+            );
+          })
+          .join("");
+        body.innerHTML =
+          '<a href="#dati/' +
+          esc(table) +
+          '" class="ct-mono ct-back">← ' +
+          esc(table) +
+          "</a>" +
+          '<section class="card"><h2>' +
+          esc(table) +
+          " · riga " +
+          d.rowid +
+          "</h2>" +
+          (d.contactId
+            ? '<p><a href="#casa-' +
+              d.contactId +
+              '">Apri la scheda della casa →</a></p>'
+            : "") +
+          '<div class="table-wrap"><table class="ct-data"><tbody>' +
+          fields +
+          "</tbody></table></div></section>";
+      })
+      .catch(function (e) {
+        body.innerHTML =
+          '<a href="#dati/' +
+          esc(table) +
+          '" class="ct-mono ct-back">← ' +
+          esc(table) +
+          '</a><p class="error">' +
+          esc(e.message) +
+          "</p>";
+      });
+  }
+
   function route() {
     var h = location.hash.slice(1) || "oggi";
     var m = /^(casa|bozza)-(\d+)$/.exec(h);
     var view = m
       ? m[1]
-      : ["oggi", "pipeline", "motore"].indexOf(h) !== -1
-        ? h
-        : "oggi";
+      : /^dati(\/|$)/.test(h)
+        ? "dati"
+        : ["oggi", "pipeline", "motore"].indexOf(h) !== -1
+          ? h
+          : "oggi";
     if (!m) state.prevHash = h;
     document.querySelectorAll("[data-back]").forEach(function (a) {
       a.setAttribute(
@@ -1001,6 +1214,7 @@
     if (view === "oggi") renderToday();
     else if (view === "pipeline") renderPipeline();
     else if (view === "motore") renderEngine();
+    else if (view === "dati") renderData(h);
     else if (view === "casa") renderContact(m[2]);
     else if (view === "bozza") renderDraft(m[2]);
   }
