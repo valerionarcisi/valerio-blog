@@ -130,7 +130,7 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 | `/admin/arte-di-narrare` | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                                                                                            |
 | `/admin/radar`           | Film opportunities radar (bandi/call/pitch) — deadline-sorted cards from `src/data/radar.json` (served via `GET /api/admin/radar`), filters + search                                  |
 
-`/admin/contatti` is the contacts radar for the films (production and distribution companies to write to): it reads and writes the **separate** Turso DB of the Python engine running on the NAS (`TURSO_RADAR_URL`, `TURSO_RADAR_TOKEN`). The site never sends email; approving a draft only queues it for the NAS. See `docs/radar-contatti-spec.md`.
+`/admin/contatti` is the contacts radar for the films (production and distribution companies to write to): it reads and writes the **separate** Turso DB of the Python engine running on the NAS (`TURSO_RADAR_URL`, `TURSO_RADAR_TOKEN`). The site never sends email; approving a draft only queues it for the NAS. The Dati tab browses the engine's tables read-only. See `docs/radar-contatti-spec.md`.
 
 `src/data/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
 GitHub Actions workflow (`.github/workflows/radar-weekly.yml`): `scripts/radar-update.mjs`

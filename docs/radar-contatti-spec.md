@@ -39,11 +39,12 @@ Una sola pagina con routing sull'hash, logica in `public/admin/contatti.js`:
 | `#pipeline`   | colonne per fase, un film alla volta, filtri per punteggio e nome                 |
 | `#casa-<id>`  | scheda: punteggio spiegato, email con prova, doppioni, storico, note, cambio fase |
 | `#bozza-<id>` | modifica, approva, togli dalla coda, scarta                                       |
+| `#dati`       | navigazione in sola lettura delle tabelle del radar (vedi sotto)                  |
 | `#motore`     | giri, fonti, accensione degli invii, pausa, regole                                |
 
 ## API `/api/admin/contatti`
 
-`GET ?view=today | pipeline&project=…&min=… | contact&id=… | draft&id=… | engine`
+`GET ?view=today | pipeline&project=…&min=… | contact&id=… | draft&id=… | engine | tables | table&name=…&page=…&sort=…&dir=…&q=… | row&name=…&rowid=…`
 
 `POST` con `action`:
 
@@ -52,6 +53,12 @@ Una sola pagina con routing sull'hash, logica in `public/admin/contatti.js`:
 - `setting` (solo chiavi in lista, con limiti: tetto giornaliero, fascia oraria, follow-up…)
 
 Logica e validazione in `src/lib/radar-contacts.ts` (`parseAction` → `Result`, `applyAction`); test in `radar-contacts.test.ts` con DB in memoria.
+
+## Dati (sola lettura)
+
+`#dati` elenca le tabelle con il numero di righe; `#dati/<tabella>?q=&sort=&dir=&page=` mostra 50 righe per pagina con ricerca su tutte le colonne e ordinamento; `#dati/<tabella>/<rowid>` mostra la riga intera (per `contacts` e le tabelle con `contact_id` c'è il link alla scheda `#casa-<id>`, dove si modifica). Da qui non si scrive nulla.
+
+Logica in `src/lib/radar-browse.ts`, test in `radar-browse.test.ts`. Nel SQL entrano solo nomi verificati: la tabella deve stare nella lista chiusa (`contacts`, `contact_projects`, `people`, `credits`, `deadlines`, `sources`, `source_candidates`, `search_queries`, `search_runs`, `radar_runs`, `radar_events`, `radar_sources`, `lessons_*`) ed esistere, la colonna di ordinamento deve risultare da `PRAGMA table_info`, i valori sono parametri (`LIKE` con escape di `%` e `_`). Le celle lunghe sono tagliate a 300 caratteri nell'elenco. `sys_config`, `sys_files`, `scripts`, `radar_outbox`, `radar_requests` e `radar_settings` non sono consultabili: possono contenere configurazione, testi delle email o chiavi del motore.
 
 ## Spostare le carte
 
@@ -89,5 +96,6 @@ I lavori automatici del motore fanno al massimo `llm_daily_calls` chiamate al gi
 
 ## Limiti noti
 
-- Una pagina sola, nessuna paginazione: la pipeline mostra al massimo 40 carte per colonna.
+- Dati: nessun filtro per colonna, nessun export; la ricerca è un `LIKE` su tutte le colonne (lenta solo su tabelle molto grandi).
+- Una pagina sola, la pipeline non è paginata: la pipeline mostra al massimo 40 carte per colonna.
 - Le azioni sul database sono dirette, senza annulla.
