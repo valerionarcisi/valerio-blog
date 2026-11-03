@@ -56,7 +56,9 @@ Logica e validazione in `src/lib/radar-contacts.ts` (`parseAction` → `Result`,
 
 ## Dati (sola lettura)
 
-`#dati` elenca le tabelle con il numero di righe; `#dati/<tabella>?q=&sort=&dir=&page=` mostra 50 righe per pagina con ricerca su tutte le colonne e ordinamento; `#dati/<tabella>/<rowid>` mostra la riga intera (per `contacts` e le tabelle con `contact_id` c'è il link alla scheda `#casa-<id>`, dove si modifica). Da qui non si scrive nulla.
+`#dati` mostra le tabelle come schede raggruppate (Case e persone, Ricerca, Motore, Lezioni) con nome in italiano, descrizione, nome tecnico e numero di righe, più un filtro «Trova tabella». Dentro una tabella c'è un selettore rapido per passare alle altre, le prime 7 colonne (con «Mostra tutte le colonne», `all=1`), la riga intera cliccabile e, nel dettaglio, i campi vuoti raccolti in «campi vuoti». Etichette e descrizioni stanno in `DATA_GROUPS` / `DATA_HINT` in `public/admin/contatti.js`: una tabella nuova compare comunque, sotto «Altre».
+
+In dettaglio: `#dati/<tabella>?q=&sort=&dir=&page=` mostra 50 righe per pagina con ricerca su tutte le colonne e ordinamento; `#dati/<tabella>/<rowid>` mostra la riga intera (per `contacts` e le tabelle con `contact_id` c'è il link alla scheda `#casa-<id>`, dove si modifica). Da qui non si scrive nulla.
 
 Logica in `src/lib/radar-browse.ts`, test in `radar-browse.test.ts`. Nel SQL entrano solo nomi verificati: la tabella deve stare nella lista chiusa (`contacts`, `contact_projects`, `people`, `credits`, `deadlines`, `sources`, `source_candidates`, `search_queries`, `search_runs`, `radar_runs`, `radar_events`, `radar_sources`, `lessons_*`) ed esistere, la colonna di ordinamento deve risultare da `PRAGMA table_info`, i valori sono parametri (`LIKE` con escape di `%` e `_`). Le celle lunghe sono tagliate a 300 caratteri nell'elenco. `sys_config`, `sys_files`, `scripts`, `radar_outbox`, `radar_requests` e `radar_settings` non sono consultabili: possono contenere configurazione, testi delle email o chiavi del motore.
 
