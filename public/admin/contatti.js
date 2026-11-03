@@ -31,9 +31,18 @@
     drafts_per_run: "Bozze per giro",
     llm_daily_calls: "Chiamate al modello al giorno",
   };
+  var MAIL_LABEL = { personal: "personale", generic: "info@", none: "" };
+  function mailChip(kind) {
+    return kind === "none" || !kind
+      ? ""
+      : '<span class="ct-chip" style="margin:0">' +
+          esc(MAIL_LABEL[kind]) +
+          "</span>";
+  }
   var state = {
     project: "non-fa-ridere",
     min: 0,
+    mail: "all",
     q: "",
     pipeline: null,
     prevHash: "oggi",
@@ -424,7 +433,12 @@
     document.querySelectorAll("[data-project]").forEach(function (b) {
       b.classList.toggle("active", b.dataset.project === state.project);
     });
-    get({ view: "pipeline", project: state.project, min: state.min })
+    get({
+      view: "pipeline",
+      project: state.project,
+      min: state.min,
+      mail: state.mail,
+    })
       .then(function (d) {
         state.pipeline = d;
         drawBoard();
@@ -480,7 +494,9 @@
                 (c.email
                   ? '<span class="ct-chip ' +
                     (c.verification_level === "verified" ? "ok" : "warn") +
-                    '" style="margin:0">email</span>'
+                    '" style="margin:0">' +
+                    esc(MAIL_LABEL[c.mail_kind]) +
+                    "</span>"
                   : '<span class="ct-chip" style="margin:0">senza email</span>') +
                 "</div></a>" +
                 '<label class="ct-move"><span class="ct-sr">Sposta ' +
@@ -711,7 +727,9 @@
               (c.verification_level === "verified" ? "ok" : "warn") +
               '" style="margin:0">' +
               esc(c.verification_level || "da verificare") +
-              "</span></div>" +
+              "</span> " +
+              mailChip(c.mail_kind) +
+              "</div>" +
               (c.contact_proof
                 ? '<div class="ct-mono" style="margin-top:.4rem">prova: ' +
                   esc(c.contact_proof) +
@@ -735,6 +753,7 @@
                     '<div class="ct-mono">' +
                     esc(x.email || "email non trovata") +
                     (x.email && x.email_confidence ? " (da confermare)" : "") +
+                    (x.email ? " · " + esc(MAIL_LABEL[x.mail_kind]) : "") +
                     link +
                     "</div></div></div>"
                   );
@@ -2236,6 +2255,9 @@
       );
     } else if (t.id === "pl-min") {
       state.min = Number(t.value);
+      renderPipeline();
+    } else if (t.id === "pl-mail") {
+      state.mail = t.value;
       renderPipeline();
     }
   });

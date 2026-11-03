@@ -36,7 +36,7 @@ Una sola pagina con routing sull'hash, logica in `public/admin/contatti.js`:
 | Hash          | Vista                                                                             |
 | ------------- | --------------------------------------------------------------------------------- |
 | `#oggi`       | bozze da approvare, relazioni calde, ultimi giri del motore                       |
-| `#pipeline`   | colonne per fase, un film alla volta, filtri per punteggio e nome                 |
+| `#pipeline`   | colonne per fase, un film alla volta, filtri per punteggio, tipo di email e nome  |
 | `#casa-<id>`  | scheda: punteggio spiegato, email con prova, doppioni, storico, note, cambio fase |
 | `#bozza-<id>` | modifica, approva, togli dalla coda, scarta                                       |
 | `#dati`       | navigazione in sola lettura delle tabelle del radar (vedi sotto)                  |
@@ -44,7 +44,7 @@ Una sola pagina con routing sull'hash, logica in `public/admin/contatti.js`:
 
 ## API `/api/admin/contatti`
 
-`GET ?view=today | pipeline&project=…&min=… | contact&id=… | draft&id=… | engine | tables | table&name=…&page=…&sort=…&dir=…&q=… | row&name=…&rowid=…`
+`GET ?view=today | pipeline&project=…&min=…&mail=all\|personal\|generic | contact&id=… | draft&id=… | engine | tables | table&name=…&page=…&sort=…&dir=…&q=… | row&name=…&rowid=…`
 
 `POST` con `action`:
 
@@ -53,6 +53,10 @@ Una sola pagina con routing sull'hash, logica in `public/admin/contatti.js`:
 - `setting` (solo chiavi in lista, con limiti: tetto giornaliero, fascia oraria, follow-up…)
 
 Logica e validazione in `src/lib/radar-contacts.ts` (`parseAction` → `Result`, `applyAction`); test in `radar-contacts.test.ts` con DB in memoria.
+
+## Email personale / generica
+
+Flag calcolato dall'indirizzo, senza colonne nel DB del motore (`src/lib/radar-email.ts`): se la parte prima della `@` è una casella d'ufficio (`info`, `contatti`, `produzione`, `segreteria`, `press`, `submissions`…) l'email è `generic` ("info@"), altrimenti `personal`; senza `@` è `none`. Il filtro `mail` di Pipeline agisce prima del taglio a 40 carte, quindi i conteggi delle colonne sono quelli filtrati. Il flag compare anche nella scheda casa e accanto alle persone. Per aggiungere una casella generica basta allungare l'elenco.
 
 ## Dati (sola lettura)
 

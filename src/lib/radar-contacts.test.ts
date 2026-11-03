@@ -371,3 +371,32 @@ describe("reads", () => {
     expect(domainOf("non un url")).toBe("");
   });
 });
+
+describe("flag email personale / generica", () => {
+  test("riconosce le caselle di ufficio", async () => {
+    const { emailFlag } = await import("./radar-email");
+    expect(emailFlag("info@kidam.it")).toBe("generic");
+    expect(emailFlag("Produzione@x.com")).toBe("generic");
+    expect(emailFlag("mario.rossi@kidam.it")).toBe("personal");
+    expect(emailFlag("")).toBe("none");
+    expect(emailFlag(null)).toBe("none");
+  });
+
+  test("la pipeline filtra per tipo di email e conta solo quelle", async () => {
+    const db = await seed();
+    await db.batch([
+      "UPDATE contacts SET email = 'info@kidam.it' WHERE id = 3",
+      "UPDATE contacts SET email = 'anna.bianchi@x.it' WHERE id = 5",
+    ]);
+    const all = await loadPipeline(db, "walkie-talkie", 0);
+    const kinds = all.columns.flatMap((c) => c.cards.map((x) => x.mail_kind));
+    expect(kinds).toContain("generic");
+    const personal = await loadPipeline(db, "walkie-talkie", 0, "personal");
+    const cards = personal.columns.flatMap((c) => c.cards);
+    expect(cards.every((x) => x.mail_kind === "personal")).toBe(true);
+    const generic = await loadPipeline(db, "walkie-talkie", 0, "generic");
+    expect(generic.columns.flatMap((c) => c.cards).map((x) => x.id)).toEqual([
+      3,
+    ]);
+  });
+});
