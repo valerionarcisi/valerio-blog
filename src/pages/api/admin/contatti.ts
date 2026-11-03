@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { requireAdmin } from "~/lib/admin-auth";
+import { parseMailKind } from "~/lib/radar-email";
 import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
 import { listTables, loadRow, loadTable } from "~/lib/radar-browse";
 import {
@@ -47,7 +48,8 @@ export const GET: APIRoute = async ({ request, url }) => {
           0,
           Math.min(100, Number(url.searchParams.get("min")) || 0),
         );
-        return withNoStore(jsonOk(await loadPipeline(db, project, min)));
+        const mail = parseMailKind(url.searchParams.get("mail"));
+        return withNoStore(jsonOk(await loadPipeline(db, project, min, mail)));
       }
       case "contact": {
         if (!Number.isInteger(id) || id <= 0)

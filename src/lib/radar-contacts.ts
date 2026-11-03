@@ -11,6 +11,7 @@ import {
   isNonEmptyString,
   isValidEmail,
 } from "~/lib/result";
+import { type MailKind, emailFlag } from "~/lib/radar-email";
 
 export const PROJECTS = ["non-fa-ridere", "walkie-talkie"] as const;
 export type Project = (typeof PROJECTS)[number];
@@ -149,8 +150,13 @@ export async function loadDueFollowups(
   );
 }
 
-export async function loadPipeline(db: Client, project: Project, minScore = 0) {
-  const list = await rows(
+export async function loadPipeline(
+  db: Client,
+  project: Project,
+  minScore = 0,
+  mail: MailKind = "all",
+) {
+  const found = await rows(
     db,
     `SELECT c.id, c.name, c.country, c.city, c.email, c.verification_level,
             cp.stage, cp.score, cp.shortlist, cp.reason
@@ -159,6 +165,12 @@ export async function loadPipeline(db: Client, project: Project, minScore = 0) {
      ORDER BY cp.shortlist DESC, cp.score DESC NULLS LAST, c.id DESC`,
     [project, minScore],
   );
+  const withKind: Row[] = found.map((r) => ({
+    ...r,
+    mail_kind: emailFlag(r.email),
+  }));
+  const list =
+    mail === "all" ? withKind : withKind.filter((r) => r.mail_kind === mail);
   const columns = STAGES.map((stage) => {
     const all = list.filter((r) => (r.stage ?? "to-contact") === stage);
     return { stage, count: all.length, cards: all.slice(0, 40) };
@@ -205,7 +217,15 @@ export async function loadContact(db: Client, id: number) {
         [id],
       ),
     ]);
-  return { contact, projects, outbox, events, duplicates, requests, people };
+  return {
+    contact: { ...contact, mail_kind: emailFlag(contact.email) },
+    projects,
+    outbox,
+    events,
+    duplicates,
+    requests,
+    people: people.map((p) => ({ ...p, mail_kind: emailFlag(p.email) })),
+  };
 }
 
 export async function loadDraft(db: Client, id: number) {
