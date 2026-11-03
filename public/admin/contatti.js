@@ -1028,6 +1028,46 @@
     radar_sources: "Fonti attive del motore",
   };
   var COMPACT_COLS = 7;
+  // Segmenti in cima alla tabella: gruppi di valori di una colonna ("type" è sporco: producer/production, sales/distributor…).
+  var SEGMENTS = {
+    contacts: {
+      col: "type",
+      groups: [
+        {
+          key: "produzione",
+          label: "Produzioni",
+          vals: ["producer", "production"],
+        },
+        {
+          key: "distribuzione",
+          label: "Distribuzioni",
+          vals: [
+            "sales",
+            "distributor",
+            "theatrical_distribution",
+            "short_distribution",
+            "sales_agent",
+          ],
+        },
+        { key: "altro", label: "Altro", rest: true },
+      ],
+    },
+    contact_projects: {
+      col: "project",
+      groups: [
+        {
+          key: "nfr",
+          label: "Non fa ridere · distribuzione",
+          vals: ["non-fa-ridere"],
+        },
+        {
+          key: "wt",
+          label: "Walkie Talkie · produzione",
+          vals: ["walkie-talkie"],
+        },
+      ],
+    },
+  };
   function dataLabel(t) {
     for (var i = 0; i < DATA_GROUPS.length; i++)
       if (DATA_GROUPS[i].tables[t]) return DATA_GROUPS[i].tables[t];
@@ -1415,9 +1455,11 @@
   }
   function dataLink(table, o, rowid) {
     var qs = [];
-    ["q", "sort", "dir", "page", "all", "fcol", "fval"].forEach(function (k) {
-      if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
-    });
+    ["q", "sort", "dir", "page", "all", "fcol", "fval", "seg"].forEach(
+      function (k) {
+        if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
+      },
+    );
     return (
       "#dati/" +
       table +
@@ -1427,9 +1469,11 @@
   }
   function dataParams(p) {
     var o = {};
-    ["q", "sort", "dir", "page", "all", "fcol", "fval"].forEach(function (k) {
-      o[k] = p.get(k) || "";
-    });
+    ["q", "sort", "dir", "page", "all", "fcol", "fval", "seg"].forEach(
+      function (k) {
+        o[k] = p.get(k) || "";
+      },
+    );
     return o;
   }
   function compactCols(table, columns) {
@@ -1554,21 +1598,99 @@
       openDrawer(path[1], open, o);
     });
   }
+  function segmentOf(table, seg) {
+    var cfg = SEGMENTS[table];
+    if (!cfg) return null;
+    var g = cfg.groups.filter(function (x) {
+      return x.key === seg;
+    })[0];
+    return g ? { cfg: cfg, group: g } : null;
+  }
+  function tableQuery(table, o) {
+    var sp = new URLSearchParams({
+      view: "table",
+      name: table,
+      page: o.page || 1,
+      dir: o.dir || "asc",
+    });
+    ["sort", "q", "fcol", "fval"].forEach(function (k) {
+      if (o[k]) sp.set(k, o[k]);
+    });
+    var cfg = SEGMENTS[table];
+    if (cfg) sp.set("facet", cfg.col);
+    var sg = segmentOf(table, o.seg);
+    if (sg) {
+      sp.set("scol", sg.cfg.col);
+      var vals = sg.group.rest
+        ? sg.cfg.groups.reduce(function (a, g) {
+            return a.concat(g.vals || []);
+          }, [])
+        : sg.group.vals;
+      vals.forEach(function (v) {
+        sp.append("sval", v);
+      });
+      if (sg.group.rest) sp.set("sneg", "1");
+    }
+    return sp.toString();
+  }
+  function segmentsHtml(table, d, base) {
+    var cfg = SEGMENTS[table];
+    if (!cfg || !d.facet) return "";
+    var counts = {},
+      total = 0;
+    d.facet.values.forEach(function (v) {
+      counts[v.value] = v.count;
+      total += v.count;
+    });
+    var claimed = {};
+    cfg.groups.forEach(function (g) {
+      (g.vals || []).forEach(function (v) {
+        claimed[v] = true;
+      });
+    });
+    var items = [{ key: "", label: "Tutti", n: total }].concat(
+      cfg.groups.map(function (g) {
+        var n = g.rest
+          ? d.facet.values.reduce(function (a, v) {
+              return a + (claimed[v.value] ? 0 : v.count);
+            }, 0)
+          : g.vals.reduce(function (a, v) {
+              return a + (counts[v] || 0);
+            }, 0);
+        return { key: g.key, label: g.label, n: n };
+      }),
+    );
+    return (
+      '<div class="ct-seg" role="group" aria-label="Segmenti">' +
+      items
+        .map(function (it) {
+          return (
+            '<a href="' +
+            dataLink(
+              table,
+              Object.assign({}, base, { seg: it.key, page: "" }),
+            ) +
+            '"' +
+            ((base.seg || "") === it.key
+              ? ' class="is-on" aria-current="true"'
+              : "") +
+            ">" +
+            esc(it.label) +
+            "<em>" +
+            nf(it.n) +
+            "</em></a>"
+          );
+        })
+        .join("") +
+      "</div>"
+    );
+  }
   function renderDataTable(body, table, o, done) {
     var keep = body.querySelector('.ct-dlayout[data-table="' + table + '"]');
     if (!keep) body.innerHTML = SKELETON;
     else keep.classList.add("is-loading");
     Promise.all([
-      get({
-        view: "table",
-        name: table,
-        page: o.page || 1,
-        dir: o.dir || "asc",
-        sort: o.sort,
-        q: o.q,
-        fcol: o.fcol,
-        fval: o.fval,
-      }),
+      window.apiJson(API + "?" + tableQuery(table, o)),
       tablesList(),
     ])
       .then(function (res) {
@@ -1587,6 +1709,7 @@
           all: o.all,
           fcol: d.filter ? d.filter.col : "",
           fval: d.filter ? d.filter.val : "",
+          seg: segmentOf(table, o.seg) ? o.seg : "",
         };
         var head = cols
           .map(function (c) {
@@ -1685,6 +1808,7 @@
           '" placeholder="Cerca in ' +
           esc(dataLabel(table)) +
           '…  ( / )" aria-label="Cerca" autocomplete="off" /></form></div>' +
+          segmentsHtml(table, d, base) +
           '<div class="ct-dbar"><div class="ct-fchips"><span class="muted">' +
           nf(d.total) +
           (d.total === 1 ? " riga" : " righe") +

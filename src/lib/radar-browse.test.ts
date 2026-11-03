@@ -138,6 +138,73 @@ describe("filter and contact names", () => {
   });
 });
 
+describe("facet", () => {
+  test("counts values of a real column, honouring the search but not the filter", async () => {
+    const all = await loadTable(db, { table: "contacts", facet: "city" });
+    expect(all.ok && all.value.facet?.values).toEqual([
+      { value: "Roma", count: 2 },
+      { value: "Milano", count: 1 },
+    ]);
+    const filtered = await loadTable(db, {
+      table: "contacts",
+      facet: "city",
+      fcol: "city",
+      fval: "Milano",
+      q: "film",
+    });
+    expect(filtered.ok && filtered.value.facet?.values).toEqual([
+      { value: "Roma", count: 1 },
+    ]);
+  });
+
+  test("ignores a facet column that is not in the table", async () => {
+    const r = await loadTable(db, { table: "contacts", facet: "x; DROP" });
+    expect(r.ok && r.value.facet).toBeNull();
+  });
+});
+
+describe("segment", () => {
+  test("keeps rows whose column is in the set, or outside it with sneg", async () => {
+    const inSet = await loadTable(db, {
+      table: "contacts",
+      scol: "city",
+      svals: ["Milano", "Torino"],
+    });
+    expect(inSet.ok && inSet.value.rows.map((r) => r.name)).toEqual([
+      "100% Cinema",
+    ]);
+    const outside = await loadTable(db, {
+      table: "contacts",
+      scol: "city",
+      svals: ["Roma"],
+      sneg: true,
+    });
+    expect(outside.ok && outside.value.total).toBe(1);
+  });
+
+  test("sneg also keeps rows where the column is NULL", async () => {
+    await db.execute(
+      "INSERT INTO contacts (id, name) VALUES (9, 'Senza città')",
+    );
+    const r = await loadTable(db, {
+      table: "contacts",
+      scol: "city",
+      svals: ["Roma"],
+      sneg: true,
+    });
+    expect(r.ok && r.value.total).toBe(2);
+  });
+
+  test("rejects a segment column that is not in the table", async () => {
+    const r = await loadTable(db, {
+      table: "contacts",
+      scol: "x; DROP",
+      svals: ["a"],
+    });
+    expect(r.ok).toBe(false);
+  });
+});
+
 describe("loadRow", () => {
   test("returns full values and the contact link", async () => {
     const c = await loadRow(db, "contacts", 1);
