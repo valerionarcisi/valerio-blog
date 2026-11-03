@@ -972,16 +972,77 @@
 
   // ─── Router ────────────────────────────────────────────
   // ── Dati: navigazione in sola lettura del DB del motore ──────────
+  var DATA_GROUPS = [
+    {
+      title: "Case e persone",
+      tables: {
+        contacts: "Contatti",
+        contact_projects: "Contatti per film",
+        people: "Persone",
+        credits: "Crediti",
+      },
+    },
+    {
+      title: "Ricerca di nuove case",
+      tables: {
+        sources: "Fonti",
+        source_candidates: "Fonti candidate",
+        search_queries: "Ricerche",
+        search_runs: "Giri di ricerca",
+        deadlines: "Scadenze",
+      },
+    },
+    {
+      title: "Motore",
+      tables: {
+        radar_runs: "Giri del motore",
+        radar_events: "Eventi",
+        radar_sources: "Fonti del motore",
+      },
+    },
+    {
+      title: "Lezioni",
+      tables: {
+        lessons_directing: "Regia",
+        lessons_english: "Inglese",
+        lessons_study: "Studio",
+      },
+    },
+  ];
+  var DATA_HINT = {
+    contacts: "Case di produzione e distribuzione: anagrafica, email, prove",
+    contact_projects: "Punteggio, fase e motivo di ogni casa per ogni film",
+    people: "Referenti trovati dentro le case",
+    credits: "Film e crediti usati per valutare le case",
+    sources: "Siti e liste da cui nascono i contatti",
+    source_candidates: "Fonti proposte, ancora da valutare",
+    search_queries: "Ricerche eseguite dal motore",
+    search_runs: "Esito di ogni giro di ricerca",
+    deadlines: "Scadenze di bandi e festival",
+    radar_runs: "Cronologia dei lavori automatici",
+    radar_events: "Cosa è successo a ogni contatto",
+    radar_sources: "Fonti attive del motore",
+  };
+  var COMPACT_COLS = 7;
+  function dataLabel(t) {
+    for (var i = 0; i < DATA_GROUPS.length; i++)
+      if (DATA_GROUPS[i].tables[t]) return DATA_GROUPS[i].tables[t];
+    return t.replace(/^lessons_/, "Lezioni · ");
+  }
   function dataLink(table, o) {
     var qs = [];
-    ["q", "sort", "dir", "page"].forEach(function (k) {
+    ["q", "sort", "dir", "page", "all"].forEach(function (k) {
       if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
     });
     return "#dati/" + table + (qs.length ? "?" + qs.join("&") : "");
   }
   function cellHtml(v) {
-    if (v === null || v === undefined) return '<span class="muted">—</span>';
+    if (v === null || v === undefined || v === "")
+      return '<span class="muted">—</span>';
     return esc(String(v));
+  }
+  function nf(n) {
+    return Number(n).toLocaleString("it-IT");
   }
   function renderData(h) {
     var body = $("dati-body");
@@ -994,57 +1055,158 @@
   }
   function renderDataTables(body) {
     body.innerHTML = SKELETON;
-    window
-      .apiJson(API + "?view=tables")
+    get({ view: "tables" })
       .then(function (list) {
-        body.innerHTML =
-          '<section class="card"><h2>Tabelle del radar</h2>' +
-          '<p class="muted">Sola lettura. Le tabelle di sistema del motore non sono consultabili.</p>' +
-          '<div class="table-wrap"><table><thead><tr><th>Tabella</th><th class="num">Righe</th></tr></thead><tbody>' +
-          list
-            .map(function (t) {
-              return (
-                '<tr><td><a href="#dati/' +
-                esc(t.name) +
-                '">' +
-                esc(t.name) +
-                '</a></td><td class="num">' +
-                t.rows.toLocaleString("it-IT") +
-                "</td></tr>"
-              );
+        var counts = {};
+        list.forEach(function (t) {
+          counts[t.name] = t.rows;
+        });
+        var known = {};
+        var html = DATA_GROUPS.map(function (g) {
+          var tiles = Object.keys(g.tables)
+            .filter(function (n) {
+              known[n] = true;
+              return n in counts;
             })
-            .join("") +
-          "</tbody></table></div></section>";
+            .map(function (n) {
+              return tile(n, g.tables[n], counts[n]);
+            });
+          return tiles.length
+            ? '<section class="ct-dgroup"><h2 class="ct-eyebrow">' +
+                esc(g.title) +
+                '</h2><div class="ct-dgrid">' +
+                tiles.join("") +
+                "</div></section>"
+            : "";
+        }).join("");
+        var rest = list
+          .filter(function (t) {
+            return !known[t.name] && !/^lessons_/.test(t.name);
+          })
+          .map(function (t) {
+            return tile(t.name, t.name, t.rows);
+          });
+        var lessons = list
+          .filter(function (t) {
+            return /^lessons_/.test(t.name) && !known[t.name];
+          })
+          .map(function (t) {
+            return tile(t.name, dataLabel(t.name), t.rows);
+          });
+        html += rest.concat(lessons).length
+          ? '<section class="ct-dgroup"><h2 class="ct-eyebrow">Altre</h2><div class="ct-dgrid">' +
+            rest.concat(lessons).join("") +
+            "</div></section>"
+          : "";
+        body.innerHTML =
+          '<p class="ct-lede">Il database del radar, in sola lettura. ' +
+          "Scegli una tabella per sfogliarla, cercare e ordinare. " +
+          "Le tabelle di sistema del motore non sono consultabili.</p>" +
+          '<div class="ct-toolbar"><label for="dati-filter">Trova tabella</label>' +
+          '<input id="dati-filter" type="search" placeholder="Es. contatti, persone…" /></div>' +
+          '<div id="dati-groups">' +
+          html +
+          "</div>" +
+          '<p class="muted" id="dati-none" hidden>Nessuna tabella corrisponde.</p>';
+        $("dati-filter").addEventListener("input", function (e) {
+          var q = e.target.value.trim().toLowerCase();
+          var shown = 0;
+          body.querySelectorAll(".ct-dtile").forEach(function (a) {
+            var on = !q || a.dataset.search.indexOf(q) !== -1;
+            a.hidden = !on;
+            if (on) shown++;
+          });
+          body.querySelectorAll(".ct-dgroup").forEach(function (g) {
+            g.hidden = !g.querySelector(".ct-dtile:not([hidden])");
+          });
+          $("dati-none").hidden = shown > 0;
+        });
       })
       .catch(function (e) {
         body.innerHTML = '<p class="error">' + esc(e.message) + "</p>";
       });
+    function tile(name, label, rows) {
+      return (
+        '<a class="ct-dtile" href="#dati/' +
+        esc(name) +
+        '" data-search="' +
+        esc(
+          (label + " " + name + " " + (DATA_HINT[name] || "")).toLowerCase(),
+        ) +
+        '"><span class="ct-dtile-top"><b>' +
+        esc(label) +
+        '</b><span class="ct-dtile-n">' +
+        nf(rows) +
+        '</span></span><span class="ct-dtile-hint">' +
+        esc(DATA_HINT[name] || "") +
+        '</span><span class="ct-mono">' +
+        esc(name) +
+        "</span></a>"
+      );
+    }
+  }
+  function switcher(current) {
+    return get({ view: "tables" }).then(function (list) {
+      var order = [];
+      DATA_GROUPS.forEach(function (g) {
+        order = order.concat(Object.keys(g.tables));
+      });
+      var rank = function (n) {
+        var i = order.indexOf(n);
+        return i === -1 ? order.length : i;
+      };
+      list = list.slice().sort(function (a, b) {
+        return rank(a.name) - rank(b.name);
+      });
+      return (
+        '<nav class="ct-dswitch" aria-label="Tabelle">' +
+        list
+          .map(function (t) {
+            return (
+              '<a href="#dati/' +
+              esc(t.name) +
+              '"' +
+              (t.name === current ? ' aria-current="page"' : "") +
+              ">" +
+              esc(dataLabel(t.name)) +
+              "</a>"
+            );
+          })
+          .join("") +
+        "</nav>"
+      );
+    });
   }
   function renderDataTable(body, table, params) {
     var q = params.get("q") || "",
       sort = params.get("sort") || "",
       dir = params.get("dir") || "asc",
-      page = Number(params.get("page")) || 1;
+      page = Number(params.get("page")) || 1,
+      all = params.get("all") === "1";
     body.innerHTML = SKELETON;
-    var qs =
-      "&name=" +
-      encodeURIComponent(table) +
-      "&page=" +
-      page +
-      "&dir=" +
-      encodeURIComponent(dir) +
-      (sort ? "&sort=" + encodeURIComponent(sort) : "") +
-      (q ? "&q=" + encodeURIComponent(q) : "");
-    window
-      .apiJson(API + "?view=table" + qs)
-      .then(function (d) {
-        var head = d.columns
+    Promise.all([
+      get({
+        view: "table",
+        name: table,
+        page: page,
+        dir: dir,
+        sort: sort,
+        q: q,
+      }),
+      switcher(table),
+    ])
+      .then(function (res) {
+        var d = res[0];
+        var cols = all ? d.columns : d.columns.slice(0, COMPACT_COLS);
+        var hidden = d.columns.length - cols.length;
+        var o = { q: d.q, sort: d.sort, dir: d.dir, all: all ? "1" : "" };
+        var head = cols
           .map(function (c) {
             var on = d.sort === c;
             var next = on && d.dir === "asc" ? "desc" : "asc";
             return (
               '<th><a href="' +
-              dataLink(table, { q: q, sort: c, dir: next }) +
+              dataLink(table, Object.assign({}, o, { sort: c, dir: next })) +
               '">' +
               esc(c) +
               (on ? (d.dir === "asc" ? " ▲" : " ▼") : "") +
@@ -1055,13 +1217,16 @@
         var rows = d.rows
           .map(function (r) {
             return (
-              "<tr>" +
-              '<td><a href="#dati/' +
+              '<tr data-open="#dati/' +
               esc(table) +
               "/" +
               r._rowid +
-              '">apri</a></td>' +
-              d.columns
+              '"><td><a href="#dati/' +
+              esc(table) +
+              "/" +
+              r._rowid +
+              '">Apri</a></td>' +
+              cols
                 .map(function (c) {
                   return "<td>" + cellHtml(r[c]) + "</td>";
                 })
@@ -1070,112 +1235,168 @@
             );
           })
           .join("");
-        var o = { q: d.q, sort: d.sort, dir: d.dir };
-        var prev =
-          d.page > 1
+        var first = (d.page - 1) * 50 + 1;
+        var last = first + d.rows.length - 1;
+        var pager =
+          '<div class="ct-pager">' +
+          (d.page > 1
             ? '<a href="' +
               dataLink(table, Object.assign({}, o, { page: d.page - 1 })) +
-              '">← Prima</a>'
-            : "";
-        var next =
-          d.page < d.pages
-            ? '<a href="' +
-              dataLink(table, Object.assign({}, o, { page: d.page + 1 })) +
-              '">Dopo →</a>'
-            : "";
-        body.innerHTML =
-          '<a href="#dati" class="ct-mono ct-back">← Tabelle</a>' +
-          '<section class="card"><h2>' +
-          esc(table) +
-          "</h2>" +
-          '<form class="ct-toolbar" id="dati-search"><label for="dati-q">Cerca</label>' +
-          '<input id="dati-q" type="search" value="' +
-          esc(d.q) +
-          '" placeholder="In tutte le colonne" />' +
-          '<button type="submit">Cerca</button></form>' +
-          '<p class="muted">' +
-          d.total.toLocaleString("it-IT") +
-          " righe · pagina " +
+              '">← Precedenti</a>'
+            : "<span></span>") +
+          "<span>" +
+          (d.total
+            ? nf(first) + "–" + nf(last) + " di " + nf(d.total)
+            : "0 righe") +
+          " · pagina " +
           d.page +
           " di " +
           d.pages +
-          "</p>" +
-          '<div class="table-wrap"><table class="ct-data"><thead><tr><th></th>' +
+          "</span>" +
+          (d.page < d.pages
+            ? '<a href="' +
+              dataLink(table, Object.assign({}, o, { page: d.page + 1 })) +
+              '">Successive →</a>'
+            : "<span></span>") +
+          "</div>";
+        body.innerHTML =
+          '<a href="#dati" class="ct-mono ct-back">← Tutte le tabelle</a>' +
+          res[1] +
+          '<section class="card"><div class="ct-dhead"><div><h2>' +
+          esc(dataLabel(table)) +
+          '</h2><p class="muted">' +
+          esc(DATA_HINT[table] || table) +
+          '</p></div><form class="ct-toolbar" id="dati-search" role="search">' +
+          '<input id="dati-q" type="search" value="' +
+          esc(d.q) +
+          '" placeholder="Cerca in ' +
+          esc(dataLabel(table)) +
+          '…" aria-label="Cerca" /><button type="submit">Cerca</button>' +
+          (d.q
+            ? '<a href="' +
+              dataLink(table, { sort: d.sort, dir: d.dir, all: o.all }) +
+              '">Azzera</a>'
+            : "") +
+          "</form></div>" +
+          '<div class="ct-dbar"><span class="muted">' +
+          (d.q
+            ? nf(d.total) + " risultati per «" + esc(d.q) + "»"
+            : nf(d.total) + " righe") +
+          "</span>" +
+          (d.columns.length > COMPACT_COLS
+            ? '<a href="' +
+              dataLink(table, Object.assign({}, o, { all: all ? "" : "1" })) +
+              '">' +
+              (all
+                ? "Mostra meno colonne"
+                : "Mostra tutte le colonne (+" + hidden + ")") +
+              "</a>"
+            : "") +
+          "</div>" +
+          '<div class="table-wrap"><table class="ct-data ct-data-rows"><thead><tr><th></th>' +
           head +
           "</tr></thead><tbody>" +
           (rows ||
             '<tr><td class="muted" colspan="' +
-              (d.columns.length + 1) +
-              '">Nessuna riga.</td></tr>') +
-          '</tbody></table></div><div class="ct-pager">' +
-          prev +
-          " " +
-          next +
-          "</div></section>";
+              (cols.length + 1) +
+              '">Nessuna riga trovata.</td></tr>') +
+          "</tbody></table></div>" +
+          pager +
+          "</section>";
+        var cur = body.querySelector(".ct-dswitch [aria-current]");
+        if (cur && cur.scrollIntoView)
+          cur.scrollIntoView({ block: "nearest", inline: "center" });
         $("dati-search").addEventListener("submit", function (e) {
           e.preventDefault();
           location.hash = dataLink(table, {
             q: $("dati-q").value.trim(),
             sort: d.sort,
             dir: d.dir,
+            all: o.all,
           });
+        });
+        body.querySelector("tbody").addEventListener("click", function (e) {
+          var tr = e.target.closest("tr[data-open]");
+          if (tr && !e.target.closest("a")) location.hash = tr.dataset.open;
         });
       })
       .catch(function (e) {
         body.innerHTML =
-          '<a href="#dati" class="ct-mono ct-back">← Tabelle</a><p class="error">' +
+          '<a href="#dati" class="ct-mono ct-back">← Tutte le tabelle</a><p class="error">' +
           esc(e.message) +
           "</p>";
       });
   }
   function renderDataRow(body, table, rowid) {
     body.innerHTML = SKELETON;
-    window
-      .apiJson(
-        API +
-          "?view=row&name=" +
-          encodeURIComponent(table) +
-          "&rowid=" +
-          encodeURIComponent(rowid),
-      )
+    get({ view: "row", name: table, rowid: rowid })
       .then(function (d) {
-        var fields = Object.keys(d.values)
-          .map(function (k) {
-            return (
-              "<tr><th>" +
-              esc(k) +
-              '</th><td class="ct-pre">' +
-              cellHtml(d.values[k]) +
-              "</td></tr>"
-            );
-          })
-          .join("");
+        var keys = Object.keys(d.values);
+        var filled = keys.filter(function (k) {
+          var v = d.values[k];
+          return v !== null && v !== "";
+        });
+        var empty = keys.length - filled.length;
+        var rowsHtml = function (list) {
+          return list
+            .map(function (k) {
+              return (
+                "<tr><th>" +
+                esc(k) +
+                '</th><td class="ct-pre">' +
+                cellHtml(d.values[k]) +
+                "</td></tr>"
+              );
+            })
+            .join("");
+        };
+        var title =
+          d.values.name ||
+          d.values.title ||
+          d.values.query ||
+          "riga " + d.rowid;
         body.innerHTML =
           '<a href="#dati/' +
           esc(table) +
           '" class="ct-mono ct-back">← ' +
-          esc(table) +
+          esc(dataLabel(table)) +
           "</a>" +
-          '<section class="card"><h2>' +
-          esc(table) +
+          '<section class="card"><div class="ct-dhead"><div><h2>' +
+          esc(title) +
+          '</h2><p class="muted">' +
+          esc(dataLabel(table)) +
           " · riga " +
           d.rowid +
-          "</h2>" +
+          "</p></div>" +
           (d.contactId
-            ? '<p><a href="#casa-' +
+            ? '<a class="ct-btn" href="#casa-' +
               d.contactId +
-              '">Apri la scheda della casa →</a></p>'
+              '">Apri la scheda →</a>'
             : "") +
+          "</div>" +
           '<div class="table-wrap"><table class="ct-data"><tbody>' +
-          fields +
-          "</tbody></table></div></section>";
+          rowsHtml(filled) +
+          "</tbody></table></div>" +
+          (empty
+            ? '<details class="ct-dempty"><summary>' +
+              empty +
+              " campi vuoti</summary>" +
+              '<div class="table-wrap"><table class="ct-data"><tbody>' +
+              rowsHtml(
+                keys.filter(function (k) {
+                  return filled.indexOf(k) === -1;
+                }),
+              ) +
+              "</tbody></table></div></details>"
+            : "") +
+          "</section>";
       })
       .catch(function (e) {
         body.innerHTML =
           '<a href="#dati/' +
           esc(table) +
           '" class="ct-mono ct-back">← ' +
-          esc(table) +
+          esc(dataLabel(table)) +
           '</a><p class="error">' +
           esc(e.message) +
           "</p>";

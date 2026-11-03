@@ -439,6 +439,126 @@
   font-size: var(--foglio-fs-mono);
 }
 
+.foglio body.admin .ct-dgroup {
+  margin-top: 1.5rem;
+}
+.foglio body.admin .ct-dgrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.6rem;
+}
+.foglio body.admin .ct-dtile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: 6px;
+  background: var(--foglio-paper-2, transparent);
+  color: var(--foglio-ink);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+.foglio body.admin .ct-dtile:hover,
+.foglio body.admin .ct-dtile:focus-visible {
+  border-color: var(--foglio-accent);
+  transform: translateY(-1px);
+}
+.foglio body.admin .ct-dtile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.foglio body.admin .ct-dtile-top b {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+.foglio body.admin .ct-dtile-n {
+  font-family: var(--foglio-mono);
+  font-size: 1.1rem;
+  color: var(--foglio-accent);
+  font-variant-numeric: tabular-nums;
+}
+.foglio body.admin .ct-dtile-hint {
+  font-size: 0.85rem;
+  color: var(--foglio-ink-mute);
+  min-height: 2.4em;
+}
+.foglio body.admin .ct-dswitch {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding: 0.25rem 0 0.75rem;
+  margin: 0.5rem 0;
+}
+.foglio body.admin .ct-dswitch a {
+  flex: none;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--foglio-ink);
+  text-decoration: none;
+}
+.foglio body.admin .ct-dswitch a[aria-current="page"] {
+  background: var(--foglio-ink);
+  color: var(--foglio-paper);
+}
+.foglio body.admin .ct-dhead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.foglio body.admin .ct-dbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0.75rem 0 0.4rem;
+  font-size: 0.9rem;
+}
+.foglio body.admin .ct-data-rows tbody tr[data-open] {
+  cursor: pointer;
+}
+.foglio body.admin .ct-data-rows tbody tr[data-open]:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+.foglio body.admin .ct-data thead th {
+  position: sticky;
+  top: 0;
+  background: var(--foglio-paper);
+}
+.foglio body.admin .ct-dempty {
+  margin-top: 1rem;
+}
+.foglio body.admin .ct-dempty summary {
+  cursor: pointer;
+  color: var(--foglio-ink-mute);
+  font-size: 0.9rem;
+}
+.foglio body.admin .ct-btn {
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--foglio-ink);
+  border-radius: 4px;
+  text-decoration: none;
+  color: var(--foglio-ink);
+}
+.foglio body.admin .ct-pager {
+  justify-content: space-between;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  .foglio body.admin .ct-dgrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (hover: none) {
   .foglio body.admin .ct-move {
     display: block;
