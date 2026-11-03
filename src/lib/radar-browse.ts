@@ -40,6 +40,7 @@ export type TablePage = {
   dir: "asc" | "desc";
   q: string;
   filter: { col: string; val: string } | null;
+  facet: { col: string; values: { value: string; count: number }[] } | null;
 };
 
 export const isBrowsable = (name: string): boolean =>
@@ -75,6 +76,36 @@ export async function listTables(db: Client): Promise<TableInfo[]> {
   return out;
 }
 
+// Conteggi per valore di una colonna, con la ricerca applicata ma non il filtro: servono ai segmenti.
+async function loadFacet(
+  db: Client,
+  table: string,
+  columns: string[],
+  col: string | null | undefined,
+  q: string,
+  qArgs: InValue[],
+): Promise<TablePage["facet"]> {
+  if (!col || !columns.includes(col)) return null;
+  const search = q
+    ? " WHERE (" +
+      columns
+        .map((c) => `CAST(${quote(c)} AS TEXT) LIKE ? ESCAPE '\\'`)
+        .join(" OR ") +
+      ")"
+    : "";
+  const res = await db.execute({
+    sql: `SELECT CAST(${quote(col)} AS TEXT) AS v, COUNT(*) AS n FROM ${quote(table)}${search} GROUP BY v ORDER BY n DESC LIMIT 30`,
+    args: qArgs,
+  });
+  return {
+    col,
+    values: res.rows.map((r) => ({
+      value: r.v === null ? "" : String(r.v),
+      count: Number(r.n),
+    })),
+  };
+}
+
 async function contactNames(
   db: Client,
   ids: unknown[],
@@ -98,6 +129,11 @@ export type TableQuery = {
   q?: string | null;
   fcol?: string | null;
   fval?: string | null;
+  facet?: string | null;
+  // Un segmento: la colonna vale uno tra `vals` (o nessuno di essi con `neg`).
+  scol?: string | null;
+  svals?: string[];
+  sneg?: boolean;
 };
 
 export async function loadTable(
@@ -120,6 +156,10 @@ export async function loadTable(
       : null;
   if (filter && !columns.includes(filter.col)) return err("Colonna non valida");
 
+  const svals = (query.svals ?? []).slice(0, 30).map((v) => String(v));
+  if (query.scol && svals.length && !columns.includes(query.scol))
+    return err("Colonna non valida");
+
   const args: InValue[] = [];
   const clauses: string[] = [];
   if (q) {
@@ -137,7 +177,25 @@ export async function loadTable(
     clauses.push(`CAST(${quote(filter.col)} AS TEXT) = ?`);
     args.push(filter.val);
   }
+  if (query.scol && svals.length) {
+    const marks = svals.map(() => "?").join(",");
+    const col = `CAST(${quote(query.scol)} AS TEXT)`;
+    clauses.push(
+      query.sneg
+        ? `(${quote(query.scol)} IS NULL OR ${col} NOT IN (${marks}))`
+        : `${col} IN (${marks})`,
+    );
+    args.push(...svals);
+  }
   const where = clauses.length ? " WHERE " + clauses.join(" AND ") : "";
+  const facet = await loadFacet(
+    db,
+    query.table,
+    columns,
+    query.facet,
+    q,
+    args.slice(0, q ? columns.length : 0),
+  );
 
   const totalRes = await db.execute({
     sql: `SELECT COUNT(*) AS n FROM ${quote(query.table)}${where}`,
@@ -179,6 +237,7 @@ export async function loadTable(
     dir,
     q,
     filter,
+    facet,
   });
 }
 

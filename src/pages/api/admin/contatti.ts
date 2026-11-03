@@ -78,6 +78,10 @@ export const GET: APIRoute = async ({ request, url }) => {
           q: url.searchParams.get("q"),
           fcol: url.searchParams.get("fcol"),
           fval: url.searchParams.get("fval"),
+          facet: url.searchParams.get("facet"),
+          scol: url.searchParams.get("scol"),
+          svals: url.searchParams.getAll("sval"),
+          sneg: url.searchParams.get("sneg") === "1",
         });
         return res.ok
           ? withNoStore(jsonOk(res.value))
