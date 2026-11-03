@@ -38,6 +38,10 @@
     pipeline: null,
     prevHash: "oggi",
     polls: 0,
+    dtables: null,
+    dkey: null,
+    drows: [],
+    dbase: null,
   };
   var SKELETON = '<p class="loading">Carico…</p>';
   // Le bozze le prepara il motore: a mano non si sposta nulla verso "Bozza pronta".
@@ -1029,34 +1033,14 @@
       if (DATA_GROUPS[i].tables[t]) return DATA_GROUPS[i].tables[t];
     return t.replace(/^lessons_/, "Lezioni · ");
   }
-  function dataLink(table, o) {
-    var qs = [];
-    ["q", "sort", "dir", "page", "all"].forEach(function (k) {
-      if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
-    });
-    return "#dati/" + table + (qs.length ? "?" + qs.join("&") : "");
-  }
-  function cellHtml(v) {
-    if (v === null || v === undefined || v === "")
-      return '<span class="muted">—</span>';
-    return esc(String(v));
-  }
   function nf(n) {
     return Number(n).toLocaleString("it-IT");
-  }
-  function renderData(h) {
-    var body = $("dati-body");
-    var parts = h.split("?");
-    var path = parts[0].split("/");
-    var params = new URLSearchParams(parts[1] || "");
-    if (!path[1]) return renderDataTables(body);
-    if (path[2]) return renderDataRow(body, path[1], path[2]);
-    renderDataTable(body, path[1], params);
   }
   function renderDataTables(body) {
     body.innerHTML = SKELETON;
     get({ view: "tables" })
       .then(function (list) {
+        state.dtables = list;
         var counts = {};
         list.forEach(function (t) {
           counts[t.name] = t.rows;
@@ -1145,70 +1129,476 @@
       );
     }
   }
-  function switcher(current) {
-    return get({ view: "tables" }).then(function (list) {
-      var order = [];
-      DATA_GROUPS.forEach(function (g) {
-        order = order.concat(Object.keys(g.tables));
+  var COL_LABEL = {
+    name: "Nome",
+    company: "Azienda",
+    role: "Ruolo",
+    type: "Tipo",
+    country: "Paese",
+    city: "Città",
+    email: "Email",
+    status: "Stato",
+    stage: "Fase",
+    project: "Film",
+    score: "Punteggio",
+    score_detail: "Dettaglio punteggio",
+    reason: "Motivo",
+    shortlist: "Shortlist",
+    contacted_at: "Contattata",
+    created_at: "Creata",
+    updated_at: "Aggiornata",
+    scored_at: "Valutata",
+    detail: "Dettaglio",
+    kind: "Tipo",
+    job: "Lavoro",
+    started_at: "Iniziato",
+    finished_at: "Finito",
+    found: "Trovati",
+    errors: "Errori",
+    note: "Note",
+    notes: "Note",
+    at: "Quando",
+    contact_id: "Casa",
+    official_url: "Sito",
+    verification_level: "Verifica",
+    email_confidence: "Affidabilità email",
+    next_action: "Prossima azione",
+    next_action_date: "Quando",
+    do_not_contact: "Non contattare",
+    fit_reason: "Perché è adatta",
+    last_verified_at: "Verificata",
+    source_url: "Fonte",
+  };
+  var PREFERRED = {
+    contacts: [
+      "name",
+      "type",
+      "country",
+      "city",
+      "email",
+      "status",
+      "contacted_at",
+    ],
+    contact_projects: [
+      "contact_id",
+      "project",
+      "score",
+      "stage",
+      "shortlist",
+      "reason",
+      "updated_at",
+    ],
+    people: ["name", "role", "contact_id", "email", "email_confidence"],
+    radar_events: ["at", "kind", "contact_id", "project", "detail"],
+    radar_runs: ["job", "started_at", "status", "found", "errors", "note"],
+  };
+  var FILTERABLE = [
+    "stage",
+    "project",
+    "status",
+    "type",
+    "country",
+    "kind",
+    "verification_level",
+    "job",
+    "role",
+    "email_confidence",
+    "priority",
+  ];
+  var BOOL_LABEL = {
+    shortlist: "★ Shortlist",
+    do_not_contact: "Non contattare",
+    active: "Attiva",
+  };
+  var DATE_COL = /(_at|_date|^at|^date|^last_run)$/;
+  var STATUS_TONE = {
+    ok: "good",
+    done: "good",
+    sent: "good",
+    verified: "good",
+    error: "bad",
+    failed: "bad",
+    warning: "warn",
+    running: "warn",
+    pending: "warn",
+  };
+
+  function colLabel(c) {
+    if (COL_LABEL[c]) return COL_LABEL[c];
+    var t = c.replace(/_/g, " ");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+  }
+  function parseTs(v) {
+    if (typeof v !== "string") return null;
+    var m = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2})(:\d{2})?)?/.exec(v);
+    if (!m) return null;
+    var d = new Date(m[1] + "T" + (m[2] || "00:00") + (m[3] || ":00") + "Z");
+    return isNaN(d) ? null : d;
+  }
+  function relTime(d) {
+    var s = (Date.now() - d.getTime()) / 1000,
+      f = s < 0,
+      a = Math.abs(s);
+    var txt =
+      a < 90
+        ? "adesso"
+        : a < 3600
+          ? Math.round(a / 60) + " min"
+          : a < 86400
+            ? Math.round(a / 3600) + " h"
+            : a < 86400 * 2
+              ? "1 giorno"
+              : a < 86400 * 60
+                ? Math.round(a / 86400) + " giorni"
+                : null;
+    if (txt === null)
+      return d.toLocaleDateString("it-IT", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
       });
-      var rank = function (n) {
-        var i = order.indexOf(n);
-        return i === -1 ? order.length : i;
-      };
-      list = list.slice().sort(function (a, b) {
-        return rank(a.name) - rank(b.name);
+    if (txt === "adesso") return txt;
+    return f ? "tra " + txt : txt + " fa";
+  }
+  function tryJson(v) {
+    if (typeof v !== "string" || !/^[{[]/.test(v)) return null;
+    try {
+      var j = JSON.parse(v);
+      return j && typeof j === "object" ? j : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function host(u) {
+    try {
+      return new URL(u).hostname.replace(/^www\./, "");
+    } catch (e) {
+      return u;
+    }
+  }
+  function pill(col, val, label, tone) {
+    return (
+      '<button type="button" class="ct-pill' +
+      (tone ? " " + tone : "") +
+      '" data-fcol="' +
+      esc(col) +
+      '" data-fval="' +
+      esc(val) +
+      '" title="Mostra solo: ' +
+      esc(label) +
+      '">' +
+      esc(label) +
+      "</button>"
+    );
+  }
+  function scoreBar(n) {
+    var v = Math.max(0, Math.min(100, Number(n)));
+    var tone = v >= 80 ? "good" : v >= 60 ? "mid" : "low";
+    return (
+      '<span class="ct-score ' +
+      tone +
+      '"><i style="width:' +
+      v +
+      '%"></i><b>' +
+      esc(String(n)) +
+      "</b></span>"
+    );
+  }
+  function fmtJson(j, detail) {
+    var keys = Object.keys(j);
+    var nums =
+      keys.length &&
+      keys.every(function (k) {
+        return typeof j[k] === "number";
       });
+    if (!detail) {
+      var show = keys
+        .slice(0, 3)
+        .map(function (k) {
+          return esc(k) + " " + esc(String(j[k]));
+        })
+        .join(" · ");
       return (
-        '<nav class="ct-dswitch" aria-label="Tabelle">' +
-        list
-          .map(function (t) {
+        '<span class="ct-mono muted">' +
+        show +
+        (keys.length > 3 ? " …" : "") +
+        "</span>"
+      );
+    }
+    if (nums) {
+      var max = Math.max.apply(
+        null,
+        keys
+          .map(function (k) {
+            return j[k];
+          })
+          .concat([1]),
+      );
+      return (
+        '<div class="ct-bars">' +
+        keys
+          .map(function (k) {
             return (
-              '<a href="#dati/' +
-              esc(t.name) +
-              '"' +
-              (t.name === current ? ' aria-current="page"' : "") +
-              ">" +
-              esc(dataLabel(t.name)) +
-              "</a>"
+              "<div><span>" +
+              esc(k) +
+              '</span><span class="ct-bar"><i style="width:' +
+              Math.round((j[k] / max) * 100) +
+              '%"></i></span><b>' +
+              esc(String(j[k])) +
+              "</b></div>"
             );
           })
           .join("") +
-        "</nav>"
+        "</div>"
       );
+    }
+    return '<pre class="ct-json">' + esc(JSON.stringify(j, null, 2)) + "</pre>";
+  }
+  // Una cella con significato: fase, film, punteggio, data, email, link… (detail = pannello riga).
+  function fmt(col, v, row, detail) {
+    if (col === "contact_id" && row && row._contact !== undefined)
+      return row._contact
+        ? '<a href="#casa-' +
+            esc(v) +
+            '" data-stop>' +
+            esc(row._contact) +
+            '</a><span class="ct-id">#' +
+            esc(v) +
+            "</span>"
+        : '<span class="ct-id">#' + esc(v) + "</span>";
+    if (v === null || v === undefined || v === "")
+      return '<span class="muted">—</span>';
+    if (col in BOOL_LABEL)
+      return Number(v) === 1
+        ? '<span class="ct-pill on">' + esc(BOOL_LABEL[col]) + "</span>"
+        : '<span class="muted">—</span>';
+    if (col === "stage") return pill(col, v, STAGE_LABEL[v] || v, "st-" + v);
+    if (col === "project")
+      return pill(
+        col,
+        v,
+        PROJECT_LABEL[v] || v,
+        "pj-" + (PROJECT_CHIP[v] || ""),
+      );
+    if (col === "status" || col === "email_confidence")
+      return pill(
+        col,
+        v,
+        String(v),
+        STATUS_TONE[String(v).toLowerCase()] || "",
+      );
+    if (FILTERABLE.indexOf(col) !== -1) return pill(col, v, String(v), "");
+    if (/(^|_)score$/.test(col) && !isNaN(Number(v))) return scoreBar(v);
+    if (DATE_COL.test(col)) {
+      var d = parseTs(v);
+      if (d)
+        return (
+          '<span title="' + esc(String(v)) + '">' + esc(relTime(d)) + "</span>"
+        );
+    }
+    if (col === "email")
+      return '<a href="mailto:' + esc(v) + '" data-stop>' + esc(v) + "</a>";
+    if (
+      /(^|_)url$|^linkedin$|^instagram$/.test(col) &&
+      /^https?:\/\//.test(String(v))
+    )
+      return (
+        '<a href="' +
+        esc(v) +
+        '" target="_blank" rel="noopener noreferrer" data-stop>' +
+        esc(host(String(v))) +
+        " ↗</a>"
+      );
+    var j = tryJson(v);
+    if (j) return fmtJson(j, detail);
+    return esc(String(v));
+  }
+  function dataLink(table, o, rowid) {
+    var qs = [];
+    ["q", "sort", "dir", "page", "all", "fcol", "fval"].forEach(function (k) {
+      if (o && o[k]) qs.push(k + "=" + encodeURIComponent(o[k]));
+    });
+    return (
+      "#dati/" +
+      table +
+      (rowid ? "/" + rowid : "") +
+      (qs.length ? "?" + qs.join("&") : "")
+    );
+  }
+  function dataParams(p) {
+    var o = {};
+    ["q", "sort", "dir", "page", "all", "fcol", "fval"].forEach(function (k) {
+      o[k] = p.get(k) || "";
+    });
+    return o;
+  }
+  function compactCols(table, columns) {
+    var pref = (PREFERRED[table] || []).filter(function (c) {
+      return columns.indexOf(c) !== -1;
+    });
+    return pref.length >= 3 ? pref : columns.slice(0, COMPACT_COLS);
+  }
+  function tablesList() {
+    if (state.dtables) return Promise.resolve(state.dtables);
+    return get({ view: "tables" }).then(function (l) {
+      state.dtables = l;
+      return l;
     });
   }
-  function renderDataTable(body, table, params) {
-    var q = params.get("q") || "",
-      sort = params.get("sort") || "",
-      dir = params.get("dir") || "asc",
-      page = Number(params.get("page")) || 1,
-      all = params.get("all") === "1";
-    body.innerHTML = SKELETON;
+  function groupedTables(list) {
+    var counts = {},
+      seen = {};
+    list.forEach(function (t) {
+      counts[t.name] = t.rows;
+    });
+    var groups = DATA_GROUPS.map(function (g) {
+      return {
+        title: g.title,
+        items: Object.keys(g.tables)
+          .filter(function (n) {
+            seen[n] = true;
+            return n in counts;
+          })
+          .map(function (n) {
+            return { name: n, label: g.tables[n], rows: counts[n] };
+          }),
+      };
+    });
+    var rest = list
+      .filter(function (t) {
+        return !seen[t.name];
+      })
+      .map(function (t) {
+        return { name: t.name, label: dataLabel(t.name), rows: t.rows };
+      });
+    if (rest.length) groups.push({ title: "Altre", items: rest });
+    return groups.filter(function (g) {
+      return g.items.length;
+    });
+  }
+  function sidebarHtml(list, current) {
+    var groups = groupedTables(list);
+    return (
+      '<aside class="ct-dside" aria-label="Tabelle"><a href="#dati" class="ct-dside-all">← Tutte le tabelle</a>' +
+      groups
+        .map(function (g) {
+          return (
+            '<div class="ct-dside-g"><h3 class="ct-eyebrow">' +
+            esc(g.title) +
+            "</h3>" +
+            g.items
+              .map(function (t) {
+                return (
+                  '<a href="#dati/' +
+                  esc(t.name) +
+                  '"' +
+                  (t.name === current ? ' aria-current="page"' : "") +
+                  "><span>" +
+                  esc(t.label) +
+                  "</span><em>" +
+                  nf(t.rows) +
+                  "</em></a>"
+                );
+              })
+              .join("") +
+            "</div>"
+          );
+        })
+        .join("") +
+      '</aside><label class="ct-dpick-wrap"><span class="ct-eyebrow">Tabella</span><select class="ct-dpick" id="dati-pick">' +
+      groups
+        .map(function (g) {
+          return (
+            '<optgroup label="' +
+            esc(g.title) +
+            '">' +
+            g.items
+              .map(function (t) {
+                return (
+                  '<option value="' +
+                  esc(t.name) +
+                  '"' +
+                  (t.name === current ? " selected" : "") +
+                  ">" +
+                  esc(t.label) +
+                  " (" +
+                  nf(t.rows) +
+                  ")</option>"
+                );
+              })
+              .join("") +
+            "</optgroup>"
+          );
+        })
+        .join("") +
+      "</select></label>"
+    );
+  }
+  function renderData(h) {
+    var body = $("dati-body");
+    var parts = h.split("?");
+    var path = parts[0].split("/");
+    if (!path[1]) {
+      state.dkey = null;
+      return renderDataTables(body);
+    }
+    var o = dataParams(new URLSearchParams(parts[1] || ""));
+    var key = path[1] + "|" + dataLink(path[1], o);
+    var open = path[2] || null;
+    if (state.dkey === key && body.querySelector(".ct-dlayout")) {
+      openDrawer(path[1], open, o);
+      return;
+    }
+    state.dkey = key;
+    renderDataTable(body, path[1], o, function () {
+      openDrawer(path[1], open, o);
+    });
+  }
+  function renderDataTable(body, table, o, done) {
+    var keep = body.querySelector('.ct-dlayout[data-table="' + table + '"]');
+    if (!keep) body.innerHTML = SKELETON;
+    else keep.classList.add("is-loading");
     Promise.all([
       get({
         view: "table",
         name: table,
-        page: page,
-        dir: dir,
-        sort: sort,
-        q: q,
+        page: o.page || 1,
+        dir: o.dir || "asc",
+        sort: o.sort,
+        q: o.q,
+        fcol: o.fcol,
+        fval: o.fval,
       }),
-      switcher(table),
+      tablesList(),
     ])
       .then(function (res) {
-        var d = res[0];
-        var cols = all ? d.columns : d.columns.slice(0, COMPACT_COLS);
+        var d = res[0],
+          list = res[1];
+        var all = o.all === "1";
+        var cols = all ? d.columns : compactCols(table, d.columns);
         var hidden = d.columns.length - cols.length;
-        var o = { q: d.q, sort: d.sort, dir: d.dir, all: all ? "1" : "" };
+        state.drows = d.rows.map(function (r) {
+          return r._rowid;
+        });
+        var base = {
+          q: d.q,
+          sort: d.sort,
+          dir: d.dir,
+          all: o.all,
+          fcol: d.filter ? d.filter.col : "",
+          fval: d.filter ? d.filter.val : "",
+        };
         var head = cols
           .map(function (c) {
-            var on = d.sort === c;
-            var next = on && d.dir === "asc" ? "desc" : "asc";
+            var on = d.sort === c,
+              next = on && d.dir === "asc" ? "desc" : "asc";
             return (
               '<th><a href="' +
-              dataLink(table, Object.assign({}, o, { sort: c, dir: next })) +
-              '">' +
+              dataLink(table, Object.assign({}, base, { sort: c, dir: next })) +
+              '" title="' +
               esc(c) +
+              '">' +
+              esc(colLabel(c)) +
               (on ? (d.dir === "asc" ? " ▲" : " ▼") : "") +
               "</a></th>"
             );
@@ -1217,31 +1607,35 @@
         var rows = d.rows
           .map(function (r) {
             return (
-              '<tr data-open="#dati/' +
-              esc(table) +
-              "/" +
+              '<tr data-rowid="' +
               r._rowid +
-              '"><td><a href="#dati/' +
-              esc(table) +
-              "/" +
+              '"><td class="ct-open"><a href="' +
+              dataLink(table, base, r._rowid) +
+              '" aria-label="Apri riga ' +
               r._rowid +
-              '">Apri</a></td>' +
+              '">›</a></td>' +
               cols
                 .map(function (c) {
-                  return "<td>" + cellHtml(r[c]) + "</td>";
+                  return (
+                    '<td data-col="' +
+                    esc(c) +
+                    '">' +
+                    fmt(c, r[c], r, false) +
+                    "</td>"
+                  );
                 })
                 .join("") +
               "</tr>"
             );
           })
           .join("");
-        var first = (d.page - 1) * 50 + 1;
-        var last = first + d.rows.length - 1;
+        var first = (d.page - 1) * 50 + 1,
+          last = first + d.rows.length - 1;
         var pager =
           '<div class="ct-pager">' +
           (d.page > 1
             ? '<a href="' +
-              dataLink(table, Object.assign({}, o, { page: d.page - 1 })) +
+              dataLink(table, Object.assign({}, base, { page: d.page - 1 })) +
               '">← Precedenti</a>'
             : "<span></span>") +
           "<span>" +
@@ -1255,70 +1649,119 @@
           "</span>" +
           (d.page < d.pages
             ? '<a href="' +
-              dataLink(table, Object.assign({}, o, { page: d.page + 1 })) +
+              dataLink(table, Object.assign({}, base, { page: d.page + 1 })) +
               '">Successive →</a>'
             : "<span></span>") +
           "</div>";
+        var chips = "";
+        if (d.q)
+          chips +=
+            '<span class="ct-fchip">«' +
+            esc(d.q) +
+            '» <a href="' +
+            dataLink(table, Object.assign({}, base, { q: "" })) +
+            '" aria-label="Togli la ricerca">✕</a></span>';
+        if (d.filter)
+          chips +=
+            '<span class="ct-fchip">' +
+            esc(colLabel(d.filter.col)) +
+            ": " +
+            esc(d.filter.val) +
+            ' <a href="' +
+            dataLink(table, Object.assign({}, base, { fcol: "", fval: "" })) +
+            '" aria-label="Togli il filtro">✕</a></span>';
         body.innerHTML =
-          '<a href="#dati" class="ct-mono ct-back">← Tutte le tabelle</a>' +
-          res[1] +
-          '<section class="card"><div class="ct-dhead"><div><h2>' +
+          '<div class="ct-dlayout" data-table="' +
+          esc(table) +
+          '">' +
+          sidebarHtml(list, table) +
+          '<div class="ct-dmain"><div class="ct-dhead"><div><h2>' +
           esc(dataLabel(table)) +
           '</h2><p class="muted">' +
           esc(DATA_HINT[table] || table) +
-          '</p></div><form class="ct-toolbar" id="dati-search" role="search">' +
-          '<input id="dati-q" type="search" value="' +
+          "</p></div>" +
+          '<form class="ct-dsearch" id="dati-search" role="search"><input id="dati-q" type="search" value="' +
           esc(d.q) +
           '" placeholder="Cerca in ' +
           esc(dataLabel(table)) +
-          '…" aria-label="Cerca" /><button type="submit">Cerca</button>' +
-          (d.q
-            ? '<a href="' +
-              dataLink(table, { sort: d.sort, dir: d.dir, all: o.all }) +
-              '">Azzera</a>'
-            : "") +
-          "</form></div>" +
-          '<div class="ct-dbar"><span class="muted">' +
-          (d.q
-            ? nf(d.total) + " risultati per «" + esc(d.q) + "»"
-            : nf(d.total) + " righe") +
+          '…  ( / )" aria-label="Cerca" autocomplete="off" /></form></div>' +
+          '<div class="ct-dbar"><div class="ct-fchips"><span class="muted">' +
+          nf(d.total) +
+          (d.total === 1 ? " riga" : " righe") +
           "</span>" +
+          chips +
+          "</div>" +
           (d.columns.length > COMPACT_COLS
             ? '<a href="' +
-              dataLink(table, Object.assign({}, o, { all: all ? "" : "1" })) +
+              dataLink(
+                table,
+                Object.assign({}, base, { all: all ? "" : "1" }),
+              ) +
               '">' +
-              (all
-                ? "Mostra meno colonne"
-                : "Mostra tutte le colonne (+" + hidden + ")") +
+              (all ? "Meno colonne" : "Tutte le colonne (+" + hidden + ")") +
               "</a>"
             : "") +
           "</div>" +
-          '<div class="table-wrap"><table class="ct-data ct-data-rows"><thead><tr><th></th>' +
+          '<div class="table-wrap ct-dtable"><table class="ct-data ct-data-rows"><thead><tr><th></th>' +
           head +
           "</tr></thead><tbody>" +
           (rows ||
-            '<tr><td class="muted" colspan="' +
-              (cols.length + 1) +
+            '<tr><td></td><td class="muted" colspan="' +
+              cols.length +
               '">Nessuna riga trovata.</td></tr>') +
           "</tbody></table></div>" +
           pager +
-          "</section>";
-        var cur = body.querySelector(".ct-dswitch [aria-current]");
-        if (cur && cur.scrollIntoView)
-          cur.scrollIntoView({ block: "nearest", inline: "center" });
+          "</div></div>" +
+          '<div class="ct-scrim" id="dati-scrim" hidden></div><aside class="ct-drawer" id="dati-drawer" role="dialog" aria-label="Dettaglio riga" hidden></aside>';
+        var cur = body.querySelector(".ct-dside [aria-current]");
+        if (cur && cur.scrollIntoView) cur.scrollIntoView({ block: "nearest" });
+        $("dati-pick").addEventListener("change", function (e) {
+          location.hash = "#dati/" + e.target.value;
+        });
+        var timer;
+        $("dati-q").addEventListener("input", function (e) {
+          clearTimeout(timer);
+          var v = e.target.value.trim();
+          timer = setTimeout(function () {
+            if (v === d.q) return;
+            state.refocus = true;
+            location.hash = dataLink(
+              table,
+              Object.assign({}, base, { q: v, page: "" }),
+            );
+          }, 350);
+        });
         $("dati-search").addEventListener("submit", function (e) {
           e.preventDefault();
-          location.hash = dataLink(table, {
-            q: $("dati-q").value.trim(),
-            sort: d.sort,
-            dir: d.dir,
-            all: o.all,
-          });
         });
+        if (state.refocus) {
+          state.refocus = false;
+          var qi = $("dati-q");
+          qi.focus();
+          qi.setSelectionRange(qi.value.length, qi.value.length);
+        }
         body.querySelector("tbody").addEventListener("click", function (e) {
-          var tr = e.target.closest("tr[data-open]");
-          if (tr && !e.target.closest("a")) location.hash = tr.dataset.open;
+          var f = e.target.closest("[data-fcol]");
+          if (f) {
+            location.hash = dataLink(
+              table,
+              Object.assign({}, base, {
+                fcol: f.dataset.fcol,
+                fval: f.dataset.fval,
+                page: "",
+              }),
+            );
+            return;
+          }
+          if (e.target.closest("a")) return;
+          var tr = e.target.closest("tr[data-rowid]");
+          if (tr) location.hash = dataLink(table, base, tr.dataset.rowid);
         });
+        $("dati-scrim").addEventListener("click", function () {
+          location.hash = dataLink(table, base);
+        });
+        state.dbase = base;
+        done();
       })
       .catch(function (e) {
         body.innerHTML =
@@ -1327,81 +1770,166 @@
           "</p>";
       });
   }
-  function renderDataRow(body, table, rowid) {
-    body.innerHTML = SKELETON;
+  function openDrawer(table, rowid, o) {
+    var drawer = $("dati-drawer"),
+      scrim = $("dati-scrim");
+    if (!drawer) return;
+    var base = state.dbase || o;
+    document
+      .querySelectorAll(".ct-data-rows tr.is-active")
+      .forEach(function (tr) {
+        tr.classList.remove("is-active");
+      });
+    if (!rowid) {
+      drawer.hidden = true;
+      scrim.hidden = true;
+      document.body.classList.remove("ct-noscroll");
+      return;
+    }
+    drawer.hidden = false;
+    scrim.hidden = false;
+    document.body.classList.add("ct-noscroll");
+    var active = document.querySelector(
+      '.ct-data-rows tr[data-rowid="' + rowid + '"]',
+    );
+    if (active) {
+      active.classList.add("is-active");
+      if (active.scrollIntoView) active.scrollIntoView({ block: "nearest" });
+    }
+    drawer.innerHTML = SKELETON;
+    var ids = state.drows || [],
+      i = ids.indexOf(Number(rowid));
+    var prev = i > 0 ? ids[i - 1] : null,
+      next = i !== -1 && i < ids.length - 1 ? ids[i + 1] : null;
     get({ view: "row", name: table, rowid: rowid })
       .then(function (d) {
         var keys = Object.keys(d.values);
         var filled = keys.filter(function (k) {
-          var v = d.values[k];
-          return v !== null && v !== "";
+          return d.values[k] !== null && d.values[k] !== "";
         });
-        var empty = keys.length - filled.length;
-        var rowsHtml = function (list) {
-          return list
-            .map(function (k) {
-              return (
-                "<tr><th>" +
-                esc(k) +
-                '</th><td class="ct-pre">' +
-                cellHtml(d.values[k]) +
-                "</td></tr>"
-              );
-            })
-            .join("");
+        var empty = keys.filter(function (k) {
+          return filled.indexOf(k) === -1;
+        });
+        var dl = function (list) {
+          return (
+            '<dl class="ct-dl">' +
+            list
+              .map(function (k) {
+                return (
+                  '<div><dt title="' +
+                  esc(k) +
+                  '">' +
+                  esc(colLabel(k)) +
+                  "</dt><dd>" +
+                  fmt(
+                    k,
+                    d.values[k],
+                    d.contactId && k === "contact_id"
+                      ? { _contact: d.contactName }
+                      : null,
+                    true,
+                  ) +
+                  "</dd></div>"
+                );
+              })
+              .join("") +
+            "</dl>"
+          );
         };
-        var title =
-          d.values.name ||
-          d.values.title ||
-          d.values.query ||
-          "riga " + d.rowid;
-        body.innerHTML =
-          '<a href="#dati/' +
-          esc(table) +
-          '" class="ct-mono ct-back">← ' +
-          esc(dataLabel(table)) +
-          "</a>" +
-          '<section class="card"><div class="ct-dhead"><div><h2>' +
-          esc(title) +
-          '</h2><p class="muted">' +
+        var title = d.contactName
+          ? d.contactName +
+            (d.values.project
+              ? " · " + (PROJECT_LABEL[d.values.project] || d.values.project)
+              : "")
+          : d.values.name ||
+            d.values.title ||
+            d.values.query ||
+            "Riga " + d.rowid;
+        var nav = function (id, sym, label) {
+          return id
+            ? '<a href="' +
+                dataLink(table, base, id) +
+                '" aria-label="' +
+                label +
+                '">' +
+                sym +
+                "</a>"
+            : '<span class="is-off" aria-hidden="true">' + sym + "</span>";
+        };
+        drawer.innerHTML =
+          '<header class="ct-drawer-head"><div><p class="ct-eyebrow">' +
           esc(dataLabel(table)) +
           " · riga " +
           d.rowid +
-          "</p></div>" +
+          "</p><h2>" +
+          esc(title) +
+          '</h2></div><div class="ct-dnav">' +
+          nav(prev, "↑", "Riga precedente") +
+          nav(next, "↓", "Riga successiva") +
+          '<a href="' +
+          dataLink(table, base) +
+          '" aria-label="Chiudi" class="ct-x">✕</a></div></header>' +
           (d.contactId
             ? '<a class="ct-btn" href="#casa-' +
               d.contactId +
-              '">Apri la scheda →</a>'
+              '">Apri la scheda della casa →</a>'
             : "") +
-          "</div>" +
-          '<div class="table-wrap"><table class="ct-data"><tbody>' +
-          rowsHtml(filled) +
-          "</tbody></table></div>" +
-          (empty
+          dl(filled) +
+          (empty.length
             ? '<details class="ct-dempty"><summary>' +
-              empty +
+              empty.length +
               " campi vuoti</summary>" +
-              '<div class="table-wrap"><table class="ct-data"><tbody>' +
-              rowsHtml(
-                keys.filter(function (k) {
-                  return filled.indexOf(k) === -1;
-                }),
-              ) +
-              "</tbody></table></div></details>"
+              dl(empty) +
+              "</details>"
             : "") +
-          "</section>";
+          '<p class="ct-hint ct-mono">↑ ↓ per scorrere · Esc per chiudere</p>';
+        drawer.scrollTop = 0;
+        var x = drawer.querySelector(".ct-x");
+        if (x) x.focus({ preventScroll: true });
       })
       .catch(function (e) {
-        body.innerHTML =
-          '<a href="#dati/' +
-          esc(table) +
-          '" class="ct-mono ct-back">← ' +
-          esc(dataLabel(table)) +
-          '</a><p class="error">' +
+        drawer.innerHTML =
+          '<header class="ct-drawer-head"><h2>Errore</h2><div class="ct-dnav"><a href="' +
+          dataLink(table, base) +
+          '" class="ct-x" aria-label="Chiudi">✕</a></div></header><p class="error">' +
           esc(e.message) +
           "</p>";
       });
   }
+  document.addEventListener("keydown", function (e) {
+    if (!/^#dati/.test(location.hash) || e.metaKey || e.ctrlKey || e.altKey)
+      return;
+    var typing = /^(INPUT|TEXTAREA|SELECT)$/.test(
+      (e.target || {}).tagName || "",
+    );
+    var drawer = $("dati-drawer");
+    var open = drawer && !drawer.hidden;
+    if (e.key === "/" && !typing) {
+      var q = $("dati-q");
+      if (q) {
+        e.preventDefault();
+        q.focus();
+      }
+    } else if (e.key === "Escape" && open) {
+      var x = drawer.querySelector(".ct-x");
+      if (x) location.hash = x.getAttribute("href");
+    } else if (
+      (e.key === "ArrowDown" ||
+        e.key === "ArrowUp" ||
+        e.key === "j" ||
+        e.key === "k") &&
+      open &&
+      !typing
+    ) {
+      var down = e.key === "ArrowDown" || e.key === "j";
+      var which = down ? "Riga successiva" : "Riga precedente";
+      var link = drawer.querySelector('.ct-dnav a[aria-label="' + which + '"]');
+      if (link) {
+        e.preventDefault();
+        location.hash = link.getAttribute("href");
+      }
+    }
+  });
 
   function route() {
     var h = location.hash.slice(1) || "oggi";

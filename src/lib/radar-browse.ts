@@ -39,6 +39,7 @@ export type TablePage = {
   sort: string | null;
   dir: "asc" | "desc";
   q: string;
+  filter: { col: string; val: string } | null;
 };
 
 export const isBrowsable = (name: string): boolean =>
@@ -74,12 +75,29 @@ export async function listTables(db: Client): Promise<TableInfo[]> {
   return out;
 }
 
+async function contactNames(
+  db: Client,
+  ids: unknown[],
+): Promise<Map<number, string>> {
+  const unique = [
+    ...new Set(ids.map(Number).filter((n) => Number.isInteger(n) && n > 0)),
+  ];
+  if (!unique.length) return new Map();
+  const res = await db.execute({
+    sql: `SELECT id, name FROM contacts WHERE id IN (${unique.map(() => "?").join(",")})`,
+    args: unique,
+  });
+  return new Map(res.rows.map((r) => [Number(r.id), String(r.name ?? "")]));
+}
+
 export type TableQuery = {
   table: string;
   page?: number;
   sort?: string | null;
   dir?: string | null;
   q?: string | null;
+  fcol?: string | null;
+  fval?: string | null;
 };
 
 export async function loadTable(
@@ -96,17 +114,30 @@ export async function loadTable(
   const dir = query.dir === "desc" ? "desc" : "asc";
   const q = (query.q ?? "").trim().slice(0, 100);
 
+  const filter =
+    query.fcol && query.fval !== null && query.fval !== undefined
+      ? { col: query.fcol, val: String(query.fval).slice(0, 200) }
+      : null;
+  if (filter && !columns.includes(filter.col)) return err("Colonna non valida");
+
   const args: InValue[] = [];
-  let where = "";
+  const clauses: string[] = [];
   if (q) {
     const like = `%${q.replace(/[\\%_]/g, (c) => "\\" + c)}%`;
-    where =
-      " WHERE " +
-      columns
-        .map((c) => `CAST(${quote(c)} AS TEXT) LIKE ? ESCAPE '\\'`)
-        .join(" OR ");
+    clauses.push(
+      "(" +
+        columns
+          .map((c) => `CAST(${quote(c)} AS TEXT) LIKE ? ESCAPE '\\'`)
+          .join(" OR ") +
+        ")",
+    );
     for (let i = 0; i < columns.length; i++) args.push(like);
   }
+  if (filter) {
+    clauses.push(`CAST(${quote(filter.col)} AS TEXT) = ?`);
+    args.push(filter.val);
+  }
+  const where = clauses.length ? " WHERE " + clauses.join(" AND ") : "";
 
   const totalRes = await db.execute({
     sql: `SELECT COUNT(*) AS n FROM ${quote(query.table)}${where}`,
@@ -124,12 +155,21 @@ export async function loadTable(
     args: [...args, PAGE_SIZE, (page - 1) * PAGE_SIZE],
   });
 
+  const names = columns.includes("contact_id")
+    ? await contactNames(
+        db,
+        res.rows.map((r) => r.contact_id),
+      )
+    : new Map<number, string>();
+
   return ok({
     table: query.table,
     columns,
     rows: res.rows.map((r) => {
       const o: Row = { _rowid: r._rowid };
       for (const c of columns) o[c] = cell(r[c]);
+      if (columns.includes("contact_id"))
+        o._contact = names.get(Number(r.contact_id)) ?? null;
       return o;
     }),
     total,
@@ -138,6 +178,7 @@ export async function loadTable(
     sort,
     dir,
     q,
+    filter,
   });
 }
 
@@ -146,6 +187,7 @@ export type RowDetail = {
   rowid: number;
   values: Row;
   contactId: number | null;
+  contactName: string | null;
 };
 
 export async function loadRow(
@@ -177,10 +219,9 @@ export async function loadRow(
       : columns.includes("contact_id")
         ? values.contact_id
         : null;
-  return ok({
-    table,
-    rowid,
-    values,
-    contactId: typeof link === "number" && link > 0 ? link : null,
-  });
+  const contactId = typeof link === "number" && link > 0 ? link : null;
+  const contactName = contactId
+    ? ((await contactNames(db, [contactId])).get(contactId) ?? null)
+    : null;
+  return ok({ table, rowid, values, contactId, contactName });
 }
