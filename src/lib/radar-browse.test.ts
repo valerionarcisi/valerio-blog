@@ -104,6 +104,40 @@ describe("loadTable", () => {
   });
 });
 
+describe("filter and contact names", () => {
+  test("exact filter on a real column, combined with search", async () => {
+    const r = await loadTable(db, {
+      table: "contacts",
+      fcol: "city",
+      fval: "Roma",
+    });
+    expect(r.ok && r.value.total).toBe(2);
+    const both = await loadTable(db, {
+      table: "contacts",
+      fcol: "city",
+      fval: "Roma",
+      q: "kidam",
+    });
+    expect(both.ok && both.value.total).toBe(1);
+  });
+
+  test("rejects a filter column that is not in the table", async () => {
+    const r = await loadTable(db, {
+      table: "contacts",
+      fcol: "name; DROP TABLE contacts",
+      fval: "x",
+    });
+    expect(r.ok).toBe(false);
+  });
+
+  test("adds the contact name to rows with contact_id", async () => {
+    const r = await loadTable(db, { table: "contact_projects" });
+    expect(r.ok && r.value.rows[0]._contact).toBe("Kidam");
+    const row = await loadRow(db, "contact_projects", 1);
+    expect(row.ok && row.value?.contactName).toBe("Kidam");
+  });
+});
+
 describe("loadRow", () => {
   test("returns full values and the contact link", async () => {
     const c = await loadRow(db, "contacts", 1);

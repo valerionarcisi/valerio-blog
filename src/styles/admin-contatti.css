@@ -431,13 +431,6 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
-.foglio body.admin .ct-pager {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.75rem;
-  font-family: var(--foglio-mono);
-  font-size: var(--foglio-fs-mono);
-}
 
 .foglio body.admin .ct-dgroup {
   margin-top: 1.5rem;
@@ -488,46 +481,6 @@
   color: var(--foglio-ink-mute);
   min-height: 2.4em;
 }
-.foglio body.admin .ct-dswitch {
-  display: flex;
-  gap: 0.4rem;
-  overflow-x: auto;
-  padding: 0.25rem 0 0.75rem;
-  margin: 0.5rem 0;
-}
-.foglio body.admin .ct-dswitch a {
-  flex: none;
-  padding: 0.3rem 0.7rem;
-  border: 1px solid var(--foglio-rule);
-  border-radius: 999px;
-  font-size: 0.85rem;
-  color: var(--foglio-ink);
-  text-decoration: none;
-}
-.foglio body.admin .ct-dswitch a[aria-current="page"] {
-  background: var(--foglio-ink);
-  color: var(--foglio-paper);
-}
-.foglio body.admin .ct-dhead {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-.foglio body.admin .ct-dbar {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 0.75rem 0 0.4rem;
-  font-size: 0.9rem;
-}
-.foglio body.admin .ct-data-rows tbody tr[data-open] {
-  cursor: pointer;
-}
-.foglio body.admin .ct-data-rows tbody tr[data-open]:hover td {
-  background: rgba(255, 255, 255, 0.04);
-}
 .foglio body.admin .ct-data thead th {
   position: sticky;
   top: 0;
@@ -549,13 +502,421 @@
   text-decoration: none;
   color: var(--foglio-ink);
 }
-.foglio body.admin .ct-pager {
-  justify-content: space-between;
-  align-items: center;
-}
 @media (max-width: 640px) {
   .foglio body.admin .ct-dgrid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ── Dati: navigatore a tre colonne (menu · tabella · pannello riga) ── */
+.foglio body.admin .ct-dlayout {
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.foglio body.admin .ct-dlayout.is-loading .ct-dmain {
+  opacity: 0.55;
+  transition: opacity 0.2s;
+}
+.foglio body.admin .ct-dside {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+.foglio body.admin .ct-dside-all {
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  text-decoration: none;
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-dside-g {
+  margin-bottom: 1.1rem;
+}
+.foglio body.admin .ct-dside-g h3 {
+  margin: 0 0 0.35rem;
+}
+.foglio body.admin .ct-dside-g a {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.38rem 0.6rem;
+  border-radius: 6px;
+  color: var(--foglio-ink);
+  text-decoration: none;
+  font-size: 0.92rem;
+}
+.foglio body.admin .ct-dside-g a em {
+  font-style: normal;
+  font-family: var(--foglio-mono);
+  font-size: 0.78rem;
+  color: var(--foglio-ink-mute);
+  font-variant-numeric: tabular-nums;
+}
+.foglio body.admin .ct-dside-g a:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+.foglio body.admin .ct-dside-g a[aria-current="page"] {
+  background: var(--foglio-ink);
+  color: var(--foglio-paper);
+}
+.foglio body.admin .ct-dside-g a[aria-current="page"] em {
+  color: inherit;
+  opacity: 0.7;
+}
+.foglio body.admin .ct-dpick-wrap {
+  display: none;
+}
+.foglio body.admin .ct-dpick {
+  width: 100%;
+}
+.foglio body.admin .ct-dmain {
+  min-width: 0;
+}
+.foglio body.admin .ct-dhead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+.foglio body.admin .ct-dhead h2 {
+  margin: 0;
+}
+.foglio body.admin .ct-dhead p {
+  margin: 0.2rem 0 0;
+}
+.foglio body.admin .ct-dsearch {
+  flex: 1 1 16rem;
+  max-width: 24rem;
+}
+.foglio body.admin .ct-dsearch input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  font-size: 1rem;
+}
+.foglio body.admin .ct-dbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+}
+.foglio body.admin .ct-fchips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.foglio body.admin .ct-fchip {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.15rem 0.2rem 0.15rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--foglio-accent);
+  color: var(--foglio-accent);
+  font-size: 0.82rem;
+}
+.foglio body.admin .ct-fchip a {
+  padding: 0 0.4rem;
+  text-decoration: none;
+  color: inherit;
+}
+.foglio body.admin .ct-dtable {
+  border: 1px solid var(--foglio-rule);
+  border-radius: 8px;
+  max-height: calc(100vh - 15rem);
+  overflow: auto;
+}
+.foglio body.admin .ct-data-rows {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.foglio body.admin .ct-data-rows thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--foglio-paper);
+  border-bottom: 1px solid var(--foglio-rule-strong);
+  white-space: nowrap;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+}
+.foglio body.admin .ct-data-rows thead th a {
+  color: var(--foglio-ink-mute);
+  text-decoration: none;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.foglio body.admin .ct-data-rows thead th a:hover {
+  color: var(--foglio-ink);
+}
+.foglio body.admin .ct-data-rows td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--foglio-rule);
+  max-width: 26ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.foglio body.admin .ct-data-rows tbody tr {
+  cursor: pointer;
+}
+.foglio body.admin .ct-data-rows tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+.foglio body.admin .ct-data-rows tbody tr.is-active td {
+  background: color-mix(in srgb, var(--foglio-accent) 16%, transparent);
+}
+.foglio body.admin .ct-data-rows td.ct-open {
+  width: 1.6rem;
+  padding-right: 0;
+}
+.foglio body.admin .ct-data-rows td.ct-open a {
+  text-decoration: none;
+  color: var(--foglio-ink-mute);
+  font-size: 1.2rem;
+}
+.foglio body.admin .ct-id {
+  margin-left: 0.4rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.75rem;
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-pill {
+  display: inline-block;
+  padding: 0.12rem 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--foglio-ink);
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.foglio body.admin button.ct-pill:hover {
+  outline: 1px solid var(--foglio-accent);
+}
+.foglio body.admin .ct-pill.on {
+  cursor: default;
+  color: var(--foglio-accent);
+  background: color-mix(in srgb, var(--foglio-accent) 16%, transparent);
+}
+.foglio body.admin .ct-pill.good,
+.foglio body.admin .ct-pill.st-warm,
+.foglio body.admin .ct-pill.st-replied {
+  color: #62c58d;
+  background: rgba(98, 197, 141, 0.14);
+}
+.foglio body.admin .ct-pill.bad,
+.foglio body.admin .ct-pill.st-discarded {
+  color: #ee7a68;
+  background: rgba(238, 122, 104, 0.14);
+}
+.foglio body.admin .ct-pill.warn,
+.foglio body.admin .ct-pill.st-followup,
+.foglio body.admin .ct-pill.st-draft {
+  color: #e2b04a;
+  background: rgba(226, 176, 74, 0.14);
+}
+.foglio body.admin .ct-pill.st-contacted,
+.foglio body.admin .ct-pill.pj-nfr {
+  color: #7fa8f0;
+  background: rgba(127, 168, 240, 0.14);
+}
+.foglio body.admin .ct-pill.pj-wt {
+  color: #c79af0;
+  background: rgba(199, 154, 240, 0.14);
+}
+.foglio body.admin .ct-pill.st-on-hold {
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-score {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 4.5rem;
+  height: 1.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  vertical-align: middle;
+}
+.foglio body.admin .ct-score i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  opacity: 0.35;
+  background: currentColor;
+}
+.foglio body.admin .ct-score b {
+  position: relative;
+  padding-left: 0.5rem;
+  font-family: var(--foglio-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--foglio-ink);
+}
+.foglio body.admin .ct-score.good {
+  color: #62c58d;
+}
+.foglio body.admin .ct-score.mid {
+  color: #e2b04a;
+}
+.foglio body.admin .ct-score.low {
+  color: #ee7a68;
+}
+.foglio body.admin .ct-pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.8rem;
+}
+.foglio body.admin .ct-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgba(0, 0, 0, 0.45);
+}
+.foglio body.admin .ct-drawer {
+  position: fixed;
+  z-index: 41;
+  inset: 0 0 0 auto;
+  width: min(34rem, 100%);
+  overflow-y: auto;
+  padding: 1.2rem 1.4rem 2rem;
+  background: var(--foglio-paper);
+  border-left: 1px solid var(--foglio-rule-strong);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.35);
+  animation: ct-slide 0.18s ease-out;
+}
+@keyframes ct-slide {
+  from {
+    transform: translateX(2rem);
+    opacity: 0;
+  }
+}
+.foglio body.admin .ct-drawer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.foglio body.admin .ct-drawer-head h2 {
+  margin: 0.15rem 0 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.foglio body.admin .ct-dnav {
+  display: flex;
+  gap: 0.35rem;
+  flex: none;
+}
+.foglio body.admin .ct-dnav a,
+.foglio body.admin .ct-dnav span {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: 1px solid var(--foglio-rule-strong);
+  border-radius: 6px;
+  color: var(--foglio-ink);
+  text-decoration: none;
+}
+.foglio body.admin .ct-dnav .is-off {
+  opacity: 0.3;
+}
+.foglio body.admin .ct-dl {
+  margin: 1rem 0 0;
+}
+.foglio body.admin .ct-dl > div {
+  display: grid;
+  grid-template-columns: 9rem minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--foglio-rule);
+}
+.foglio body.admin .ct-dl dt {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .ct-dl dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.foglio body.admin .ct-bars > div {
+  display: grid;
+  grid-template-columns: 7rem 1fr 2rem;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+.foglio body.admin .ct-bar {
+  height: 0.5rem;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.foglio body.admin .ct-bar i {
+  display: block;
+  height: 100%;
+  background: var(--foglio-accent);
+}
+.foglio body.admin .ct-bars b {
+  text-align: right;
+  font-family: var(--foglio-mono);
+}
+.foglio body.admin .ct-json {
+  margin: 0;
+  font-family: var(--foglio-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+.foglio body.admin .ct-hint {
+  margin-top: 1.5rem;
+  color: var(--foglio-ink-mute);
+}
+body.ct-noscroll {
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  .foglio body.admin .ct-dlayout {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
+  .foglio body.admin .ct-dside {
+    display: none;
+  }
+  .foglio body.admin .ct-dpick-wrap {
+    display: grid;
+    gap: 0.3rem;
+  }
+  .foglio body.admin .ct-dtable {
+    max-height: none;
+  }
+}
+@media (max-width: 640px) {
+  .foglio body.admin .ct-dl > div {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+  .foglio body.admin .ct-drawer {
+    padding: 1rem;
   }
 }
 

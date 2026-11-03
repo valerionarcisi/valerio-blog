@@ -76,6 +76,8 @@ export const GET: APIRoute = async ({ request, url }) => {
           sort: url.searchParams.get("sort"),
           dir: url.searchParams.get("dir"),
           q: url.searchParams.get("q"),
+          fcol: url.searchParams.get("fcol"),
+          fval: url.searchParams.get("fval"),
         });
         return res.ok
           ? withNoStore(jsonOk(res.value))
