@@ -1,0 +1,71 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { loadArchive } from "~/lib/radar-calls";
+import { PROJECT_CHIP, PROJECT_LABEL, confidenceText, fmtDate } from "~/lib/bandi-format";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+let data: Awaited<ReturnType<typeof loadArchive>> | null = null;
+let error = "";
+if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    data = await loadArchive(getRadarDb());
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+const sections = data
+  ? [
+      { title: "Non adatte", list: data.notSuitable },
+      { title: "Passate o oltre i 12 mesi", list: data.past },
+    ]
+  : [];
+---
+
+<AdminBandi title="Archivio" tab="archivio">
+  {error && <p class="bd-note is-error">{error}</p>}
+  {data && (
+    <div class="bd-stack">
+      {sections.map((s) => (
+        <section class="card">
+          <h2>{s.title} <small>({s.list.length})</small></h2>
+          {s.list.length === 0 ? (
+            <p class="bd-muted">Nessuna.</p>
+          ) : (
+            <ul class="bd-plain">
+              {s.list.map((p) => (
+                <li>
+                  <a href={`/admin/bandi/proposta/${p.id}`}>{p.title}</a>
+                  <span class={`bd-chip ${PROJECT_CHIP[p.project]}`}>{PROJECT_LABEL[p.project]}</span>
+                  <small>{p.region_name} · apre {fmtDate(p.predicted_opens)} · {confidenceText(p.confidence)}</small>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ))}
+      <section class="card">
+        <h2>Bandi chiusi <small>({data.closedCalls.length})</small></h2>
+        {data.closedCalls.length === 0 ? (
+          <p class="bd-muted">Nessuno.</p>
+        ) : (
+          <ul class="bd-plain">
+            {data.closedCalls.map((c) => (
+              <li>
+                <b>{c.title}</b>
+                <small>
+                  <a href={`/admin/bandi/regione/${c.region}`}>{c.region_name}</a> · ultima chiusura {fmtDate(c.last_closes)}
+                </small>
+                {c.official_url && <a href={c.official_url} target="_blank" rel="noopener noreferrer">Ufficiale ↗</a>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </div>
+  )}
+</AdminBandi>

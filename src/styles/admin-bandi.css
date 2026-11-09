@@ -1,0 +1,503 @@
+/* /admin/bandi — token Foglio, nessun colore nuovo. */
+.foglio body.admin .bd-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.foglio body.admin .bd-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+.foglio body.admin .bd-eyebrow {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  letter-spacing: 0.08em;
+  color: var(--foglio-ink-mute);
+  text-transform: uppercase;
+}
+.foglio body.admin .bd-back {
+  text-decoration: none;
+}
+.foglio body.admin .bd-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.foglio body.admin .bd-tabs a {
+  padding: 0.55rem 1rem;
+  border: 1px solid var(--foglio-rule-strong);
+  border-radius: var(--foglio-radius-sm);
+  color: var(--foglio-ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+.foglio body.admin .bd-tabs a[aria-current="page"] {
+  background: var(--foglio-ink);
+  color: var(--foglio-paper);
+  border-color: var(--foglio-ink);
+}
+.foglio body.admin .bd-toast,
+.foglio body.admin .bd-note {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--foglio-radius-sm);
+  border: 1px solid var(--foglio-pos);
+  color: var(--foglio-pos);
+  background: var(--foglio-paper);
+}
+.foglio body.admin .bd-toast.is-error,
+.foglio body.admin .bd-note.is-error {
+  border-color: var(--foglio-neg);
+  color: var(--foglio-neg);
+}
+.foglio body.admin .bd-muted {
+  color: var(--foglio-ink-mute);
+  margin: 0.4rem 0;
+}
+.foglio body.admin .bd-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.foglio body.admin .bd-wrap h2,
+.foglio body.admin .bd-wrap h3 {
+  margin: 0 0 0.6rem;
+}
+.foglio body.admin .bd-wrap h4 {
+  margin: 1rem 0 0.4rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.foglio body.admin .bd-wrap small {
+  color: var(--foglio-ink-mute);
+}
+
+/* pillole */
+.foglio body.admin .bd-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--foglio-rule-strong);
+  border-radius: 999px;
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-soft);
+  margin-left: 0.4rem;
+  white-space: nowrap;
+}
+.foglio body.admin .bd-chip.nfr {
+  border-color: var(--foglio-accent);
+  color: var(--foglio-accent);
+}
+.foglio body.admin .bd-chip.wt {
+  border-color: var(--foglio-info);
+  color: var(--foglio-info);
+}
+.foglio body.admin .bd-chip.ok {
+  border-color: var(--foglio-pos);
+  color: var(--foglio-pos);
+}
+.foglio body.admin .bd-chip.warn {
+  border-color: var(--foglio-warn);
+  color: var(--foglio-warn);
+}
+
+/* aperti adesso */
+.foglio body.admin .bd-open,
+.foglio body.admin .bd-plain,
+.foglio body.admin .bd-regions,
+.foglio body.admin .bd-targets,
+.foglio body.admin .bd-houses,
+.foglio body.admin .bd-sessions,
+.foglio body.admin .bd-wins {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.foglio body.admin .bd-open li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.9rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--foglio-rule);
+}
+.foglio body.admin .bd-open li:first-child {
+  border-top: 0;
+}
+.foglio body.admin .bd-open b {
+  font-family: var(--foglio-mono);
+  color: var(--foglio-pos);
+}
+.foglio body.admin .bd-open b.is-hot {
+  color: var(--foglio-neg);
+}
+
+/* filtri */
+.foglio body.admin .bd-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  align-items: flex-end;
+}
+.foglio body.admin .bd-filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .bd-filters .bd-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.4rem;
+}
+
+/* legenda */
+.foglio body.admin .bd-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  font-size: var(--foglio-fs-mono);
+  font-family: var(--foglio-mono);
+  color: var(--foglio-ink-soft);
+  margin: 0 0 1rem;
+}
+.foglio body.admin .bd-key::before,
+.foglio body.admin .bd-key-conf::before,
+.foglio body.admin .bd-key-win::before {
+  content: "";
+  display: inline-block;
+  width: 1.6rem;
+  height: 0.55rem;
+  margin-right: 0.35rem;
+  border-radius: 2px;
+  vertical-align: middle;
+  background: currentColor;
+}
+.foglio body.admin .bd-key.wt {
+  color: var(--foglio-info);
+}
+.foglio body.admin .bd-key.nfr {
+  color: var(--foglio-accent);
+}
+.foglio body.admin .bd-key-win::before {
+  background: color-mix(in srgb, var(--foglio-ink) 14%, transparent);
+  outline: 1px solid var(--foglio-rule-strong);
+}
+
+/* barre di affidabilità: il colore del progetto arriva da .wt / .nfr sul contenitore */
+.foglio body.admin .wt {
+  --bd-color: var(--foglio-info);
+}
+.foglio body.admin .nfr {
+  --bd-color: var(--foglio-accent);
+}
+.foglio body.admin .bd-key-conf {
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .bd-key-conf.c-media::before {
+  opacity: 0.45;
+}
+.foglio body.admin .bd-key-conf.c-bassa::before {
+  background: transparent;
+  border: 1px dashed currentColor;
+}
+.foglio body.admin .bd-key-conf.c-annunciata::before {
+  background: currentColor;
+  box-shadow: inset 0 0 0 2px var(--foglio-paper);
+}
+
+.foglio body.admin .bd-bar {
+  position: absolute;
+  top: 50%;
+  height: 0.9rem;
+  transform: translateY(-50%);
+  border-radius: 3px;
+  min-width: 6px;
+  background: var(--bd-color, var(--foglio-ink-soft));
+  border: 1px solid var(--bd-color, var(--foglio-ink-soft));
+  z-index: 2;
+}
+.foglio body.admin .bd-bar.c-annunciata {
+  box-shadow: inset 0 0 0 2px var(--foglio-paper);
+}
+.foglio body.admin .bd-bar.c-media {
+  opacity: 0.5;
+}
+.foglio body.admin .bd-bar.c-bassa {
+  background: transparent;
+  border-style: dashed;
+}
+
+.foglio body.admin .bd-conf.c-annunciata,
+.foglio body.admin .bd-conf.c-alta {
+  color: var(--foglio-pos);
+}
+.foglio body.admin .bd-conf.c-media {
+  color: var(--foglio-warn);
+}
+.foglio body.admin .bd-conf.c-bassa {
+  color: var(--foglio-ink-mute);
+  font-style: italic;
+}
+
+/* timeline desktop */
+.foglio body.admin .bd-tl-axis,
+.foglio body.admin .bd-tl-row {
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  gap: 1rem;
+  align-items: center;
+}
+.foglio body.admin .bd-tl-row {
+  text-decoration: none;
+  color: inherit;
+  border-top: 1px solid var(--foglio-rule);
+  min-height: 3rem;
+}
+.foglio body.admin .bd-tl-row:hover {
+  background: color-mix(in srgb, var(--foglio-ink) 4%, transparent);
+}
+.foglio body.admin .bd-tl-label {
+  display: flex;
+  flex-direction: column;
+  padding: 0.35rem 0;
+}
+.foglio body.admin .bd-tl-label b {
+  line-height: 1.2;
+}
+.foglio body.admin .bd-tl-track {
+  position: relative;
+  height: 2.4rem;
+}
+.foglio body.admin .bd-tl-axis .bd-tl-track {
+  height: 1.4rem;
+}
+.foglio body.admin .bd-tl-axis i {
+  position: absolute;
+  top: 0;
+  font-style: normal;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+  padding-left: 3px;
+}
+.foglio body.admin .bd-tl-axis .bd-today {
+  position: absolute;
+  top: 0.9rem;
+  font-style: normal;
+  font-family: var(--foglio-mono);
+  font-size: 0.65rem;
+  color: var(--foglio-neg);
+}
+.foglio body.admin .bd-grid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--foglio-rule);
+}
+.foglio body.admin .bd-today-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  border-left: 2px solid var(--foglio-neg);
+  text-decoration: none;
+}
+.foglio body.admin .bd-window {
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  text-decoration: none;
+  background: color-mix(in srgb, var(--bd-color, var(--foglio-ink)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bd-color, var(--foglio-ink)) 35%, transparent);
+  border-radius: 3px;
+}
+.foglio body.admin .bd-window.w-now {
+  background: color-mix(in srgb, var(--bd-color, var(--foglio-ink)) 30%, transparent);
+  border-color: var(--bd-color, var(--foglio-ink));
+}
+.foglio body.admin .bd-window.w-closing,
+.foglio body.admin .bd-window.w-passed {
+  opacity: 0.5;
+}
+
+/* lista per mese (telefono) */
+.foglio body.admin .bd-months {
+  display: none;
+}
+.foglio body.admin .bd-months ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.foglio body.admin .bd-months li a {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0.7rem;
+  border-left: 4px solid var(--bd-color, var(--foglio-rule-strong));
+  border-top: 1px solid var(--foglio-rule);
+  text-decoration: none;
+  color: inherit;
+}
+.foglio body.admin .bd-months h3 {
+  margin-top: 1rem;
+  text-transform: capitalize;
+}
+@media (max-width: 719px) {
+  .foglio body.admin .bd-tl {
+    display: none;
+  }
+  .foglio body.admin .bd-months {
+    display: block;
+  }
+}
+
+/* scheda proposta */
+.foglio body.admin .bd-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.8rem 1.2rem;
+  margin: 0 0 0.8rem;
+}
+.foglio body.admin .bd-facts dt {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  color: var(--foglio-ink-mute);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.foglio body.admin .bd-facts dd {
+  margin: 0.1rem 0 0;
+}
+.foglio body.admin .bd-facts small {
+  display: block;
+}
+.foglio body.admin .bd-sessions li {
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.25rem 0;
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+}
+.foglio body.admin .bd-prose {
+  max-width: 68ch;
+  white-space: pre-line;
+}
+.foglio body.admin .bd-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0.5rem 0 0;
+}
+.foglio body.admin .bd-check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.foglio body.admin .bd-check-list li {
+  padding: 0.35rem 0;
+}
+.foglio body.admin .bd-check-list label {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.foglio body.admin .bd-check-list input:checked + span {
+  text-decoration: line-through;
+  color: var(--foglio-ink-mute);
+}
+.foglio body.admin .bd-warn {
+  border-color: var(--foglio-warn);
+}
+.foglio body.admin .bd-warn ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+.foglio body.admin .bd-pitch {
+  white-space: pre-wrap;
+  font-family: var(--foglio-sans);
+  background: var(--foglio-bg);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  padding: 0.9rem 1rem;
+  margin: 0 0 0.7rem;
+  max-width: 72ch;
+}
+.foglio body.admin .bd-targets li,
+.foglio body.admin .bd-houses li,
+.foglio body.admin .bd-plain > li {
+  padding: 0.6rem 0;
+  border-top: 1px solid var(--foglio-rule);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.foglio body.admin .bd-targets li:first-child,
+.foglio body.admin .bd-houses li:first-child,
+.foglio body.admin .bd-plain > li:first-child {
+  border-top: 0;
+}
+.foglio body.admin .bd-targets p {
+  margin: 0;
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .bd-score {
+  font-family: var(--foglio-mono);
+  margin-left: 0.5rem;
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .bd-wins {
+  font-size: var(--foglio-fs-xs);
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .bd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.foglio body.admin .bd-request {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  margin: 0.4rem 0;
+}
+.foglio body.admin .btn-pri {
+  background: var(--foglio-accent);
+  border-color: var(--foglio-accent);
+  color: var(--foglio-paper);
+}
+.foglio body.admin .btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* regioni */
+.foglio body.admin .bd-regions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.6rem;
+}
+.foglio body.admin .bd-regions a {
+  display: flex;
+  flex-direction: column;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-md);
+  text-decoration: none;
+  color: inherit;
+}
+.foglio body.admin .bd-regions a:hover {
+  border-color: var(--foglio-accent);
+}

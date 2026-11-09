@@ -1,0 +1,99 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { loadRegion } from "~/lib/radar-calls";
+import { isRegionCode } from "~/lib/radar-regions";
+import { MAIL_LABEL, PROJECT_CHIP, PROJECT_LABEL, confidenceText, fmtDate } from "~/lib/bandi-format";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+const code = Astro.params.code;
+let data: Awaited<ReturnType<typeof loadRegion>> | null = null;
+let error = "";
+if (!isRegionCode(code)) error = "Regione non valida.";
+else if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    data = await loadRegion(getRadarDb(), code);
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+---
+
+<AdminBandi title={data?.name ?? "Regione"} tab="regioni" back={{ href: "/admin/bandi/regione", label: "Regioni" }}>
+  {error && <p class="bd-note is-error">{error}</p>}
+  {data && (
+    <div class="bd-stack">
+      <h2>{data.name}</h2>
+
+      {data.proposals.length > 0 && (
+        <section class="card">
+          <h3>Proposte</h3>
+          <ul class="bd-plain">
+            {data.proposals.map((p) => (
+              <li>
+                <a href={`/admin/bandi/proposta/${p.id}`}>{p.title}</a>
+                <span class={`bd-chip ${PROJECT_CHIP[p.project]}`}>{PROJECT_LABEL[p.project]}</span>
+                <small>apre {fmtDate(p.predicted_opens)} · {confidenceText(p.confidence)}{p.suitable ? "" : " · non adatta"}</small>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section class="card">
+        <h3>Bandi e storico</h3>
+        {data.calls.length === 0 ? (
+          <p class="bd-muted">Nessun bando in archivio per questa regione.</p>
+        ) : (
+          <ul class="bd-plain">
+            {data.calls.map((c) => (
+              <li>
+                <b>{c.title}</b>
+                {c.sheet_kind === "facilities" && <span class="bd-chip">facilities</span>}
+                {c.budget_text && <small>{c.budget_text}</small>}
+                {c.sessions.length > 0 ? (
+                  <ul class="bd-sessions">
+                    {c.sessions.map((s) => (
+                      <li><span>{s.opens ? fmtDate(s.opens) : "apertura n.d."} → {fmtDate(s.closes)}</span>{s.status && <small>{s.status}</small>}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <small>nessuna sessione registrata</small>
+                )}
+                <span class="bd-links">
+                  {c.official_url && <a href={c.official_url} target="_blank" rel="noopener noreferrer">Ufficiale ↗</a>}
+                  {c.ifm_url && <a href={c.ifm_url} target="_blank" rel="noopener noreferrer">Italy for Movies ↗</a>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {data.groups.length === 0 && <p class="bd-muted">Nessuna casa collegata a questa regione.</p>}
+      {data.groups.map((g) => (
+        <section class="card">
+          <h3>{g.label} <small>({g.contacts.length})</small></h3>
+          <ul class="bd-houses">
+            {g.contacts.map((c) => (
+              <li>
+                <a href={`/admin/contatti#casa-${c.id}`}><b>{c.name}</b></a>
+                {c.place && <small>{c.place}</small>}
+                <small>{c.email ? `${c.email} · ${MAIL_LABEL[c.mail_kind]}` : "senza email"}</small>
+                {c.wins.length > 0 && (
+                  <ul class="bd-wins">
+                    {c.wins.map((w) => <li>{w.year ?? "—"} · {w.title}</li>)}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  )}
+</AdminBandi>

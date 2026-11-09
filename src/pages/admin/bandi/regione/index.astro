@@ -1,0 +1,55 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { REGIONS } from "~/lib/radar-regions";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+type Count = { region: string; houses: number; winners: number; calls: number };
+let counts = new Map<string, Count>();
+let error = "";
+if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    const db = getRadarDb();
+    const [h, c] = await Promise.all([
+      db.execute(
+        `SELECT region, count(DISTINCT contact_id) AS houses,
+                count(DISTINCT CASE WHEN basis = 'fondo_regionale' THEN contact_id END) AS winners
+         FROM contact_regions GROUP BY region`,
+      ),
+      db.execute("SELECT region, count(*) AS calls FROM regional_calls GROUP BY region"),
+    ]);
+    for (const code of Object.keys(REGIONS)) counts.set(code, { region: code, houses: 0, winners: 0, calls: 0 });
+    for (const r of h.rows) {
+      const x = counts.get(String(r.region));
+      if (x) { x.houses = Number(r.houses); x.winners = Number(r.winners); }
+    }
+    for (const r of c.rows) {
+      const x = counts.get(String(r.region));
+      if (x) x.calls = Number(r.calls);
+    }
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+---
+
+<AdminBandi title="Regioni" tab="regioni">
+  {error && <p class="bd-note is-error">{error}</p>}
+  <section class="card">
+    <h2>Dove ho terreno</h2>
+    <ul class="bd-regions">
+      {[...counts.values()].map((c) => (
+        <li>
+          <a href={`/admin/bandi/regione/${c.region}`}>
+            <b>{REGIONS[c.region]}</b>
+            <small>{c.winners} vincitori · {c.houses} case · {c.calls} bandi</small>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</AdminBandi>
