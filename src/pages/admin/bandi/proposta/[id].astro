@@ -1,0 +1,183 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { loadProposal } from "~/lib/radar-calls";
+import {
+  MAIL_LABEL,
+  PROJECT_CHIP,
+  PROJECT_LABEL,
+  STAGE_LABEL,
+  confidenceText,
+  fmtDate,
+  windowText,
+} from "~/lib/bandi-format";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+const id = Number(Astro.params.id);
+let data: Awaited<ReturnType<typeof loadProposal>> = null;
+let error = "";
+if (!Number.isInteger(id) || id <= 0) error = "Proposta non valida.";
+else if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    data = await loadProposal(getRadarDb(), id);
+    if (!data) error = "Proposta non trovata.";
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+const p = data?.proposal;
+const c = data?.call;
+const sessions = data?.sessions ?? [];
+const latest = data?.requests[0];
+const active = latest && (latest.status === "pending" || latest.status === "running");
+const money = (v: unknown) => (v == null || v === "" ? null : String(v));
+---
+
+<AdminBandi title={p?.title ?? "Proposta"} tab="timeline" back={{ href: "/admin/bandi", label: "Timeline" }}>
+  {error && <p class="bd-note is-error">{error}</p>}
+  {data && p && c && (
+    <article class="bd-stack" data-proposal={p.id}>
+      <header class="bd-title">
+        <div class="bd-eyebrow">
+          <a href={`/admin/bandi/regione/${p.region}`}>{p.region_name}</a>
+          <span class={`bd-chip ${PROJECT_CHIP[p.project]}`}>{PROJECT_LABEL[p.project]}</span>
+          {!p.suitable && <span class="bd-chip warn">Non adatta</span>}
+        </div>
+        <h2>{p.title}</h2>
+      </header>
+
+      <section class="card">
+        <h3>Quando</h3>
+        <dl class="bd-facts">
+          <div><dt>Apre (previsto)</dt><dd>{fmtDate(p.predicted_opens)}</dd></div>
+          <div><dt>Chiude (previsto)</dt><dd>{fmtDate(p.predicted_closes)}</dd></div>
+          <div><dt>Affidabilità</dt><dd><span class={`bd-conf c-${p.confidence ?? "bassa"}`}>{confidenceText(p.confidence)}</span></dd></div>
+          <div>
+            <dt>Finestra d'azione</dt>
+            <dd>{p.window ? `${fmtDate(p.window.from)} → ${fmtDate(p.window.to)}` : "—"}<small>{windowText(p)}</small></dd>
+          </div>
+        </dl>
+        {p.basis && <p><b>Perché:</b> {p.basis}</p>}
+        {sessions.length > 0 && (
+          <>
+            <h4>Sessioni passate e annunciate</h4>
+            <ul class="bd-sessions">
+              {sessions.map((s) => (
+                <li>
+                  <span>{s.opens ? fmtDate(s.opens) : "apertura n.d."} → {fmtDate(s.closes)}</span>
+                  {s.status && <small>{s.status}</small>}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
+
+      <section class="card">
+        <h3>Il bando</h3>
+        <dl class="bd-facts">
+          {money(c.budget_text) && <div><dt>Budget</dt><dd>{c.budget_text}</dd></div>}
+          {(money(c.min_contribution) || money(c.max_contribution)) && (
+            <div><dt>Contributo</dt><dd>{money(c.min_contribution) ?? "—"} – {money(c.max_contribution) ?? "—"}</dd></div>
+          )}
+          {money(c.works) && <div><dt>Opere</dt><dd>{c.works}</dd></div>}
+          {money(c.phases) && <div><dt>Fasi</dt><dd>{c.phases}</dd></div>}
+          {money(c.beneficiaries) && <div><dt>Beneficiari</dt><dd>{c.beneficiaries}</dd></div>}
+        </dl>
+        {c.description && <p class="bd-prose">{c.description}</p>}
+        <p class="bd-links">
+          {c.official_url && <a href={String(c.official_url)} target="_blank" rel="noopener noreferrer">Bando ufficiale ↗</a>}
+          {c.ifm_url && <a href={String(c.ifm_url)} target="_blank" rel="noopener noreferrer">Italy for Movies ↗</a>}
+        </p>
+      </section>
+
+      {p.angle && (
+        <section class="card">
+          <h3>Angolo</h3>
+          <p class="bd-prose">{p.angle}</p>
+        </section>
+      )}
+
+      {p.prepare.length > 0 && (
+        <section class="card">
+          <h3>Da preparare</h3>
+          <ul class="bd-check-list" data-checklist={`bandi-${p.id}`}>
+            {p.prepare.map((t, i) => (
+              <li><label><input type="checkbox" data-i={i} /> <span>{t}</span></label></li>
+            ))}
+          </ul>
+          <p class="bd-muted">Le spunte restano solo in questo browser.</p>
+        </section>
+      )}
+
+      {p.warnings.length > 0 && (
+        <section class="card bd-warn">
+          <h3>Attenzione</h3>
+          <ul>{p.warnings.map((w) => <li>{w}</li>)}</ul>
+        </section>
+      )}
+
+      {p.pitch && (
+        <section class="card">
+          <h3>Testo per le case</h3>
+          <pre class="bd-pitch" id="bd-pitch">{p.pitch}</pre>
+          <button type="button" class="btn" data-copy="#bd-pitch">Copia testo</button>
+        </section>
+      )}
+
+      <section class="card">
+        <h3>Case bersaglio <small>({data.targets.length})</small></h3>
+        {data.targets.length === 0 ? (
+          <p class="bd-muted">Il motore non ha indicato case per questa proposta.</p>
+        ) : (
+          <ul class="bd-targets">
+            {data.targets.map((t) => (
+              <li>
+                <div>
+                  <a href={`/admin/contatti#casa-${t.id}`}><b>{t.name}</b></a>
+                  {t.score !== null && <span class="bd-score" title="Punteggio">{Math.round(t.score)}</span>}
+                  {t.stage && <span class="bd-chip ok">{STAGE_LABEL[t.stage] ?? t.stage}</span>}
+                  {t.shortlist && <span class="bd-chip">shortlist</span>}
+                </div>
+                {t.why && <p>{t.why}</p>}
+                <small>
+                  {t.email ? <>{t.email} · {MAIL_LABEL[t.mail_kind]}</> : "senza email"}
+                  {t.site && <> · <a href={t.site.startsWith("http") ? t.site : `https://${t.site}`} target="_blank" rel="noopener noreferrer">{t.site}</a></>}
+                </small>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section class="card bd-actions-card">
+        <h3>Azioni</h3>
+        <div class="bd-actions">
+          <button type="button" class="btn btn-pri" data-action="prepare_drafts" data-id={p.id} disabled={!p.suitable || active}>
+            Prepara bozze
+          </button>
+          <button type="button" class="btn" data-action="set_suitable" data-id={p.id} data-value={p.suitable ? "false" : "true"}>
+            {p.suitable ? "Non adatta" : "Di nuovo adatta"}
+          </button>
+        </div>
+        <p class="bd-muted">
+          Il sito non spedisce email: il motore scrive le bozze (max 5, solo case con email) e le approvi in
+          <a href="/admin/contatti#oggi">Contatti</a>.
+        </p>
+        <p class="bd-request" id="bd-request" data-request={active ? latest!.id : ""} aria-live="polite">
+          {latest && (
+            <>
+              Ultima richiesta: <b>{latest.status}</b>
+              {latest.note ? ` — ${latest.note}` : ""}
+            </>
+          )}
+        </p>
+        <button type="button" class="btn" id="bd-refresh" data-id={latest?.id ?? ""} hidden={!latest}>Aggiorna stato</button>
+      </section>
+    </article>
+  )}
+</AdminBandi>

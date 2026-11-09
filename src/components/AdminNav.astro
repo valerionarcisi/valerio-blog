@@ -7,6 +7,7 @@ type PageId =
   | "comments"
   | "radar"
   | "contatti"
+  | "bandi"
   | "meal-plan"
   | "body-comp"
   | "roma-arte-di-narrare";
@@ -36,7 +37,10 @@ const groups: { title: string; links: { id: PageId; label: string; href: string 
   },
   {
     title: "Film",
-    links: [{ id: "contatti", label: "Contatti", href: href("contatti") }],
+    links: [
+      { id: "contatti", label: "Contatti", href: href("contatti") },
+      { id: "bandi", label: "Bandi regionali", href: href("bandi") },
+    ],
   },
   {
     title: "Dieta",

@@ -1,0 +1,187 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import {
+  TIMELINE_DAYS,
+  applyFilters,
+  dayNumber,
+  groupByMonth,
+  isoDay,
+  loadOverview,
+  parseFilters,
+} from "~/lib/radar-calls";
+import { REGIONS } from "~/lib/radar-regions";
+import {
+  CONFIDENCE_LABEL,
+  PROJECT_CHIP,
+  PROJECT_LABEL,
+  confidenceText,
+  fmtDate,
+  fmtMonth,
+  windowText,
+} from "~/lib/bandi-format";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+const filters = parseFilters(Astro.url.searchParams);
+let overview: Awaited<ReturnType<typeof loadOverview>> | null = null;
+let error = "";
+if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    overview = await loadOverview(getRadarDb());
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+const rows = overview ? applyFilters(overview.timeline, filters) : [];
+const open = overview?.open ?? [];
+const months = (() => {
+  if (!overview) return [];
+  const t = dayNumber(overview.today)!;
+  const [y, m] = overview.today.split("-").map(Number);
+  return Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(Date.UTC(y, m - 1 + i, 1));
+    const iso = d.toISOString().slice(0, 10);
+    return {
+      label: fmtMonth(iso.slice(0, 7)).split(" ")[0].slice(0, 3),
+      left: Math.max(0, (dayNumber(iso)! - t) / TIMELINE_DAYS) * 100,
+    };
+  });
+})();
+const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
+const hasFilter = Boolean(
+  filters.project || filters.region || filters.confidence || filters.windowOnly,
+);
+---
+
+<AdminBandi title="Timeline" tab="timeline">
+  {error && <p class="bd-note is-error">{error}</p>}
+  {overview && (
+    <>
+      <section class="card">
+        <h2>Aperti adesso</h2>
+        {open.length === 0 ? (
+          <p class="bd-muted">Nessun bando aperto oggi.</p>
+        ) : (
+          <ul class="bd-open">
+            {open.map((c) => (
+              <li>
+                <a href={`/admin/bandi/regione/${c.region}`}>{c.region_name}</a>
+                <span>{c.title}</span>
+                <b class={c.days_left! <= 7 ? "is-hot" : ""}>
+                  {c.days_left === 0 ? "chiude oggi" : `${c.days_left} giorni`}
+                </b>
+                <small>chiude il {fmtDate(c.closes)}</small>
+                {c.official_url && <a href={c.official_url} rel="noopener noreferrer" target="_blank">Bando ↗</a>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <form class="bd-filters" method="get">
+        <label>Progetto
+          <select name="progetto">
+            <option value="">Tutti</option>
+            {Object.entries(PROJECT_LABEL).map(([k, v]) => <option value={k} selected={filters.project === k}>{v}</option>)}
+          </select>
+        </label>
+        <label>Regione
+          <select name="regione">
+            <option value="">Tutte</option>
+            {Object.entries(REGIONS).map(([k, v]) => <option value={k} selected={filters.region === k}>{v}</option>)}
+          </select>
+        </label>
+        <label>Affidabilità
+          <select name="affidabilita">
+            <option value="">Tutte</option>
+            {Object.entries(CONFIDENCE_LABEL).map(([k, v]) => <option value={k} selected={filters.confidence === k}>{v}</option>)}
+          </select>
+        </label>
+        <label class="bd-check">
+          <input type="checkbox" name="finestra" value="1" checked={filters.windowOnly} /> Solo nella finestra d'azione
+        </label>
+        <button type="submit" class="btn">Filtra</button>
+        {hasFilter && <a href="/admin/bandi" class="bd-eyebrow">Azzera</a>}
+      </form>
+
+      <section class="card">
+        <h2>Prossimi 12 mesi</h2>
+        <p class="bd-legend">
+          <span class="bd-key wt">Walkie Talkie</span>
+          <span class="bd-key nfr">Non fa ridere</span>
+          <span class="bd-key-conf c-annunciata">annunciata</span>
+          <span class="bd-key-conf c-alta">alta</span>
+          <span class="bd-key-conf c-media">media</span>
+          <span class="bd-key-conf c-bassa">bassa</span>
+          <span class="bd-key-win">finestra d'azione (150→45 giorni prima)</span>
+        </p>
+        {rows.length === 0 ? (
+          <p class="bd-muted">
+            {hasFilter ? "Nessuna proposta con questi filtri." : "Nessuna proposta adatta nei prossimi 12 mesi."}
+          </p>
+        ) : (
+          <>
+            <div class="bd-tl" role="list">
+              <div class="bd-tl-axis">
+                <span></span>
+                <div class="bd-tl-track">
+                  {months.map((m) => <i style={`left:${m.left}%`}>{m.label}</i>)}
+                  <em class="bd-today" style="left:0">oggi</em>
+                </div>
+              </div>
+              {rows.map((p) => (
+                <a class={`bd-tl-row ${PROJECT_CHIP[p.project]}`} href={`/admin/bandi/proposta/${p.id}`} role="listitem">
+                  <span class="bd-tl-label">
+                    <b>{p.title}</b>
+                    <small>{p.region_name} · {PROJECT_LABEL[p.project]}</small>
+                  </span>
+                  <span class="bd-tl-track">
+                    {months.map((m) => <i class="bd-grid" style={`left:${m.left}%`}></i>)}
+                    <u class="bd-today-line"></u>
+                    {p.window && (
+                      <s
+                        class={`bd-window w-${p.window.state}`}
+                        style={`left:${pct(p.window_start)};width:${pct(Math.max(p.window_end - p.window_start, 0.004))}`}
+                      ></s>
+                    )}
+                    <span
+                      class={`bd-bar c-${p.confidence ?? "bassa"}`}
+                      style={`left:${pct(p.position)};width:${pct(Math.max(p.end_position - p.position, 0.012))}`}
+                      title={`${confidenceText(p.confidence)} · apre ${fmtDate(p.predicted_opens)}`}
+                    ></span>
+                  </span>
+                </a>
+              ))}
+            </div>
+
+            <div class="bd-months">
+              {groupByMonth(rows).map((g) => (
+                <section>
+                  <h3>{fmtMonth(g.month)}</h3>
+                  <ul>
+                    {g.items.map((p) => (
+                      <li class={PROJECT_CHIP[p.project]}>
+                        <a href={`/admin/bandi/proposta/${p.id}`}>
+                          <b>{p.title}</b>
+                          <span>{p.region_name} · {PROJECT_LABEL[p.project]}</span>
+                          <small>
+                            apre {fmtDate(p.predicted_opens)} · affidabilità {confidenceText(p.confidence)}
+                            {windowText(p) ? ` · ${windowText(p)}` : ""}
+                          </small>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+    </>
+  )}
+</AdminBandi>

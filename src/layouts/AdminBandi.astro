@@ -1,0 +1,50 @@
+---
+import AdminNav from "~/components/AdminNav.astro";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+import "~/styles/admin-bandi.css";
+
+interface Props {
+  title: string;
+  tab?: "timeline" | "regioni" | "archivio";
+  back?: { href: string; label: string };
+}
+const { title, tab, back } = Astro.props;
+const tabs = [
+  { id: "timeline", label: "Timeline", href: "/admin/bandi" },
+  { id: "regioni", label: "Regioni", href: "/admin/bandi/regione" },
+  { id: "archivio", label: "Archivio", href: "/admin/bandi/archivio" },
+] as const;
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>{title} · Bandi · Admin</title>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="bandi" />
+    <div class="bd-wrap">
+      <header class="bd-head">
+        <div>
+          <div class="bd-eyebrow">Fondi regionali per il cinema</div>
+          <h1>Bandi <em class="acc">regionali</em></h1>
+        </div>
+        <nav class="bd-tabs" aria-label="Sezioni">
+          {tabs.map((t) => (
+            <a href={t.href} aria-current={t.id === tab ? "page" : undefined}>{t.label}</a>
+          ))}
+        </nav>
+      </header>
+      {back && <a href={back.href} class="bd-eyebrow bd-back">← {back.label}</a>}
+      <p class="bd-toast" id="bd-toast" role="status" aria-live="polite" hidden></p>
+      <slot />
+    </div>
+    <script is:inline src="/admin/admin-client.js"></script>
+    <script is:inline src="/admin/bandi.js"></script>
+  </body>
+</html>

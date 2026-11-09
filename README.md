@@ -132,6 +132,8 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 
 `/admin/contatti` is the contacts radar for the films (production and distribution companies to write to): it reads and writes the **separate** Turso DB of the Python engine running on the NAS (`TURSO_RADAR_URL`, `TURSO_RADAR_TOKEN`). The site never sends email; approving a draft only queues it for the NAS. The Dati tab browses the engine's tables read-only. See `docs/radar-contatti-spec.md`.
 
+`/admin/bandi` is the regional-funds view on the same engine DB: 12-month timeline of predicted call openings with the 150→45 day action window, per-proposal sheet (angle, checklist, pitch, target houses), per-region ground and an archive. The site only reads, queues `radar_requests` (`call_proposal`, payload `<id> bozze`) and flips `call_proposals.suitable`. See `docs/radar-bandi-spec.md`.
+
 `src/data/radar.json` is the single data source for `/admin/radar`, regenerated **weekly** by a
 GitHub Actions workflow (`.github/workflows/radar-weekly.yml`): `scripts/radar-update.mjs`
 web-researches film opportunities via the Anthropic API (Haiku + web search), rewrites the file,
@@ -195,7 +197,7 @@ pnpm dev              # dev server on :4321
 ```
 TURSO_DATABASE_URL
 TURSO_AUTH_TOKEN
-TURSO_RADAR_URL             # contacts radar DB (NAS engine), read by /admin/contatti
+TURSO_RADAR_URL             # contacts radar DB (NAS engine), read by /admin/contatti and /admin/bandi
 TURSO_RADAR_TOKEN
 TMDB_API_KEY
 LASTFM_API_KEY
