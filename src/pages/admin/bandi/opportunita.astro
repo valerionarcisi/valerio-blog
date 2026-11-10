@@ -1,0 +1,96 @@
+---
+import AdminBandi from "~/layouts/AdminBandi.astro";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { loadHealth, loadOpportunities } from "~/lib/radar-opps";
+import { fmtDate } from "~/lib/bandi-format";
+
+export const prerender = false;
+if (!Astro.locals.isAdmin) return new Response("Unauthorized", { status: 401 });
+
+let data: Awaited<ReturnType<typeof loadOpportunities>> | null = null;
+let health: Awaited<ReturnType<typeof loadHealth>> | null = null;
+let error = "";
+if (!isRadarConfigured()) error = "TURSO_RADAR_URL / TURSO_RADAR_TOKEN non configurati.";
+else {
+  try {
+    const db = getRadarDb();
+    [data, health] = await Promise.all([loadOpportunities(db), loadHealth(db)]);
+  } catch (e) {
+    console.error("[admin/bandi]", e);
+    error = "Il database del radar non risponde.";
+  }
+}
+const when = (n: number | null) =>
+  n === null ? "senza scadenza" : n === 0 ? "scade oggi" : n === 1 ? "scade domani" : `tra ${n} giorni`;
+---
+
+<AdminBandi title="Opportunità" tab="opportunita">
+  {error && <p class="bd-note is-error">{error}</p>}
+  {data && (
+    <div class="bd-stack">
+      <p class="bd-muted">
+        Le opportunità le aggiungi inoltrando il post a HAL su Telegram: il motore le legge, le controlla ogni giorno
+        e ti avvisa 7 e 2 giorni prima della scadenza.
+      </p>
+
+      {health && !health.ok && (
+        <p class="bd-note is-error">
+          Il motore ha dei problemi: {health.problems.map((p) => `${p.job} (${p.text})`).join("; ")}
+        </p>
+      )}
+
+      <section class="card">
+        <h2>Aperte <small>({data.open.length})</small></h2>
+        {data.open.length === 0 ? (
+          <p class="bd-muted">Nessuna opportunità aperta.</p>
+        ) : (
+          <ul class="bd-plain">
+            {data.open.map((o) => (
+              <li>
+                <div>
+                  {o.url ? <a href={o.url} target="_blank" rel="noopener noreferrer"><b>{o.title}</b> ↗</a> : <b>{o.title}</b>}
+                  {o.kind && <span class="bd-chip">{o.kind}</span>}
+                  <span class={`bd-when ${o.days_left !== null && o.days_left <= 7 ? "is-hot" : ""}`}>{when(o.days_left)}</span>
+                </div>
+                <small>
+                  {[o.organizer, o.location, o.amount_text, o.deadline ? `scadenza ${fmtDate(o.deadline)}` : null].filter(Boolean).join(" · ")}
+                </small>
+                {o.summary && <p class="bd-prose">{o.summary}</p>}
+                {o.eligibility && <small>Chi può candidarsi: {o.eligibility}</small>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {data.agenda.length > 0 && (
+        <section class="card">
+          <h2>Altre scadenze in agenda <small>({data.agenda.length})</small></h2>
+          <ul class="bd-plain">
+            {data.agenda.map((d) => (
+              <li>
+                <div>
+                  {d.url ? <a href={d.url} target="_blank" rel="noopener noreferrer"><b>{d.name}</b> ↗</a> : <b>{d.name}</b>}
+                  {d.type && <span class="bd-chip">{d.type}</span>}
+                  <span class="bd-when">{when(d.days_left)}</span>
+                </div>
+                <small>{[fmtDate(d.deadline), d.project, d.cost].filter(Boolean).join(" · ")}</small>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {data.past.length > 0 && (
+        <details class="card">
+          <summary><b>Chiuse o scadute</b> <small>({data.past.length})</small></summary>
+          <ul class="bd-plain">
+            {data.past.map((o) => (
+              <li><span>{o.title}</span><small>{o.status} · {o.deadline ? fmtDate(o.deadline) : "senza data"}</small></li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  )}
+</AdminBandi>

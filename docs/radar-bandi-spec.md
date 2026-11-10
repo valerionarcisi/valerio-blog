@@ -75,3 +75,12 @@ Finestra d'azione ai bordi (150/45 giorni, già aperta, già passata), sessioni 
 ## Fuori scopo
 
 Nessun invio email, nessuna modifica a contatti o bandi, nessuna statistica. Facilities (`sheet_kind = facilities`) compaiono solo nella vista regione.
+
+## Opportunità, scadenze della settimana e salute del motore
+
+Il motore (`~/radar` sul NAS, container `radar`) tiene le opportunità in `opportunities`: Valerio inoltra un post a HAL su Telegram, HAL accoda `opportunity`, il motore lo estrae e lo ricontrolla ogni giorno (`opportunities:watch`), con avvisi a 7 e 2 giorni. HAL è solo il bot Telegram (comandi `/casa`, `/bandi`, `/proposta <n> [bozze]`, `/regione`, forward di post); il lavoro lo fa il motore.
+
+- **`/admin/bandi/opportunita`**: aperte per scadenza (le senza data in coda), agenda del motore (`deadlines` future senza doppioni per titolo), chiuse/scadute. Solo lettura. Logica in `src/lib/radar-opps.ts`.
+- **Home admin, card «Scadenze e motore»**: opportunità e bandi aperti che chiudono entro 14 giorni (max 6) e una riga di salute. Soft failure: se il DB radar non risponde la card dice «dati non disponibili».
+- **Salute**: ultimo giro in errore per lavoro, tranne se `hb_<lavoro>` è più recente dell'errore (send/inbox/requests entrano nello storico solo se falliscono, quindi l'errore resterebbe per sempre); battito fermo per `requests` (30 min), `inbox` (60), `send` (120). Mostra anche se gli invii sono spenti, accesi o in pausa.
+- `call_proposal` con payload `"<id> bozze"` è consumato dal motore (`requests_queue.call_proposal` → `forecast.make_drafts`), che risponde anche su Telegram.

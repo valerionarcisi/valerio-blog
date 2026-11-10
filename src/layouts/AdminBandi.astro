@@ -6,12 +6,13 @@ import "~/styles/admin-bandi.css";
 
 interface Props {
   title: string;
-  tab?: "timeline" | "regioni" | "archivio";
+  tab?: "timeline" | "opportunita" | "regioni" | "archivio";
   back?: { href: string; label: string };
 }
 const { title, tab, back } = Astro.props;
 const tabs = [
   { id: "timeline", label: "Timeline", href: "/admin/bandi" },
+  { id: "opportunita", label: "Opportunità", href: "/admin/bandi/opportunita" },
   { id: "regioni", label: "Regioni", href: "/admin/bandi/regione" },
   { id: "archivio", label: "Archivio", href: "/admin/bandi/archivio" },
 ] as const;
