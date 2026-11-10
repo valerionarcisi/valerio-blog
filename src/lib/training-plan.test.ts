@@ -85,4 +85,10 @@ describe("training-plan", () => {
     expect(v.per100).toBeNull();
     expect(v.splits).toEqual([]);
   });
+
+  it("in pista anche il recupero a ritmo ha passaggi ogni 100 m", () => {
+    const v = buildBlockView({ kind: "recovery", label: "Recupero lento", distance_m: 300, pace: "fl" }, undefined, true);
+    expect(v.splits.map((s) => s.meters)).toEqual([100, 200, 300]);
+    expect(v.per100).toBe(`31"–32"`);
+  });
 });

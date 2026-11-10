@@ -117,9 +117,9 @@ export interface BlockView {
   total: string | null;
 }
 
-/** `track`: seduta in pista, solo lì servono passaggi e tempo ogni 100 m sulle ripetute */
+/** `track`: seduta in pista, solo lì servono passaggi e tempo ogni 100 m su ripetute e recuperi */
 export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPace, track = false): BlockView {
-  const trackRep = track && block.kind === "rep";
+  const trackRep = track && (block.kind === "rep" || block.kind === "recovery");
   const reps = block.reps && block.reps > 1 ? block.reps : null;
   const paced = block.pace && block.distance_m !== undefined && block.distance_max_m === undefined;
   const pace = block.pace ? parsePaceRange(block.pace, easyPace) : null;
