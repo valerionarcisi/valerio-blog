@@ -19,6 +19,7 @@ export interface PlanDay {
   text?: string;
   summary?: string;
   note?: string;
+  track?: boolean;
   blocks?: PlanBlock[];
 }
 
@@ -116,12 +117,14 @@ export interface BlockView {
   total: string | null;
 }
 
-export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPace): BlockView {
+/** `track`: seduta in pista, solo lì servono passaggi e tempo ogni 100 m sulle ripetute */
+export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPace, track = false): BlockView {
+  const trackRep = track && block.kind === "rep";
   const reps = block.reps && block.reps > 1 ? block.reps : null;
   const paced = block.pace && block.distance_m !== undefined && block.distance_max_m === undefined;
   const pace = block.pace ? parsePaceRange(block.pace, easyPace) : null;
   const perRep = paced && pace ? blockTime(pace, block.distance_m as number) : null;
-  const sp = pace && block.distance_m !== undefined && block.distance_max_m === undefined ? buildSplits(pace, block.distance_m) : null;
+  const sp = trackRep && pace && block.distance_m !== undefined && block.distance_max_m === undefined ? buildSplits(pace, block.distance_m) : null;
   return {
     kind: block.kind,
     label: block.label,
@@ -133,7 +136,7 @@ export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPac
     perRep: perRep ? formatRange(perRep) : null,
     splits: sp?.splits ?? [],
     splitsRepeat: sp?.repeatsPerLap ?? false,
-    per100: pace ? formatRange(per100Time(pace)) : null,
+    per100: trackRep && pace ? formatRange(per100Time(pace)) : null,
     perLap: pace && paced ? formatRange(lapTime(pace)) : null,
     total: perRep ? formatRange(reps && perRep ? scale(perRep, reps) : perRep) : null,
   };
@@ -187,15 +190,15 @@ export interface PaceRow {
   times: string[];
 }
 
-/** Tutti i ritmi usati nel piano (estremi degli intervalli inclusi), dal più veloce */
+/** Ritmi delle ripetute in pista (estremi degli intervalli inclusi), dal più veloce */
 export function buildPaceTable(
   weeks: { days: PlanDay[] }[] = plan.weeks as never,
   easyPace: string = plan.easyPace,
 ): PaceRow[] {
   const paces = new Set<number>();
   for (const day of weeks.flatMap((w) => w.days))
-    for (const b of day.blocks ?? [])
-      if (b.pace) parsePaceRange(b.pace, easyPace).forEach((p) => paces.add(p));
+    for (const b of day.track ? (day.blocks ?? []) : [])
+      if (b.pace && b.kind === "rep") parsePaceRange(b.pace, easyPace).forEach((p) => paces.add(p));
   return [...paces]
     .sort((a, b) => a - b)
     .map((p) => ({

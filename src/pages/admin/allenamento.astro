@@ -81,7 +81,7 @@ const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "D
                       </summary>
                       <ol class="tp-blocks">
                         {day.blocks!.map((b) => {
-                          const v = buildBlockView(b, plan.easyPace);
+                          const v = buildBlockView(b, plan.easyPace, day.track);
                           return (
                             <li class={`tp-block ${v.kind}`}>
                               <div class="tp-block-title">

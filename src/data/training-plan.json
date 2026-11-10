@@ -11,6 +11,7 @@
         {
           "date": "2026-11-11",
           "kind": "quality",
+          "track": true,
           "summary": "3 km F.L. + 8×500 + defat.",
           "blocks": [
             { "kind": "easy", "label": "F.L. + allunghi", "distance_m": 3000, "pace": "fl" },
@@ -32,6 +33,7 @@
         {
           "date": "2026-11-18",
           "kind": "quality",
+          "track": true,
           "summary": "5 km F.L. + 4 km a 4'45\"–4'50\" + defat.",
           "blocks": [
             { "kind": "easy", "label": "F.L.", "distance_m": 5000, "pace": "fl" },
@@ -52,6 +54,7 @@
         {
           "date": "2026-11-25",
           "kind": "quality",
+          "track": true,
           "summary": "3 km F.L. + 3000 + 2000 + 1000 + defat.",
           "blocks": [
             { "kind": "easy", "label": "F.L.", "distance_m": 3000, "pace": "fl" },
@@ -87,6 +90,7 @@
         {
           "date": "2026-12-02",
           "kind": "quality",
+          "track": true,
           "summary": "3 km F.L. + 5 km 200 forte/200 piano + 1000 + defat.",
           "blocks": [
             { "kind": "easy", "label": "F.L. + allunghi", "distance_m": 3000, "pace": "fl" },
