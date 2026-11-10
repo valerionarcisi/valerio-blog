@@ -1,0 +1,116 @@
+{
+  "athlete": "Valerio Narcisi",
+  "start": "2026-11-09",
+  "end": "2026-12-06",
+  "easyPace": "5:15-5:20",
+  "weeks": [
+    {
+      "days": [
+        { "date": "2026-11-09", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-10", "kind": "rest" },
+        {
+          "date": "2026-11-11",
+          "kind": "quality",
+          "summary": "3 km F.L. + 8×500 + defat.",
+          "blocks": [
+            { "kind": "easy", "label": "F.L. + allunghi", "distance_m": 3000, "pace": "fl" },
+            { "kind": "rep", "label": "Ripetute", "reps": 8, "distance_m": 500, "pace": "4:20" },
+            { "kind": "recovery", "label": "Recupero lento", "distance_m": 300, "pace": "fl", "note": "dopo ogni ripetuta, a ritmo F.L." },
+            { "kind": "cool", "label": "Defaticamento", "distance_m": 2000, "distance_max_m": 3000 }
+          ]
+        },
+        { "date": "2026-11-12", "kind": "rest" },
+        { "date": "2026-11-13", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-14", "kind": "rest" },
+        { "date": "2026-11-15", "kind": "race", "text": "Maratonina del Mare, 10 km (gara)" }
+      ]
+    },
+    {
+      "days": [
+        { "date": "2026-11-16", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-17", "kind": "rest" },
+        {
+          "date": "2026-11-18",
+          "kind": "quality",
+          "summary": "5 km F.L. + 4 km a 4'45\"–4'50\" + defat.",
+          "blocks": [
+            { "kind": "easy", "label": "F.L.", "distance_m": 5000, "pace": "fl" },
+            { "kind": "rep", "label": "Ritmo", "reps": 1, "distance_m": 4000, "pace": "4:45-4:50" },
+            { "kind": "cool", "label": "Defaticamento", "distance_m": 3000 }
+          ]
+        },
+        { "date": "2026-11-19", "kind": "rest" },
+        { "date": "2026-11-20", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-21", "kind": "rest" },
+        { "date": "2026-11-22", "kind": "easy", "text": "15–16 km F.L." }
+      ]
+    },
+    {
+      "days": [
+        { "date": "2026-11-23", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-24", "kind": "rest" },
+        {
+          "date": "2026-11-25",
+          "kind": "quality",
+          "summary": "3 km F.L. + 3000 + 2000 + 1000 + defat.",
+          "blocks": [
+            { "kind": "easy", "label": "F.L.", "distance_m": 3000, "pace": "fl" },
+            { "kind": "rep", "label": "Ripetuta 1", "reps": 1, "distance_m": 3000, "pace": "4:45-4:50" },
+            { "kind": "recovery", "label": "Recupero lento", "distance_m": 400 },
+            { "kind": "rep", "label": "Ripetuta 2", "reps": 1, "distance_m": 2000, "pace": "4:35-4:40" },
+            { "kind": "recovery", "label": "Recupero lento", "distance_m": 400 },
+            { "kind": "rep", "label": "Ripetuta 3", "reps": 1, "distance_m": 1000, "pace": "4:25-4:30" },
+            { "kind": "cool", "label": "Defaticamento" }
+          ]
+        },
+        { "date": "2026-11-26", "kind": "rest" },
+        { "date": "2026-11-27", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-11-28", "kind": "rest" },
+        {
+          "date": "2026-11-29",
+          "kind": "quality",
+          "summary": "4 km F.L. + 3 km + 2 km a ritmo + 3 km lento",
+          "note": "Totale 12 km",
+          "blocks": [
+            { "kind": "easy", "label": "F.L.", "distance_m": 4000, "pace": "fl" },
+            { "kind": "rep", "label": "Ritmo", "reps": 1, "distance_m": 3000, "pace": "4:40-4:45" },
+            { "kind": "rep", "label": "Ritmo", "reps": 1, "distance_m": 2000, "pace": "4:30-4:35" },
+            { "kind": "cool", "label": "Lento", "distance_m": 3000 }
+          ]
+        }
+      ]
+    },
+    {
+      "days": [
+        { "date": "2026-11-30", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-12-01", "kind": "rest" },
+        {
+          "date": "2026-12-02",
+          "kind": "quality",
+          "summary": "3 km F.L. + 5 km 200 forte/200 piano + 1000 + defat.",
+          "blocks": [
+            { "kind": "easy", "label": "F.L. + allunghi", "distance_m": 3000, "pace": "fl" },
+            { "kind": "fartlek", "label": "200 m forte / 200 m piano", "distance_m": 5000, "note": "Nessun tempo prescritto, a sensazione" },
+            { "kind": "recovery", "label": "Recupero piano", "distance_m": 400 },
+            { "kind": "rep", "label": "Ripetuta", "reps": 1, "distance_m": 1000, "pace": "4:25-4:30" },
+            { "kind": "cool", "label": "Defaticamento", "distance_m": 1000 }
+          ]
+        },
+        { "date": "2026-12-03", "kind": "rest" },
+        { "date": "2026-12-04", "kind": "easy", "text": "10 km F.L." },
+        { "date": "2026-12-05", "kind": "rest" },
+        {
+          "date": "2026-12-06",
+          "kind": "quality",
+          "summary": "4 km F.L. + 6 km a 4'45\"–4'50\" + 4 km F.L.",
+          "note": "Totale 14 km",
+          "blocks": [
+            { "kind": "easy", "label": "F.L.", "distance_m": 4000, "pace": "fl" },
+            { "kind": "rep", "label": "Ritmo", "reps": 1, "distance_m": 6000, "pace": "4:45-4:50" },
+            { "kind": "easy", "label": "F.L.", "distance_m": 4000, "pace": "fl" }
+          ]
+        }
+      ]
+    }
+  ]
+}

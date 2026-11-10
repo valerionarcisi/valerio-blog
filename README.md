@@ -125,6 +125,7 @@ Private dashboards under `/admin/` (visit `/admin?token=<ADMIN_TOKEN>` once: an 
 | `/admin/analytics`       | GA-style analytics dashboard (Panoramica, Utenti, Acquisizione, Coinvolgimento, Tecnologia, Bot & qualità): live users, sessions timeline, scorecards with deltas, geo map, bot rules |
 | `/admin/comments`        | Moderation queue + claps recap + activity feed                                                                                                                                        |
 | `/admin`                 | "Oggi" home: next event countdown, today's analytics and meals, links to every page                                                                                                   |
+| `/admin/allenamento`     | Running plan (09/11–06/12/2026), week by week, with computed pace/lap/block times in accordions (mobile first)                                                                         |
 | `/admin/body-comp`       | BIA body composition with charts (FFM, FM, BMI, BMR, PhA) and a "last measurement" banner                                                                                             |
 | `/admin/meal-plan`       | Tabs: weekly plan, shopping list (`#spesa`), recipes (`#ricette`); `/admin/grocery` and `/admin/recipes` redirect                                                                     |
 | `/admin/arte-di-narrare` | One-off event page (Rome, 18 Oct 2026): schedule, parking and travel times                                                                                                            |

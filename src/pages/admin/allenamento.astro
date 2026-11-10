@@ -1,0 +1,150 @@
+---
+import AdminNav from "~/components/AdminNav.astro";
+import {
+  buildBlockView,
+  buildWeeks,
+  formatDayMonth,
+  formatRange,
+  hasTimings,
+  nextTimedSession,
+  parsePaceRange,
+  plan,
+  weekdayShort,
+} from "~/lib/training-plan";
+import "~/styles/foglio.css";
+import "~/styles/admin-foglio.css";
+import "~/styles/admin-allenamento.css";
+
+export const prerender = false;
+
+if (!Astro.locals.isAdmin) {
+  return new Response("Unauthorized", { status: 401 });
+}
+
+const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(new Date());
+const weeks = buildWeeks();
+const openDate = nextTimedSession(weeks, todayIso);
+const easy = formatRange(parsePaceRange("fl"));
+const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "Defat.", fartlek: "Variato" } as const;
+---
+
+<!doctype html>
+<html lang="it" class="foglio">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <title>Allenamento · Admin</title>
+  </head>
+  <body class="admin">
+    <AdminNav currentPage="allenamento" />
+    <div class="tp-wrap">
+      <header class="tp-head">
+        <h1>Piano di <em class="acc">corsa</em></h1>
+        <p class="tp-meta">
+          {plan.athlete} · {formatDayMonth(plan.start)}/2026 → {formatDayMonth(plan.end)}/2026
+        </p>
+        <p class="tp-note">F.L. = fondo lento, {easy}/km circa</p>
+      </header>
+
+      <div class="tp-weeks">
+        {weeks.map((week) => (
+          <section class="tp-week" aria-labelledby={`w${week.number}`}>
+            <h2 id={`w${week.number}`}>
+              Settimana {week.number}
+              <span>{formatDayMonth(week.from)} – {formatDayMonth(week.to)}</span>
+            </h2>
+            <ul class="tp-days">
+              {week.trainingDays.map((day) => {
+                const isToday = day.date === todayIso;
+                const cls = ["tp-day", day.kind, { today: isToday }];
+                const label = (
+                  <div class="tp-when">
+                    <strong>{weekdayShort(day.date)}</strong>
+                    <span>{formatDayMonth(day.date)}</span>
+                    {isToday && <em>oggi</em>}
+                  </div>
+                );
+                return hasTimings(day) ? (
+                  <li class:list={cls} aria-current={isToday ? "date" : undefined}>
+                    <details open={day.date === openDate}>
+                      <summary>
+                        {label}
+                        <div class="tp-what">
+                          <span>{day.summary}</span>
+                          {day.note && <small>{day.note}</small>}
+                        </div>
+                      </summary>
+                      <ol class="tp-blocks">
+                        {day.blocks!.map((b) => {
+                          const v = buildBlockView(b, plan.easyPace);
+                          return (
+                            <li class={`tp-block ${v.kind}`}>
+                              <div class="tp-block-title">
+                                <span class="tp-tag">{KIND_LABEL[v.kind]}</span>
+                                {v.reps && <span class="tp-reps">{v.reps}×</span>}
+                                <span>{v.label}</span>
+                              </div>
+                              <dl>
+                                {v.distance && (
+                                  <div>
+                                    <dt>Distanza</dt>
+                                    <dd>
+                                      {v.distance}
+                                      {v.laps && <small>{v.laps}</small>}
+                                    </dd>
+                                  </div>
+                                )}
+                                {v.pace && (
+                                  <div>
+                                    <dt>Ritmo</dt>
+                                    <dd>{v.pace}</dd>
+                                  </div>
+                                )}
+                                {v.perRep && (
+                                  <div>
+                                    <dt>{v.reps ? "Per ripetuta" : "Tempo"}</dt>
+                                    <dd>{v.perRep}</dd>
+                                  </div>
+                                )}
+                                {v.perLap && (
+                                  <div>
+                                    <dt>Per giro (400 m)</dt>
+                                    <dd>{v.perLap}</dd>
+                                  </div>
+                                )}
+                                {v.total && v.reps && (
+                                  <div>
+                                    <dt>Totale blocco</dt>
+                                    <dd>{v.total}</dd>
+                                  </div>
+                                )}
+                              </dl>
+                              {v.note && <p class="tp-block-note">{v.note}</p>}
+                            </li>
+                          );
+                        })}
+                      </ol>
+                    </details>
+                  </li>
+                ) : (
+                  <li class:list={cls} aria-current={isToday ? "date" : undefined}>
+                    <div class="tp-row">
+                      {label}
+                      <div class="tp-what">
+                        <span>{day.text ?? day.summary}</span>
+                        {day.note && <small>{day.note}</small>}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+            <p class="tp-rest">Riposo: {week.restDays.join(", ")}</p>
+          </section>
+        ))}
+      </div>
+    </div>
+  </body>
+</html>

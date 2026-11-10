@@ -65,6 +65,7 @@ const groups = [
   { title: "Dieta", items: [
     { label: "Piano & spesa", desc: "Menu, lista e ricette", href: link("meal-plan") },
     { label: "Body Comp", desc: "Composizione corporea", href: link("body-comp") },
+    { label: "Allenamento", desc: "Piano di corsa e tempi", href: link("allenamento") },
   ]},
   { title: "Eventi", items: events.filter((e) => dayDiff(e.date) >= 0).map((e) => ({ label: e.title, desc: e.date, href: e.href })) },
 ];
