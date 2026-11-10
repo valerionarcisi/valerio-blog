@@ -3,6 +3,8 @@ import AdminNav from "~/components/AdminNav.astro";
 import { days } from "~/data/meal-plan";
 import getDb from "~/lib/turso";
 import { deltaPct, getTodaySummarySafe } from "~/lib/analytics-summary";
+import getRadarDb, { isRadarConfigured } from "~/lib/radar-db";
+import { loadRadarGlanceSafe } from "~/lib/radar-opps";
 import "~/styles/foglio.css";
 import "~/styles/admin-foglio.css";
 
@@ -47,6 +49,8 @@ const todayLabel = new Intl.DateTimeFormat("it-IT", { timeZone: TZ, weekday: "lo
 
 // Card "Analytics oggi": soft failure, la home non dipende dal database.
 const summary = await getTodaySummarySafe(getDb, now);
+const radar = isRadarConfigured() ? await loadRadarGlanceSafe(getRadarDb(), todayStr) : null;
+const whenText = (n: number) => (n === 0 ? "oggi" : n === 1 ? "domani" : `tra ${n} giorni`);
 const fmtDelta = (p: number | null) => (p === null ? "—" : p === 0 ? "=" : `${p > 0 ? "+" : "−"}${Math.abs(p)}%`);
 const summaryTime = summary
   ? new Intl.DateTimeFormat("it-IT", { timeZone: TZ, hour: "2-digit", minute: "2-digit" }).format(new Date(summary.asOf))
@@ -97,6 +101,11 @@ const groups = [
       .foglio body.admin .an-unit { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); color: var(--foglio-ink-soft); text-transform: uppercase; letter-spacing: 0.1em; }
       .foglio body.admin .an-line { margin: 0 0 0.5rem; font-size: var(--foglio-fs-sm); }
       .foglio body.admin .an-spike { margin: 0 0 0.6rem; padding: 0.5rem 0.7rem; border: 1px solid var(--foglio-warn); border-radius: var(--foglio-radius-sm); color: var(--foglio-warn); font-weight: 600; font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .rd-week { list-style: none; margin: 0 0 0.6rem; padding: 0; }
+      .foglio body.admin .rd-week li { display: flex; flex-wrap: wrap; gap: 0.2rem 0.8rem; justify-content: space-between; padding: 0.35rem 0; border-top: 1px solid var(--foglio-rule); font-size: var(--foglio-fs-sm); }
+      .foglio body.admin .rd-week li:first-child { border-top: 0; }
+      .foglio body.admin .rd-week span { font-family: var(--foglio-mono); font-size: var(--foglio-fs-mono); }
+      .foglio body.admin .rd-hot { color: var(--foglio-neg); font-weight: 600; }
       .foglio body.admin .an-posts { margin: 0 0 0.6rem; padding-left: 1.2rem; font-size: var(--foglio-fs-sm); }
       .foglio body.admin .an-posts li { margin: 0; }
       .foglio body.admin .an-posts a { display: inline-block; min-height: 44px; box-sizing: border-box; padding: 0.7rem 0; line-height: 1.4; overflow-wrap: anywhere; }
@@ -139,6 +148,35 @@ const groups = [
           <p class="muted">dati non disponibili</p>
         )}
         <a class="btn" href={link("analytics")} style="display:inline-flex;align-items:center;text-decoration:none;">Apri analytics</a>
+      </section>
+
+      <section class="card" aria-labelledby="rd-title">
+        <h2 class="card-title" id="rd-title">Scadenze e motore</h2>
+        {radar ? (
+          <>
+            {radar.week.length > 0 ? (
+              <ul class="rd-week">
+                {radar.week.map((w) => (
+                  <li>
+                    <a href={w.href}>{w.title}</a>
+                    <span class={w.days_left <= 2 ? "rd-hot" : "muted"}>{w.kind === "bando" ? "bando" : "opportunità"} · {whenText(w.days_left)}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="muted an-line">Niente in scadenza nei prossimi 14 giorni.</p>
+            )}
+            <p class={radar.health.ok ? "muted an-line" : "an-spike"} role="status">
+              {radar.health.ok
+                ? `Motore regolare · invii ${radar.health.sending}`
+                : `Il motore ha ${radar.health.problems.length} problem${radar.health.problems.length === 1 ? "a" : "i"}: ` +
+                  radar.health.problems.map((p) => `${p.job} (${p.text})`).join("; ")}
+            </p>
+            <a class="btn" href="/admin/bandi/opportunita" style="display:inline-flex;align-items:center;text-decoration:none;">Tutte le opportunità</a>
+          </>
+        ) : (
+          <p class="muted">dati non disponibili</p>
+        )}
       </section>
 
       {nextEvent && (

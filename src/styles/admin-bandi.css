@@ -501,3 +501,18 @@
 .foglio body.admin .bd-regions a:hover {
   border-color: var(--foglio-accent);
 }
+
+/* opportunità */
+.foglio body.admin .bd-when {
+  font-family: var(--foglio-mono);
+  font-size: var(--foglio-fs-mono);
+  margin-left: 0.6rem;
+  color: var(--foglio-ink-soft);
+}
+.foglio body.admin .bd-when.is-hot {
+  color: var(--foglio-neg);
+  font-weight: 600;
+}
+.foglio body.admin .bd-wrap details summary {
+  cursor: pointer;
+}
