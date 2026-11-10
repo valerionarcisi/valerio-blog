@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   blockTime,
   buildBlockView,
+  buildPaceTable,
   buildWeeks,
   formatRange,
   formatTime,
@@ -45,7 +46,7 @@ describe("training-plan", () => {
     const v = buildBlockView({ kind: "rep", label: "Ritmo", distance_m: 3000, pace: "4:45-4:50" });
     expect(v.total).toBe(`14'15"–14'30"`);
     expect(v.perLap).toBe(`1'54"–1'56"`);
-    expect(v.per100).toBe(`29"`);
+    expect(v.per100).toBe(`28"–29"`);
   });
 
   it("piano: 4 settimane, riposi derivati dalle date, prossima seduta in pista", () => {
@@ -55,5 +56,16 @@ describe("training-plan", () => {
     expect(nextTimedSession(weeks, "2026-11-10")).toBe("2026-11-11");
     expect(nextTimedSession(weeks, "2026-11-12")).toBe("2026-11-18");
     expect(nextTimedSession(weeks, "2026-12-07")).toBeNull();
+  });
+
+  it("tabella ritmi: coincide con la tabella di riferimento", () => {
+    const rows = buildPaceTable();
+    const row = (pace: string) => rows.find((r) => r.pace === pace);
+    expect(row(`4'20"`)?.times).toEqual([`26"`, `52"`, `1'18"`, `1'44"`, `2'10"`]);
+    expect(row(`4'25"`)?.times.slice(1)).toEqual([`53"`, `1'19"`, `1'46"`, `2'12"`]);
+    expect(row(`4'35"`)?.times[4]).toBe(`2'17"`);
+    expect(row(`4'45"`)?.times[4]).toBe(`2'22"`);
+    expect(row(`4'50"`)?.times).toEqual([`29"`, `58"`, `1'27"`, `1'56"`, `2'25"`]);
+    expect(row(`5'15"`)).toBeDefined();
   });
 });

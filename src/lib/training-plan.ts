@@ -42,7 +42,8 @@ export function parsePaceRange(value: string, easyPace: string = plan.easyPace):
 
 /** 130 -> 2'10" */
 export function formatTime(seconds: number): string {
-  const total = Math.round(seconds);
+  // mezzo secondo per difetto: coincide con le tabelle ritmo/distanza usate in pista
+  const total = Math.ceil(seconds - 0.5);
   const min = Math.floor(total / 60);
   const sec = total % 60;
   return min === 0 ? `${sec}"` : `${min}'${String(sec).padStart(2, "0")}"`;
@@ -156,3 +157,27 @@ export function nextTimedSession(weeks: WeekView[], todayIso: string): string | 
 }
 
 export { plan };
+
+export const TABLE_DISTANCES_M = [100, 200, 300, 400, 500] as const;
+
+export interface PaceRow {
+  pace: string;
+  times: string[];
+}
+
+/** Tutti i ritmi usati nel piano (estremi degli intervalli inclusi), dal più veloce */
+export function buildPaceTable(
+  weeks: { days: PlanDay[] }[] = plan.weeks as never,
+  easyPace: string = plan.easyPace,
+): PaceRow[] {
+  const paces = new Set<number>();
+  for (const day of weeks.flatMap((w) => w.days))
+    for (const b of day.blocks ?? [])
+      if (b.pace) parsePaceRange(b.pace, easyPace).forEach((p) => paces.add(p));
+  return [...paces]
+    .sort((a, b) => a - b)
+    .map((p) => ({
+      pace: formatTime(p),
+      times: TABLE_DISTANCES_M.map((m) => formatTime((p * m) / 1000)),
+    }));
+}

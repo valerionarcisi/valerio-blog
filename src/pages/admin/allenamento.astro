@@ -2,7 +2,9 @@
 import AdminNav from "~/components/AdminNav.astro";
 import {
   buildBlockView,
+  buildPaceTable,
   buildWeeks,
+  TABLE_DISTANCES_M,
   formatDayMonth,
   formatRange,
   hasTimings,
@@ -23,6 +25,7 @@ if (!Astro.locals.isAdmin) {
 
 const todayIso = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Rome" }).format(new Date());
 const weeks = buildWeeks();
+const paceTable = buildPaceTable();
 const openDate = nextTimedSession(weeks, todayIso);
 const easy = formatRange(parsePaceRange("fl"));
 const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "Defat.", fartlek: "Variato" } as const;
@@ -151,6 +154,26 @@ const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "D
           </section>
         ))}
       </div>
+
+      <section class="tp-week tp-table" aria-labelledby="tp-table-h">
+        <h2 id="tp-table-h">Tabella ritmi</h2>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Ritmo al km</th>
+              {TABLE_DISTANCES_M.map((m) => <th scope="col">{m} m</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {paceTable.map((row) => (
+              <tr>
+                <th scope="row">{row.pace}</th>
+                {row.times.map((t) => <td>{t}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </div>
   </body>
 </html>

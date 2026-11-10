@@ -122,3 +122,21 @@
   font-size: 0.875rem;
   color: var(--foglio-ink-mute);
 }
+
+.tp-table { grid-column: 1 / -1; }
+.tp-table table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tp-table th,
+.tp-table td {
+  padding: 0.6rem 0.4rem;
+  text-align: left;
+  border-top: 1px solid var(--foglio-rule);
+  font-family: var(--foglio-mono);
+  font-size: 0.9375rem;
+  white-space: nowrap;
+}
+.tp-table thead th {
+  border-top: 0;
+  font-size: 0.8125rem;
+  color: var(--foglio-ink-mute);
+  font-weight: 400;
+}
