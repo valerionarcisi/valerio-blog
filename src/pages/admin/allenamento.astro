@@ -108,6 +108,12 @@ const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "D
                                     <dd>{v.perRep}</dd>
                                   </div>
                                 )}
+                                {v.per100 && (
+                                  <div>
+                                    <dt>Ogni 100 m</dt>
+                                    <dd>{v.per100}</dd>
+                                  </div>
+                                )}
                                 {v.perLap && (
                                   <div>
                                     <dt>Per giro (400 m)</dt>

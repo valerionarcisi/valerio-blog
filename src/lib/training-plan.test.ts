@@ -38,13 +38,14 @@ describe("training-plan", () => {
 
   it("totale ripetute: 8×500 a 4'20\" = 17'20\"", () => {
     const v = buildBlockView({ kind: "rep", label: "Ripetute", reps: 8, distance_m: 500, pace: "4:20" });
-    expect(v).toMatchObject({ perRep: `2'10"`, perLap: `1'44"`, total: `17'20"`, laps: "1,25 giri" });
+    expect(v).toMatchObject({ perRep: `2'10"`, perLap: `1'44"`, per100: `26"`, total: `17'20"`, laps: "1,25 giri" });
   });
 
   it("intervallo di ritmo: min–max", () => {
     const v = buildBlockView({ kind: "rep", label: "Ritmo", distance_m: 3000, pace: "4:45-4:50" });
     expect(v.total).toBe(`14'15"–14'30"`);
     expect(v.perLap).toBe(`1'54"–1'56"`);
+    expect(v.per100).toBe(`29"`);
   });
 
   it("piano: 4 settimane, riposi derivati dalle date, prossima seduta in pista", () => {

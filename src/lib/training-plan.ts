@@ -45,7 +45,7 @@ export function formatTime(seconds: number): string {
   const total = Math.round(seconds);
   const min = Math.floor(total / 60);
   const sec = total % 60;
-  return `${min}'${String(sec).padStart(2, "0")}"`;
+  return min === 0 ? `${sec}"` : `${min}'${String(sec).padStart(2, "0")}"`;
 }
 
 export function formatRange([a, b]: Range): string {
@@ -61,6 +61,10 @@ export function blockTime(paceSKm: Range, distanceM: number): Range {
 
 export function lapTime(paceSKm: Range): Range {
   return scale(paceSKm, LAP_M / 1000);
+}
+
+export function per100Time(paceSKm: Range): Range {
+  return scale(paceSKm, 0.1);
 }
 
 /** Giri da 400 m in decimale, solo se la distanza non è multipla del giro */
@@ -88,6 +92,7 @@ export interface BlockView {
   pace: string | null;
   perRep: string | null;
   perLap: string | null;
+  per100: string | null;
   total: string | null;
 }
 
@@ -105,6 +110,7 @@ export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPac
     laps: block.distance_m !== undefined ? lapsLabel(block.distance_m) : null,
     pace: pace ? `${formatRange(pace)}/km` : null,
     perRep: perRep ? formatRange(perRep) : null,
+    per100: pace ? formatRange(per100Time(pace)) : null,
     perLap: pace && paced ? formatRange(lapTime(pace)) : null,
     total: perRep ? formatRange(reps && perRep ? scale(perRep, reps) : perRep) : null,
   };
