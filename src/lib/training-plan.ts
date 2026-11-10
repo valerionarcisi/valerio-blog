@@ -64,6 +64,23 @@ export function lapTime(paceSKm: Range): Range {
   return scale(paceSKm, LAP_M / 1000);
 }
 
+export interface Split {
+  meters: number;
+  time: string;
+}
+
+const MARK_M = 100;
+const MAX_SPLIT_M = 500;
+
+/** Passaggi ai segni ogni 100 m; oltre i 500 m solo il primo giro (poi si ripete) */
+export function buildSplits(paceSKm: Range, distanceM: number): { splits: Split[]; repeatsPerLap: boolean } {
+  const repeatsPerLap = distanceM > MAX_SPLIT_M;
+  const upTo = repeatsPerLap ? LAP_M : distanceM;
+  const splits: Split[] = [];
+  for (let m = MARK_M; m <= upTo; m += MARK_M) splits.push({ meters: m, time: formatRange(blockTime(paceSKm, m)) });
+  return { splits, repeatsPerLap };
+}
+
 export function per100Time(paceSKm: Range): Range {
   return scale(paceSKm, 0.1);
 }
@@ -94,6 +111,8 @@ export interface BlockView {
   perRep: string | null;
   perLap: string | null;
   per100: string | null;
+  splits: Split[];
+  splitsRepeat: boolean;
   total: string | null;
 }
 
@@ -102,6 +121,7 @@ export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPac
   const paced = block.pace && block.distance_m !== undefined && block.distance_max_m === undefined;
   const pace = block.pace ? parsePaceRange(block.pace, easyPace) : null;
   const perRep = paced && pace ? blockTime(pace, block.distance_m as number) : null;
+  const sp = pace && block.distance_m !== undefined && block.distance_max_m === undefined ? buildSplits(pace, block.distance_m) : null;
   return {
     kind: block.kind,
     label: block.label,
@@ -111,6 +131,8 @@ export function buildBlockView(block: PlanBlock, easyPace: string = plan.easyPac
     laps: block.distance_m !== undefined ? lapsLabel(block.distance_m) : null,
     pace: pace ? `${formatRange(pace)}/km` : null,
     perRep: perRep ? formatRange(perRep) : null,
+    splits: sp?.splits ?? [],
+    splitsRepeat: sp?.repeatsPerLap ?? false,
     per100: pace ? formatRange(per100Time(pace)) : null,
     perLap: pace && paced ? formatRange(lapTime(pace)) : null,
     total: perRep ? formatRange(reps && perRep ? scale(perRep, reps) : perRep) : null,

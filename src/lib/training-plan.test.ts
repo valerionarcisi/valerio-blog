@@ -3,6 +3,7 @@ import {
   blockTime,
   buildBlockView,
   buildPaceTable,
+  buildSplits,
   buildWeeks,
   formatRange,
   formatTime,
@@ -67,5 +68,15 @@ describe("training-plan", () => {
     expect(row(`4'45"`)?.times[4]).toBe(`2'22"`);
     expect(row(`4'50"`)?.times).toEqual([`29"`, `58"`, `1'27"`, `1'56"`, `2'25"`]);
     expect(row(`5'15"`)).toBeDefined();
+  });
+
+  it("passaggi ogni 100 m: 500 m a 4'20\" fino a 500, oltre solo il primo giro", () => {
+    const rep = buildSplits(parsePaceRange("4:20"), 500);
+    expect(rep.splits.map((s) => s.time)).toEqual([`26"`, `52"`, `1'18"`, `1'44"`, `2'10"`]);
+    expect(rep.repeatsPerLap).toBe(false);
+    const long = buildSplits(parsePaceRange("4:45-4:50"), 3000);
+    expect(long.splits).toHaveLength(4);
+    expect(long.splits[3].time).toBe(`1'54"–1'56"`);
+    expect(long.repeatsPerLap).toBe(true);
   });
 });

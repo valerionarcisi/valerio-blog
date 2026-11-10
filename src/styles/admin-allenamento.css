@@ -140,3 +140,27 @@
   color: var(--foglio-ink-mute);
   font-weight: 400;
 }
+
+.tp-splits { margin-top: 0.55rem; }
+.tp-splits-title { font-size: 0.875rem; color: var(--foglio-ink-mute); }
+.tp-splits ul {
+  list-style: none;
+  margin: 0.3rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: 0.3rem;
+}
+.tp-splits li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--foglio-bg);
+  border: 1px solid var(--foglio-rule);
+  border-radius: var(--foglio-radius-sm);
+  font-family: var(--foglio-mono);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+.tp-splits li span { color: var(--foglio-ink-soft); }

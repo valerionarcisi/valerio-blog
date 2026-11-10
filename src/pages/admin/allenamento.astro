@@ -130,6 +130,21 @@ const KIND_LABEL = { easy: "Lento", rep: "Ritmo", recovery: "Recupero", cool: "D
                                   </div>
                                 )}
                               </dl>
+                              {v.splits.length > 0 && (
+                                <div class="tp-splits">
+                                  <span class="tp-splits-title">
+                                    Passaggi ai segni{v.splitsRepeat ? " (ogni giro uguale)" : ""}
+                                  </span>
+                                  <ul>
+                                    {v.splits.map((sp) => (
+                                      <li>
+                                        <span>{sp.meters} m</span>
+                                        <b>{sp.time}</b>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
                               {v.note && <p class="tp-block-note">{v.note}</p>}
                             </li>
                           );
