@@ -405,10 +405,10 @@ const libSceneNum = latestReview ? "05" : "04";
         </div>
       </div>
 
-      <div class="fh-lib-block">
+      <div class="fh-lib-block" data-listening-home>
         <h3>{t.listening}</h3>
         {lastSongs.length > 0 ? (
-          <ul class="fh-lib-list fh-lib-list--music">
+          <ul class="fh-lib-list fh-lib-list--music" data-listening-list>
             {lastSongs.slice(0, 5).map((song: any) => (
               <li>
                 <div
@@ -444,8 +444,17 @@ const libSceneNum = latestReview ? "05" : "04";
   </section>
 </main>
 
-<script define:vars={{ locale, byLabel: t.byLabel, likedLabel: t.likedTitle }}>
+<script define:vars={{ locale, byLabel: t.byLabel, likedLabel: t.likedTitle, recently: t.recently }}>
   window.__dchWatched = { locale, byLabel, likedLabel };
+  window.__dchListening = { locale, recentlyLabel: recently };
+</script>
+<script>
+  import { watchListening } from "~/scripts/listening-tracks";
+  const block = document.querySelector<HTMLElement>("[data-listening-home]");
+  const opts = (window as unknown as { __dchListening: { locale: string; recentlyLabel: string } }).__dchListening;
+  if (block && opts) {
+    watchListening(block, opts);
+  }
 </script>
 <script>
   import { fetchWatched, renderCompact } from "~/scripts/watched-movies";
