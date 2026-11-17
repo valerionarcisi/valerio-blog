@@ -26,7 +26,7 @@ export const parseXmlContent = (xmlContent: string): Promise<unknown> =>
     });
   });
 
-const FILM_SLUG_RE = /\/film\/([^/]+)\/?$/;
+const FILM_SLUG_RE = /\/film\/([^/]+)(?:\/\d+)?\/?$/;
 
 export function letterboxdFilmSlug(link: string | undefined): string | null {
   if (!link) return null;

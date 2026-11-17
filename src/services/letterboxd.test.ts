@@ -18,6 +18,10 @@ describe("letterboxdFilmSlug", () => {
     expect(letterboxdFilmSlug("https://letterboxd.com/valenar/film/conclave")).toBe("conclave");
   });
 
+  it("handles the rewatch suffix Letterboxd appends to repeated entries", () => {
+    expect(letterboxdFilmSlug("https://letterboxd.com/valenar/film/hope-2026/1/")).toBe("hope-2026");
+  });
+
   it("returns null for undefined or non-film links", () => {
     expect(letterboxdFilmSlug(undefined)).toBeNull();
     expect(letterboxdFilmSlug("https://letterboxd.com/valenar/")).toBeNull();
