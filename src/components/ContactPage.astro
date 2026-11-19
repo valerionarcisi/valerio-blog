@@ -16,6 +16,7 @@ const COPY = {
     h1: "Scrivimi.",
     lede: ["Per collaborazioni, sceneggiature, idee — o solo per dire qualcosa.", "Rispondo a tutti, in giornata."],
     email: "Email",
+    phone: "Telefono",
     elsewhere: "Altrove",
     films: "Per i film",
     filmsNote:
@@ -28,6 +29,7 @@ const COPY = {
     h1: "Get in touch.",
     lede: ["For collaborations, screenplays, ideas — or just to say something.", "I reply to everyone, same day."],
     email: "Email",
+    phone: "Phone",
     elsewhere: "Elsewhere",
     films: "About films",
     filmsNote:
@@ -53,6 +55,17 @@ const LINKS = [
           <h1 class="dc-page-title"><em class="acc">{COPY.h1}</em></h1>
           <p class="ct-lede">{COPY.lede[0]} {COPY.lede[1]}</p>
         </header>
+
+        <ul class="ct-direct">
+          <li>
+            <span class="ct-direct-label">{COPY.phone}</span>
+            <a href="tel:+393334220502" class="ct-direct-link">+39 333 422 0502</a>
+          </li>
+          <li>
+            <span class="ct-direct-label">{COPY.email}</span>
+            <a href="mailto:valerio.narcisi@gmail.com" class="ct-direct-link">valerio.narcisi@gmail.com</a>
+          </li>
+        </ul>
 
         <ContactForm lang={lang} />
       </div>
@@ -164,6 +177,40 @@ const LINKS = [
     opacity: 0.75;
   }
 
+  .ct-page .ct-direct {
+    list-style: none;
+    margin: 0 0 2.4rem;
+    padding: 0;
+    display: grid;
+    gap: 0.9rem;
+  }
+  .ct-page .ct-direct li {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+  .ct-page .ct-direct-label {
+    font-family: var(--foglio-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--foglio-ink-soft);
+  }
+  .ct-page .ct-direct-link {
+    font-family: var(--foglio-mono);
+    font-size: clamp(1rem, 4.2vw, 1.25rem);
+    color: var(--foglio-accent);
+    border-bottom: 1px solid var(--foglio-accent-soft);
+    padding: 6px 0 2px;
+    justify-self: start;
+    word-break: break-all;
+    transition: opacity 0.15s;
+  }
+  .ct-page .ct-direct-link:hover {
+    opacity: 0.75;
+  }
+
   .ct-page .ct-links {
     list-style: none;
     margin: 0;
@@ -219,6 +266,15 @@ const LINKS = [
   }
 
   @media (max-width: 600px) {
+    .ct-page .ct-direct li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+    .ct-page .ct-direct-link {
+      word-break: normal;
+      overflow-wrap: anywhere;
+      font-size: 1.05rem;
+    }
     .ct-page {
       padding: 2.2rem var(--dc-gutter) 5rem;
     }

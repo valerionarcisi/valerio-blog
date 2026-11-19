@@ -37,6 +37,10 @@ const social = [
       </div>
     </dl>
     <a class="dc-write-me" href={isEn ? "/en/contact" : "/contatti"}>{isEn ? "WRITE ME" : "SCRIVIMI"}<span>.</span></a>
+    <p class="dc-footer-direct">
+      <a href="tel:+393334220502">+39 333 422 0502</a>
+      <a href="mailto:valerio.narcisi@gmail.com">valerio.narcisi@gmail.com</a>
+    </p>
     <p class="dc-footer-inspired">
       {isEn ? "Design inspired by " : "Design ispirato a "}
       <a href="https://fontainesdc.com" target="_blank" rel="noopener"><em>Dopamine Chamber</em></a>
@@ -126,6 +130,24 @@ const social = [
     font-weight: 400;
   }
   .dc-footer .dc-write-me:hover {
+    color: var(--foglio-accent);
+  }
+  .dc-footer-direct {
+    margin: 24px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 24px;
+    font-family: var(--foglio-mono);
+    font-size: 13px;
+  }
+  .dc-footer-direct a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--foglio-ink-soft);
+  }
+  .dc-footer-direct a:hover {
     color: var(--foglio-accent);
   }
   .dc-footer-inspired {
